@@ -1,0 +1,145 @@
+\documentclass[12pt, a4paper]{article}
+\input{./everything/everything.tex}
+
+% for the mathscr
+\usepackage{mathrsfs}
+% easier for bold symbols
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+% partial derivatives
+\newcommand{\partiald}[1]{\frac{\delta}{\delta#1}}
+% for estimators
+\newcommand{\wh}[1]{\widehat{#1}}
+% for examples
+\newcommand{\gb}[1]{\greybox{#1}}
+
+
+\titleformat{\section}{\normalfont\Large\bfseries}{}{0pt}{}
+% for sets and curly letters
+\newcommand{\cur}[1]{\mathcal{#1}}
+\newcommand{\scr}[1]{\mathscr{#1}}
+
+
+\begin{document}
+% refer to https://yihui.org/knitr/options/#code-decoration for more options
+<<include = FALSE>>=
+knitr::opts_chunk$set(
+  comment = '', fig.width = 6, fig.height = 4, fig.align = "center",
+  tide = TRUE, size = "small"
+)
+@
+
+% (1) Remember that we want the default page style
+% (2) but for this page we want an empty page style for the title 
+% (3) we input our title 
+% (4) we call a new page and reset the page counter to 1
+\pagestyle{default}
+\thispagestyle{empty}
+\input{./title_page.tex}
+\newpage
+\setcounter{page}{1}
+We shall compare three different estimators of a binomial success probability. If $Y \thicksim B(2, \theta)$ then we have: $P(Y = 0) = (1 - \theta^2)$, $P(Y = 1) = 2\theta(1 - \theta)$, $P(Y = 2) = \theta^2$. Moreover, if we have an iid sample $Y_1, Y_2,..., Y_n$ then if we define:
+
+\begin{itemize}
+  \item $N_0 = \sum_{i = 1}^n1_{\{Y_i = 0\}}$ as the number of 0's $\implies N_0 \thicksim B(n, (1 - \theta)^2)$
+  \item $N_1 = \sum_{i = 1}^n1_{\{Y_i = 1\}}$ as the number of 1's  $\implies N_1\thicksim B(n, 2\theta(1 - \theta))$
+  \item $N_2 = \sum_{i = 1}^n1_{\{Y_i = 2\}}$ as the number of 2's $\implies N_2 \thicksim B(n, \theta^2)$
+\end{itemize}
+
+The usual estimator of $\theta$ based on an iid sample $Y_1, Y_2, ... , Y_n$ is a function of $\overbar{1}{Y}= \frac{1}{n}\sum_{i = 1}^nY_i$
+
+\begin{enumerate}[label={\bfseries\arabic*.}]
+\item Determine an unbiased estimator of $\theta$ which is a \textit{linear} function of $\overbar{1}{Y}$. Call it $\hat{\theta_1}$
+
+{\setlength{\leftskip}{3ex}
+\tbf{Solution}
+
+To find an unbiased estimator of $\theta$ we first note that:
+\begin{align*}
+\E[\overbar{0.5}{Y}] & = \frac{1}{n}\sum_{i = 1}^n\E[Y_1]\\
+& = \E[Y_1] \\
+& = 2\theta
+\end{align*}
+Hence we should define an unbiased estimator $\hat{\theta_1}$ by: 
+$$\hat{\theta_1} = \frac{1}{2}\overbar{0.2}{Y}$$
+}
+\item Determine an unbiased estimator of $\theta$ which is a \textit{nonlinear} function of $N_0$ (hint: use method of moments, i.e. set equal to expectation and solve for $\theta$). Call it $\hat{\theta_0}$
+
+{\setlength{\leftskip}{3ex}
+\tbf{Solution}
+
+To find an unbiased estimator of $\theta$ we recall the method of moments. We have that $1_{\{Y_i = 0\}} \thicksim bernoulli((1 - \theta)^2)$. Hence we have that $\E\brac{1_{\{Y_i = 0\}}} = (1 - \theta)^2$. With the random sample $1_{\{Y_1 = 0\}}, 1_{\{Y_2 = 0\}}, ..., 1_{\{Y_n = 0\}}$. We have that (by the method of moments) $ (1 - \theta)^2 = \frac{1}{n}\sum_{i = 1}^n 1_{\{Y_i = 0\}} \implies (1 - \theta)^2 = \frac{1}{n}N_0 \implies \hat{\theta_0} = 1 - \sqrt{\frac{N_0}{n}}$
+
+}
+
+\item Determine an unbiased estimator of $\theta$ which is a \textit{nonlinear} function of $N_2$ (hint: use method of moments, i.e. set equal to expectation and solve for $\theta$). Call it $\hat{\theta_2}$
+
+{\setlength{\leftskip}{3ex}
+\tbf{Solution}
+
+To find an unbiased estimator of $\theta$ we recall the method of moments. We have that $1_{\{Y_i = 2\}} \thicksim bernoulli(\theta^2)$. Hence we have that $\E\brac{1_{\{Y_i = 2\}}} =\theta^2$. With the random sample $1_{\{Y_1 = 2\}}, 1_{\{Y_2 = 2\}},$ 
+
+$..., 1_{\{Y_n = 2\}}$. We have that (by the method of moments) $ \theta^2 = \frac{1}{n}\sum_{i = 1}^n 1_{\{Y_i = 2\}} \implies \theta^2 = \frac{1}{n}N_0 \implies \hat{\theta_2} = \sqrt{\frac{N_0}{n}}$
+
+}
+
+\item We shall simulate a sample if $n = 100$ iid such $Y_i$’s and compute the values of these three estimators and then compare their mean squared errors, for a fine grid of $\theta$ values.
+
+{\setlength{\leftskip}{3ex}
+\tbf{Solution}
+
+We want to now compare the variance of $\hat{\theta_0}, \hat{\theta_1}$ and $\hat{\theta_2}$ with the CRLB of $\frac{\theta\rbrac{1 - \theta}}{2n}$. To do this, we illustrate the idea with $\hat{\theta_0}$ first. 
+
+<<>>=
+# create a partiton of theta values
+theta_vals = (1:39)/40
+
+# create a vector to store the theta_0 values we obtain
+var_theta_0_for_each_theta = rep(0, length(theta_vals))
+
+# set the sample size n and the number of simulation iterations N
+n = 100
+N = 1000
+
+# Define the MSE0 to be zero 
+MSE0 = 0
+
+# define a vector of length 1000 so store our simulation values
+simulate_N = rep(0, N)
+
+
+# for each value of theta_vals, we want to estimate the variance of theta_0. 
+for (i in 1:length(theta_vals)) {
+  # We draw n times from Y ~ B(2, theta_vals[1]) and calculate theta_1_hat. 
+  # We simulate this experiment N times. 
+  
+  # temp_vect = rbinom(n * N, 2, theta_vals[i])
+  # mat_sim = matrix(temp_vect, ncols = n, nrows = N)
+  # mat_sim = mat_sim == 0
+  # theta_0_estimates = apply(mat_sim, MARGIN = 1, FUN = sum)
+  # theta_0_estimates = sqrt(theta_0_estimates/n)
+  # var_theta_0_for_each_theta[i] = sum((theta_0_estimates - theta_vals[i])^2)/N
+  
+  for (ii in 1:N) {
+    temp_vect = rbinom(n, 2, theta_vals[i])
+    temp_vect = temp_vect == 0
+    simulate_N[ii] = 1 - sqrt(sum(temp_vect)/n)
+  }
+  
+  var_theta_0_for_each_theta[i] = sum((simulate_N - theta_vals[i])^2)/N
+  
+  
+}
+
+var_theta_0_for_each_theta
+
+plot(theta_vals, var_theta_0_for_each_theta)
+@
+
+}
+\end{enumerate}
+
+<<>>=
+
+@
+
+\end{document}

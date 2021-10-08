@@ -1,0 +1,229 @@
+\documentclass[12pt, a4paper]{article}\usepackage[]{graphicx}\usepackage[]{color}
+% maxwidth is the original width if it is less than linewidth
+% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+\let\hlipl\hlkwb
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+\input{./everything/everything.tex}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+% refer to https://yihui.org/knitr/options/#code-decoration for more options
+
+
+% (1) Remember that we want the default page style
+% (2) but for this page we want an empty page style for the title 
+% (3) we input our title 
+% (4) we call a new page and reset the page counter to 1
+\pagestyle{default}
+\thispagestyle{empty}
+\input{./title_page.tex}
+\newpage
+\setcounter{page}{1}
+\begin{enumerate}
+  \item 
+  \begin{enumerate}[label=(\alph*)]
+  \item We generate 1000 samples, sampling from a binomial distribution with size being 200 and $p = 0.3$
+  
+\begin{knitrout}\small
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{samples} \hlkwb{=} \hlnum{1000}
+\hlstd{size} \hlkwb{=} \hlnum{200}
+\hlstd{p} \hlkwb{=} \hlnum{0.3}
+\hlstd{X} \hlkwb{=} \hlkwd{rbinom}\hlstd{(samples, size, p)}
+\hlkwd{hist}\hlstd{(X,} \hlkwc{prob} \hlstd{=} \hlnum{TRUE}\hlstd{,} \hlkwc{main} \hlstd{=} \hlstr{"Distribution of the bin(200, 0.3)"}\hlstd{)}
+\hlstd{X_mean} \hlkwb{=} \hlstd{size} \hlopt{*} \hlstd{p}
+\hlstd{X_sd} \hlkwb{=} \hlkwd{sqrt}\hlstd{(size} \hlopt{*} \hlstd{p} \hlopt{*} \hlstd{(}\hlnum{1} \hlopt{-} \hlstd{p))}
+\hlkwd{curve}\hlstd{(}\hlkwd{dnorm}\hlstd{(x,} \hlkwc{mean} \hlstd{= X_mean,} \hlkwc{sd} \hlstd{= X_sd),} \hlkwc{xlim} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{0}\hlstd{,} \hlnum{200}\hlstd{),} \hlkwc{add} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+\end{alltt}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/unnamed-chunk-2-1} 
+
+}
+
+
+\end{knitrout}
+  
+  \item 
+  We find the $P(45 \le X \le 55)$ 
+\begin{knitrout}\small
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{pbinom}\hlstd{(}\hlnum{55}\hlstd{, size, p)} \hlopt{-} \hlkwd{pbinom}\hlstd{(}\hlnum{45}\hlstd{, size, p)}
+\end{alltt}
+\begin{verbatim}
+[1] 0.2343248
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+  \item  We use the normal approximation to the binomial with mean $np$ and standard deviation $np(1-p)$ to approximate the same probability. With the continuity correction, our probability becomes $$P(45 \le X \le 55) = P(44.5 \le X \le 55.5)$$
+\begin{knitrout}\small
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{pnorm}\hlstd{(}\hlnum{55.5}\hlstd{,} \hlkwc{mean} \hlstd{= X_mean,} \hlkwc{sd} \hlstd{= X_sd)} \hlopt{-} \hlkwd{pnorm}\hlstd{(}\hlnum{45.5}\hlstd{,} \hlkwc{mean} \hlstd{= X_mean,} \hlkwc{sd} \hlstd{= X_sd)}
+\end{alltt}
+\begin{verbatim}
+[1] 0.2310965
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+  \end{enumerate}
+ \item  
+  \begin{enumerate}
+  \item
+  We simulate drawing 1000 times from the binomial and the poisson distribution here:
+\begin{knitrout}\small
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{simulations} \hlkwb{=} \hlnum{1000}
+\hlstd{size} \hlkwb{=} \hlnum{200}
+\hlstd{p} \hlkwb{=} \hlnum{0.03}
+\hlstd{lambda} \hlkwb{=} \hlnum{6}
+
+\hlcom{# 1000 draws of a binomial distribution}
+\hlstd{X} \hlkwb{=} \hlkwd{rbinom}\hlstd{(simulations, size, p)}
+\hlcom{# 1000 draws of a poisson distribution}
+\hlstd{Y} \hlkwb{=} \hlkwd{rpois}\hlstd{(simulations, lambda)}
+\hlcom{# plot with 1 row and 2 columns}
+\hlkwd{par}\hlstd{(}\hlkwc{mfrow}\hlstd{=}\hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,}\hlnum{2}\hlstd{))}
+\hlcom{# Historgrams of X and Y}
+\hlkwd{hist}\hlstd{(X,} \hlkwc{probability} \hlstd{=} \hlnum{TRUE}\hlstd{,} \hlkwc{main} \hlstd{=} \hlstr{"binomial distribution"}\hlstd{,} \hlkwc{breaks} \hlstd{=} \hlnum{15}\hlstd{)}
+\hlkwd{hist}\hlstd{(Y,} \hlkwc{probability} \hlstd{=} \hlnum{TRUE}\hlstd{,} \hlkwc{main} \hlstd{=} \hlstr{"Poisson distribution"}\hlstd{,} \hlkwc{breaks} \hlstd{=} \hlnum{15}\hlstd{)}
+\end{alltt}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/unnamed-chunk-5-1} 
+
+}
+
+
+\end{knitrout}
+  \item We find $P(X \le 5)$ and $P(Y \le 5)$ 
+\begin{knitrout}\small
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+  \hlkwd{pbinom}\hlstd{(}\hlnum{5}\hlstd{,} \hlkwc{size} \hlstd{=} \hlnum{200}\hlstd{,} \hlkwc{prob} \hlstd{=} \hlnum{0.03}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+[1] 0.4432292
+\end{verbatim}
+\begin{alltt}
+  \hlkwd{ppois}\hlstd{(}\hlnum{5}\hlstd{,} \hlkwc{lambda} \hlstd{=} \hlnum{6}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+[1] 0.4456796
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+  \end{enumerate}
+  \item Recall that for $n$ iid random variables $X_1, ..., X_n$ the standardised sum is given by:
+  $$S = \dfrac{\sum_{i = 1}^n\brac{X_i - \E{x_i}}}{\sqrt{n\Var{X_1}}}$$
+  \begin{enumerate}
+    \item Generate 1000 realisations of the sum of $n$ (where $n = 5$) from the uniform distirbution $unif(0, 1)$. Note that here, $\E{X_i} = \frac{1}{2}$ and that $\Var{X_i} = \frac{1}{12}$. Then do the same for $n = 100$ and caclulate the standardised residuals for both. 
+    
+    
+\begin{knitrout}\small
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{set.seed}\hlstd{(}\hlnum{3023}\hlstd{)}
+\hlstd{sim_number} \hlkwb{=} \hlnum{1000}
+\hlstd{n1} \hlkwb{=} \hlnum{5}
+\hlstd{n2} \hlkwb{=} \hlnum{100}
+\hlstd{mu} \hlkwb{=} \hlnum{1}\hlopt{/}\hlnum{2}
+\hlstd{sigma_squared} \hlkwb{=} \hlnum{1}\hlopt{/}\hlnum{12}
+
+\hlcom{# sample from the uniform distribution n1 times and repeat the experiment }
+\hlcom{# sim_number of times}
+\hlstd{temp1} \hlkwb{=} \hlstd{(}\hlkwd{runif}\hlstd{(sim_number} \hlopt{*} \hlstd{n1)} \hlopt{-} \hlstd{mu)}\hlopt{/}\hlkwd{sqrt}\hlstd{(n1} \hlopt{*} \hlstd{sigma_squared)}
+\hlstd{mat_temp1} \hlkwb{=} \hlkwd{matrix}\hlstd{(temp1,} \hlkwc{ncol} \hlstd{= n1)}
+\hlkwd{dim}\hlstd{(mat_temp1)}
+\end{alltt}
+\begin{verbatim}
+[1] 1000    5
+\end{verbatim}
+\begin{alltt}
+\hlstd{S1} \hlkwb{=} \hlkwd{apply}\hlstd{(mat_temp1,} \hlnum{1}\hlstd{, sum)}
+
+\hlstd{temp2} \hlkwb{=} \hlstd{(}\hlkwd{runif}\hlstd{(sim_number} \hlopt{*} \hlstd{n2)} \hlopt{-} \hlstd{mu)}\hlopt{/}\hlkwd{sqrt}\hlstd{(n2} \hlopt{*} \hlstd{sigma_squared)}
+\hlstd{mat_temp2} \hlkwb{=} \hlkwd{matrix}\hlstd{(temp2,} \hlkwc{ncol} \hlstd{= n2)}
+\hlkwd{dim}\hlstd{(mat_temp2)}
+\end{alltt}
+\begin{verbatim}
+[1] 1000  100
+\end{verbatim}
+\begin{alltt}
+\hlstd{S2} \hlkwb{=} \hlkwd{apply}\hlstd{(mat_temp2,} \hlnum{1}\hlstd{, sum)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+    
+    
+\begin{knitrout}\small
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{par}\hlstd{(}\hlkwc{mfrow} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,} \hlnum{2}\hlstd{))}
+\hlkwd{hist}\hlstd{(S1,} \hlkwc{probability} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+\hlkwd{curve}\hlstd{(}\hlkwd{dnorm}\hlstd{(x),} \hlkwc{add} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+\hlkwd{hist}\hlstd{(S2,} \hlkwc{probability} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+\hlkwd{curve}\hlstd{(}\hlkwd{dnorm}\hlstd{(x),} \hlkwc{add} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+\end{alltt}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/unnamed-chunk-8-1} 
+
+}
+
+
+\end{knitrout}
+    
+    \vfill
+    
+  \end{enumerate}
+\end{enumerate}
+\end{document}
