@@ -1,0 +1,236 @@
+\documentclass[12pt, a4paper]{article}\usepackage[]{graphicx}\usepackage[]{color}
+% maxwidth is the original width if it is less than linewidth
+% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+\let\hlipl\hlkwb
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+\input{./everything/everything.tex}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+% refer to https://yihui.org/knitr/options/#code-decoration for more options
+
+
+% (1) Remember that we want the default page style
+% (2) but for this page we want an empty page style for the title 
+% (3) we input our title 
+% (4) we call a new page and reset the page counter to 1
+\pagestyle{default}
+\thispagestyle{empty}
+\input{./title_page.tex}
+\newpage
+\setcounter{page}{1}
+
+% Numerical list
+\begin{enumerate}
+  \item 
+    % alphabetised list
+    \begin{enumerate}
+      \item Generate 100 iid Unif(0,1) (use \verb+runif+) random variables and store them in \verb+u+. Apply the function $-\log(1 - u)$ to each element, and store the results in \verb+x+.
+      % TODO1
+      {\setlength{\leftskip}{3ex}
+      
+      \tbf{Solution}
+      
+      Here we sample 100 times from the uniform distribution (unif(0, 1)) with a random variable $U$ and hence, the random variable $1 - e^{-X} = U \thicksim $Unif(0, 1)
+\begin{knitrout}\small
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{set.seed}\hlstd{(}\hlnum{2021}\hlstd{)}
+\hlstd{u} \hlkwb{=} \hlkwd{runif}\hlstd{(}\hlnum{100}\hlstd{)}
+\hlstd{x} \hlkwb{=} \hlopt{-}\hlnum{1} \hlopt{*} \hlkwd{log}\hlstd{(}\hlnum{1} \hlopt{-} \hlstd{u)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+      }
+      \item Plot the histogram of \verb+x+ and overlay it with the density curve of exponential(1) (use 
+      \verb+dexp(x,+
+      
+      \verb+rate=1)+). Why do we have good agreement here? (Hint: $-\log(1 - u)$ is the inverse function of the c.d.f. of exponential(1).) 
+      % TODO2
+      
+      {\setlength{\leftskip}{3ex}
+      
+      \tbf{Solution}
+      
+      We see this to be the case because:
+      
+      \vspace{-0.5cm}
+      
+      \work{
+      P_X\brac{x} &=& P\brac{X \le x}\\
+      &=& P\brac{-\log\brac{1 - U} \le x}\\
+      & = & P\brac{1 - U \ge e^{-x}}\\
+      & = & P\brac{U \le 1 - e^{-x}} \\
+      & = & P_U\brac{1 - e^{-x}}
+      }
+      
+      Hence we can say that $f_X\brac{x} = \frac{\text{d}}{\dx}\brac{1 - e^{-x}} = e^{-x}$ for $x > 0$ because the values of $U \in \rbrac{0, 1}$ and $X = -\log\brac{1 - U}$
+ 
+ That is, $X\thicksim exp\brac{1}$     
+\begin{knitrout}\scriptsize
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{hist}\hlstd{(x,}
+     \hlkwc{main} \hlstd{=} \hlstr{"X = -log(1 - U) sampled 100 times"}\hlstd{,}
+     \hlkwc{probability} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+\hlkwd{curve}\hlstd{(}\hlkwd{dexp}\hlstd{(x,} \hlkwc{rate} \hlstd{=} \hlnum{1}\hlstd{),} \hlkwc{add} \hlstd{=} \hlnum{TRUE}\hlstd{,} \hlkwc{col} \hlstd{=} \hlstr{"blue"}\hlstd{)}
+\end{alltt}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/unnamed-chunk-3-1} 
+
+}
+
+
+\end{knitrout}
+
+      }
+    \end{enumerate}
+    
+  \item Transformation of random variables 
+  \begin{enumerate}
+    \item Generate 100 random variables from a $t$ distribution with 5 degrees of freedom (use \verb+rt(100,+
+    
+    \verb+df=5)+). Store them in \verb+t+. Make another vector \verb+f+ by \verb+f = t^2.+ Overlay the histogram of \verb+f+ with the density curve of a $F_{1,5}$ distribution (use \verb+df(x, df1=1, df2=5)+). Comment on the plot.
+    % TODO3
+    
+    {\setlength{\leftskip}{3ex}
+    
+    \tbf{Solution}
+    
+\begin{knitrout}\small
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{set.seed}\hlstd{(}\hlnum{2021}\hlstd{)}
+\hlstd{t} \hlkwb{=} \hlkwd{rt}\hlstd{(}\hlkwc{n} \hlstd{=} \hlnum{100}\hlstd{,} \hlkwc{df} \hlstd{=} \hlnum{5}\hlstd{)}
+\hlstd{f} \hlkwb{=} \hlstd{t}\hlopt{^}\hlnum{2}
+\hlkwd{hist}\hlstd{(}\hlkwc{x} \hlstd{= f,} \hlkwc{main} \hlstd{=} \hlstr{"t^2 distribution"}\hlstd{,} \hlkwc{probability} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+\hlkwd{curve}\hlstd{(}\hlkwd{df}\hlstd{(x,} \hlkwc{df1}\hlstd{=}\hlnum{1}\hlstd{,} \hlkwc{df2}\hlstd{=}\hlnum{5}\hlstd{),} \hlkwc{add} \hlstd{=} \hlnum{TRUE}\hlstd{,} \hlkwc{col} \hlstd{=} \hlstr{"red"}\hlstd{)}
+\end{alltt}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/unnamed-chunk-4-1} 
+
+}
+
+
+\end{knitrout}
+
+We see that the the density of the $F_{1, 5}$ seems to fit a $t^2$ distribution with 5 degrees of freedom. In general, a logical question to ask is:
+\begin{center}
+Is $X \thicksim F_{1, p} \iff X \thicksim t_p^2$ true? 
+\end{center}
+
+    }
+    \item Generate 100 random variables from a $F_{5,2}$ distribution (use \verb+rf(100, df1=5, df2=2)+). Store them in \verb+y+. Make another vector \verb+w = 1/y+. Overlay the histogram of \verb+w+ with the density curve of a $F_{2,5}$ distribution. Comment on the plot.
+    % TODO4
+    
+    {\setlength{\leftskip}{3ex}
+    
+    \tbf{Solution}
+    
+\begin{knitrout}\small
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{# 100 samples from the F_\{5, 2\} distribution}
+\hlkwd{set.seed}\hlstd{(}\hlnum{2021}\hlstd{)}
+\hlstd{y} \hlkwb{=} \hlkwd{rf}\hlstd{(}\hlnum{100}\hlstd{,} \hlkwc{df1}\hlstd{=}\hlnum{5}\hlstd{,} \hlkwc{df2}\hlstd{=}\hlnum{2}\hlstd{)}
+\hlstd{w} \hlkwb{=} \hlnum{1}\hlopt{/}\hlstd{y}
+\hlkwd{hist}\hlstd{(}\hlkwc{x} \hlstd{= w,} \hlkwc{main} \hlstd{=} \hlstr{"100 samples from 1/F_\{5, 2\}"}\hlstd{,} \hlkwc{probability} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+\hlkwd{curve}\hlstd{(}\hlkwd{df}\hlstd{(x,} \hlkwc{df1}\hlstd{=}\hlnum{2}\hlstd{,} \hlkwc{df2}\hlstd{=}\hlnum{5}\hlstd{),} \hlkwc{add} \hlstd{=} \hlnum{TRUE}\hlstd{,} \hlkwc{col} \hlstd{=} \hlstr{"purple"}\hlstd{)}
+\end{alltt}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/unnamed-chunk-5-1} 
+
+}
+
+
+\end{knitrout}
+
+It seems like when we sample from the distribution $\frac{1}{Y}$ where $Y \thicksim F_{5, 2}$ the density curve which fits this is $F_{2, 5}$. It's like taking the reciprocal of the $F$ distribution switches the two parameters! 
+
+A natural question which this prompts is does this hold true in general- that is if $Y \thicksim F_{a, b}$ then is $W = \frac{1}{Y} \thicksim F_{b, a}$?
+
+    }
+    
+    \item Generate 100 random variables from a beta(2, 1) distribution (use \verb+rbeta(100, shape1=2,+ 
+    
+    \verb+shape2=1)+). Store them in \verb+z+. Make another vector \verb+v = 2*z/(4*(1-z)+). Overlay the histogram of \verb+v+ with the density curve of a $F_{4,2}$ distribution. Comment on the plot.
+    
+    % TODO5
+    
+    {\setlength{\leftskip}{3ex}
+    
+    \tbf{Solution}
+    
+\begin{knitrout}\small
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{set.seed}\hlstd{(}\hlnum{2021}\hlstd{)}
+\hlstd{z} \hlkwb{=} \hlkwd{rbeta}\hlstd{(}\hlnum{100}\hlstd{,} \hlkwc{shape1}\hlstd{=}\hlnum{2}\hlstd{,}\hlkwc{shape2}\hlstd{=}\hlnum{1}\hlstd{)}
+\hlstd{v} \hlkwb{=} \hlstd{(}\hlnum{2}\hlopt{*}\hlstd{z)}\hlopt{/}\hlstd{(}\hlnum{4}\hlopt{*}\hlstd{(}\hlnum{1}\hlopt{-}\hlstd{z))}
+\hlkwd{hist}\hlstd{(}\hlkwc{x} \hlstd{= v,} \hlkwc{main} \hlstd{=} \hlstr{"100 samples from (2*z)/(4*(1-z))"}\hlstd{,} \hlkwc{probability} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+\hlkwd{curve}\hlstd{(}\hlkwd{df}\hlstd{(x,} \hlkwc{df1}\hlstd{=}\hlnum{4}\hlstd{,} \hlkwc{df2}\hlstd{=}\hlnum{2}\hlstd{),} \hlkwc{add} \hlstd{=} \hlnum{TRUE}\hlstd{,} \hlkwc{col} \hlstd{=} \hlstr{"green"}\hlstd{)}
+\end{alltt}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/unnamed-chunk-6-1} 
+
+}
+
+
+\end{knitrout}
+    
+    Hence we see that the $F_{4, 2}$ density seems to fit $W = \frac{2X}{4(1 - X)}$ where $X \thicksim$ beta(2, 1) distribtion quite well. 
+    
+    }
+  \end{enumerate}
+\end{enumerate}
+\end{document}

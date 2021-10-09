@@ -1,0 +1,187 @@
+\documentclass[12pt, a4paper]{article}
+\input{./everything/everything.tex}
+
+\makeatletter
+\def\convertto#1#2{\strip@pt\dimexpr #2*65536/\number\dimexpr 1#1}
+\makeatother
+
+\begin{document}
+
+% refer to https://yihui.org/knitr/options/#code-decoration for more options
+<<include = FALSE>>=
+knitr::opts_chunk$set(
+  comment = '', fig.width = 5, fig.height = 4, fig.align = "center",
+  tidy = TRUE, size = "scriptsize"
+)
+library(latex2exp)
+@
+
+% (1) Remember that we want the default page style
+% (2) but for this page we want an empty page style for the title 
+% (3) we input our title 
+% (4) we call a new page and reset the page counter to 1
+\pagestyle{default}
+\thispagestyle{empty}
+\input{./title_page.tex}
+\newpage
+\setcounter{page}{1}
+
+% Numerical list
+\begin{enumerate}
+  \item 
+    % alphabetised list
+    \begin{enumerate}
+      \item Generate 100 realisations of the sample variance of 10 independent $N(0, 1)$ random variables and store them in \verb+s2+
+      
+      {\setlength{\leftskip}{3ex}
+      
+      \tbf{Solution}
+      
+      To do this, we have to recall that sample variance is given by:$$S^2 = \frac{1}{n - 1} \sum_{i = 1}^2(X_i -\overline{X})^2$$We can use the R functin \verb+var+ to obtain the sample variance from a vector
+<<>>=
+set.seed(3023)
+num_sim = 100
+num_rvs = 10
+experiment = rnorm(n = num_sim * num_rvs, mean = 0, sd = 1)
+data_mat = matrix(experiment, nrow = num_sim)
+s2 = apply(data_mat, MARGIN = 1, FUN = var)
+@
+
+      }
+      \item Plot the histogram of \verb+(10 - 1) * s2+ and overlay it with the density function of the $\chi_9^2$ distribution (use \verb+dchisq+)
+      
+      {\setlength{\leftskip}{3ex}
+      
+      \tbf{Solution}
+      
+<<>>=
+hist(s2 * (num_rvs - 1), 
+     main = sprintf("Histogram of s^2 * (%d - 1)", num_rvs),
+     probability = TRUE,
+     xlab = sprintf("s^2 * (%d - 1)", num_rvs))
+curve(dchisq(x, df = num_rvs - 1), add = TRUE)
+@
+      
+      }
+      
+      \item Repeat (a) and (b) with $n = 60$ independent $N(0, 1)$ random variables. Overlay the histogram with both the density curve of $\chi_{n - 1}^2$ and the density curve of $N(n - 1, 2(n - 1))$ (in two different colours). Comment on the fit. 
+      
+      {\setlength{\leftskip}{3ex}
+      
+      \tbf{Solution}
+      
+<<size = "scriptsize">>=
+set.seed(3023)
+num_sim = 100
+num_rvs = 60
+experiment = rnorm(n = num_sim * num_rvs, mean = 0, sd = 1)
+data_mat = matrix(experiment, nrow = num_sim)
+s2 = apply(data_mat, MARGIN = 1, FUN = var)
+
+hist(s2 * (num_rvs - 1), 
+     main = sprintf("Histogram of s^2 * (n - 1)"),
+     probability = TRUE,
+     xlab = sprintf("s^2 * (%d - 1)", num_rvs),
+     breaks = 15)
+curve(dchisq(x, df = num_rvs - 1), 
+      add = TRUE, 
+      col = "blue")
+curve(dnorm(x, mean = num_rvs - 1, sd = sqrt(2*(num_rvs - 1))), 
+      add = TRUE, 
+      col = "red")
+legend(x = "topright", 
+       legend = c(expression(chi[n-1]^2), expression(N(n-1, 2(n-1)))), 
+       col = c("red", "blue"),
+       lty = c(1,1),
+       cex = 0.8)
+@
+      }
+      
+      \item For $n = 60$ compute $P\rbrac{\brac{n - 1}S^2 > 68}$ using both the exact distribution $\brac{\chi_{n-1}^2}$ and the normal approximation. Compare the results.
+      
+      {\setlength{\leftskip}{3ex}
+      
+      \tbf{Solution}
+      
+      Recall that $$\frac{\brac{n - 1}S^2}{\sigma^2} = \frac{\sum_{i = 1}^n \brac{X_i - \overline{X}}^2}{\sigma^2} \thicksim \chi_{n-1}^2$$
+      And in this case, $\sigma = 1$ and $\mu = 0$. Hence we have:
+      $$(n-1)S^2 = \sum_{i = 1}^n\brac{X_i - \overline{X}}^2 \thicksim \chi_{n - 1}^2$$
+      
+      Thus to compute the $P\rbrac{\brac{n - 1}S^2 > 68}$ we can use the $\chi_{n-1}^2$ distribution or approximate it with $X \thicksim N(n-1, 2(n-1))$
+      
+<<>>=
+pchisq(68, df = num_rvs - 1, lower.tail = FALSE)
+pnorm(68, mean = num_rvs - 1, sd = sqrt(2*(num_rvs - 1)), lower.tail = FALSE)
+@
+
+      }
+    \end{enumerate}
+    \item 
+    \begin{enumerate}
+    \item When two random variables $(X, Y)$ follow a bivariate normal distribution, the
+covariance matrix $\Sigma$ is defined as
+$$ \Sigma = \begin{bmatrix} \sigma_1^2 & \rho\sigma_1\sigma_2 \\
+\rho\sigma_1\sigma_2 & \sigma_2^2\end{bmatrix}$$
+Where $\rho$ is the correlation, $\sigma_1, \sigma_2$ are the variances of $X$ and $Y$ respectively. Use \verb+mvrnorm+ from the \verb+MASS+ library to generate 100 samples
+from a bivariate normal distribution with $\boldsymbol{\mu} = \brac{\mu_1, \mu_2}$ with $\mu_1 = 2, \mu_2 = 3$ and $\Sigma = \begin{bmatrix} 1 & 1\\1 & 4\end{bmatrix}$. Call the first column \verb+x+ and the second column \verb+y+
+<<>>=
+library(MASS)
+set.seed(3023)
+cov_matrix = matrix(c(1, 1, 1, 4), nrow = 2, ncol = 2)
+cov_matrix
+xy = mvrnorm(100, mu = c(2, 3), Sigma = cov_matrix)
+x = xy[ , 1]
+y = xy[ , 2]
+@
+    \item Plot the histogram of \verb+x+ and overlay it with the corresponding marginal normal
+density. Repeat for \verb+y+. (Recall the marginal distribution of $X$ is $N(\mu_1, \sigma_1^2)$)
+<<>>=
+par(mfrow = c(1,2))
+hist(x, probability = TRUE, main = "X")
+curve(dnorm(x, mean = 2, sd = 1), add = TRUE, col = "blue")
+
+
+hist(y, probability = TRUE, main = "Y")
+curve(dnorm(x, mean = 3, sd = 2), add = TRUE, col = "red")
+@
+    \item Produce a scatter plot of \verb+x+ and \verb+y+ (use \verb+plot+). Compute the sample correlation coefficient (use \verb+cor+) and compare with the population correlation $\rho$. (First work out $\rho$ in the $\Sigma$ given.)
+    
+<<fig.height = 3.5>>=
+par(mfrow = c(1,1))
+plot(x, y)
+# Get sample correlation (theoretical correlation is 0.5)
+cor(x, y)
+@
+    \end{enumerate}
+\item 
+  \begin{enumerate}
+    \item Generate 100 realizations of the minimum of 10 independent exponential(1) random variables. Note the rate parameter in \verb+rexp+ is defined as the reciprocal the
+expectation (check the density function in the help file ?\verb+rexp+).
+
+{\setlength{\leftskip}{3ex}
+
+\tbf{Solution}
+
+We recall that if $X \thicksim exp(\lambda)$ then $\E{X} = \frac{1}{\lambda}$. Hence the \verb+rate+ parameter in R is $\lambda$. 
+<<>>=
+n = 10
+num_sim = 100
+lambda = 1
+mat_sim = matrix(rexp(n = num_sim * n, rate = lambda), 
+                 nrow = num_sim,
+                 ncol = n)
+simulate_mins = apply(mat_sim, MARGIN = 1, FUN = min)
+@
+
+}
+    \item Plot the histogram and overlay it with the density of exponential(1/10) (\verb+rate+=10) distribution. Comment on the fit.
+<<>>=
+par(mfrow = c(1,1))
+hist(x = simulate_mins, probability = TRUE,
+     xlab = "minimums",
+     ylab = "probability")
+curve(dexp(x, rate = n), add = TRUE)
+@
+  \end{enumerate}
+\end{enumerate}
+\end{document}

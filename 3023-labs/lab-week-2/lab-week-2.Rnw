@@ -1,0 +1,116 @@
+\documentclass[12pt, a4paper]{article}
+\input{./everything/everything.tex}
+
+\begin{document}
+% refer to https://yihui.org/knitr/options/#code-decoration for more options
+<<include = FALSE>>=
+knitr::opts_chunk$set(
+  comment = '', fig.width = 6, fig.height = 4, fig.align = "center",
+  tide = TRUE, size = "small"
+)
+@
+
+% (1) Remember that we want the default page style
+% (2) but for this page we want an empty page style for the title 
+% (3) we input our title 
+% (4) we call a new page and reset the page counter to 1
+\pagestyle{default}
+\thispagestyle{empty}
+\input{./title_page.tex}
+\newpage
+\setcounter{page}{1}
+\begin{enumerate}
+  \item 
+  \begin{enumerate}[label=(\alph*)]
+  \item We generate 1000 samples, sampling from a binomial distribution with size being 200 and $p = 0.3$
+  
+  <<>>=
+  samples = 1000
+  size = 200
+  p = 0.3
+  X = rbinom(samples, size, p)
+  hist(X, prob = TRUE, main = "Distribution of the bin(200, 0.3)")
+  X_mean = size * p
+  X_sd = sqrt(size * p * (1 - p))
+  curve(dnorm(x, mean = X_mean, sd = X_sd), xlim = c(0, 200), add = TRUE)
+  @
+  
+  \item 
+  We find the $P(45 \le X \le 55)$ 
+  <<>>=
+  pbinom(55, size, p) - pbinom(45, size, p)
+  @
+  \item  We use the normal approximation to the binomial with mean $np$ and standard deviation $np(1-p)$ to approximate the same probability. With the continuity correction, our probability becomes $$P(45 \le X \le 55) = P(44.5 \le X \le 55.5)$$
+  <<>>=
+  pnorm(55.5, mean = X_mean, sd = X_sd) - pnorm(45.5, mean = X_mean, sd = X_sd)
+  @
+  \end{enumerate}
+ \item  
+  \begin{enumerate}
+  \item
+  We simulate drawing 1000 times from the binomial and the poisson distribution here:
+  <<>>=
+  simulations = 1000
+  size = 200
+  p = 0.03
+  lambda = 6
+  
+  # 1000 draws of a binomial distribution
+  X = rbinom(simulations, size, p)
+  # 1000 draws of a poisson distribution
+  Y = rpois(simulations, lambda)
+  # plot with 1 row and 2 columns
+  par(mfrow=c(1,2))
+  # Historgrams of X and Y
+  hist(X, probability = TRUE, main = "binomial distribution", breaks = 15)
+  hist(Y, probability = TRUE, main = "Poisson distribution", breaks = 15)
+  @
+  \item We find $P(X \le 5)$ and $P(Y \le 5)$ 
+  <<>>=
+    pbinom(5, size = 200, prob = 0.03)
+    ppois(5, lambda = 6)
+  @
+  \end{enumerate}
+  \item Recall that for $n$ iid random variables $X_1, ..., X_n$ the standardised sum is given by:
+  $$S = \dfrac{\sum_{i = 1}^n\brac{X_i - \E{x_i}}}{\sqrt{n\Var{X_1}}}$$
+  \begin{enumerate}
+    \item Generate 1000 realisations of the sum of $n$ (where $n = 5$) from the uniform distirbution $unif(0, 1)$. Note that here, $\E{X_i} = \frac{1}{2}$ and that $\Var{X_i} = \frac{1}{12}$. Then do the same for $n = 100$ and caclulate the standardised residuals for both. 
+    
+    
+    <<>>= 
+    set.seed(3023)
+    sim_number = 1000
+    n1 = 5
+    n2 = 100
+    mu = 1/2
+    sigma_squared = 1/12
+    
+    # sample from the uniform distribution n1 times and repeat the experiment 
+    # sim_number of times
+    temp1 = (runif(sim_number * n1) - mu)/sqrt(n1 * sigma_squared)
+    mat_temp1 = matrix(temp1, ncol = n1)
+    dim(mat_temp1)
+    S1 = apply(mat_temp1, 1, sum)
+    
+    temp2 = (runif(sim_number * n2) - mu)/sqrt(n2 * sigma_squared)
+    mat_temp2 = matrix(temp2, ncol = n2)
+    dim(mat_temp2)
+    S2 = apply(mat_temp2, 1, sum)
+    
+    @
+    
+    
+    <<>>=
+    
+    par(mfrow = c(1, 2))
+    hist(S1, probability = TRUE)
+    curve(dnorm(x), add = TRUE)
+    hist(S2, probability = TRUE)
+    curve(dnorm(x), add = TRUE)
+    @
+    
+    \vfill
+    
+  \end{enumerate}
+\end{enumerate}
+\end{document}

@@ -1,0 +1,147 @@
+\documentclass[12pt, a4paper]{article}
+\input{./everything/everything.tex}
+
+\begin{document}
+% refer to https://yihui.org/knitr/options/#code-decoration for more options
+<<include = FALSE>>=
+knitr::opts_chunk$set(
+  comment = '', fig.width = 6, fig.height = 4, fig.align = "center",
+  tide = TRUE, size = "small"
+)
+@
+
+% (1) Remember that we want the default page style
+% (2) but for this page we want an empty page style for the title 
+% (3) we input our title 
+% (4) we call a new page and reset the page counter to 1
+\pagestyle{default}
+\thispagestyle{empty}
+\input{./title_page.tex}
+\newpage
+\setcounter{page}{1}
+
+% Numerical list
+\begin{enumerate}
+  \item 
+    % alphabetised list
+    \begin{enumerate}
+      \item Generate 100 iid Unif(0,1) (use \verb+runif+) random variables and store them in \verb+u+. Apply the function $-\log(1 - u)$ to each element, and store the results in \verb+x+.
+      % TODO1
+      {\setlength{\leftskip}{3ex}
+      
+      \tbf{Solution}
+      
+      Here we sample 100 times from the uniform distribution (unif(0, 1)) with a random variable $U$ and hence, the random variable $1 - e^{-X} = U \thicksim $Unif(0, 1)
+<<>>=
+set.seed(2021)
+u = runif(100)
+x = -1 * log(1 - u)
+@
+
+      }
+      \item Plot the histogram of \verb+x+ and overlay it with the density curve of exponential(1) (use 
+      \verb+dexp(x,+
+      
+      \verb+rate=1)+). Why do we have good agreement here? (Hint: $-\log(1 - u)$ is the inverse function of the c.d.f. of exponential(1).) 
+      % TODO2
+      
+      {\setlength{\leftskip}{3ex}
+      
+      \tbf{Solution}
+      
+      We see this to be the case because:
+      
+      \vspace{-0.5cm}
+      
+      \work{
+      P_X\brac{x} &=& P\brac{X \le x}\\
+      &=& P\brac{-\log\brac{1 - U} \le x}\\
+      & = & P\brac{1 - U \ge e^{-x}}\\
+      & = & P\brac{U \le 1 - e^{-x}} \\
+      & = & P_U\brac{1 - e^{-x}}
+      }
+      
+      Hence we can say that $f_X\brac{x} = \frac{\text{d}}{\dx}\brac{1 - e^{-x}} = e^{-x}$ for $x > 0$ because the values of $U \in \rbrac{0, 1}$ and $X = -\log\brac{1 - U}$
+ 
+ That is, $X\thicksim exp\brac{1}$     
+<<fig.height = 3.5, size = "scriptsize">>=
+hist(x, 
+     main = "X = -log(1 - U) sampled 100 times",
+     probability = TRUE)
+curve(dexp(x, rate = 1), add = TRUE, col = "blue")
+@
+
+      }
+    \end{enumerate}
+    
+  \item Transformation of random variables 
+  \begin{enumerate}
+    \item Generate 100 random variables from a $t$ distribution with 5 degrees of freedom (use \verb+rt(100,+
+    
+    \verb+df=5)+). Store them in \verb+t+. Make another vector \verb+f+ by \verb+f = t^2.+ Overlay the histogram of \verb+f+ with the density curve of a $F_{1,5}$ distribution (use \verb+df(x, df1=1, df2=5)+). Comment on the plot.
+    % TODO3
+    
+    {\setlength{\leftskip}{3ex}
+    
+    \tbf{Solution}
+    
+<<>>= 
+set.seed(2021)
+t = rt(n = 100, df = 5)
+f = t^2
+hist(x = f, main = "t^2 distribution", probability = TRUE)
+curve(df(x, df1=1, df2=5), add = TRUE, col = "red")
+@    
+
+We see that the the density of the $F_{1, 5}$ seems to fit a $t^2$ distribution with 5 degrees of freedom. In general, a logical question to ask is:
+\begin{center}
+Is $X \thicksim F_{1, p} \iff X \thicksim t_p^2$ true? 
+\end{center}
+
+    }
+    \item Generate 100 random variables from a $F_{5,2}$ distribution (use \verb+rf(100, df1=5, df2=2)+). Store them in \verb+y+. Make another vector \verb+w = 1/y+. Overlay the histogram of \verb+w+ with the density curve of a $F_{2,5}$ distribution. Comment on the plot.
+    % TODO4
+    
+    {\setlength{\leftskip}{3ex}
+    
+    \tbf{Solution}
+    
+<<>>=
+# 100 samples from the F_{5, 2} distribution
+set.seed(2021)
+y = rf(100, df1=5, df2=2)
+w = 1/y
+hist(x = w, main = "100 samples from 1/F_{5, 2}", probability = TRUE)
+curve(df(x, df1=2, df2=5), add = TRUE, col = "purple")
+@
+
+It seems like when we sample from the distribution $\frac{1}{Y}$ where $Y \thicksim F_{5, 2}$ the density curve which fits this is $F_{2, 5}$. It's like taking the reciprocal of the $F$ distribution switches the two parameters! 
+
+A natural question which this prompts is does this hold true in general- that is if $Y \thicksim F_{a, b}$ then is $W = \frac{1}{Y} \thicksim F_{b, a}$?
+
+    }
+    
+    \item Generate 100 random variables from a beta(2, 1) distribution (use \verb+rbeta(100, shape1=2,+ 
+    
+    \verb+shape2=1)+). Store them in \verb+z+. Make another vector \verb+v = 2*z/(4*(1-z)+). Overlay the histogram of \verb+v+ with the density curve of a $F_{4,2}$ distribution. Comment on the plot.
+    
+    % TODO5
+    
+    {\setlength{\leftskip}{3ex}
+    
+    \tbf{Solution}
+    
+    <<>>=
+    set.seed(2021)
+    z = rbeta(100, shape1=2,shape2=1)
+    v = (2*z)/(4*(1-z))
+    hist(x = v, main = "100 samples from (2*z)/(4*(1-z))", probability = TRUE)
+    curve(df(x, df1=4, df2=2), add = TRUE, col = "green")
+    @
+    
+    Hence we see that the $F_{4, 2}$ density seems to fit $W = \frac{2X}{4(1 - X)}$ where $X \thicksim$ beta(2, 1) distribtion quite well. 
+    
+    }
+  \end{enumerate}
+\end{enumerate}
+\end{document}
