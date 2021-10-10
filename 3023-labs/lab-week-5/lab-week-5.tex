@@ -1,54 +1,4 @@
-\documentclass[12pt, a4paper]{article}\usepackage[]{graphicx}\usepackage[]{color}
-% maxwidth is the original width if it is less than linewidth
-% otherwise use linewidth (to make sure the graphics do not exceed the margin)
-\makeatletter
-\def\maxwidth{ %
-  \ifdim\Gin@nat@width>\linewidth
-    \linewidth
-  \else
-    \Gin@nat@width
-  \fi
-}
-\makeatother
-
-\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
-\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
-\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
-\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
-\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
-\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
-\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
-\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
-\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
-\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
-\let\hlipl\hlkwb
-
-\usepackage{framed}
-\makeatletter
-\newenvironment{kframe}{%
- \def\at@end@of@kframe{}%
- \ifinner\ifhmode%
-  \def\at@end@of@kframe{\end{minipage}}%
-  \begin{minipage}{\columnwidth}%
- \fi\fi%
- \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
- \colorbox{shadecolor}{##1}\hskip-\fboxsep
-     % There is no \\@totalrightmargin, so:
-     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
- \MakeFramed {\advance\hsize-\width
-   \@totalleftmargin\z@ \linewidth\hsize
-   \@setminipage}}%
- {\par\unskip\endMakeFramed%
- \at@end@of@kframe}
-\makeatother
-
-\definecolor{shadecolor}{rgb}{.97, .97, .97}
-\definecolor{messagecolor}{rgb}{0, 0, 0}
-\definecolor{warningcolor}{rgb}{1, 0, 1}
-\definecolor{errorcolor}{rgb}{1, 0, 0}
-\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
-
-\usepackage{alltt}
+\documentclass[12pt, a4paper]{article}
 \input{./everything/everything.tex}
 
 % for the mathscr
@@ -67,10 +17,20 @@
 % for sets and curly letters
 \newcommand{\cur}[1]{\mathcal{#1}}
 \newcommand{\scr}[1]{\mathscr{#1}}
-\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
-\begin{document}
-% refer to https://yihui.org/knitr/options/#code-decoration for more options
 
+
+\usepackage{Sweave}
+\begin{document}
+\input{lab-week-5-concordance}
+% refer to https://yihui.org/knitr/options/#code-decoration for more options
+\begin{Schunk}
+\begin{Sinput}
+> knitr::opts_chunk$set(
++   comment = '', fig.width = 6, fig.height = 4, fig.align = "center",
++   tide = TRUE, size = "small"
++ )
+\end{Sinput}
+\end{Schunk}
 
 % (1) Remember that we want the default page style
 % (2) but for this page we want an empty page style for the title 
@@ -131,11 +91,67 @@ $..., 1_{\{Y_n = 2\}}$. We have that (by the method of moments) $ \theta^2 = \fr
 {\setlength{\leftskip}{3ex}
 \tbf{Solution}
 
-We want to now compare the variance of $\hat{\theta_0}, \hat{\theta_1}$ and $\hat{\theta_2}$ with the CRLB of $\frac{\theta\rbrac{1 - \theta}}{2n}$
+We want to now compare the variance of $\hat{\theta_0}, \hat{\theta_1}$ and $\hat{\theta_2}$ with the CRLB of $\frac{\theta\rbrac{1 - \theta}}{2n}$. To do this, we illustrate the idea with $\hat{\theta_0}$ first. 
+
+\begin{Schunk}
+\begin{Sinput}
+> # create a partiton of theta values
+> theta_vals = (1:39)/40
+> # create a vector to store the theta_0 values we obtain
+> var_theta_0_for_each_theta = rep(0, length(theta_vals))
+> # set the sample size n and the number of simulation iterations N
+> n = 100
+> N = 1000
+> # Define the MSE0 to be zero 
+> MSE0 = 0
+> # define a vector of length 1000 so store our simulation values
+> simulate_N = rep(0, N)
+> # for each value of theta_vals, we want to estimate the variance of theta_0. 
+> for (i in 1:length(theta_vals)) {
++   # We draw n times from Y ~ B(2, theta_vals[1]) and calculate theta_1_hat. 
++   # We simulate this experiment N times. 
++   
++   # temp_vect = rbinom(n * N, 2, theta_vals[i])
++   # mat_sim = matrix(temp_vect, ncols = n, nrows = N)
++   # mat_sim = mat_sim == 0
++   # theta_0_estimates = apply(mat_sim, MARGIN = 1, FUN = sum)
++   # theta_0_estimates = sqrt(theta_0_estimates/n)
++   # var_theta_0_for_each_theta[i] = sum((theta_0_estimates - theta_vals[i])^2)/N
++   
++   for (ii in 1:N) {
++     temp_vect = rbinom(n, 2, theta_vals[i])
++     temp_vect = temp_vect == 0
++     simulate_N[ii] = 1 - sqrt(sum(temp_vect)/n)
++   }
++   
++   var_theta_0_for_each_theta[i] = sum((simulate_N - theta_vals[i])^2)/N
++   
++   
++ }
+> var_theta_0_for_each_theta
+\end{Sinput}
+\begin{Soutput}
+ [1] 0.0001298333 0.0002541709 0.0003738888 0.0004728320 0.0005869841
+ [6] 0.0007200118 0.0008558126 0.0008858230 0.0010000302 0.0010605262
+[11] 0.0012217792 0.0012858581 0.0013935799 0.0015341275 0.0015389720
+[16] 0.0017292130 0.0016570296 0.0017520842 0.0017844477 0.0019746090
+[21] 0.0018957917 0.0021606012 0.0022098312 0.0022712450 0.0021134446
+[26] 0.0023292737 0.0024023104 0.0023773007 0.0024837647 0.0026832055
+[31] 0.0027801322 0.0031332682 0.0034612553 0.0037073586 0.0042293449
+[36] 0.0047323146 0.0040348470 0.0026634800 0.0009129289
+\end{Soutput}
+\begin{Sinput}
+> plot(theta_vals, var_theta_0_for_each_theta)
+\end{Sinput}
+\end{Schunk}
 
 }
 \end{enumerate}
 
-
+\begin{Schunk}
+\begin{Sinput}
+> 
+\end{Sinput}
+\end{Schunk}
 
 \end{document}

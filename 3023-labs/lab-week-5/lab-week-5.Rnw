@@ -20,6 +20,7 @@
 
 
 \begin{document}
+\SweaveOpts{concordance=TRUE}
 % refer to https://yihui.org/knitr/options/#code-decoration for more options
 <<include = FALSE>>=
 knitr::opts_chunk$set(
