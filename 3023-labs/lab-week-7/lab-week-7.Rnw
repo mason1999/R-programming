@@ -1,0 +1,243 @@
+\documentclass[12pt, a4paper]{article}
+\input{./everything/everything.tex}
+\input{./everything/preamble.tex}
+
+\begin{document}
+% refer to https://yihui.org/knitr/options/#code-decoration for more options
+<<include = FALSE>>=
+knitr::opts_chunk$set(echo = TRUE, 
+                      include = TRUE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      tidy = TRUE, 
+                      tidy.opts = list(width.cutoff=100), 
+                      fig.width = 6, 
+                      fig.height = 4, 
+                      fig.align = "center", 
+                      size = "footnotesize"
+)
+@
+
+% (1) Remember that we want the default page style
+% (2) but for this page we want an empty page style for the title 
+% (3) we input our title 
+% (4) we call a new page and reset the page counter to 1
+\pagestyle{default}
+\thispagestyle{empty}
+\input{./title_page.tex}
+\newpage
+\setcounter{page}{1}
+
+Consider the test of $H_0: \theta = \theta_0$ against $H_1 : \theta \neq \theta_0$ based on $X\thicksim f(. ; \gamma_0, \theta)$ where
+\begin{align}
+f\brac{x; \gamma, \theta} = 
+\begin{cases}
+\frac{1}{\Gamma\brac{\gamma}\theta^\gamma}x^{\gamma - 1}e^{-\frac{x}{\theta}} &\quad\text{for } x > 0 \\
+0 &\quad\text{otherwise}
+\end{cases}
+\end{align}
+that is $X$ has a gamma distribution with known shape parameter $\gamma_0$ but unknown scale parameter $\theta$.
+
+\begin{enumerate}[label = {\bfseries \arabic*.}]
+\item Consider first the exponential case where $\gamma_0 = 1$ and suppose the hypothesised value of the scale parameter (also the mean in this case) is $\theta_0 = 1$
+
+  \begin{enumerate}[label = (\alph*)]
+  \item The ``equal-tailed''test at level $\alpha$ rejects for $X \le a$ or $X \ge b$ where
+    \begin{align}
+    P_1\brac{X\le a} = P_1\brac{X\ge b} = \frac{\alpha}{2}
+    \end{align}
+    Taking $\alpha = 0.05$, determine the value sof \verb+a+ and \verb+b+ satisfying (2) above (\tbf{hint:} use \verb+qexp()+).
+    
+{\setlength{\leftskip}{3ex}
+\tbf{Solution}
+
+Since we take $\gamma_0 = 1$ and under the null $\theta_0 = 1$ we have that the the pdf is given by: 
+$$ f(x) = e^{-x}\qquad\text{for } x > 0$$
+<<>>=
+a = qexp(0.025, rate = 1)
+b = qexp(0.975, rate = 1)
+c(a, b)
+@
+}
+    \item We shall plot the power function of the equal-tailed test. Define a vector of $\theta$-values: \verb+th=(250:1500)/1000+ and obtain a corresponding vector of values of the power (the proba- bility of rejecting) for each such $\theta$-value; that is:
+    $$P_\theta \brac{X\le a} + P_\theta \brac{ X \ge b}$$
+    Finally plot the power against \verb+th+ and add a horizontal dashed line at $\gamma = 0.05$. Add an informative heading, etc and remember to use \verb+type = 'l'+
+    
+    {\setlength{\leftskip}{3ex}
+    
+    \tbf{Solution}
+    
+    We plot the power function of the equal-tailed test. Note that for $P_\theta\brac{X \ge b}$ we note that $P_\theta\brac{X \ge b} = 1 - P_\theta\brac{X \le b}$. We alse use the \verb+abline(.)+ function to plot a horizontal line
+    
+<<>>=
+th = (250:1500)/1000
+power =  pexp(a, rate = 1/th, lower.tail = TRUE) + pexp(b, rate = 1/th, lower.tail = FALSE)
+# Plot theta against the power:
+plot(th, power, type = "l", main = "Power of two tail test")
+# add a horizontal dashed line at gamma = 0.05
+abline(h = 0.05, lty = 2)
+@
+    
+    }
+    \item This is a 1-parameter exponential family with sufficient statistic $X$ and so (since it is continuous) the \textit{uniformly most powerful unbiased} (UMPU) test is of the form
+    \begin{align}
+    \delta\brac{X} = 
+      \begin{cases}
+      1 &\qquad\text{for } X \ge d \\
+      0 &\qquad\text{for } c < X < d\\
+      1 &\qquad \text{for } X \le c
+      \end{cases}
+    \end{align}
+Where $c$ and $d$ are chosen so that:
+  \begin{align}
+    \E_{\theta_0}\rbrac{\delta\brac{X}} = \alpha
+  \end{align}
+  \begin{align}
+  \E_{\theta_0}\rbrac{X\delta\brac{X}} = \alpha\E_{\theta_0}\brac{X} = \alpha
+  \end{align}
+  Since $\E_{\theta_0}\brac{X} = 1$. We show in a tutorial exercise these are equivalent to
+  \begin{align*}
+  1 - e^{-c} + e^{-d} & = \alpha \\
+  ce^{-c} & = de^{-d}
+  \end{align*}
+  From the first equation we get:
+  \begin{align*}
+  e^{-d} & = \alpha - 1 + e^{-c} \\
+  \implies d & = -\log \rbrac{\alpha -1 + e^{-c}}
+  \end{align*}
+  Hence, once $c$ is determined we can compute $d$. To determine $c$ we need to solve the equation:
+  \begin{align*}
+  ce^{-c} - de^{-d} = ce^{-c} + \cbrac{\log \rbrac{\alpha - 1 + e^{-c}}}\rbrac{\alpha - 1 + e^{-c}} = 0
+  \end{align*}
+  We can use the R function \verb+uniroot()+ to determine c \textit{numerically}.
+    \begin{enumerate}[label=(\roman*)]
+      \item Write an R function which computes the middle member of the equation above (i.e. the function whose root we wish to find).
+      
+      {\setlength{\leftskip}{3ex}
+      \tbf{Solution}
+      
+      We write a function which computes the root $c$ to the equation 
+      $$ce^{-c} + \cbrac{\log \rbrac{\alpha - 1 + e^{-c}}}\rbrac{\alpha - 1 + e^{-c}} = 0$$
+<<>>=
+fn = function(c, alpha) {
+  term = alpha - 1 + exp(-1 * c)
+  return(c * exp(-c) + (log(term) * term))
+}
+@
+      
+      }
+      \item Noting that $c$ can be no bigger than the lower 0.05-quantile of the exponential(1) distribution, execute a certain command involving \verb+eps = 1e-5+. Note: the use of \verb+eps+ here is to stay away from the upper bound, since there the function is trying to evaluate \verb+log(0)+
+<<>>=
+eps = 1e-5
+uniroot(f = fn, lower = 0, upper = qexp(0.05) - eps, alpha = 0.05)
+@
+      \item Write an R function which takes as an argument the level \verb+alpha+ and returns a list with elements \verb+c+ and \verb+d+, corresponding to the desired values $c$ and $d$ defining the UMPU test (3) above for $\theta_0 = 1$ and $\alpha = 0.05$
+      
+      {\setlength{\leftskip}{3ex}
+      
+      \tbf{Solution}
+      
+      We write a function \verb+expon.umpu+ (exponential uniformly most powerful unbiased test) which takes in $\alpha$ and returns the optimal $c$ and $d$ which solve the above equations. 
+      
+<<>>=
+expon.umpu = function(alpha) {
+  eps = 1e-8
+  c = uniroot(f = fn, lower = 0, upper = qexp(alpha) - eps, alpha = alpha)$root
+  term = alpha - 1 + exp(-c)
+  d = -log(term)
+  list(c_val = c, d_val = d)
+}
+expon.umpu(0.05)
+@
+      
+      }
+    \end{enumerate}
+  \item Recreate your plot from part (b) above and add to it a red curve of the power of the UMPU test. Add an informative heading and legend. \tbf{Comment} on what feature of the plot indicates that the UMPU test is unbiased. The power function of the UMPU test never goes below the 0.05 level, thus it is unbiased.
+  
+  {\setlength{\leftskip}{3ex}
+  \tbf{Solution}
+  
+  We now plot the power of the UMPU test in red:
+  
+<<>>=
+th = (250:1500)/1000
+# for the two tailed test
+power = pexp(a, 1/th) + pexp(b, 1/th, lower.tail = FALSE)
+plot(th, power, type = "l", main = "testing for an exponential mean")
+abline(h = 0.05, lty = 2)
+# for the uniformly most powerful test:
+umpu = expon.umpu(0.05)
+umpu.power = pexp(umpu$c, 1/th) + pexp(umpu$d, 1/th, lower.tail = FALSE)
+lines(th, umpu.power, col = "red")
+legend("top", legend = c("Power of equal-tailed test", "power of UMPU test"), 
+       col = c("black", "red"), 
+       lty = c(1, 1))
+@
+  
+  }
+  \end{enumerate}
+\item Consider now the case where $Y_1, ..., Y_n$ are iid exponential with mean $\theta$ and we again wish to test $H_0: \theta = \theta_0$ against a two sided $H_1: \theta \neq \theta_0$. The likelihood is:
+$$\Pi_{i = 1}^n\rbrac{\frac{1}{\theta}e^{-\frac{Y_i}{\theta}}} = \exp\brac{-\frac{1}{\theta}\sum_{i = 1}^nY_i - n\log\theta}$$
+and so clearly $X = \sum_{i = 1}^nY_i$ is a sufficient statistic; indeed this is a 1-parameter exponential family. The UMPU test is thus of the form (3) where $c$ and $d$ are chosen to satisfy the two conditions (4) and (5).
+
+However since $X$ itself has a gamma distribution with shape parameter $n$ and scale parameter $\theta$, the UMPU above is the same as for a single observation from the density (1) above with $\gamma_0 = n$. We show in the tutorial that in the present case the two conditions (4) and (5) are equivalent to
+$$ \int_0^cf\brac{x; n, 1}\dx + \int_d^\infty f\brac{x; n, 1}\dx = \alpha = \int_0^c f\brac{x; n + 1, 1}\dx + \int_d^\infty f\brac{x; n + 1, 1}\dx$$
+
+Below we shall write a function to determine the UMPU test, for the case $n = 5$ and $\alpha = 0.05$.
+\begin{enumerate}[label=(\alph*)]
+  \item By adapting your solution to part (c) of the previous question, write a function (playing the same role as the function \verb+fn()+ above; it will use \verb+pgamma()+ and \verb+qgamma()+) the root of which gives the desired value of $c$ to solve the above equations (\tbf{hint}: in the body of this function you will need to first find \verb+d+ in terms of \verb+c+ and \verb+alpha+ using one of the two constraints). Then use \verb+uniroot()+ to actually find the root. Wrap this all in an appropriate function which takes as input values of \verb+alpha+ and \verb+n+ and outputs a list with elements \verb+c+ and \verb+d+, the lower and upper critical values of the desired UMPU test.
+  
+  {\setlength{\leftskip}{3ex}
+  \tbf{Solution}
+  
+<<>>=
+gamma.root = function(c, n, alpha) {
+  lower = pgamma(q = c, shape = n, scale = 1) # P (X < c)
+  # P(X < c) + P(X > d) = alpha
+  # P(X > d) = alpha - P(x < c)
+  # P(X < d) = 1 - alpha + P(X < c) 
+  # d = F^-1(1 - alpha + P(X < c))
+  d = qgamma(p = 1 - alpha + lower, shape = n, scale = 1)
+  
+  # return the equation to solve--> the latter half of the integral equation
+  return(pgamma(c, shape = (n + 1), scale = 1) + 
+           pgamma(d, shape = (n + 1), scale = 1, lower.tail = FALSE) - 
+           alpha)
+}
+
+@
+Show the roots:
+<<>>=
+eps = 1e-8
+upper = qgamma(0.05, shape = 5, scale = 1) - eps
+uniroot(f = gamma.root, lower = 0, upper = upper, n = 5, alpha = 0.05)
+@
+And finally wrap all this up in a function:
+<<>>=
+gamma.umpu = function(alpha, n) {
+  eps = 1e-8
+  upper = qgamma(alpha, shape = n, scale = 1) - eps
+  c = uniroot(f = gamma.root, lower = 0, upper = upper, n = n, alpha = alpha)$root
+  lower = pgamma(c, shape = n, scale = 1)
+  d = qgamma(1 - (alpha - lower), shape = n, scale = 1)
+  return(list(c_val = c, d_val = d))
+}
+
+@
+  
+  }
+  \item Use your \verb+gamma.umpu()+ function to determine the appropriate $c$ and $d$ for the UMPU test for this problem with $n = 5$ and $\alpha = 0.05$. Plot the power as a function of $\theta$ and graphically verify that the test is unbiased and of level 0.05.
+<<>>=
+gamma.umpu(0.05, 5)
+gu = gamma.umpu(0.05, 5) # obtain c and d
+g.power = pgamma(gu$c, shape = 5, scale = th) + 
+  1 - pgamma(gu$d, shape = 5, scale = th)
+plot(th, g.power, type = "l")
+abline(h = 0.05, lty = 2)
+@
+\end{enumerate}
+\end{enumerate}
+
+\newpage
+
+\end{document}

@@ -1,0 +1,80 @@
+\documentclass[12pt, a4paper]{article}
+\input{./everything/everything.tex}
+
+% for the mathscr
+\usepackage{mathrsfs}
+% easier for bold symbols
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+% partial derivatives
+\newcommand{\partiald}[1]{\frac{\delta}{\delta#1}}
+% second partial derivative
+\newcommand{\partialdtwo}[1]{\frac{\delta^2}{\delta#1^2}}
+% for estimators
+\newcommand{\wh}[1]{\widehat{#1}}
+% for examples
+\newcommand{\gb}[1]{\greybox{#1}}
+% text over arrow
+\usepackage{mathtools}
+% command for symbols under symbols
+\newcommand{\under}[2]{\mathop{#1}\limits_{#2}}
+% cancel to zero
+\usepackage{cancel}
+% Example: \cancelto{0}{x}
+
+\titleformat{\section}{\normalfont\Large\bfseries}{}{0pt}{}
+% for sets and curly letters
+\newcommand{\cur}[1]{\mathcal{#1}}
+\newcommand{\scr}[1]{\mathscr{#1}}
+
+\begin{document}
+% refer to https://yihui.org/knitr/options/#code-decoration for more options
+<<include = FALSE>>=
+knitr::opts_chunk$set(
+  comment = '', fig.width = 6, fig.height = 4, fig.align = "center",
+  tide = TRUE, size = "small"
+)
+@
+
+% (1) Remember that we want the default page style
+% (2) but for this page we want an empty page style for the title 
+% (3) we input our title 
+% (4) we call a new page and reset the page counter to 1
+\pagestyle{default}
+\thispagestyle{empty}
+\input{./title_page.tex}
+\newpage
+\setcounter{page}{1}
+
+Suppose $\bs{X} = \brac{X_1 ,... , X n}$  is a vector of iid RVs with common PDF $f_\theta\brac{.}$ where:
+
+$$f_\theta\brac{x} = \frac{1}{\theta}g\brac{\frac{x}{\theta}}$$
+
+for a known PDF $g\brac{.}$ which possesses a continuous derivative. The family $\cur{F} = \cbrac{f_\theta\brac{.} : \theta > 0}$ is thus a \textit{scale family} and $\theta$ is a \textit{scale parameter}, like the standard deviation in the normal family. The Cramer-Rao Lower Bound for variance of an unbiased estimator of $\theta$ in such a family based on $n$ iid observations is
+given by:
+
+\begin{align*}
+\frac{1}{n I_\theta} \text{ where } I_\theta  = \frac{J\brac{g} - 1}{\theta^2} \text{ and } J\brac{g} = \int \frac{\rbrac{xg'\brac{x}}^2}{g\brac{x}}\dx \label{1}\tag{1}
+\end{align*}
+
+We shall study what happens when 
+
+$$ g\brac{x} = \frac{1}{\pi\brac{1 + x^2}}$$
+
+is the Cauchy density (same as Student’s-t with 1 degree of freedom, is also the density of the ratio of two independent $N(0, 1)$ random variables); note that the quartiles of $g\brac{.}$ are $\pm 1$, and also that neither the mean nor the variance exist! We shall consider two estimators of $\theta$ based on $\bs{X}$:
+
+\begin{itemize}
+  \item $\wh{\theta}_{\text{IQR}}\brac{\bs{X}} = \frac{\text{IQR}\brac{\bs{X}}}{2}$
+  \item $\wh{\theta}_{\text{MLE}}\brac{\bs{X}}$, the maximum likelihood estimator (obtained numerically using $R$)
+\end{itemize}
+
+\begin{enumerate}[label={\bfseries \arabic*.}]
+  \item Generate a sample of size $n=100$ from the Cauchy distribution with \verb+scale=0.75+ (see the help for \verb+rcauchy()+). Print its \verb+summary()+ and draw a (horizontal) boxplot (try setting \verb+fig.height=3+ in the Rmarkdown chunk options). You might also want to use \verb+set.seed()+ to make sure you get
+the same generated sample each time you “knit”.
+  \item Compute the value of the estimator θ̂ IQR for your generated sample using the IQR() function. Save it as th.hat.IQR.
+  \item 
+  \item 
+  \item 
+  \item 
+  \item 
+\end{enumerate}
+\end{document}

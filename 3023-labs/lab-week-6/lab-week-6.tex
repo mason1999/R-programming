@@ -1,0 +1,118 @@
+\documentclass[12pt, a4paper]{article}\usepackage[]{graphicx}\usepackage[]{color}
+% maxwidth is the original width if it is less than linewidth
+% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+\let\hlipl\hlkwb
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+\input{./everything/everything.tex}
+
+% for the mathscr
+\usepackage{mathrsfs}
+% easier for bold symbols
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+% partial derivatives
+\newcommand{\partiald}[1]{\frac{\delta}{\delta#1}}
+% second partial derivative
+\newcommand{\partialdtwo}[1]{\frac{\delta^2}{\delta#1^2}}
+% for estimators
+\newcommand{\wh}[1]{\widehat{#1}}
+% for examples
+\newcommand{\gb}[1]{\greybox{#1}}
+% text over arrow
+\usepackage{mathtools}
+% command for symbols under symbols
+\newcommand{\under}[2]{\mathop{#1}\limits_{#2}}
+% cancel to zero
+\usepackage{cancel}
+% Example: \cancelto{0}{x}
+
+\titleformat{\section}{\normalfont\Large\bfseries}{}{0pt}{}
+% for sets and curly letters
+\newcommand{\cur}[1]{\mathcal{#1}}
+\newcommand{\scr}[1]{\mathscr{#1}}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+% refer to https://yihui.org/knitr/options/#code-decoration for more options
+
+
+% (1) Remember that we want the default page style
+% (2) but for this page we want an empty page style for the title 
+% (3) we input our title 
+% (4) we call a new page and reset the page counter to 1
+\pagestyle{default}
+\thispagestyle{empty}
+\input{./title_page.tex}
+\newpage
+\setcounter{page}{1}
+
+Suppose $\bs{X} = \brac{X_1 ,... , X n}$  is a vector of iid RVs with common PDF $f_\theta\brac{.}$ where:
+
+$$f_\theta\brac{x} = \frac{1}{\theta}g\brac{\frac{x}{\theta}}$$
+
+for a known PDF $g\brac{.}$ which possesses a continuous derivative. The family $\cur{F} = \cbrac{f_\theta\brac{.} : \theta > 0}$ is thus a \textit{scale family} and $\theta$ is a \textit{scale parameter}, like the standard deviation in the normal family. The Cramer-Rao Lower Bound for variance of an unbiased estimator of $\theta$ in such a family based on $n$ iid observations is
+given by:
+
+\begin{align*}
+\frac{1}{n I_\theta} \text{ where } I_\theta  = \frac{J\brac{g} - 1}{\theta^2} \text{ and } J\brac{g} = \int \frac{\rbrac{xg'\brac{x}}^2}{g\brac{x}}\dx \label{1}\tag{1}
+\end{align*}
+
+We shall study what happens when 
+
+$$ g\brac{x} = \frac{1}{\pi\brac{1 + x^2}}$$
+
+is the Cauchy density (same as Student’s-t with 1 degree of freedom, is also the density of the ratio of two independent $N(0, 1)$ random variables); note that the quartiles of $g\brac{.}$ are $\pm 1$, and also that neither the mean nor the variance exist! We shall consider two estimators of $\theta$ based on $\bs{X}$:
+
+\begin{itemize}
+  \item $\wh{\theta}_{\text{IQR}}\brac{\bs{X}} = \frac{\text{IQR}\brac{\bs{X}}}{2}$
+  \item $\wh{\theta}_{\text{MLE}}\brac{\bs{X}}$, the maximum likelihood estimator (obtained numerically using $R$)
+\end{itemize}
+
+\begin{enumerate}[label={\bfseries \arabic*.}]
+  \item 
+\end{enumerate}
+\end{document}

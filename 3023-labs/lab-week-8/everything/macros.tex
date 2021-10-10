@@ -41,8 +41,8 @@ very thick}
 \usetikzlibrary{shadows.blur} 
 \newcommand{\mybox}[2]{
 \begin{tikzpicture}
-\node[draw=red, rectangle, line width=2pt, fill=yellow!30, rounded corners, inner sep=14pt, blur shadow={shadow xshift=1ex, shadow yshift=-1ex, shadow scale=1, shadow opacity=60, shadow blur radius=1.2ex}](temp){
-\begin{minipage}{0.94\textwidth}
+\node[draw=red, rectangle, line width=2pt, fill=yellow!30, rounded corners, inner sep=20pt, blur shadow={shadow xshift=1ex, shadow yshift=-1ex, shadow scale=1, shadow opacity=60, shadow blur radius=1.2ex}](temp){
+\begin{minipage}{0.9\textwidth}
 #2
 \end{minipage}
 };
@@ -52,133 +52,6 @@ very thick}
 \end{tikzpicture}
 }
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% example box %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\definecolor{bluegrey}{rgb}{0.4, 0.6, 0.8}
-\definecolor{battleshipgrey}{rgb}{0.52, 0.52, 0.51}
-\newcommand{\myex}[2]{
-\begin{tikzpicture}
-\node[draw=battleshipgrey!150, rectangle, line width=2pt, fill=bluegrey!40, rounded corners, inner sep=14pt, blur shadow={shadow xshift=1ex, shadow yshift=-1ex, shadow scale=1, shadow opacity=60, shadow blur radius=1.2ex}](temp){
-\begin{minipage}{0.94\textwidth}
-#2
-\end{minipage}
-};
-\node[rectangle, rounded corners, draw = battleshipgrey!150, line width = 2pt, fill=battleshipgrey, text=white, font={\bfseries}, right=5mm]  at (temp.north west) {#1};
-
-\end{tikzpicture}
-}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Remark box %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\definecolor{cadiumgreen}{rgb}{0.0, 0.42, 0.24}
-\newcommand{\myrm}[2]{
-\begin{tikzpicture}
-\node[draw=battleshipgrey!150, rectangle, line width=2pt, fill=cadiumgreen!30, rounded corners, inner sep=14pt, blur shadow={shadow xshift=1ex, shadow yshift=-1ex, shadow scale=1, shadow opacity=60, shadow blur radius=1.2ex}](temp){
-\begin{minipage}{0.94\textwidth}
-#2
-\end{minipage}
-};
-\node[rectangle, rounded corners, draw = battleshipgrey!150, line width = 2pt, fill=battleshipgrey, text=white, font={\bfseries}, right=5mm]  at (temp.north west) {#1};
-
-\end{tikzpicture}
-}
-
-%%%%%%%%%%%%%%%%%%%%%%% grey box %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage{color}
-\definecolor{lightgray}{gray}{0.75}
-
-\newcommand\greybox[1]{%
-  \vskip\baselineskip%
-  \par\noindent\colorbox{lightgray}{%
-    \begin{minipage}{\textwidth}#1\end{minipage}%
-  }%
-  \vskip\baselineskip%
-}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%% Parchment box %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage{lipsum}   % To generate test text 
-\usepackage{framed}
-\usepackage{tikz}
-\usetikzlibrary{decorations.pathmorphing,calc}
-\pgfmathsetseed{1} % To have predictable results
-% Define a background layer, in which the parchment shape is drawn
-\pgfdeclarelayer{background}
-\pgfsetlayers{background,main}
-
-% define styles for the normal border and the torn border
-\tikzset{
-  normal border/.style={orange!30!black!10, decorate, 
-     decoration={random steps, segment length=2.5cm, amplitude=.7mm}},
-  torn border/.style={orange!30!black!5, decorate, 
-     decoration={random steps, segment length=.5cm, amplitude=1.7mm}}}
-
-% Macro to draw the shape behind the text, when it fits completly in the
-% page
-\def\parchmentframe#1{
-\tikz{
-  \node[inner sep=2em] (A) {#1};  % Draw the text of the node
-  \begin{pgfonlayer}{background}  % Draw the shape behind
-  \fill[normal border] 
-        (A.south east) -- (A.south west) -- 
-        (A.north west) -- (A.north east) -- cycle;
-  \end{pgfonlayer}}}
-
-% Macro to draw the shape, when the text will continue in next page
-\def\parchmentframetop#1{
-\tikz{
-  \node[inner sep=2em] (A) {#1};    % Draw the text of the node
-  \begin{pgfonlayer}{background}    
-  \fill[normal border]              % Draw the ``complete shape'' behind
-        (A.south east) -- (A.south west) -- 
-        (A.north west) -- (A.north east) -- cycle;
-  \fill[torn border]                % Add the torn lower border
-        ($(A.south east)-(0,.2)$) -- ($(A.south west)-(0,.2)$) -- 
-        ($(A.south west)+(0,.2)$) -- ($(A.south east)+(0,.2)$) -- cycle;
-  \end{pgfonlayer}}}
-
-% Macro to draw the shape, when the text continues from previous page
-\def\parchmentframebottom#1{
-\tikz{
-  \node[inner sep=2em] (A) {#1};   % Draw the text of the node
-  \begin{pgfonlayer}{background}   
-  \fill[normal border]             % Draw the ``complete shape'' behind
-        (A.south east) -- (A.south west) -- 
-        (A.north west) -- (A.north east) -- cycle;
-  \fill[torn border]               % Add the torn upper border
-        ($(A.north east)-(0,.2)$) -- ($(A.north west)-(0,.2)$) -- 
-        ($(A.north west)+(0,.2)$) -- ($(A.north east)+(0,.2)$) -- cycle;
-  \end{pgfonlayer}}}
-
-% Macro to draw the shape, when both the text continues from previous page
-% and it will continue in next page
-\def\parchmentframemiddle#1{
-\tikz{
-  \node[inner sep=2em] (A) {#1};   % Draw the text of the node
-  \begin{pgfonlayer}{background}   
-  \fill[normal border]             % Draw the ``complete shape'' behind
-        (A.south east) -- (A.south west) -- 
-        (A.north west) -- (A.north east) -- cycle;
-  \fill[torn border]               % Add the torn lower border
-        ($(A.south east)-(0,.2)$) -- ($(A.south west)-(0,.2)$) -- 
-        ($(A.south west)+(0,.2)$) -- ($(A.south east)+(0,.2)$) -- cycle;
-  \fill[torn border]               % Add the torn upper border
-        ($(A.north east)-(0,.2)$) -- ($(A.north west)-(0,.2)$) -- 
-        ($(A.north west)+(0,.2)$) -- ($(A.north east)+(0,.2)$) -- cycle;
-  \end{pgfonlayer}}}
-
-% Define the environment which puts the frame
-% In this case, the environment also accepts an argument with an optional
-% title (which defaults to ``Example'', which is typeset in a box overlaid
-% on the top border
-\newenvironment{parchment}[1][Example]{%
-  \def\FrameCommand{\parchmentframe}%
-  \def\FirstFrameCommand{\parchmentframetop}%
-  \def\LastFrameCommand{\parchmentframebottom}%
-  \def\MidFrameCommand{\parchmentframemiddle}%
-  \vskip\baselineskip
-  \MakeFramed {\FrameRestore}
-  \noindent\tikz\node[inner sep=1ex, draw=black!20,fill=white, 
-          anchor=west, overlay] at (0em, 2em) {\sffamily#1};\par}%
-{\endMakeFramed}
 %%%%%%%%%%%%%%%%%% contradiction symbol %%%%%%%%%%%%%%%%%%%%%%%
 
 \usepackage{tikz} %for the contradiction symbol
@@ -257,11 +130,11 @@ very thick}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%% code for expected value: %%%%%%%%%%%%%%%%%%%%%%
-
 \DeclareRobustCommand{\bbone}{\text{\usefont{U}{bbold}{m}{n}1}}
 
-\DeclareMathOperator{\E}{\mathbb{E}}% expected value
+\DeclareMathOperator{\EX}{\mathbb{E}}% expected value
 
+\newcommand{\E}[1]{\EX[#1]}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%% Code for argument and cis %%%%%%%%%%%%%%%%%%%%%
@@ -273,12 +146,8 @@ very thick}
 \DeclareMathOperator{\im}{Im}
 
 %%%%%%%%%%%%%%% code for variance %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\DeclareMathOperator{\Var}{\mathbb{V}\kern -0.1em ar}% variance
-\DeclareMathOperator{\Cov}{\mathbb{C}\kern -0.1em ov}% covariance
-\DeclareMathOperator{\Cor}{\mathbb{C}\kern -0.1em or}% correlation
-
-
+\newcommand{\Var}[1]{\mathrm{Var}[#1]}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%% integrals %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{relsize}
@@ -286,21 +155,13 @@ very thick}
 % \mathlarger{...}
 % \int\limits_{a}^{b} something
 \newcommand{\dx}{\, \text{d}x}
-\newcommand{\dbx}{\, \text{d}\boldsymbol{x}}
 \newcommand{\dy}{\, \text{d}y}
-\newcommand{\dby}{\, \text{d}\boldsymbol{y}}
 \newcommand{\dz}{\, \text{d}z}
-\newcommand{\dbz}{\, \text{d}\boldsymbol{z}}
 \newcommand{\dt}{\, \text{d}t}
-\newcommand{\dbt}{\, \text{d}\boldsymbol{t}}
 \newcommand{\dm}{\, \text{d}m}
-\newcommand{\dbm}{\, \text{d}\boldsymbol{m}}
 \newcommand{\dk}{\, \text{d}k}
-\newcommand{\dbk}{\, \text{d}\boldsymbol{k}}
 \newcommand{\du}{\, \text{d}u}
-\newcommand{\dbu}{\, \text{d}\boldsymbol{u}}
 \newcommand{\dv}{\, \text{d}v}
-\newcommand{\dbv}{\, \text{d}\boldsymbol{v}}
 
 %%%%%%%%%%%%%%%%%%%%%% brackets %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\rbrac}[1]{\left[#1\right]}
@@ -324,12 +185,13 @@ very thick}
 \newcommand{\tbf}[1]{{\bf #1}}
 \newcommand{\bu}[1]{{\bf\underline{#1}}}
 \newcommand{\red}[1]{{\color{red}#1}}
-\newcommand{\violet}[1]{{\color{violet}#1}}
+\newcommand{\vio}[1]{{\color{violet}#1}}
 \newcommand{\teal}[1]{{\color{teal}#1}}
-\newcommand{\blue}[1]{{\color{blue}#1}}
-\newcommand{\black}[1]{{\color{black}#1}}
-\newcommand{\green}[1]{{\color{cadmiumgreen}#1}}
+\newcommand{\blu}[1]{{\color{blue}#1}}
+\newcommand{\bla}[1]{{\color{black}#1}}
+\newcommand{\gre}[1]{{\color{cadmiumgreen}#1}}
 \newcommand{\white}[1]{{\color{white}#1}}
+\newcommand{\black}[1]{{\color{blacks}#1}}
 
 \newcommand{\nn}{\mathbb{N}}
 \newcommand{\zz}{\mathbb{Z}}

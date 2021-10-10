@@ -122,7 +122,7 @@ To find an unbiased estimator of $\theta$ we recall the method of moments. We ha
 
 To find an unbiased estimator of $\theta$ we recall the method of moments. We have that $1_{\{Y_i = 2\}} \thicksim bernoulli(\theta^2)$. Hence we have that $\E\brac{1_{\{Y_i = 2\}}} =\theta^2$. With the random sample $1_{\{Y_1 = 2\}}, 1_{\{Y_2 = 2\}},$ 
 
-$..., 1_{\{Y_n = 2\}}$. We have that (by the method of moments) $ \theta^2 = \frac{1}{n}\sum_{i = 1}^n 1_{\{Y_i = 2\}} \implies \theta^2 = \frac{1}{n}N_0 \implies \hat{\theta_2} = \sqrt{\frac{N_0}{n}}$
+$..., 1_{\{Y_n = 2\}}$. We have that (by the method of moments) $ \theta^2 = \frac{1}{n}\sum_{i = 1}^n 1_{\{Y_i = 2\}} \implies \theta^2 = \frac{1}{n}N_2 \implies \hat{\theta_2} = \sqrt{\frac{N_2}{n}}$
 
 }
 
@@ -131,11 +131,92 @@ $..., 1_{\{Y_n = 2\}}$. We have that (by the method of moments) $ \theta^2 = \fr
 {\setlength{\leftskip}{3ex}
 \tbf{Solution}
 
-We want to now compare the variance of $\hat{\theta_0}, \hat{\theta_1}$ and $\hat{\theta_2}$ with the CRLB of $\frac{\theta\rbrac{1 - \theta}}{2n}$
+We want to now compare the variance of $\hat{\theta_0}, \hat{\theta_1}$ and $\hat{\theta_2}$ with the CRLB of $\frac{\theta\rbrac{1 - \theta}}{2n}$. 
+
+\begin{knitrout}\small
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{# sample size}
+\hlstd{n} \hlkwb{=} \hlnum{100}
+\hlcom{# Number of simulation iterations}
+\hlstd{N} \hlkwb{=} \hlnum{1000}
+\hlcom{# theta values and length of this vector of values}
+\hlstd{thetaVals} \hlkwb{=} \hlstd{(}\hlnum{1}\hlopt{:}\hlnum{39}\hlstd{)}\hlopt{/}\hlnum{40}
+\hlstd{len} \hlkwb{=} \hlkwd{length}\hlstd{(thetaVals)}
+\hlcom{# Declare the mean squared error vectors to be plotted against the theta values}
+\hlstd{mse0} \hlkwb{=} \hlkwd{vector}\hlstd{(}\hlkwc{mode} \hlstd{=} \hlstr{"numeric"}\hlstd{,} \hlkwc{length} \hlstd{= len)}
+\hlstd{mse1} \hlkwb{=} \hlkwd{vector}\hlstd{(}\hlkwc{mode} \hlstd{=} \hlstr{"numeric"}\hlstd{,} \hlkwc{length} \hlstd{= len)}
+\hlstd{mse2} \hlkwb{=} \hlkwd{vector}\hlstd{(}\hlkwc{mode} \hlstd{=} \hlstr{"numeric"}\hlstd{,} \hlkwc{length} \hlstd{= len)}
+
+\hlcom{# Declare temporary variables to be used in the loop}
+\hlstd{temp0} \hlkwb{=} \hlkwd{vector}\hlstd{(}\hlkwc{mode} \hlstd{=} \hlstr{"numeric"}\hlstd{,} \hlkwc{length} \hlstd{= N)}
+\hlstd{temp1} \hlkwb{=} \hlkwd{vector}\hlstd{(}\hlkwc{mode} \hlstd{=} \hlstr{"numeric"}\hlstd{,} \hlkwc{length} \hlstd{= N)}
+\hlstd{temp2} \hlkwb{=} \hlkwd{vector}\hlstd{(}\hlkwc{mode} \hlstd{=} \hlstr{"numeric"}\hlstd{,} \hlkwc{length} \hlstd{= N)}
+
+\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{1}\hlopt{:}\hlstd{len) \{}
+  \hlcom{# We set the current value of theta. }
+  \hlstd{currThetaValue} \hlkwb{=} \hlstd{thetaVals[i]}
+
+  \hlcom{# For the current theta value, we calculate the mean squared error for all }
+  \hlcom{# three estimators}
+  \hlkwa{for} \hlstd{(j} \hlkwa{in} \hlnum{1}\hlopt{:}\hlstd{N) \{}
+
+    \hlcom{# step 1: Draw a sample of n binomal observations}
+    \hlstd{obs} \hlkwb{=} \hlkwd{rbinom}\hlstd{(}\hlkwc{n} \hlstd{= n,} \hlkwc{size} \hlstd{=} \hlnum{2}\hlstd{,} \hlkwc{prob} \hlstd{= currThetaValue)}
+
+    \hlcom{# calculate the value of theta0, theta1 and theta2}
+    \hlstd{temp0[j]} \hlkwb{=} \hlnum{1} \hlopt{-} \hlkwd{sqrt}\hlstd{(}\hlkwd{sum}\hlstd{(obs} \hlopt{==} \hlnum{0}\hlstd{)}\hlopt{/}\hlstd{n)}
+    \hlstd{temp1[j]} \hlkwb{=} \hlnum{1}\hlopt{/}\hlnum{2} \hlopt{*} \hlkwd{mean}\hlstd{(obs)}
+    \hlstd{temp2[j]} \hlkwb{=} \hlkwd{sqrt}\hlstd{(}\hlkwd{sum}\hlstd{(obs} \hlopt{==} \hlnum{2}\hlstd{)}\hlopt{/}\hlstd{n)}
+
+  \hlstd{\}}
+
+  \hlstd{temp0} \hlkwb{=} \hlstd{(temp0} \hlopt{-} \hlstd{currThetaValue)}\hlopt{^}\hlnum{2}
+  \hlstd{temp1} \hlkwb{=} \hlstd{(temp1} \hlopt{-} \hlstd{currThetaValue)}\hlopt{^}\hlnum{2}
+  \hlstd{temp2} \hlkwb{=} \hlstd{(temp2} \hlopt{-} \hlstd{currThetaValue)}\hlopt{^}\hlnum{2}
+
+  \hlstd{mse0[i]} \hlkwb{=} \hlkwd{mean}\hlstd{(temp0)}
+  \hlstd{mse1[i]} \hlkwb{=} \hlkwd{mean}\hlstd{(temp1)}
+  \hlstd{mse2[i]} \hlkwb{=} \hlkwd{mean}\hlstd{(temp2)}
+\hlstd{\}}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+After all this processing, we can now plot the values of the mean squared error for each value of $\theta_k$ (where $k \in \cbrac{1, 2, 3, ..., 39}$). We also plot the 
+Cramer Rao Lower Bound and show the result below:
+
+\begin{knitrout}\small
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{# returns the min and max value for the range}
+\hlstd{yRange} \hlkwb{=} \hlkwd{range}\hlstd{(}\hlkwd{c}\hlstd{(mse0, mse1, mse2))}
+\hlcom{# plot the best estimator theta1 hat}
+\hlkwd{plot}\hlstd{(}\hlkwc{x} \hlstd{= thetaVals,} \hlkwc{y} \hlstd{= mse1,} \hlkwc{col} \hlstd{=} \hlstr{"red"}\hlstd{,} \hlkwc{ylim} \hlstd{= yRange,}
+     \hlkwc{type} \hlstd{=} \hlstr{"l"}\hlstd{,} \hlkwc{main} \hlstd{=} \hlstr{"Empirical MSE's"}\hlstd{,}
+     \hlkwc{xlab} \hlstd{=} \hlstr{"Theta values"}\hlstd{,}
+     \hlkwc{ylab} \hlstd{=} \hlstr{"mean squared error"}\hlstd{)}
+\hlcom{# plot theta0 hat}
+\hlkwd{lines}\hlstd{(}\hlkwc{x} \hlstd{= thetaVals,} \hlkwc{y} \hlstd{= mse0,} \hlkwc{col} \hlstd{=} \hlstr{"blue"}\hlstd{)}
+\hlcom{# plot theta2 hat}
+\hlkwd{lines}\hlstd{(}\hlkwc{x} \hlstd{= thetaVals,} \hlkwc{y} \hlstd{= mse2,} \hlkwc{col} \hlstd{=} \hlstr{"DarkGreen"}\hlstd{)}
+\hlcom{# plot the CRLB}
+\hlkwd{curve}\hlstd{(}\hlnum{0.5} \hlopt{*} \hlstd{x} \hlopt{*} \hlstd{(}\hlnum{1} \hlopt{-} \hlstd{x)}\hlopt{/}\hlstd{n,} \hlkwc{add} \hlstd{=} \hlnum{TRUE}\hlstd{,} \hlkwc{lty} \hlstd{=} \hlnum{2}\hlstd{)}
+\hlcom{# legend}
+\hlkwd{legend}\hlstd{(}\hlkwc{x} \hlstd{=} \hlstr{"top"}\hlstd{,}
+       \hlkwc{legend} \hlstd{=} \hlkwd{c}\hlstd{(}\hlstr{"using average"}\hlstd{,} \hlstr{"using N0"}\hlstd{,} \hlstr{"using N2"}\hlstd{,} \hlstr{"CRLB"}\hlstd{),}
+       \hlkwc{col} \hlstd{=} \hlkwd{c}\hlstd{(}\hlstr{"red"}\hlstd{,} \hlstr{"blue"}\hlstd{,} \hlstr{"DarkGreen"}\hlstd{,} \hlstr{"black"}\hlstd{),}
+       \hlkwc{lty} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,} \hlnum{1}\hlstd{,} \hlnum{1}\hlstd{,} \hlnum{2}\hlstd{))}
+\end{alltt}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/unnamed-chunk-3-1} 
+
+}
+
+
+\end{knitrout}
 
 }
 \end{enumerate}
-
-
 
 \end{document}

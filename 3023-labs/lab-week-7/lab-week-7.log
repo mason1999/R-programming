@@ -1,9 +1,9 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.4.7)  9 OCT 2021 21:26
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.4.7)  10 OCT 2021 23:06
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**lab-week-5.tex
-(./lab-week-5.tex
+**lab-week-7.tex
+(./lab-week-7.tex
 LaTeX2e <2017-04-15>
 Babel <3.18> and hyphenation patterns for 84 language(s) loaded.
 (/usr/share/texlive/texmf-dist/tex/latex/base/article.cls
@@ -1010,28 +1010,32 @@ Package: array 2016/10/06 v2.4d Tabular extension package (FMi)
 \extratabsurround=\skip140
 \backup@length=\skip141
 )))
+(./everything/preamble.tex
 (/usr/share/texlive/texmf-dist/tex/latex/jknapltx/mathrsfs.sty
 Package: mathrsfs 1996/01/01 Math RSFS package v1.0 (jk)
 \symrsfs=\mathgroup7
 )
+(/usr/share/texlive/texmf-dist/tex/latex/cancel/cancel.sty
+Package: cancel 2013/04/12 v2.2 Cancel math terms
+))
 (/usr/share/texlive/texmf-dist/tex/latex/upquote/upquote.sty
 Package: upquote 2012/04/19 v1.3 upright-quote and grave-accent glyphs in verba
 tim
-) (./lab-week-5.aux)
-\openout1 = `lab-week-5.aux'.
+) (./lab-week-7.aux)
+\openout1 = `lab-week-7.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 71.
-LaTeX Font Info:    ... okay on input line 71.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 71.
-LaTeX Font Info:    ... okay on input line 71.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 71.
-LaTeX Font Info:    ... okay on input line 71.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 71.
-LaTeX Font Info:    ... okay on input line 71.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 71.
-LaTeX Font Info:    ... okay on input line 71.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 71.
-LaTeX Font Info:    ... okay on input line 71.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 55.
+LaTeX Font Info:    ... okay on input line 55.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 55.
+LaTeX Font Info:    ... okay on input line 55.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 55.
+LaTeX Font Info:    ... okay on input line 55.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 55.
+LaTeX Font Info:    ... okay on input line 55.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 55.
+LaTeX Font Info:    ... okay on input line 55.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 55.
+LaTeX Font Info:    ... okay on input line 55.
  (/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count298
@@ -1112,78 +1116,45 @@ LaTeX Font Warning: Font shape `OT1/cmr/bx/sc' undefined
 [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map} <./UsydLogo.png>])
-LaTeX Font Info:    Try loading font information for U+msa on input line 84.
+LaTeX Font Info:    Try loading font information for U+msa on input line 69.
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 84.
+LaTeX Font Info:    Try loading font information for U+msb on input line 69.
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-LaTeX Font Info:    Try loading font information for U+lasy on input line 84.
+LaTeX Font Info:    Try loading font information for U+lasy on input line 69.
 
 (/usr/share/texlive/texmf-dist/tex/latex/base/ulasy.fd
 File: ulasy.fd 1998/08/17 v2.2e LaTeX symbol font definitions
 )
-LaTeX Font Info:    Try loading font information for U+rsfs on input line 84.
+LaTeX Font Info:    Try loading font information for U+rsfs on input line 69.
 
 (/usr/share/texlive/texmf-dist/tex/latex/jknapltx/ursfs.fd
 File: ursfs.fd 1998/03/24 rsfs font definition file (jk)
 )
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 87.
 
-(/usr/share/texlive/texmf-dist/tex/latex/base/omscmr.fd
-File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
-)
-LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <12> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 87.
+Package xcolor Warning: Incompatible color definition on input line 95.
 
-Overfull \hbox (20.5679pt too wide) in paragraph at lines 114--115
- \OT1/cmr/m/n/12 1[]\OML/cmm/m/it/12 ; \OT1/cmr/m/n/12 1[]\OML/cmm/m/it/12 ; ::
-:; \OT1/cmr/m/n/12 1[]$. We have that (by the method of mo-ments) $(1 \OMS/cmsy
-/m/n/12 ^^@ \OML/cmm/m/it/12 ^^R\OT1/cmr/m/n/12 )[] = [] [][] 1[]  =[]\OMS/cmsy
-/m/n/12 )
+LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <10> not available
+(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 97.
+
+Package xcolor Warning: Incompatible color definition on input line 118.
+
+
+Overfull \hbox (6.59421pt too wide) in paragraph at lines 121--121
+[][]\OT1/cmtt/m/n/10 power[] []=[]  []pexp[][](a,[] []rate[] []=[] []1[][]/[][]
+th,[] []lower.tail[] []=[] []TRUE[][])[] []+[] []pexp[][](b,[] []rate[] []=[] [
+]1[][]/[][]th,[] []lower.tail[] []=[] []FALSE[][])[][] 
  []
 
-Missing character: There is no â in font cmr12!
-Missing character: There is no € in font cmr12!
-Missing character: There is no ™ in font cmr12!
-
-Package xcolor Warning: Incompatible color definition on input line 137.
-
-
-Package Fancyhdr Warning: \headheight is too small (8.5359pt): 
- Make it at least 14.49998pt.
- We now make it that large for the rest of the document.
- This may cause the page layout to be inconsistent, however.
-
-[1]
-LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <10.95> not available
-(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 145.
-LaTeX Font Info:    Try loading font information for OMS+cmtt on input line 156
-.
- (/usr/share/R/share/texmf/tex/latex/omscmtt.fd
-File: omscmtt.fd 
-)
-LaTeX Font Info:    Font shape `OMS/cmtt/m/n' in size <10.95> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 156.
-
-
-Package Fancyhdr Warning: \headheight is too small (8.5359pt): 
- Make it at least 14.49998pt.
- We now make it that large for the rest of the document.
- This may cause the page layout to be inconsistent, however.
-
-[2]
-
-Package xcolor Warning: Incompatible color definition on input line 189.
-
-<figure/unnamed-chunk-3-1.pdf, id=54, 433.62pt x 289.08pt>
+<figure/unnamed-chunk-3-1.pdf, id=36, 433.62pt x 289.08pt>
 File: figure/unnamed-chunk-3-1.pdf Graphic file (type pdf)
 <use figure/unnamed-chunk-3-1.pdf>
-Package pdftex.def Info: figure/unnamed-chunk-3-1.pdf  used on input line 212.
+Package pdftex.def Info: figure/unnamed-chunk-3-1.pdf  used on input line 129.
 (pdftex.def)             Requested size: 433.61894pt x 289.09251pt.
 
 Package Fancyhdr Warning: \headheight is too small (8.5359pt): 
@@ -1191,19 +1162,97 @@ Package Fancyhdr Warning: \headheight is too small (8.5359pt):
  We now make it that large for the rest of the document.
  This may cause the page layout to be inconsistent, however.
 
-[3 <./figure/unnamed-chunk-3-1.pdf>] (./lab-week-5.aux)
+[1]
+
+Package Fancyhdr Warning: \headheight is too small (8.5359pt): 
+ Make it at least 14.49998pt.
+ We now make it that large for the rest of the document.
+ This may cause the page layout to be inconsistent, however.
+
+[2 <./figure/unnamed-chunk-3-1.pdf>]
+
+Package xcolor Warning: Incompatible color definition on input line 177.
+
+LaTeX Font Info:    Try loading font information for OMS+cmtt on input line 179
+.
+(/usr/share/R/share/texmf/tex/latex/omscmtt.fd
+File: omscmtt.fd 
+)
+LaTeX Font Info:    Font shape `OMS/cmtt/m/n' in size <10> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 179.
+
+
+Package xcolor Warning: Incompatible color definition on input line 190.
+
+
+Package xcolor Warning: Incompatible color definition on input line 222.
+
+
+Package Fancyhdr Warning: \headheight is too small (8.5359pt): 
+ Make it at least 14.49998pt.
+ We now make it that large for the rest of the document.
+ This may cause the page layout to be inconsistent, however.
+
+[3]
+
+Package xcolor Warning: Incompatible color definition on input line 253.
+
+<figure/unnamed-chunk-7-1.pdf, id=64, 433.62pt x 289.08pt>
+File: figure/unnamed-chunk-7-1.pdf Graphic file (type pdf)
+<use figure/unnamed-chunk-7-1.pdf>
+Package pdftex.def Info: figure/unnamed-chunk-7-1.pdf  used on input line 270.
+(pdftex.def)             Requested size: 433.61894pt x 289.09251pt.
+
+Package Fancyhdr Warning: \headheight is too small (8.5359pt): 
+ Make it at least 14.49998pt.
+ We now make it that large for the rest of the document.
+ This may cause the page layout to be inconsistent, however.
+
+[4 <./figure/unnamed-chunk-7-1.pdf>]
+
+Package xcolor Warning: Incompatible color definition on input line 294.
+
+
+Package xcolor Warning: Incompatible color definition on input line 314.
+
+
+Package xcolor Warning: Incompatible color definition on input line 340.
+
+
+Package Fancyhdr Warning: \headheight is too small (8.5359pt): 
+ Make it at least 14.49998pt.
+ We now make it that large for the rest of the document.
+ This may cause the page layout to be inconsistent, however.
+
+[5]
+
+Package xcolor Warning: Incompatible color definition on input line 357.
+
+<figure/unnamed-chunk-11-1.pdf, id=77, 433.62pt x 289.08pt>
+File: figure/unnamed-chunk-11-1.pdf Graphic file (type pdf)
+<use figure/unnamed-chunk-11-1.pdf>
+Package pdftex.def Info: figure/unnamed-chunk-11-1.pdf  used on input line 377.
+
+(pdftex.def)             Requested size: 433.61894pt x 289.09251pt.
+
+Package Fancyhdr Warning: \headheight is too small (8.5359pt): 
+ Make it at least 14.49998pt.
+ We now make it that large for the rest of the document.
+ This may cause the page layout to be inconsistent, however.
+
+[6 <./figure/unnamed-chunk-11-1.pdf>] (./lab-week-7.aux)
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
  ) 
 Here is how much of TeX's memory you used:
- 26849 strings out of 492982
- 553482 string characters out of 6134897
- 629405 words of memory out of 5000000
- 29945 multiletter control sequences out of 15000+600000
- 537881 words of font info for 54 fonts, out of 8000000 for 9000
+ 26878 strings out of 492982
+ 554067 string characters out of 6134897
+ 629360 words of memory out of 5000000
+ 29967 multiletter control sequences out of 15000+600000
+ 537493 words of font info for 53 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 59i,11n,78p,10503b,470s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 59i,16n,78p,10503b,689s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></us
 r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/shar
 e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmitt10.pfb></usr/share/tex
@@ -1211,16 +1260,16 @@ live/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texlive/t
 exmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texlive/texmf-di
 st/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/font
 s/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1
-/public/amsfonts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
-amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts
-/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cm
-sy8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pf
-b></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></us
-r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on lab-week-5.pdf (4 pages, 204796 bytes).
+/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
+amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfon
+ts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/c
+mti12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.
+pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb></
+usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
+Output written on lab-week-7.pdf (7 pages, 253730 bytes).
 PDF statistics:
- 108 PDF objects out of 1000 (max. 8388607)
- 68 compressed objects within 1 object stream
+ 132 PDF objects out of 1000 (max. 8388607)
+ 85 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 119 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 129 words of extra memory for PDF output out of 10000 (max. 10000000)
 
