@@ -1,0 +1,137 @@
+---
+title: "Week 5 live lecture notes"
+author: "Garth Tarr"
+output:
+  distill::distill_article:
+    toc: true
+    toc_depth: 3
+    code_folding: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(gt)
+library(janitor)
+```
+
+# Practice with QQ plots
+
+statstar.io
+
+# Git 
+
+I'll attempt to get git up and running from scratch on a Windows computer.
+
+# Second look at the survey data
+
+```{r, message=FALSE}
+url = "https://docs.google.com/spreadsheets/d/1-DmA1UUM6QmZyucYiutuZX4Q0omtSCDwSOCNzHibkto/export?format=csv"
+survey = readr::read_csv("DATA2x02_survey.csv")
+# colnames(survey) %>%
+#   tibble() %>%
+#   gt::gt()
+```
+
+Rename the column names so that they are more manageable to program with.
+
+```{r}
+questions = colnames(survey)
+short_names = c("time","covid_tests","living_arrangements","height",
+                "wednesday","in_aus","math_ability","r_ability",
+                "data2002","year","webcam","vaccination","social_media",
+                "gender","steak_preference","dominant_hand","stress",
+                "lonely","emails","sign_off","salary","unit","major","exercise")
+colnames(survey) = short_names
+```
+
+## Height
+
+```{r}
+survey = survey %>% 
+  dplyr::mutate(
+    height_clean = readr::parse_number(height),
+    height_clean = case_when(
+      height_clean <= 2.5 ~ height_clean * 100,
+      height_clean <= 9 ~ NA_real_,
+      TRUE ~ height_clean
+    )
+  )
+x1 = survey %>% select(height_clean)
+x2 = survey %>% pull(height_clean)
+
+survey %>% 
+  ggplot() + 
+  aes(x = height_clean) + 
+  geom_histogram(binwidth = 5)
+
+survey %>% pull(height_clean) %>% sort(decreasing = FALSE)
+
+survey %>% 
+  # filter(unit =="DATA2002") %>%
+  group_by(unit) %>% 
+  summarise(
+    mean_height = mean(height_clean, na.rm = TRUE),
+    sd_height = sd(height_clean, na.rm = TRUE),
+    n = sum(!is.na(height_clean)),
+    total_exercise_hours = sum(exercise,na.rm = TRUE),
+    mean_exercise_hours = mean(exercise,na.rm = TRUE)
+  )
+
+```
+
+## Gender
+
+```{r}
+# install.packages("remotes")
+# remotes::install_github("ropenscilabs/gendercoder")
+survey = survey %>% 
+  mutate(gender_clean = gendercoder::recode_gender(gender))
+# survey %>% janitor::tabyl(gender,gender_clean)
+```
+
+## Living arrangements
+
+```{r}
+survey %>% janitor::tabyl(living_arrangements)
+```
+
+## Day of the week
+
+https://www.thecut.com/2017/05/the-fuzzy-way-we-talk-about-time-can-make-you-miss-a-meeting.html
+
+```{r}
+survey %>% janitor::tabyl(wednesday) %>% 
+  knitr::kable()
+
+survey = survey %>% 
+  mutate(wednesday = stringr::str_replace_all(wednesday, "[[:punct:]]", ""))
+
+survey %>% janitor::tabyl(wednesday) %>% 
+  knitr::kable()
+```
+
+## Salary (tricky)
+
+```{r}
+# survey %>% tabyl(salary)
+survey %>% mutate(
+  salary = str_replace_all(salary, fixed(" "), ""),
+  salary_clean = readr::parse_number(salary)
+  )
+```
+
+
+## Social media
+
+```{r}
+survey %>% tabyl(social_media)
+
+survey %>% 
+  mutate(
+    social_media = 
+  )
+```
+
+
+

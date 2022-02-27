@@ -1,0 +1,80 @@
+\documentclass[12pt, a4paper]{article}
+\input{./everything/everything.tex}
+\input{./everything/preamble.tex}
+
+\begin{document}
+% refer to https://yihui.org/knitr/options/#code-decoration for more options
+<<include = FALSE>>=
+knitr::opts_chunk$set(echo = TRUE, 
+                      include = TRUE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      tidy = TRUE, 
+                      tidy.opts = list(width.cutoff=100), 
+                      fig.width = 6, 
+                      fig.height = 4, 
+                      fig.align = "center", 
+                      size = "footnotesize"
+)
+render_listings()
+@
+
+% (1) Remember that we want the default page style
+% (2) but for this page we want an empty page style for the title 
+% (3) we input our title 
+% (4) we call a new page and reset the page counter to 1
+\pagestyle{default}
+\thispagestyle{empty}
+\input{./title_page.tex}
+\newpage
+\setcounter{page}{1}
+\tableofcontents
+\newpage
+\section{Lab 7}
+\begin{enumerate}[label={\bfseries\arabic*.}]
+  \item 
+  \begin{enumerate}[label={(\alph*)}]
+    \item We assume a null hypothesis of $\theta = \theta_0 = 1$. We are given that $gamma_0 = 1$. 
+<<>>=
+alpha = 0.05
+# find a and b
+a = qgamma(p = alpha/2, shape = 1, scale = 1, lower.tail = TRUE)
+b = qgamma(p = alpha/2, shape = 1, scale = 1, lower.tail = FALSE)
+c(a, b)
+@
+  \item We plot the power function of the equal tailed test
+<<>>=
+# Define a vector of theta-values
+th=(250:1500)/1000
+# obtain a corresponding vector of values of the power
+power_level = pgamma(q = a, shape = 1, scale = th, lower.tail = TRUE) + 
+  pgamma(q = b, shape = 1, scale = th, lower.tail = FALSE)
+# Plot power against theta
+plot(th, power_level, 
+     xlab = expression(theta),
+     ylab = "power", 
+     main = "power of level test",
+     lwd = 0.5)
+# dashed line
+abline(h = 0.05, lty = 2)
+@
+\item We write a function which takes a level $\alpha$ and returns the elements $c$ and $d$ for the UMPU test. We do this for $\theta_0 = 1$ and $\alpha = 0.05$
+<<>>=
+# function for c
+c.function = function(c, alpha) {
+  c * exp(-c) + (log(alpha - 1 + exp(-c))) * (alpha - 1 + exp(-c))
+}
+expon.umpu = function(alpha) {
+  # we use our function to calculate the root of the "c" equation
+  c = uniroot(f = c.function, lower = 0, upper = qexp(0.05) - 1e-5, alpha = 0.05)$root
+  # we now calculate the d value
+  d = -1 * log(alpha - 1 + exp(-c))
+  values = c(c, d)
+}
+
+@
+  \end{enumerate}
+\end{enumerate}
+
+
+\end{document}

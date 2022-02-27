@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>DATA2002</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Garth Tarr" />
+    <script src="lec06_files/header-attrs-2.10/header-attrs.js"></script>
+    <link href="lec06_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } },
+      "HTML-CSS": {
+        styles: {
+          ".MathJax a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+          ".MathJax_Preview a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+        }
+      }
+      });
+    </script>
+    <link rel="stylesheet" href="assets/sydney-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="assets/sydney.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# DATA2002
+## Measures of risk
+### Garth Tarr
+
+---
+
+class: segue
+
+
+
+
+
+.large[
+Prospective and retrospective studies
+
+Estimating population proportions
+
+Relative risk
+
+Odds ratio
+
+Standard errors and confidence intervals for odds ratios
+]
+
+---
+class: segue
+
+# Prospective and retrospective studies
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M496 256c8.8 0 16-7.2 16-16s-7.2-16-16-16-16 7.2-16 16 7.2 16 16 16zm-176-80c48.5 0 88-39.5 88-88S368.5 0 320 0s-88 39.5-88 88 39.5 88 88 88zM59.8 364c10.2 15.3 29.3 17.8 42.9 9.8 16.2-9.6 56.2-31.7 105.3-48.6V416h224v-90.7c49.1 16.8 89.1 39 105.3 48.6 13.6 8 32.7 5.3 42.9-9.8l17.8-26.7c8.8-13.2 7.6-34.6-10-45.1-11.9-7.1-29.7-17-51.1-27.4-28.1 46.1-99.4 17.8-87.7-35.1C409.3 217.2 365.1 208 320 208c-57 0-112.9 14.5-160 32.2-.2 40.2-47.6 63.3-79.2 36-11.2 6-21.3 11.6-28.7 16-17.6 10.5-18.8 31.8-10 45.1L59.8 364zM368 344c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm-96-96c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm-160 8c8.8 0 16-7.2 16-16s-7.2-16-16-16-16 7.2-16 16 7.2 16 16 16zm512 192H16c-8.8 0-16 7.2-16 16v32c0 8.8 7.2 16 16 16h608c8.8 0 16-7.2 16-16v-32c0-8.8-7.2-16-16-16z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Asthma and hay fever
+
+A large group of infants with mild respiratory problems (but asthma free) is split into those with a family history of hay fever, and those without.
+
+Random samples of 85 from the first group and 405 from the second group are selected for special study. Of these, the number diagnosed with asthma by the age of 12 are 25 and 70 respectively.
+`$$\begin{array}{c|cc|c}
+ &amp; \text{Asthma} &amp;  \text{No Asthma} &amp; \\ \hline
+  \text{Hay fever} &amp; 25 &amp; 60 &amp; \bf{85}\\
+  \text{No hay fever} &amp; 70 &amp; 335 &amp; \bf{405} \\ \hline
+  &amp; 95 &amp; 395 &amp; \\
+  \end{array}$$`
+  
+.blockquote[
+&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 448c-110.532 0-200-89.431-200-200 0-110.495 89.472-200 200-200 110.491 0 200 89.471 200 200 0 110.53-89.431 200-200 200zm107.244-255.2c0 67.052-72.421 68.084-72.421 92.863V300c0 6.627-5.373 12-12 12h-45.647c-6.627 0-12-5.373-12-12v-8.659c0-35.745 27.1-50.034 47.579-61.516 17.561-9.845 28.324-16.541 28.324-29.579 0-17.246-21.999-28.693-39.784-28.693-23.189 0-33.894 10.977-48.942 29.969-4.057 5.12-11.46 6.071-16.666 2.124l-27.824-21.098c-5.107-3.872-6.251-11.066-2.644-16.363C184.846 131.491 214.94 112 261.794 112c49.071 0 101.45 38.304 101.45 88.8zM298 368c0 23.159-18.841 42-42 42s-42-18.841-42-42 18.841-42 42-42 42 18.841 42 42z"&gt;&lt;/path&gt;&lt;/svg&gt;
+Does a family history of hay fever increase the risk of developing asthma?
+]
+
+---
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M377 105L279.1 7c-4.5-4.5-10.6-7-17-7H256v128h128v-6.1c0-6.3-2.5-12.4-7-16.9zm-153 31V0H24C10.7 0 0 10.7 0 24v464c0 13.3 10.7 24 24 24h336c13.3 0 24-10.7 24-24V160H248c-13.2 0-24-10.8-24-24zm64 160v48c0 4.4-3.6 8-8 8h-56v56c0 4.4-3.6 8-8 8h-48c-4.4 0-8-3.6-8-8v-56h-56c-4.4 0-8-3.6-8-8v-48c0-4.4 3.6-8 8-8h56v-56c0-4.4 3.6-8 8-8h48c4.4 0 8 3.6 8 8v56h56c4.4 0 8 3.6 8 8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Hodgkin's disease and tonsillectomies
+
+Vianna, Greenwald, and Davies (1971) collected data on a group of **101 patients suffering from Hodgkin's disease** and a comparable control group of **107 non-Hodgkin's patients**. 
+
+They were interested in the effect of tonsil tissue as a barrier to Hodgkin's disease. They found that in the Hodgkin's disease group, there had been 67 tonsillectomies. The corresponding figure for the non-Hodgkin's patients was 43.
+`$$\begin{array}{c|cc|c}
+ &amp; \text{Hodgkin's} &amp;  \text{disease} &amp; \\
+ \text{Tonsillectomy} &amp;  \text{Yes} &amp;  \text{No} &amp; \\ \hline
+  \text{Yes} &amp; 67 &amp; 43 &amp; 110\\
+  \text{No}  &amp; 34 &amp; 64 &amp; 98 \\ \hline
+  &amp; \bf{101} &amp; \bf{107} &amp; \\
+  \end{array}$$`
+
+.blockquote[
+&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 448c-110.532 0-200-89.431-200-200 0-110.495 89.472-200 200-200 110.491 0 200 89.471 200 200 0 110.53-89.431 200-200 200zm107.244-255.2c0 67.052-72.421 68.084-72.421 92.863V300c0 6.627-5.373 12-12 12h-45.647c-6.627 0-12-5.373-12-12v-8.659c0-35.745 27.1-50.034 47.579-61.516 17.561-9.845 28.324-16.541 28.324-29.579 0-17.246-21.999-28.693-39.784-28.693-23.189 0-33.894 10.977-48.942 29.969-4.057 5.12-11.46 6.071-16.666 2.124l-27.824-21.098c-5.107-3.872-6.251-11.066-2.644-16.363C184.846 131.491 214.94 112 261.794 112c49.071 0 101.45 38.304 101.45 88.8zM298 368c0 23.159-18.841 42-42 42s-42-18.841-42-42 18.841-42 42-42 42 18.841 42 42z"&gt;&lt;/path&gt;&lt;/svg&gt; 
+Does having a tonsillectomy increase your risk of developing Hodgkin's disease?
+]
+
+---
+
+## Notation
+
+How a study is conducted over time will affect various conditional probabilities.  
+
+To illustrate this we will use the following symbols.
+
+- `\(\color{blue}{D^+}\)` is the event that an individual **has** a particular disease. 
+- `\(\color{blue}{D^-}\)` is the event that an individual **does not have** a particular disease. 
+- `\(\color{red}{R^+}\)` is the event that an individual **has** a risk factor.
+- `\(\color{red}{R^-}\)` is the event that an individual **does not have** a risk factor.
+
+---
+
+## Prospective (or cohort study) studies
+
+A study design where one or more samples (called cohorts) are followed prospectively and subsequent status evaluations with respect to a disease or outcome are conducted to determine which initial participants exposure characteristics (risk factors) are associated with it. 
+
+As the study is conducted, an outcome from participants in each cohort is measured and relationships with specific characteristics determined.  
+
+.blockquote[
+- A **prospective study** is based on subjects who are initially identified as *disease-free* and classified by presence or absence of a *risk factor*. 
+- A random sample from each group is followed in time (prospectively) until eventually classified by disease outcome.
+]
+
+.footnote[
+&lt;svg viewBox="0 0 640 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M640 51.2l-.3 12.2c-28.1.8-45 15.8-55.8 40.3-25 57.8-103.3 240-155.3 358.6H415l-81.9-193.1c-32.5 63.6-68.3 130-99.2 193.1-.3.3-15 0-15-.3C172 352.3 122.8 243.4 75.8 133.4 64.4 106.7 26.4 63.4.2 63.7c0-3.1-.3-10-.3-14.2h161.9v13.9c-19.2 1.1-52.8 13.3-43.3 34.2 21.9 49.7 103.6 240.3 125.6 288.6 15-29.7 57.8-109.2 75.3-142.8-13.9-28.3-58.6-133.9-72.8-160-9.7-17.8-36.1-19.4-55.8-19.7V49.8l142.5.3v13.1c-19.4.6-38.1 7.8-29.4 26.1 18.9 40 30.6 68.1 48.1 104.7 5.6-10.8 34.7-69.4 48.1-100.8 8.9-20.6-3.9-28.6-38.6-29.4.3-3.6 0-10.3.3-13.6 44.4-.3 111.1-.3 123.1-.6v13.6c-22.5.8-45.8 12.8-58.1 31.7l-59.2 122.8c6.4 16.1 63.3 142.8 69.2 156.7L559.2 91.8c-8.6-23.1-36.4-28.1-47.2-28.3V49.6l127.8 1.1.2.5z"&gt;&lt;/path&gt;&lt;/svg&gt; [Prospective cohort study](https://en.wikipedia.org/wiki/Prospective_cohort_study)
+]
+
+
+---
+
+## Prospective studies -- fictitious example
+
+- A **prospective study** was designed to assess the impact of sun exposure on skin damage in beach volleyball players. 
+- During a weekend tournament, players from one team wore waterproof, SPF 35 sunscreen, while players from the other team did not wear any sunscreen. 
+- At the end of the volleyball tournament players' skin from both teams was analyzed for texture, sun damage, and burns. 
+- Comparisons of skin damage were then made based on the use of sunscreen. 
+- The analysis showed a significant difference between the cohorts in terms of the skin damage.
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M496 256c8.8 0 16-7.2 16-16s-7.2-16-16-16-16 7.2-16 16 7.2 16 16 16zm-176-80c48.5 0 88-39.5 88-88S368.5 0 320 0s-88 39.5-88 88 39.5 88 88 88zM59.8 364c10.2 15.3 29.3 17.8 42.9 9.8 16.2-9.6 56.2-31.7 105.3-48.6V416h224v-90.7c49.1 16.8 89.1 39 105.3 48.6 13.6 8 32.7 5.3 42.9-9.8l17.8-26.7c8.8-13.2 7.6-34.6-10-45.1-11.9-7.1-29.7-17-51.1-27.4-28.1 46.1-99.4 17.8-87.7-35.1C409.3 217.2 365.1 208 320 208c-57 0-112.9 14.5-160 32.2-.2 40.2-47.6 63.3-79.2 36-11.2 6-21.3 11.6-28.7 16-17.6 10.5-18.8 31.8-10 45.1L59.8 364zM368 344c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm-96-96c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm-160 8c8.8 0 16-7.2 16-16s-7.2-16-16-16-16 7.2-16 16 7.2 16 16 16zm512 192H16c-8.8 0-16 7.2-16 16v32c0 8.8 7.2 16 16 16h608c8.8 0 16-7.2 16-16v-32c0-8.8-7.2-16-16-16z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Prospective study -- Asthma 
+
+A large group of infants with mild respiratory problems (but asthma free) is 
+split into those with a family history of hay fever, `\(\color{red}{R^+}\)`, and those without, 
+`\(\color{red}{R^-}\)`.  Random samples of 85 from the first group and 405 from the second group 
+are selected for special study. Of these, the number diagnosed with asthma by 
+the age of 12, `\(\color{blue}{D^+}\)`, are 25 and 70 respectively.
+
+|       | `\(\color{blue}{D^+}\)` .blue[Asthma &lt;br&gt;by age 12]  | `\(\color{blue}{D^-}\)` .blue[No asthma &lt;br&gt;by age 12]  | Total     |
+|-------|:-------:|:-------:|-----------:|
+| `\(\color{red}{R^+}\)` .red[.bold[Family history of hay fever]]  | 25    | 60    | .red[.bold[85]]  |
+| `\(\color{red}{R^-}\)` .red[.bold[No family history of hay fever]] | 70    | 335   | .red[.bold[405]] |
+| **Total** | **95**    | **395**   | **490**       |
+
+- Risk factor is .red[.bold[family history of hay fever]]
+- Disease is .blue[.bold[asthma by age 12]]
+
+
+In a prospective study the numbers .red[.bold[highlighted in red]] are fixed by design.
+
+---
+
+## Retrospective (or case control) studies
+
+A study that compares patients who have a disease or outcome of interest (cases) with patients who do not have the disease or outcome (controls), and looks back retrospectively to compare how frequently the exposure to a risk factor is present in each group to determine the relationship between the risk factor and the disease.
+
+.blockquote[
+A **retrospective study** is based on random samples from each of the two *outcome categories* which are followed back (retrospectively) to determine the presence or absence of the *risk factor* for each individual.
+]
+
+.footnote[
+&lt;svg viewBox="0 0 640 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M640 51.2l-.3 12.2c-28.1.8-45 15.8-55.8 40.3-25 57.8-103.3 240-155.3 358.6H415l-81.9-193.1c-32.5 63.6-68.3 130-99.2 193.1-.3.3-15 0-15-.3C172 352.3 122.8 243.4 75.8 133.4 64.4 106.7 26.4 63.4.2 63.7c0-3.1-.3-10-.3-14.2h161.9v13.9c-19.2 1.1-52.8 13.3-43.3 34.2 21.9 49.7 103.6 240.3 125.6 288.6 15-29.7 57.8-109.2 75.3-142.8-13.9-28.3-58.6-133.9-72.8-160-9.7-17.8-36.1-19.4-55.8-19.7V49.8l142.5.3v13.1c-19.4.6-38.1 7.8-29.4 26.1 18.9 40 30.6 68.1 48.1 104.7 5.6-10.8 34.7-69.4 48.1-100.8 8.9-20.6-3.9-28.6-38.6-29.4.3-3.6 0-10.3.3-13.6 44.4-.3 111.1-.3 123.1-.6v13.6c-22.5.8-45.8 12.8-58.1 31.7l-59.2 122.8c6.4 16.1 63.3 142.8 69.2 156.7L559.2 91.8c-8.6-23.1-36.4-28.1-47.2-28.3V49.6l127.8 1.1.2.5z"&gt;&lt;/path&gt;&lt;/svg&gt; [Retrospective cohort study](https://en.wikipedia.org/wiki/Retrospective_cohort_study)
+]
+
+---
+
+## Retrospective studies -- fictitious example
+
+- There is a suspicion that zinc oxide, the white non-absorbent sunscreen traditionally worn by lifeguards is more effective at preventing sunburns that lead to skin cancer than absorbent sunscreen lotions. 
+- A **retrospective study** was conducted to investigate if exposure to zinc oxide is a more effective skin cancer prevention measure. 
+- The study involved comparing a group of former lifeguards that had developed cancer on their cheeks and noses (cases) to a group of lifeguards without this type of cancer (controls) and assess their prior exposure to zinc oxide or absorbent sunscreen lotions.
+- This study would be **retrospective** in that the former lifeguards would be asked to recall which type of sunscreen they used on their face and approximately how often. 
+
+---
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M377 105L279.1 7c-4.5-4.5-10.6-7-17-7H256v128h128v-6.1c0-6.3-2.5-12.4-7-16.9zm-153 31V0H24C10.7 0 0 10.7 0 24v464c0 13.3 10.7 24 24 24h336c13.3 0 24-10.7 24-24V160H248c-13.2 0-24-10.8-24-24zm64 160v48c0 4.4-3.6 8-8 8h-56v56c0 4.4-3.6 8-8 8h-48c-4.4 0-8-3.6-8-8v-56h-56c-4.4 0-8-3.6-8-8v-48c0-4.4 3.6-8 8-8h56v-56c0-4.4 3.6-8 8-8h48c4.4 0 8 3.6 8 8v56h56c4.4 0 8 3.6 8 8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Retrospective study -- Hodgkin's disease
+
+Vianna, Greenwald, and Davies (1971) collected data on a group of 101 patients suffering from Hodgkin's disease, `\(D^+\)`, and a comparable control group of 107 non-Hodgkin's patients, `\(D^-\)`. They were interested in the effect of tonsil tissue as a barrier to Hodgkin's disease. They found that in the `\(D^+\)` group, there had been 67 tonsillectomies, `\(R^+\)`. The corresponding figure for the `\(D^-\)` group was 43.
+&lt;!-- $$\begin{array}{c|cc|c} --&gt;
+&lt;!-- 		&amp; D^+ &amp; D^- \\ --&gt;
+&lt;!-- 		\hline --&gt;
+&lt;!-- 		R^+          &amp; 67    &amp;  43   &amp; 110        \\ --&gt;
+&lt;!-- 		R^-          &amp; 34    &amp;  64   &amp; 98       \\ --&gt;
+&lt;!-- 		\hline  --&gt;
+&lt;!-- 		&amp; {\color{red}\bf 101}      &amp; {\color{red}\bf 107}  &amp;            \\ --&gt;
+&lt;!-- 	\end{array}$$ --&gt;
+&lt;!-- Note that in a retrospective study the numbers highlighted in red are fixed by design. --&gt;
+
+|       | `\(\color{blue}{D^+}\)` .blue[Hodgkin's]  | `\(\color{blue}{D^-}\)` .blue[Non-Hodgkin's]  | Total     |
+|-------|:-------:|:-------:|-----------:|
+| `\(\color{red}{R^+}\)` .red[.bold[Tonsillectomy]]  | 67    | 43    | .bold[110]  |
+| `\(\color{red}{R^-}\)` .red[.bold[No tonsillectomy]] | 34    | 64   | .bold[98] |
+| **Total** | .blue[.bold[101]] | .blue[.bold[107]]   | **208**       |
+
+- Risk factor is .red[.bold[tonsillectomy]]
+- Disease is .blue[.bold[Hodgkin's disease]]
+
+
+In a retrospective study the numbers .blue[.bold[highlighted in blue]] are fixed by design.
+
+
+---
+class: segue
+
+# Estimating population proportions
+
+---
+
+## Estimating a population proportion
+
+Suppose
+- we have a large (but finite) population containing objects/individuals of two different types (say type 0 and type 1);
+- it is desired to determine or at least estimate the overall proportion of type 1
+but it is not feasible to examine every object/individual.
+
+If we can take a random sample from the population then we can use the sample proportion of type 1 as an estimate of the population proportion of type 1.
+
+Extending this idea, consider two events `\(A\)` and `\(B\)`,
+- If we can take a random sample from the whole population, we can estimate `\(P(A)\)` using the observed sample proportion with attribute `\(A\)`
+- If we can take a random sample from the subpopulation defined by `\(B\)`, we can estimate `\(P(A|B)\)` using the observed sample proportion (of the subpopulation) with attribute `\(A\)`.
+
+---
+
+## Application to prospective and retrospective studies
+
+In both kinds of study we have
+- a population;
+- a subpopulation/attribute determined by a risk factor `\(R^+\)` (with complementary subpopulation/attribute `\(R^−\)`);
+- an subpopulation/attribute determined by having/developing the disease `\(D^+\)` (with complementary subpopulation/attribute `\(D^−\)`).
+
+The labels "subpopulation" and "attribute" here are mathematically equivalent (they both mean event).
+
+The main difference between prospective and retrospective studies are which (sub)populations we can sample from.
+
+---
+
+## Prospective study
+
+- In a prospective study we take two random samples:
+  - one from the risk factor group (subpopulation) `\(R^+\)`;
+  - another from the non-risk factor group `\(R^-\)`.
+- We then (wait to) see how many in each group develop the disease.
+- We can thus estimate `\(P(D^+|R^+)\)` as well as `\(P(D^-|R^-)\)`.
+- We cannot however estimate `\(P(R^+|D^+)\)` or `\(P(R^-|D^-)\)` since we did not take random samples from the disease group.
+
+---
+
+## Retrospective study
+
+- In a retrospective study we take two random samples:
+  - one from the disease group (subpopulation) `\(D^+\)` and
+  - another from the non-disease group (subpopulation) `\(D^-\)`.
+- We then (look back to) see how many in each group were exposed to the risk factor.
+- We can thus estimate `\(P(R^+|D^+)\)` as well as `\(P(R^-|D^-)\)`.
+- We cannot however estimate `\(P(D^+|R^+)\)` or `\(P(D^-|R^-)\)` since we did not take random samples from the risk factor group.
+
+---
+class: segue
+
+# Relative risk
+
+---
+
+## Measures of risk
+
+These are different ways to measure the association between a risk factor/treatment and the disease outcome.  
+
+How the data is **sampled** will greatly impact the ways in which these methods are applicable and interpretable.
+
+---
+
+## Relative risk
+
+The relative risk is defined as a ratio of two conditional probabilities,
+`$$\displaystyle RR = \frac{P(D^+|R^+)}{P(D^+|R^-)}.$$`
+Since probabilities are bounded between 0 and 1
+`$$\displaystyle RR = \frac{P(D^+|R^+)}{P(D^+|R^-)} \to \infty \quad \text{as} \quad P(D^+|R^-) \to 0,$$`
+
+`$$\displaystyle RR= \frac{P(D^+|R^+)}{P(D^+|R^-)} \to 0 \quad \text{as} \quad P(D^+|R^+) \to 0,$$`
+and `\(RR \approx 1\)` when `\(P(D^+|R^+) \approx P(D^+|R^-)\)`.
+
+If `\(D\)` and `\(R\)` are **independent** then `\(P(D|R) = P(D)\)` and so
+`$$RR = \frac{P(D^+|R^+)}{P(D^+|R^-)} = \frac{P(D^+)}{P(D^+)} = 1.$$`
+
+.footnote[
+&lt;svg viewBox="0 0 640 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M640 51.2l-.3 12.2c-28.1.8-45 15.8-55.8 40.3-25 57.8-103.3 240-155.3 358.6H415l-81.9-193.1c-32.5 63.6-68.3 130-99.2 193.1-.3.3-15 0-15-.3C172 352.3 122.8 243.4 75.8 133.4 64.4 106.7 26.4 63.4.2 63.7c0-3.1-.3-10-.3-14.2h161.9v13.9c-19.2 1.1-52.8 13.3-43.3 34.2 21.9 49.7 103.6 240.3 125.6 288.6 15-29.7 57.8-109.2 75.3-142.8-13.9-28.3-58.6-133.9-72.8-160-9.7-17.8-36.1-19.4-55.8-19.7V49.8l142.5.3v13.1c-19.4.6-38.1 7.8-29.4 26.1 18.9 40 30.6 68.1 48.1 104.7 5.6-10.8 34.7-69.4 48.1-100.8 8.9-20.6-3.9-28.6-38.6-29.4.3-3.6 0-10.3.3-13.6 44.4-.3 111.1-.3 123.1-.6v13.6c-22.5.8-45.8 12.8-58.1 31.7l-59.2 122.8c6.4 16.1 63.3 142.8 69.2 156.7L559.2 91.8c-8.6-23.1-36.4-28.1-47.2-28.3V49.6l127.8 1.1.2.5z"&gt;&lt;/path&gt;&lt;/svg&gt; [Relative risk](https://en.wikipedia.org/wiki/Relative_risk)
+]
+
+---
+
+## Relative risk -- interpretation
+
+`$$\displaystyle RR = \frac{P(D^+|R^+)}{P(D^+|R^-)}$$`
+
+The relative risk is the ratio of the probability of having the disease in the group with the risk factor to the probability of having the disease in the group without the risk factor.
+
+- `\(RR = 1\)` means there is **no difference** between the two groups.
+- `\(RR&lt;1\)` implies the disease is **less likely** to occur in the group with the risk factor.
+- `\(RR&gt;1\)` implies the disease is **more likely** to occur in the group with the risk factor.
+
+---
+
+## Relative risk -- prospective studies
+
+`$$\begin{array}{c|cc|c}
+&amp; D^+ &amp; D^- &amp; \text{Total} \\
+\hline 
+R^+ &amp; a  &amp; b  &amp; \color{red}{\bf a+b} \\
+R^- &amp; c  &amp; d  &amp; \color{red}{\bf c+d} \\
+\hline 
+&amp; a+c &amp; b+d  &amp; a+b+c+d \\
+		\end{array}$$`
+	
+Given data from a .red[.bold[prospective study]] or .red[.bold[from a sample of completed records]] we can estimate these
+ 
+- `\(\displaystyle P(D^+|R^+) = \frac{a}{a+b}\)`
+- `\(\displaystyle P(D^+|R^-) = \frac{c}{c+d}\)`
+- **Relative risk**: `\(\displaystyle \widehat{RR} = \frac{P(D^+|R^+)}{P(D^+|R^-)} = \frac{a(c+d)}{c(a+b)}\)`
+
+.footnote[
+Recall: in a prospective study the numbers .red[.bold[highlighted in red]] are fixed by design.
+]
+
+---
+
+## Relative risk -- retrospective studies
+
+`$$\begin{array}{c|cc|c}
+&amp; D^+ &amp; D^- &amp; \text{Total} \\
+\hline 
+R^+ &amp; a  &amp; b  &amp; a+b \\
+R^- &amp; c  &amp; d  &amp; c+d \\
+\hline 
+&amp; \color{blue}{\bf a+c} &amp; \color{blue}{\bf b+d}  &amp; a+b+c+d \\
+\end{array}$$`
+
+In a .blue[.bold[retrospective study]] (or cohort control study) we identify two groups ( `\(D^+\)` and `\(D^-\)` ) and we retrospectively assess each group them for their risk status ( `\(R^+\)` and `\(R^-\)` ).  We "sampled on the outcome", choosing subjects on the basis of `\(D\)` and then observing `\(R\)`.
+
+Due to the design, we cannot extract any information about the incidence of `\(D\)` in the population because the proportions of cases with `\(D^+\)` and `\(D^-\)` were decided by the investigator. I.e. we cannot estimate `\(\displaystyle P(D^+|R^+)\)`, `\(\displaystyle P(D^+|R^-)\)`, or `\(\displaystyle RR = \frac{P(D^+|R^+)}{P(D^+|R^-)}\)`. 
+
+
+
+.footnote[
+We can estimate `\(P(R^+|D^+)\)` and `\(P(R^-|D^+)\)` but these are not used in the calculation of relative risk.
+
+Recall: in a retrospective study the numbers .blue[.bold[highlighted in blue]] are fixed by design.
+]
+
+---
+&lt;svg viewBox="0 0 576 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M112 32C50.1 32 0 82.1 0 144v224c0 61.9 50.1 112 112 112s112-50.1 112-112V144c0-61.9-50.1-112-112-112zm48 224H64V144c0-26.5 21.5-48 48-48s48 21.5 48 48v112zm139.7-29.7c-3.5-3.5-9.4-3.1-12.3.8-45.3 62.5-40.4 150.1 15.9 206.4 56.3 56.3 143.9 61.2 206.4 15.9 4-2.9 4.3-8.8.8-12.3L299.7 226.3zm229.8-19c-56.3-56.3-143.9-61.2-206.4-15.9-4 2.9-4.3 8.8-.8 12.3l210.8 210.8c3.5 3.5 9.4 3.1 12.3-.8 45.3-62.6 40.5-150.1-15.9-206.4z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Aspirin (relative risk)
+
+Steering Committee of the Physicians' Health Study Research Group (1988) provide data on a 5 year (blind) study into the effect of taking aspirin every second day on the incidence of heart attacks. 
+
+|     | Myocardial infarction `\(D^+\)` | No myocardial infarction `\(D^-\)` |      |
+| --- | :-------------------------: | :----------------------------: | ---- |
+| **Aspirin** `\(R^+\)` | 104 | 10,933 | 11,037 | 
+| **Placebo** `\(R^-\)` | 189 | 10,845 | 11,034 |
+|               | 293 | 21,778 | 22,071 |
+
+
+.pull-left[
+Estimates for the proportion of each group having heart attacks:
+`$$\begin{align*}
+P(D^+|R^+) &amp; = \dfrac{104}{10,933 + 104} = 0.0094 \\
+P(D^+|R^-) &amp; = \dfrac{189}{10,845 + 189} = 0.0171 
+\end{align*}$$`
+]
+.pull-right[
+The estimated relative risk in the is `\(0.0094/0.0171 = 0.55\)`. 
+
+.blue[Hence, you are roughly half as likely to have myocardial infarction if you take aspirin.]
+]
+
+&lt;!-- $$\begin{array}{l|cc|r} --&gt;
+&lt;!-- &amp; \text{Myocardial infarction } (D^+)     &amp;\text{No myocardial infarction } (D^-)       &amp;     \\ --&gt;
+&lt;!-- \hline --&gt;
+&lt;!-- \text{Aspirin } (R^+) &amp; 104            &amp;10,933          &amp;11,037 \\  --&gt;
+&lt;!-- \text{Placebo } (R^-) &amp; 189            &amp;10,845          &amp;11,034 \\ \hline --&gt;
+&lt;!-- &amp;293            &amp;21,778          &amp;22,071 \\ --&gt;
+&lt;!-- \end{array}$$ --&gt;
+
+&lt;!-- ## Aspirin
+
+`$$\begin{array}{l|cc|r}
+		&amp; \text{Myocardial} &amp; \text{Infarction} &amp; \\
+		&amp; \text{Yes} (D^+)     &amp;\text{No} (D^-)       &amp;     \\
+		\hline
+		\text{Aspirin} (R^+) &amp; 104            &amp;10,933          &amp;11,037 \\ 
+		\text{Placebo} (R^-) &amp; 189            &amp;10,845          &amp;11,034 \\ \hline
+		&amp;293            &amp;21,778          &amp;22,071 \\
+	\end{array}$$`
+
+The estimates for the proportion of each sub-population having heart attacks are
+`$$\begin{array}{rl}
+P(D^+|R^+)
+&amp;\;=\; \frac{104}{10,933 + 104} \;=\; 0.0094 \\
+P(D^+|R^-) &amp; \;=\; \frac{189}{10,845 + 189} \;=\; 0.0171 
+\end{array}$$`
+
+The estimated relative risk in the above case is `\(0.0094/0.0171 = 0.55\)`. .blue[Hence, you are roughly half as likely to have myocardial infarction if you take aspirin.]
+
+--&gt;
+
+---
+class: segue
+
+# Odds ratio
+
+---
+
+## Odds ratio
+
+&gt; A common alternative to the **relative risk** is the **odds ratio**, denoted `\(OR\)`.
+
+**Odds** are a ratio of probabilities.  The **odds** are used as an alternative way of measuring the likelihood of an event occurring.
+
+If the probability of event `\(A\)` is `\(P(A)\)` the **odds** of event `\(A\)` is defined as
+`$$O(A) = \frac{P(A)}{1-P(A)}.$$`
+
+In the risk/disease setting, the probability of disease for `\(R^+\)` patients is `\(P(D^+|R^+)\)`, and so the odds is,
+`$$O(D^+|R^+) = \frac{P(D^+|R^+)}{1-P(D^+|R^+)}= \frac{P(D^+|R^+)}{P(D^-|R^+)}.$$`
+
+.footnote[
+&lt;svg viewBox="0 0 640 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M640 51.2l-.3 12.2c-28.1.8-45 15.8-55.8 40.3-25 57.8-103.3 240-155.3 358.6H415l-81.9-193.1c-32.5 63.6-68.3 130-99.2 193.1-.3.3-15 0-15-.3C172 352.3 122.8 243.4 75.8 133.4 64.4 106.7 26.4 63.4.2 63.7c0-3.1-.3-10-.3-14.2h161.9v13.9c-19.2 1.1-52.8 13.3-43.3 34.2 21.9 49.7 103.6 240.3 125.6 288.6 15-29.7 57.8-109.2 75.3-142.8-13.9-28.3-58.6-133.9-72.8-160-9.7-17.8-36.1-19.4-55.8-19.7V49.8l142.5.3v13.1c-19.4.6-38.1 7.8-29.4 26.1 18.9 40 30.6 68.1 48.1 104.7 5.6-10.8 34.7-69.4 48.1-100.8 8.9-20.6-3.9-28.6-38.6-29.4.3-3.6 0-10.3.3-13.6 44.4-.3 111.1-.3 123.1-.6v13.6c-22.5.8-45.8 12.8-58.1 31.7l-59.2 122.8c6.4 16.1 63.3 142.8 69.2 156.7L559.2 91.8c-8.6-23.1-36.4-28.1-47.2-28.3V49.6l127.8 1.1.2.5z"&gt;&lt;/path&gt;&lt;/svg&gt; [Odds ratio](https://en.wikipedia.org/wiki/Odds_ratio)
+]
+	
+---
+
+## Equivalent definitions of odds ratio
+
+The ratio of the odds of a disease for `\(R^+\)` patients to the corresponding odds for `\(R^-\)` patients is the odds ratio, `\(OR:\)`
+`$$\text{Definition 1: }  \ \  OR = \frac{O(D^+|R^+)}{O(D^+|R^-)} =  \frac{P(D^+|R^+)}{P(D^-|R^+)} \Big/  \frac{P(D^+|R^-)}{P(D^-|R^-)}.$$`
+We can show that this ratio is identical to
+`$$\text{Definition 2: }  \ \  OR = \frac{O(R^+|D^+)}{O(R^+|D^-)} = \frac{P(R^+|D^+)}{P(R^-|D^+)} \Big/ \frac{P(R^+|D^-)}{P(R^-|D^-)}.$$`
+This means that `\(OR\)` can be found from both **prospective** and **retrospective** studies, unlike `\(RR\)`.
+
+---
+
+## Odds ratio -- invariance
+	
+Consider the table
+`$$\begin{array}{c|cc|c}
+&amp; D^+ &amp; D^- &amp; \text{Total} \\
+\hline 
+R^+ &amp; a  &amp; b  &amp; a+b \\
+R^- &amp; c  &amp; d  &amp; c+d \\
+\hline 
+&amp; a+c &amp; b+d  &amp; a+b+c+d \\
+\end{array}$$`
+`$$\text{Def. 1:}  \  OR = \frac{P(D^+|R^+)}{P(D^-|R^+)} \Big/  \frac{P(D^+|R^-)}{P(D^-|R^-)} = \left(\frac{\frac{a}{a+b}}{\frac{b}{a+b}}\right) \Big/ \left( \frac{\frac{c}{c+d}}{\frac{d}{c+d}} \right) = \frac{ad}{bc}$$`
+`$$\text{Def. 2:}  \  OR = \frac{P(R^+|D^+)}{P(R^-|D^+)} \Big/ \frac{P(R^+|D^-)}{P(R^-|D^-)} = \left(\frac{\frac{a}{a+c}}{\frac{c}{a+c}}\right) \Big/ \left( \frac{\frac{b}{b+d}}{\frac{d}{b+d}} \right) = \frac{ad}{bc}$$`
+
+Same no matter which definition is used.
+
+.footnote[
+&lt;svg viewBox="0 0 640 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M640 51.2l-.3 12.2c-28.1.8-45 15.8-55.8 40.3-25 57.8-103.3 240-155.3 358.6H415l-81.9-193.1c-32.5 63.6-68.3 130-99.2 193.1-.3.3-15 0-15-.3C172 352.3 122.8 243.4 75.8 133.4 64.4 106.7 26.4 63.4.2 63.7c0-3.1-.3-10-.3-14.2h161.9v13.9c-19.2 1.1-52.8 13.3-43.3 34.2 21.9 49.7 103.6 240.3 125.6 288.6 15-29.7 57.8-109.2 75.3-142.8-13.9-28.3-58.6-133.9-72.8-160-9.7-17.8-36.1-19.4-55.8-19.7V49.8l142.5.3v13.1c-19.4.6-38.1 7.8-29.4 26.1 18.9 40 30.6 68.1 48.1 104.7 5.6-10.8 34.7-69.4 48.1-100.8 8.9-20.6-3.9-28.6-38.6-29.4.3-3.6 0-10.3.3-13.6 44.4-.3 111.1-.3 123.1-.6v13.6c-22.5.8-45.8 12.8-58.1 31.7l-59.2 122.8c6.4 16.1 63.3 142.8 69.2 156.7L559.2 91.8c-8.6-23.1-36.4-28.1-47.2-28.3V49.6l127.8 1.1.2.5z"&gt;&lt;/path&gt;&lt;/svg&gt; [Odds ratio: Invertibility and invariance](https://en.wikipedia.org/wiki/Odds_ratio#Invertibility_and_invariance)
+]
+
+
+---
+
+## Odds ratio -- interpretation
+
+`$$OR = \frac{P(D^+|R^+)}{P(D^-|R^+)} \Big/  \frac{P(D^+|R^-)}{P(D^-|R^-)} = \frac{ad}{bc},$$`
+
+If `\(D\)` and `\(R\)` are independent then `\(P(D|R) = P(D)\)` and
+`$$OR = \frac{P(D^+|R^+)}{P(D^-|R^+)} \Big/  \frac{P(D^+|R^-)}{P(D^-|R^-)} 
+= \frac{P(D^+)}{P(D^-)} \Big/  \frac{P(D^+)}{P(D^-)} = 1.$$`
+
+It can be shown that `\(OR = 1\)` if and only if `\(D\)` and `\(R\)` are independent (there is no relationship between risk and disease).  
+
+Large odds ratios ( `\(OR&gt;1\)` ) implies increased risk of disease and small odd ratios ( `\(OR&lt;1\)` ) implies decreased risk of disease.
+
+---
+&lt;svg viewBox="0 0 576 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M112 32C50.1 32 0 82.1 0 144v224c0 61.9 50.1 112 112 112s112-50.1 112-112V144c0-61.9-50.1-112-112-112zm48 224H64V144c0-26.5 21.5-48 48-48s48 21.5 48 48v112zm139.7-29.7c-3.5-3.5-9.4-3.1-12.3.8-45.3 62.5-40.4 150.1 15.9 206.4 56.3 56.3 143.9 61.2 206.4 15.9 4-2.9 4.3-8.8.8-12.3L299.7 226.3zm229.8-19c-56.3-56.3-143.9-61.2-206.4-15.9-4 2.9-4.3 8.8-.8 12.3l210.8 210.8c3.5 3.5 9.4 3.1 12.3-.8 45.3-62.6 40.5-150.1-15.9-206.4z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Aspirin (odds ratio)
+
+|     | Myocardial infarction `\(D^+\)` | No myocardial infarction `\(D^-\)` |      |
+| --- | :-------------------------: | :----------------------------: | ---- |
+| **Aspirin** `\(R^+\)` | 104 | 10,933 | 11,037 | 
+| **Placebo** `\(R^-\)` | 189 | 10,845 | 11,034 |
+|               | 293 | 21,778 | 22,071 |
+
+The **odds ratio** is 
+`$$OR = \frac{104 \times 10,845}{189\times 10,933} = 0.55.$$`  
+The estimated odds of heart attack for patients taking the aspirin is `\(0.55\)` times the estimated odds for those taking the placebo.  
+
+Compare this with the relative risk of `\(0.55\)`. These are similar because the disease is rare.
+
+---
+class: segue
+
+# Standard errors and confidence intervals for odds ratios
+
+---
+
+## Standard errors and confidence intervals
+
+The **odds ratio** estimator, `\(OR\)`, has a skewed distribution on `\((0,\infty)\)`, with the neutral value being `\(1\)`. 
+
+The **log odds** estimator, `\(\log(OR)\)`, has a more symmetric distribution centred at `\(0\)` if there is no difference between the two groups.  
+
+Note: an odds ratio of `\(a\in(0,1)\)` is equivalent to a value of `\(a^{-1}\in(1,\infty)\)` just by relabeling the categories. The log transformation is such that `\(\log(a^{-1}) = -\log(a)\)`. 
+
+---
+
+## Standard errors and confidence intervals
+
+The asymptotic standard error for `\(\log(\widehat{OR})\)` is 
+`$$\sqrt{\frac{1}{a} + \frac{1}{b} + \frac{1}{c} + \frac{1}{d}}.$$`
+A large sample `\(95\%\)` confidence interval for log `\(\theta\)` is approximately
+`$$\log(\widehat{OR}) \pm 1.96 \times \sqrt{\frac{1}{a} + \frac{1}{b} + \frac{1}{c} + \frac{1}{d}}$$`
+from which we can approximate a confidence interval for the 
+odds-ratio,
+`$$\left( \exp\left( \log(\widehat{OR}) - 1.96 \sqrt{\frac{1}{a} + \frac{1}{b} + \frac{1}{c} + \frac{1}{d}} \right),
+ \exp\left( \log(\widehat{OR}) + 1.96\sqrt{\frac{1}{a} + \frac{1}{b} + \frac{1}{c} + \frac{1}{d}} \right)
+\right).$$`
+Note that these should only be applied if `\(a\)`, `\(b\)`, `\(c\)` and `\(d\)` are reasonably large (so that asymptotics hold).
+
+---
+&lt;svg viewBox="0 0 576 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M112 32C50.1 32 0 82.1 0 144v224c0 61.9 50.1 112 112 112s112-50.1 112-112V144c0-61.9-50.1-112-112-112zm48 224H64V144c0-26.5 21.5-48 48-48s48 21.5 48 48v112zm139.7-29.7c-3.5-3.5-9.4-3.1-12.3.8-45.3 62.5-40.4 150.1 15.9 206.4 56.3 56.3 143.9 61.2 206.4 15.9 4-2.9 4.3-8.8.8-12.3L299.7 226.3zm229.8-19c-56.3-56.3-143.9-61.2-206.4-15.9-4 2.9-4.3 8.8-.8 12.3l210.8 210.8c3.5 3.5 9.4 3.1 12.3-.8 45.3-62.6 40.5-150.1-15.9-206.4z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Aspirin
+
+.small[
+|     | Myocardial infarction `\(D^+\)` | No myocardial infarction `\(D^-\)` |      |
+| --- | :-------------------------: | :----------------------------: | ---- |
+| **Aspirin** `\(R^+\)` | 104 | 10,933 | 11,037 | 
+| **Placebo** `\(R^-\)` | 189 | 10,845 | 11,034 |
+|               | 293 | 21,778 | 22,071 |
+]
+
+`$$\widehat{OR} = \frac{104 \times 10,845}{189\times 10,933} = 0.55 \quad \text{ and } \quad \log(\widehat{OR}) = -0.6$$`
+`$$\text{SE}(\log(\widehat{OR})) = \sqrt{\frac{1}{104} + \frac{1}{189} + \frac{1}{10933} + \frac{1}{10845}} = 0.12.$$`
+
+A `\(95\%\)` confidence interval for the log odds-ratio is
+`$$-0.6 \pm 1.96 \times 0.12 \approx (-0.84,-0.36).$$`
+A `\(95\%\)` confidence interval for the odds-ratio is 
+`$$(e^{-0.84},e^{-0.36}) \approx (0.43,0.69).$$`
+
+---
+class: segue
+
+## Returning to our initial examples
+
+---
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M377 105L279.1 7c-4.5-4.5-10.6-7-17-7H256v128h128v-6.1c0-6.3-2.5-12.4-7-16.9zm-153 31V0H24C10.7 0 0 10.7 0 24v464c0 13.3 10.7 24 24 24h336c13.3 0 24-10.7 24-24V160H248c-13.2 0-24-10.8-24-24zm64 160v48c0 4.4-3.6 8-8 8h-56v56c0 4.4-3.6 8-8 8h-48c-4.4 0-8-3.6-8-8v-56h-56c-4.4 0-8-3.6-8-8v-48c0-4.4 3.6-8 8-8h56v-56c0-4.4 3.6-8 8-8h48c4.4 0 8 3.6 8 8v56h56c4.4 0 8 3.6 8 8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Hodgkin's disease
+
+Vianna, Greenwald, and Davies (1971) collected data on a group of 101 patients suffering from Hodgkin's disease, and a comparable control group of 107 non-Hodgkin's patients. They were interested in the effect of tonsil tissue as a barrier to Hodgkin's disease.
+
+|       | `\(\color{blue}{D^+}\)` .blue[Hodgkin's]  | `\(\color{blue}{D^-}\)` .blue[Non-Hodgkin's]  | Total     |
+|-------|:-------:|:-------:|-----------:|
+| `\(\color{red}{R^+}\)` .red[.bold[Tonsillectomy]]  | 67    | 43    | .bold[110]  |
+| `\(\color{red}{R^-}\)` .red[.bold[No tonsillectomy]] | 34    | 64   | .bold[98] |
+| **Total** | .bold[101] | .bold[107]   | **208**       |
+
+&lt;br&gt;
+
+.blockquote[
+&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 448c-110.532 0-200-89.431-200-200 0-110.495 89.472-200 200-200 110.491 0 200 89.471 200 200 0 110.53-89.431 200-200 200zm107.244-255.2c0 67.052-72.421 68.084-72.421 92.863V300c0 6.627-5.373 12-12 12h-45.647c-6.627 0-12-5.373-12-12v-8.659c0-35.745 27.1-50.034 47.579-61.516 17.561-9.845 28.324-16.541 28.324-29.579 0-17.246-21.999-28.693-39.784-28.693-23.189 0-33.894 10.977-48.942 29.969-4.057 5.12-11.46 6.071-16.666 2.124l-27.824-21.098c-5.107-3.872-6.251-11.066-2.644-16.363C184.846 131.491 214.94 112 261.794 112c49.071 0 101.45 38.304 101.45 88.8zM298 368c0 23.159-18.841 42-42 42s-42-18.841-42-42 18.841-42 42-42 42 18.841 42 42z"&gt;&lt;/path&gt;&lt;/svg&gt;
+Retrospective or prospective?  Why?  Can we calculate a relative risk?
+]
+
+
+&lt;!--
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M377 105L279.1 7c-4.5-4.5-10.6-7-17-7H256v128h128v-6.1c0-6.3-2.5-12.4-7-16.9zm-153 31V0H24C10.7 0 0 10.7 0 24v464c0 13.3 10.7 24 24 24h336c13.3 0 24-10.7 24-24V160H248c-13.2 0-24-10.8-24-24zm64 160v48c0 4.4-3.6 8-8 8h-56v56c0 4.4-3.6 8-8 8h-48c-4.4 0-8-3.6-8-8v-56h-56c-4.4 0-8-3.6-8-8v-48c0-4.4 3.6-8 8-8h56v-56c0-4.4 3.6-8 8-8h48c4.4 0 8 3.6 8 8v56h56c4.4 0 8 3.6 8 8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+## Example: Hodgkin's disease 
+
+
+The data are from a case-control (retrospective) study.  
+
+We would like to know if tonsillectomy is related to Hodgkin's disease. 
+
+- Pearson's `\(\chi^2\)` statistic is `\(t = 14.3\)` and the p-value is `\(P(\chi_1^2 &gt; 14.3) = 0.00016\)`. 
+
+- So we reject the null hypothesis of independence and conclude that tonsillectomy is associated with Hodgkin's disease.  
+
+.footnote[
+Note: This does not mean tonsillectomy causes Hodgkin's disease. Suppose, for example, that doctors gave tonsillectomies to the most seriously ill patients. The the association between tonsillectomies and Hodgkin's disease may be due to the fact that those with tonsillectomies were the most ill patients and hence the more likely to have a serious disease.  
+]
+--&gt;
+
+---
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M377 105L279.1 7c-4.5-4.5-10.6-7-17-7H256v128h128v-6.1c0-6.3-2.5-12.4-7-16.9zm-153 31V0H24C10.7 0 0 10.7 0 24v464c0 13.3 10.7 24 24 24h336c13.3 0 24-10.7 24-24V160H248c-13.2 0-24-10.8-24-24zm64 160v48c0 4.4-3.6 8-8 8h-56v56c0 4.4-3.6 8-8 8h-48c-4.4 0-8-3.6-8-8v-56h-56c-4.4 0-8-3.6-8-8v-48c0-4.4 3.6-8 8-8h56v-56c0-4.4 3.6-8 8-8h48c4.4 0 8 3.6 8 8v56h56c4.4 0 8 3.6 8 8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Hodgkin's disease 
+
+The estimated odds-ratio and log odds-ratio are
+
+`$$\widehat{OR} = \frac{67\times 64}{43 \times 34} = 2.93 \quad \text{and} \quad \log(\widehat{OR}) = \log(2.93) = 1.07$$`
+
+Hence, ~~tonsillectomy patients are three times as likely to have Hodgkin's disease~~ the odds of a tonsillectomy patient having Hodgkin's disease are three times the odds of a non-tonsillectomy patient having Hodgkin's. The standard error of the log odds-ratio is
+`$$\sqrt{\frac{1}{67} + \frac{1}{43} + \frac{1}{34} + \frac{1}{64}} = 0.29.$$`
+	
+A `\(95\%\)` confidence interval for the log odds-ratio is
+`$$1.07 \pm 1.96 \times 0.29 \approx (0.51,1.63)$$`
+and a `\(95\%\)` confidence interval for the  odds-ratio is
+`\((e^{0.51},e^{1.63}) \approx (1.66,5.10)\)`.	
+
+
+.blockquote[
+&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 448c-110.532 0-200-89.431-200-200 0-110.495 89.472-200 200-200 110.491 0 200 89.471 200 200 0 110.53-89.431 200-200 200zm107.244-255.2c0 67.052-72.421 68.084-72.421 92.863V300c0 6.627-5.373 12-12 12h-45.647c-6.627 0-12-5.373-12-12v-8.659c0-35.745 27.1-50.034 47.579-61.516 17.561-9.845 28.324-16.541 28.324-29.579 0-17.246-21.999-28.693-39.784-28.693-23.189 0-33.894 10.977-48.942 29.969-4.057 5.12-11.46 6.071-16.666 2.124l-27.824-21.098c-5.107-3.872-6.251-11.066-2.644-16.363C184.846 131.491 214.94 112 261.794 112c49.071 0 101.45 38.304 101.45 88.8zM298 368c0 23.159-18.841 42-42 42s-42-18.841-42-42 18.841-42 42-42 42 18.841 42 42z"&gt;&lt;/path&gt;&lt;/svg&gt;
+What can we conclude from the confidence interval?  Does having a tonsillectomy increase your risk of developing Hodgkin's disease?
+]
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M496 256c8.8 0 16-7.2 16-16s-7.2-16-16-16-16 7.2-16 16 7.2 16 16 16zm-176-80c48.5 0 88-39.5 88-88S368.5 0 320 0s-88 39.5-88 88 39.5 88 88 88zM59.8 364c10.2 15.3 29.3 17.8 42.9 9.8 16.2-9.6 56.2-31.7 105.3-48.6V416h224v-90.7c49.1 16.8 89.1 39 105.3 48.6 13.6 8 32.7 5.3 42.9-9.8l17.8-26.7c8.8-13.2 7.6-34.6-10-45.1-11.9-7.1-29.7-17-51.1-27.4-28.1 46.1-99.4 17.8-87.7-35.1C409.3 217.2 365.1 208 320 208c-57 0-112.9 14.5-160 32.2-.2 40.2-47.6 63.3-79.2 36-11.2 6-21.3 11.6-28.7 16-17.6 10.5-18.8 31.8-10 45.1L59.8 364zM368 344c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm-96-96c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm-160 8c8.8 0 16-7.2 16-16s-7.2-16-16-16-16 7.2-16 16 7.2 16 16 16zm512 192H16c-8.8 0-16 7.2-16 16v32c0 8.8 7.2 16 16 16h608c8.8 0 16-7.2 16-16v-32c0-8.8-7.2-16-16-16z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Asthma 
+
+A large group of infants with mild respiratory problems (but asthma free) is split into those with a family history of hay fever, `\(\color{red}{R^+}\)`, and those without, `\(\color{red}{R^-}\)`.  Random samples of 85 from the first group and 405 from the second group are selected for special study. Of these, the number diagnosed with asthma by the age of 12, `\(\color{blue}{D^+}\)`, are 25 and 70 respectively.
+
+|       | `\(\color{blue}{D^+}\)` .blue[Asthma &lt;br&gt;by age 12]  | `\(\color{blue}{D^-}\)` .blue[No asthma &lt;br&gt;by age 12]  | Total     |
+|-------|:-------:|:-------:|-----------:|
+| `\(\color{red}{R^+}\)` .red[.bold[Family history of hay fever]]  | 25    | 60    | .red[.bold[85]]  |
+| `\(\color{red}{R^-}\)` .red[.bold[No family history of hay fever]] | 70    | 335   | .red[.bold[405]] |
+| **Total** | **95**    | **395**   | **490**       |
+
+&lt;br&gt;
+
+.blockquote[
+&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 448c-110.532 0-200-89.431-200-200 0-110.495 89.472-200 200-200 110.491 0 200 89.471 200 200 0 110.53-89.431 200-200 200zm107.244-255.2c0 67.052-72.421 68.084-72.421 92.863V300c0 6.627-5.373 12-12 12h-45.647c-6.627 0-12-5.373-12-12v-8.659c0-35.745 27.1-50.034 47.579-61.516 17.561-9.845 28.324-16.541 28.324-29.579 0-17.246-21.999-28.693-39.784-28.693-23.189 0-33.894 10.977-48.942 29.969-4.057 5.12-11.46 6.071-16.666 2.124l-27.824-21.098c-5.107-3.872-6.251-11.066-2.644-16.363C184.846 131.491 214.94 112 261.794 112c49.071 0 101.45 38.304 101.45 88.8zM298 368c0 23.159-18.841 42-42 42s-42-18.841-42-42 18.841-42 42-42 42 18.841 42 42z"&gt;&lt;/path&gt;&lt;/svg&gt;
+Retrospective or prospective?  Why?  Can we calculate a relative risk?
+]
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M496 256c8.8 0 16-7.2 16-16s-7.2-16-16-16-16 7.2-16 16 7.2 16 16 16zm-176-80c48.5 0 88-39.5 88-88S368.5 0 320 0s-88 39.5-88 88 39.5 88 88 88zM59.8 364c10.2 15.3 29.3 17.8 42.9 9.8 16.2-9.6 56.2-31.7 105.3-48.6V416h224v-90.7c49.1 16.8 89.1 39 105.3 48.6 13.6 8 32.7 5.3 42.9-9.8l17.8-26.7c8.8-13.2 7.6-34.6-10-45.1-11.9-7.1-29.7-17-51.1-27.4-28.1 46.1-99.4 17.8-87.7-35.1C409.3 217.2 365.1 208 320 208c-57 0-112.9 14.5-160 32.2-.2 40.2-47.6 63.3-79.2 36-11.2 6-21.3 11.6-28.7 16-17.6 10.5-18.8 31.8-10 45.1L59.8 364zM368 344c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm-96-96c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm-160 8c8.8 0 16-7.2 16-16s-7.2-16-16-16-16 7.2-16 16 7.2 16 16 16zm512 192H16c-8.8 0-16 7.2-16 16v32c0 8.8 7.2 16 16 16h608c8.8 0 16-7.2 16-16v-32c0-8.8-7.2-16-16-16z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Asthma 
+
+The odds ratio, log odds ratio and the standard error of the log odds ratio are,
+`$$\widehat{OR} = \frac{25 \times 335}{60\times 70} = 1.99 \quad \text{and} \quad \log(\widehat{OR}) = 0.69$$`
+with
+`$$\text{SE}(\log(\widehat{OR})) = \sqrt{\frac{1}{25} + \frac{1}{60} + \frac{1}{70} + \frac{1}{335}} = 0.27.$$`
+A `\(95\%\)` confidence interval for the log odds-ratio is
+`$$0.69 \pm 1.96 \times 0.27 \approx (0.16,1.22)$$`
+and a `\(95\%\)` confidence interval for the  odds-ratio is
+`\((e^{0.16},e^{1.22}) \approx (1.17,3.39)\)`.	
+
+.blockquote[
+&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 448c-110.532 0-200-89.431-200-200 0-110.495 89.472-200 200-200 110.491 0 200 89.471 200 200 0 110.53-89.431 200-200 200zm107.244-255.2c0 67.052-72.421 68.084-72.421 92.863V300c0 6.627-5.373 12-12 12h-45.647c-6.627 0-12-5.373-12-12v-8.659c0-35.745 27.1-50.034 47.579-61.516 17.561-9.845 28.324-16.541 28.324-29.579 0-17.246-21.999-28.693-39.784-28.693-23.189 0-33.894 10.977-48.942 29.969-4.057 5.12-11.46 6.071-16.666 2.124l-27.824-21.098c-5.107-3.872-6.251-11.066-2.644-16.363C184.846 131.491 214.94 112 261.794 112c49.071 0 101.45 38.304 101.45 88.8zM298 368c0 23.159-18.841 42-42 42s-42-18.841-42-42 18.841-42 42-42 42 18.841 42 42z"&gt;&lt;/path&gt;&lt;/svg&gt;
+What can we conclude from the confidence interval? Does a family history of hay fever increase the risk of developing asthma?
+]
+
+&lt;!--
+
+## Summary
+
+- **Relative risk** is the ratio of the probability of *"developing the disease if you have the risk factor"* relative to the probability of *"developing the disease if you do not have the risk factor"*.
+
+- **Odds ratio** is the probability of success relative to the probability of failure. The probability of *"having the risk factor and the disease or not having the risk factor and no disease"* relative to *"having the risk factor and no disease or not having the risk factor and having disease"*
+--&gt;
+
+---
+
+## References
+
+Additional reading material for this lecture can be found in Agresti (2007) section 2.2 (starting page 25). I've added a link to this ebook in the Reading List tab on Canvas.
+
+.small[
+
+Agresti, A. (2007). _An introduction to categorical
+data analysis_. 2nd ed.. Wiley series in probability
+and mathematical statistics. Hoboken, NJ:
+Wiley-Interscience. ISBN: 9780471226185.
+
+Steering Committee of the Physicians' Health Study
+Research Group (1988). "Preliminary Report: Findings
+from the Aspirin Component of the Ongoing Physicians'
+Health Study". In: _New England Journal of Medicine_
+318.4, pp. 262-264. DOI:
+[10.1056/NEJM198801283180431](https://doi.org/10.1056%2FNEJM198801283180431).
+
+Vianna, N. J., P. Greenwald, and J. N. P. Davies
+(1971). "Tonsillectomy and Hodgkin's disease: the
+lymphoid tissue barrier". In: _The Lancet_ 297.7696,
+pp. 431-432. ISSN: 0140-6736. DOI:
+[10.1016/S0140-6736(71)92416-0](https://doi.org/10.1016%2FS0140-6736%2871%2992416-0).
+
+]
+
+See also:
+
+- Principles of Epidemiology in Public Health Practice, Third Edition. [An Introduction to Applied Epidemiology and Biostatistics.](https://www.cdc.gov/csels/dsepd/ss1978/SS1978.pdf) Lesson 3: Measures of Risk; Section 5: Measures of Association [&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"&gt;&lt;/path&gt;&lt;/svg&gt;](https://www.cdc.gov/csels/dsepd/ss1978/lesson3/section5.html)
+- Cochrane Handbook for Systematic Reviews of Interventions, [Version 6.2, 2021](https://training.cochrane.org/handbook/current) Section 6.4 Dichotomous outcome data [&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"&gt;&lt;/path&gt;&lt;/svg&gt;](https://training.cochrane.org/handbook/current/chapter-06#section-6-4)
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="assets/remark-zoom.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>DATA2002: Lecture 32</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Garth Tarr" />
+    <script src="lec32_files/header-attrs-2.11/header-attrs.js"></script>
+    <link href="lec32_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <script src="lec32_files/kePrint-0.0.1/kePrint.js"></script>
+    <link href="lec32_files/lightable-0.0.1/lightable.css" rel="stylesheet" />
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } },
+      "HTML-CSS": {
+        styles: {
+          ".MathJax a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+          ".MathJax_Preview a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+        }
+      }
+      });
+    </script>
+    <link rel="stylesheet" href="assets/sydney-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="assets/sydney.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# DATA2002: Lecture 32
+## Dimension reduction
+### Garth Tarr
+
+---
+
+class: segue
+
+
+
+
+
+.large[
+Principal component analysis
+
+Eigenfaces
+
+Dimension reduction + clustering
+]
+
+
+&lt;!-- Remember, our data can be denoted as: --&gt;
+&lt;!-- `\(\mathcal{D} = \{(x_i, y_i)\}_{i = 1}^N, ~~~ \mbox{where}~ x_i = (x_{i1}, \dots, x_{ip})^{T}\)` --&gt;
+&lt;!-- then dimension of the data is *p*, the number of variables. --&gt;
+
+---
+class: segue
+background-image: url(https://upload.wikimedia.org/wikipedia/commons/9/98/Andromeda_Galaxy_%28with_h-alpha%29.jpg)
+background-position: 50% 50% class: center, bottom, inverse
+
+.Large[Space is big]
+
+---
+
+## Cubes and spheres
+
+.pull-left-2[
+Space expands exponentially with dimension:
+
+&lt;img src="imgs/hypercube.png"  /&gt;
+
+.pull-down[.Large[.red[.bold[
+[The curse of dimensionality](https://en.wikipedia.org/wiki/Curse_of_dimensionality) 🎃👻
+]]]]
+]
+.pull-right-1[
+As dimension increases the .red[volume of a sphere] of same radius as cube side length becomes much .red[smaller than the volume of the cube]:
+
+&lt;img src="imgs/cube_sphere.png" /&gt;
+]
+
+---
+
+## Sub-spaces
+
+.pull-left[
+- Data will often be confined to a region of the space having lower .red[intrinsic dimensionality]. 
+
+- The data lives in a low-dimensional subspace.
+
+- The goal is to .red[reduce the dimensionality], to the subspace containing the data.
+]
+.pull-right[
+&lt;img src="imgs/subspace_clustering.png" /&gt;
+
+Illustration of clustering in subspaces. Separation of clusters in appropriate selection of dimension subspaces can be much easier than that in the original high dimensional space. 
+
+.small[Source:  Yuan, Ren, Wang, et al. (2013)]
+]
+
+---
+
+## PCA
+
+- Principal component analysis (PCA) produces a low-dimensional representation of a dataset. It finds a sequence of linear combinations of the variables that have .red[maximal variance], and are .red[mutually uncorrelated]. 
+
+- It is an .bold[.blue[unsupervised learning]] method. 
+
+
+### Why?
+
+- We may have too many predictors for a .bold[.red[regression]]. Instead, we can use the first few principal components. [PCA regression.](https://en.wikipedia.org/wiki/Principal_component_regression)
+- .bold[.red[Understanding relationships]] between variables - similar to a correlation matrix.
+- .bold[.red[Data visualisation]]: we can plot a small number of variables more easily than a large number of variables.
+
+---
+
+## PCA: Definition
+
+### First principal component
+
+The first principal component of a set of variables `\(x_1, x_2, \dots, x_p\)` is the linear combination
+`$$z_1 = \phi_{11}x_1 + \phi_{21}x_2 + \dots + \phi_{p1}x_p$$`
+that has the largest variance such that  
+`$$\displaystyle\sum_{j=1}^p \phi^2_{j1} = 1$$`
+
+The elements `\(\phi_{11},\dots,\phi_{p1}\)` are the .red[loadings] of the first principal component.
+
+
+---
+
+## Example
+
+
+
+.pull-left-2[
+&lt;a href="http://www-bcf.usc.edu/~gareth/ISL/Chapter6/6.14.pdf" target="_BLANK"&gt; &lt;img src="imgs/6.14.png" style="width: 100%; align: center"/&gt; &lt;/a&gt;
+]
+.pull-right-1[
+.green[First PC]; .blue[second PC]
+
+.small[Source:  James, Witten, Hastie, et al. (2017; Figure 6.14)]
+]
+
+---
+
+## PCA: Geometry
+
+- The loading vector `\(\boldsymbol{\phi}_1 = [\phi_{11},\dots,\phi_{p1}]'\)` defines direction in feature space along which data vary most.
+
+- If we .bold[.blue[project]] the `\(n\)` data points `\(\boldsymbol{x}_1,\dots,\boldsymbol{x}_n\)` onto this direction, the projected values are the principal component scores `\(\boldsymbol{z}_1 = [z_{11},\dots,z_{n1}]'\)`.
+
+- The second principal component is the linear combination `\(z_{i2} = \phi_{12}x_{i1} + \phi_{22}x_{i2} + \dots + \phi_{p2}x_{ip}\)` that has maximal variance among all linear combinations that are .blue[*uncorrelated*] with `\(\boldsymbol{z}_1\)`.
+
+- Equivalent to constraining `\(\boldsymbol{\phi}_2\)` to be orthogonal (perpendicular) to `\(\boldsymbol{\phi}_1\)`. And so on.
+
+- There are at most `\(\min(n - 1, p)\)` principal components.
+
+
+
+---
+
+&lt;img src="imgs/6.15.png"&gt;
+
+If you think of the first few PCs like a linear model fit, and the others as the error, it is like regression, except that errors are orthogonal to model. 
+
+.footnote[Image source:  James, Witten, Hastie, et al. (2017; Figure 6.15)]
+
+
+---
+
+## PCA explained
+
+There's a super nice answer on [CrossValidated](https://stats.stackexchange.com/questions/2691/making-sense-of-principal-component-analysis-eigenvectors-eigenvalues) that explains PCA in language suitable for your family.
+
+&lt;img src = "imgs/pca_coordinate.gif"&gt;
+
+PCA projects data onto a new **coordinate system** where the principal component vectors are **orthogonal** (independent) to each other.  The first PC tries to account for as much variation as possible in the data.
+
+???
+
+## Computation
+
+Suppose we have a `\(n\times p\)` data set `\(\boldsymbol{X} = [x_{ij}]\)`. 
+
+- Centre each of the variables to have mean zero (i.e., the column means of `\(\boldsymbol{X}\)` are zero).
+-  `\(z_{i1} = \phi_{11}x_{i1} + \phi_{21} x_{i2} + \dots + \phi_{p1} x_{ip}\)`
+- Sample variance of `\(z_{i1}\)` is `\(\displaystyle\frac1n\sum_{i=1}^n z_{i1}^2\)`.
+
+
+`$$\mathop{\textrm{maximize}}_{\phi_{11},\dots,\phi_{p1}} \frac{1}{n}\sum_{i=1}^n 
+\left(\sum_{j=1}^p \phi_{j1}x_{ij}\right)^{\!\!\!2} \quad \textrm{ subject to } \quad
+\sum_{j=1}^p \phi^2_{j1} = 1$$`
+
+
+## Computation
+
+1. Compute the covariance matrix (after scaling the columns of `\(\boldsymbol{X}\)`)
+`$$\boldsymbol{C} = \boldsymbol{X}'\boldsymbol{X}$$`
+
+2. Find eigenvalues and eigenvectors:
+`$$\boldsymbol{C}=\boldsymbol{V}\boldsymbol{D}\boldsymbol{V}'$$` 
+where columns of `\(\boldsymbol{V}\)` are orthonormal (i.e., `\(\boldsymbol{V}'\boldsymbol{V}=\boldsymbol{I}\)`)
+
+3. The principal components are `\(\boldsymbol{\Phi} = \boldsymbol{V}\)` and the principal component scores `\(\boldsymbol{Z} = \boldsymbol{X}\boldsymbol{\Phi}\)`.
+
+
+## Computation
+
+Singular Value Decomposition
+`$$\boldsymbol{X} = \boldsymbol{U}\boldsymbol{\Lambda} \boldsymbol{V}'$$`
+
+
+- `\(\boldsymbol{X}\)` is an `\(n\times p\)` matrix
+- `\(\boldsymbol{U}\)` is `\(n \times r\)` matrix with orthonormal columns ( `\(\boldsymbol{U}'\boldsymbol{U}=\boldsymbol{I}\)` )
+- `\(\boldsymbol{\Lambda}\)` is `\(r \times r\)` diagonal matrix with non-negative elements.
+- `\(\boldsymbol{V}\)` is `\(p \times r\)` matrix with orthonormal columns ( `\(\boldsymbol{V}'\boldsymbol{V}=\boldsymbol{I}\)` ).
+
+It is always possible to uniquely decompose a matrix in this way.
+
+
+## SVD: Computation
+
+
+1. Compute SVD: `\(\boldsymbol{X} = \boldsymbol{U}\boldsymbol{\Lambda}\boldsymbol{V}'\)`.
+
+2. Compute PCs: `\(\boldsymbol{\Phi} = \boldsymbol{V}\)`. `\(\boldsymbol{Z} = \boldsymbol{X}\boldsymbol{\Phi}\)`.
+
+Relationship with covariance:
+
+`$$\boldsymbol{C} = \boldsymbol{X}'\boldsymbol{X}
+= \boldsymbol{V}\boldsymbol{\Lambda}\boldsymbol{U}' \boldsymbol{U}\boldsymbol{\Lambda}\boldsymbol{V}'
+= \boldsymbol{V}\boldsymbol{\Lambda}^2\boldsymbol{V}'
+= \boldsymbol{V}\boldsymbol{D}\boldsymbol{V}'$$`
+
+
+- Eigenvalues of `\(\boldsymbol{C}\)` are squares of singular values of `\(\boldsymbol{X}\)`.
+- Eigenvectors of `\(\boldsymbol{C}\)` are right singular vectors of `\(\boldsymbol{X}\)`.
+- The principal components (directions) `\(\boldsymbol{\phi}_1,\boldsymbol{\phi}_2,\boldsymbol{\phi}_3,\dots\)` are the
+right singular vectors of the matrix `\(\boldsymbol{X}\)`.
+
+.blockquote[
+-   SVD decomposes the data matrix directly 
+-   PCA is an eigenvalue decomposition of a data covariance (or correlation) matrix
+]
+
+
+---
+
+## Total variance
+
+.red[Total variance] in data (assuming variables centered at 0):
+
+`$$\textrm{TV} = \sum_{j=1}^p \operatorname{Var}(x_j) = \sum_{j=1}^p \frac{1}{n}\sum_{i=1}^n x_{ij}^2$$`
+
+If variables are standardised, TV=number of variables!
+
+.red[Variance explained] by `\(m\)`th principal component:
+
+`$$V_m = \operatorname{Var}(z_m) = \frac{1}{n}\sum_{i=1}^n z_{im}^2$$`
+`$$\textrm{TV} = \sum_{m=1}^M V_m \textrm{  where }M=\min(n-1,p).$$`
+
+---
+
+## Choosing the number of PCs
+
+.pull-left-2[
+
+- Proportion of variance explained:
+`$$\textrm{PVE}_m = \frac{V_m}{\textrm{TV}}$$`
+
+- Choosing the number of PCs that adequately summarises the variation in `\(\boldsymbol{X}\)`, is achieved by examining the cumulative proportion of variance explained. 
+
+- Cumulative proportion of variance explained:
+`$$\textrm{CPVE}_k = \sum_{m=1}^k\frac{V_m}{\textrm{TV}}$$`
+and also by a scree plot. 
+
+
+]
+
+.pull-right-1[
+
+&lt;img src="imgs/yamnuska.jpg" /&gt;
+
+]
+
+
+.footnote[
+Image: Scree slope at the bottom of Yamnuska, Alberta, Canada. 
+Source: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Yamnuska_bottom_cliff.jpg)
+]
+
+---
+
+## Choosing the number of PCs: scree plot
+
+&lt;img src="lec32_files/figure-html/scree1-1.png" width="864" /&gt;
+
+---
+
+## Choosing the number of PCs: scree plot
+
+&lt;img src="lec32_files/figure-html/scree2-1.png" width="864" /&gt;
+
+---
+&lt;svg viewBox="0 0 416 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M272 96c26.51 0 48-21.49 48-48S298.51 0 272 0s-48 21.49-48 48 21.49 48 48 48zM113.69 317.47l-14.8 34.52H32c-17.67 0-32 14.33-32 32s14.33 32 32 32h77.45c19.25 0 36.58-11.44 44.11-29.09l8.79-20.52-10.67-6.3c-17.32-10.23-30.06-25.37-37.99-42.61zM384 223.99h-44.03l-26.06-53.25c-12.5-25.55-35.45-44.23-61.78-50.94l-71.08-21.14c-28.3-6.8-57.77-.55-80.84 17.14l-39.67 30.41c-14.03 10.75-16.69 30.83-5.92 44.86s30.84 16.66 44.86 5.92l39.69-30.41c7.67-5.89 17.44-8 25.27-6.14l14.7 4.37-37.46 87.39c-12.62 29.48-1.31 64.01 26.3 80.31l84.98 50.17-27.47 87.73c-5.28 16.86 4.11 34.81 20.97 40.09 3.19 1 6.41 1.48 9.58 1.48 13.61 0 26.23-8.77 30.52-22.45l31.64-101.06c5.91-20.77-2.89-43.08-21.64-54.39l-61.24-36.14 31.31-78.28 20.27 41.43c8 16.34 24.92 26.89 43.11 26.89H384c17.67 0 32-14.33 32-32s-14.33-31.99-32-31.99z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## National track records
+
+Example: the data on national track records for women (as at 1984). 
+
+
+```r
+track = readr::read_csv("data/womens_track.csv")
+dplyr::glimpse(track)
+```
+
+```
+## Rows: 55
+## Columns: 8
+## $ m100     &lt;dbl&gt; 11.61, 11.20, 11.43, 11.41, 11.46, 11.31,…
+## $ m200     &lt;dbl&gt; 22.94, 22.35, 23.09, 23.04, 23.05, 23.17,…
+## $ m400     &lt;dbl&gt; 54.50, 51.08, 50.62, 52.00, 53.30, 52.80,…
+## $ m800     &lt;dbl&gt; 2.15, 1.98, 1.99, 2.00, 2.16, 2.10, 2.18,…
+## $ m1500    &lt;dbl&gt; 4.43, 4.13, 4.22, 4.14, 4.58, 4.49, 4.45,…
+## $ m3000    &lt;dbl&gt; 9.79, 9.08, 9.34, 8.88, 9.81, 9.77, 9.51,…
+## $ marathon &lt;dbl&gt; 178.52, 152.37, 159.37, 157.85, 169.98, 1…
+## $ country  &lt;chr&gt; "argentin", "australi", "austria", "belgi…
+```
+
+.footnote[
+*Source*: Yuan, Ren, Wang, et al. (2013)
+]
+
+---
+&lt;svg viewBox="0 0 416 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M272 96c26.51 0 48-21.49 48-48S298.51 0 272 0s-48 21.49-48 48 21.49 48 48 48zM113.69 317.47l-14.8 34.52H32c-17.67 0-32 14.33-32 32s14.33 32 32 32h77.45c19.25 0 36.58-11.44 44.11-29.09l8.79-20.52-10.67-6.3c-17.32-10.23-30.06-25.37-37.99-42.61zM384 223.99h-44.03l-26.06-53.25c-12.5-25.55-35.45-44.23-61.78-50.94l-71.08-21.14c-28.3-6.8-57.77-.55-80.84 17.14l-39.67 30.41c-14.03 10.75-16.69 30.83-5.92 44.86s30.84 16.66 44.86 5.92l39.69-30.41c7.67-5.89 17.44-8 25.27-6.14l14.7 4.37-37.46 87.39c-12.62 29.48-1.31 64.01 26.3 80.31l84.98 50.17-27.47 87.73c-5.28 16.86 4.11 34.81 20.97 40.09 3.19 1 6.41 1.48 9.58 1.48 13.61 0 26.23-8.77 30.52-22.45l31.64-101.06c5.91-20.77-2.89-43.08-21.64-54.39l-61.24-36.14 31.31-78.28 20.27 41.43c8 16.34 24.92 26.89 43.11 26.89H384c17.67 0 32-14.33 32-32s-14.33-31.99-32-31.99z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+GGally::ggpairs(track[,1:7]) + theme_bw(base_size = 24) + theme(axis.text = element_blank())
+```
+
+&lt;img src="lec32_files/figure-html/unnamed-chunk-3-1.png" width="1008" /&gt;
+
+---
+&lt;svg viewBox="0 0 416 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M272 96c26.51 0 48-21.49 48-48S298.51 0 272 0s-48 21.49-48 48 21.49 48 48 48zM113.69 317.47l-14.8 34.52H32c-17.67 0-32 14.33-32 32s14.33 32 32 32h77.45c19.25 0 36.58-11.44 44.11-29.09l8.79-20.52-10.67-6.3c-17.32-10.23-30.06-25.37-37.99-42.61zM384 223.99h-44.03l-26.06-53.25c-12.5-25.55-35.45-44.23-61.78-50.94l-71.08-21.14c-28.3-6.8-57.77-.55-80.84 17.14l-39.67 30.41c-14.03 10.75-16.69 30.83-5.92 44.86s30.84 16.66 44.86 5.92l39.69-30.41c7.67-5.89 17.44-8 25.27-6.14l14.7 4.37-37.46 87.39c-12.62 29.48-1.31 64.01 26.3 80.31l84.98 50.17-27.47 87.73c-5.28 16.86 4.11 34.81 20.97 40.09 3.19 1 6.41 1.48 9.58 1.48 13.61 0 26.23-8.77 30.52-22.45l31.64-101.06c5.91-20.77-2.89-43.08-21.64-54.39l-61.24-36.14 31.31-78.28 20.27 41.43c8 16.34 24.92 26.89 43.11 26.89H384c17.67 0 32-14.33 32-32s-14.33-31.99-32-31.99z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Compute
+
+
+```r
+track_pca = prcomp(track[,1:7], center = TRUE, scale = TRUE)
+track_pca
+```
+
+```
+## Standard deviations (1, .., p=7):
+## [1] 2.41 0.81 0.55 0.35 0.23 0.20 0.15
+## 
+## Rotation (n x k) = (7 x 7):
+##           PC1   PC2    PC3    PC4    PC5     PC6    PC7
+## m100     0.37  0.49 -0.286  0.319  0.231  0.6198  0.052
+## m200     0.37  0.54 -0.230 -0.083  0.041 -0.7108 -0.109
+## m400     0.38  0.25  0.515 -0.347 -0.572  0.1909  0.208
+## m800     0.38 -0.16  0.585 -0.042  0.620 -0.0191 -0.315
+## m1500    0.39 -0.36  0.013  0.430  0.030 -0.2312  0.693
+## m3000    0.39 -0.35 -0.153  0.363 -0.463  0.0093 -0.598
+## marathon 0.37 -0.37 -0.484 -0.672  0.131  0.1423  0.070
+```
+
+---
+&lt;svg viewBox="0 0 416 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M272 96c26.51 0 48-21.49 48-48S298.51 0 272 0s-48 21.49-48 48 21.49 48 48 48zM113.69 317.47l-14.8 34.52H32c-17.67 0-32 14.33-32 32s14.33 32 32 32h77.45c19.25 0 36.58-11.44 44.11-29.09l8.79-20.52-10.67-6.3c-17.32-10.23-30.06-25.37-37.99-42.61zM384 223.99h-44.03l-26.06-53.25c-12.5-25.55-35.45-44.23-61.78-50.94l-71.08-21.14c-28.3-6.8-57.77-.55-80.84 17.14l-39.67 30.41c-14.03 10.75-16.69 30.83-5.92 44.86s30.84 16.66 44.86 5.92l39.69-30.41c7.67-5.89 17.44-8 25.27-6.14l14.7 4.37-37.46 87.39c-12.62 29.48-1.31 64.01 26.3 80.31l84.98 50.17-27.47 87.73c-5.28 16.86 4.11 34.81 20.97 40.09 3.19 1 6.41 1.48 9.58 1.48 13.61 0 26.23-8.77 30.52-22.45l31.64-101.06c5.91-20.77-2.89-43.08-21.64-54.39l-61.24-36.14 31.31-78.28 20.27 41.43c8 16.34 24.92 26.89 43.11 26.89H384c17.67 0 32-14.33 32-32s-14.33-31.99-32-31.99z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Assess
+
+
+```r
+summary(track_pca)
+```
+
+```
+## Importance of components:
+##                          PC1    PC2    PC3    PC4     PC5     PC6     PC7
+## Standard deviation     2.409 0.8085 0.5476 0.3542 0.23198 0.19761 0.14981
+## Proportion of Variance 0.829 0.0934 0.0428 0.0179 0.00769 0.00558 0.00321
+## Cumulative Proportion  0.829 0.9228 0.9656 0.9835 0.99122 0.99679 1.00000
+```
+
+Summary of the principal components: 
+
+&lt;table class="table" style="margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;color: white !important;background-color: #7570b3 !important;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:right;color: white !important;background-color: #7570b3 !important;"&gt; PC1 &lt;/th&gt;
+   &lt;th style="text-align:right;color: white !important;background-color: #7570b3 !important;"&gt; PC2 &lt;/th&gt;
+   &lt;th style="text-align:right;color: white !important;background-color: #7570b3 !important;"&gt; PC3 &lt;/th&gt;
+   &lt;th style="text-align:right;color: white !important;background-color: #7570b3 !important;"&gt; PC4 &lt;/th&gt;
+   &lt;th style="text-align:right;color: white !important;background-color: #7570b3 !important;"&gt; PC5 &lt;/th&gt;
+   &lt;th style="text-align:right;color: white !important;background-color: #7570b3 !important;"&gt; PC6 &lt;/th&gt;
+   &lt;th style="text-align:right;color: white !important;background-color: #7570b3 !important;"&gt; PC7 &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;width: 2.5em; color: white !important;background-color: #7570b3 !important;width: 2.5em; "&gt; Variance &lt;/td&gt;
+   &lt;td style="text-align:right;width: 2.5em; "&gt; 5.81 &lt;/td&gt;
+   &lt;td style="text-align:right;width: 2.5em; "&gt; 0.65 &lt;/td&gt;
+   &lt;td style="text-align:right;width: 2.5em; "&gt; 0.30 &lt;/td&gt;
+   &lt;td style="text-align:right;width: 2.5em; "&gt; 0.13 &lt;/td&gt;
+   &lt;td style="text-align:right;width: 2.5em; "&gt; 0.05 &lt;/td&gt;
+   &lt;td style="text-align:right;width: 2.5em; "&gt; 0.04 &lt;/td&gt;
+   &lt;td style="text-align:right;width: 2.5em; "&gt; 0.02 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;width: 2.5em; color: white !important;background-color: #7570b3 !important;width: 2.5em; "&gt; Proportion &lt;/td&gt;
+   &lt;td style="text-align:right;width: 2.5em; "&gt; 0.83 &lt;/td&gt;
+   &lt;td style="text-align:right;width: 2.5em; "&gt; 0.09 &lt;/td&gt;
+   &lt;td style="text-align:right;width: 2.5em; "&gt; 0.04 &lt;/td&gt;
+   &lt;td style="text-align:right;width: 2.5em; "&gt; 0.02 &lt;/td&gt;
+   &lt;td style="text-align:right;width: 2.5em; "&gt; 0.01 &lt;/td&gt;
+   &lt;td style="text-align:right;width: 2.5em; "&gt; 0.01 &lt;/td&gt;
+   &lt;td style="text-align:right;width: 2.5em; "&gt; 0.00 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;width: 2.5em; color: white !important;background-color: #7570b3 !important;width: 2.5em; color: white !important;background-color: #CA6627 !important;"&gt; Cum. prop &lt;/td&gt;
+   &lt;td style="text-align:right;width: 2.5em; color: white !important;background-color: #CA6627 !important;"&gt; 0.83 &lt;/td&gt;
+   &lt;td style="text-align:right;width: 2.5em; color: white !important;background-color: #CA6627 !important;"&gt; 0.92 &lt;/td&gt;
+   &lt;td style="text-align:right;width: 2.5em; color: white !important;background-color: #CA6627 !important;"&gt; 0.97 &lt;/td&gt;
+   &lt;td style="text-align:right;width: 2.5em; color: white !important;background-color: #CA6627 !important;"&gt; 0.98 &lt;/td&gt;
+   &lt;td style="text-align:right;width: 2.5em; color: white !important;background-color: #CA6627 !important;"&gt; 0.99 &lt;/td&gt;
+   &lt;td style="text-align:right;width: 2.5em; color: white !important;background-color: #CA6627 !important;"&gt; 1.00 &lt;/td&gt;
+   &lt;td style="text-align:right;width: 2.5em; color: white !important;background-color: #CA6627 !important;"&gt; 1.00 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+Increase in variance explained large until `\(k=3\)` PCs, and then tapers off. A choice of .red[3 PCs] would explain 97% of the total variance. 
+
+---
+&lt;svg viewBox="0 0 416 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M272 96c26.51 0 48-21.49 48-48S298.51 0 272 0s-48 21.49-48 48 21.49 48 48 48zM113.69 317.47l-14.8 34.52H32c-17.67 0-32 14.33-32 32s14.33 32 32 32h77.45c19.25 0 36.58-11.44 44.11-29.09l8.79-20.52-10.67-6.3c-17.32-10.23-30.06-25.37-37.99-42.61zM384 223.99h-44.03l-26.06-53.25c-12.5-25.55-35.45-44.23-61.78-50.94l-71.08-21.14c-28.3-6.8-57.77-.55-80.84 17.14l-39.67 30.41c-14.03 10.75-16.69 30.83-5.92 44.86s30.84 16.66 44.86 5.92l39.69-30.41c7.67-5.89 17.44-8 25.27-6.14l14.7 4.37-37.46 87.39c-12.62 29.48-1.31 64.01 26.3 80.31l84.98 50.17-27.47 87.73c-5.28 16.86 4.11 34.81 20.97 40.09 3.19 1 6.41 1.48 9.58 1.48 13.61 0 26.23-8.77 30.52-22.45l31.64-101.06c5.91-20.77-2.89-43.08-21.64-54.39l-61.24-36.14 31.31-78.28 20.27 41.43c8 16.34 24.92 26.89 43.11 26.89H384c17.67 0 32-14.33 32-32s-14.33-31.99-32-31.99z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Assess
+
+Scree plot: Where is the elbow?
+
+.pull-left-2[
+
+
+```r
+track_pca_var = tibble(n=1:length(track_pca$sdev), evl=track_pca$sdev^2)
+ggplot(track_pca_var, aes(x=n, y=evl)) + geom_line() +
+  xlab("Number of PCs") + ylab("Eigenvalue")
+```
+
+&lt;img src="lec32_files/figure-html/unnamed-chunk-6-1.png" width="864" /&gt;
+
+]
+
+.pull-right-1[
+
+At `\(k=2\)`, the scree plot suggests 2 PCs would be sufficient to explain the variability.
+
+]
+
+
+---
+&lt;svg viewBox="0 0 416 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M272 96c26.51 0 48-21.49 48-48S298.51 0 272 0s-48 21.49-48 48 21.49 48 48 48zM113.69 317.47l-14.8 34.52H32c-17.67 0-32 14.33-32 32s14.33 32 32 32h77.45c19.25 0 36.58-11.44 44.11-29.09l8.79-20.52-10.67-6.3c-17.32-10.23-30.06-25.37-37.99-42.61zM384 223.99h-44.03l-26.06-53.25c-12.5-25.55-35.45-44.23-61.78-50.94l-71.08-21.14c-28.3-6.8-57.77-.55-80.84 17.14l-39.67 30.41c-14.03 10.75-16.69 30.83-5.92 44.86s30.84 16.66 44.86 5.92l39.69-30.41c7.67-5.89 17.44-8 25.27-6.14l14.7 4.37-37.46 87.39c-12.62 29.48-1.31 64.01 26.3 80.31l84.98 50.17-27.47 87.73c-5.28 16.86 4.11 34.81 20.97 40.09 3.19 1 6.41 1.48 9.58 1.48 13.61 0 26.23-8.77 30.52-22.45l31.64-101.06c5.91-20.77-2.89-43.08-21.64-54.39l-61.24-36.14 31.31-78.28 20.27 41.43c8 16.34 24.92 26.89 43.11 26.89H384c17.67 0 32-14.33 32-32s-14.33-31.99-32-31.99z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Visualise
+
+.pull-left-1[
+
+Visualise model using a **biplot**: plot the principal component scores, and also the contribution of the original variables to the principal component.
+
+]
+
+.pull-right-2[
+
+&lt;img src="lec32_files/figure-html/biplot-1.png" width="864" /&gt;
+
+]
+
+
+---
+&lt;svg viewBox="0 0 416 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M272 96c26.51 0 48-21.49 48-48S298.51 0 272 0s-48 21.49-48 48 21.49 48 48 48zM113.69 317.47l-14.8 34.52H32c-17.67 0-32 14.33-32 32s14.33 32 32 32h77.45c19.25 0 36.58-11.44 44.11-29.09l8.79-20.52-10.67-6.3c-17.32-10.23-30.06-25.37-37.99-42.61zM384 223.99h-44.03l-26.06-53.25c-12.5-25.55-35.45-44.23-61.78-50.94l-71.08-21.14c-28.3-6.8-57.77-.55-80.84 17.14l-39.67 30.41c-14.03 10.75-16.69 30.83-5.92 44.86s30.84 16.66 44.86 5.92l39.69-30.41c7.67-5.89 17.44-8 25.27-6.14l14.7 4.37-37.46 87.39c-12.62 29.48-1.31 64.01 26.3 80.31l84.98 50.17-27.47 87.73c-5.28 16.86 4.11 34.81 20.97 40.09 3.19 1 6.41 1.48 9.58 1.48 13.61 0 26.23-8.77 30.52-22.45l31.64-101.06c5.91-20.77-2.89-43.08-21.64-54.39l-61.24-36.14 31.31-78.28 20.27 41.43c8 16.34 24.92 26.89 43.11 26.89H384c17.67 0 32-14.33 32-32s-14.33-31.99-32-31.99z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Interpret
+
+Explain and interpret: using the coefficients of the principal components.
+
+- PC1 measures overall magnitude, the strength of the athletics program. High positive values indicate .red[poor] programs with generally slow times across events. 
+
+
+- PC2 measures the .red[contrast] in the program between .red[short and long distance] events. Some countries have relatively stronger long distance athletes, while others have relatively stronger short distance athletes. 
+- There are several .red[outliers] visible in this plot, `wsamoa`, `cookis`, `dpkorea`. PCA, because it is computed using the variance in the data, can be affected by outliers. It may be better to remove these countries, and re-run the PCA. 
+
+---
+
+## Related problems
+
+You have multivariate variables `\(\boldsymbol{x}_1,\ldots,\boldsymbol{x}_n\)` so `\(\boldsymbol{x}_1 = (x_{11},\ldots,x_{1p})\)`
+
+* Find a new set of multivariate variables that are uncorrelated and explain as much variance as possible.
+* If you put all the variables together in one matrix, find the best matrix created with fewer variables (lower rank) that explains the original data.
+
+
+The first goal is .bold[.purple[statistical]] and the second goal is .bold[.red[data compression]] .
+
+
+---
+class: segue
+
+# Eigenfaces
+
+---
+
+## Face example
+
+&lt;!-- ## source("http://dl.dropbox.com/u/7710864/courseraPublic/myplclust.R") --&gt;
+
+
+```r
+load(url("https://github.com/DATA2002/data/raw/master/face.rda"))
+image(t(faceData)[,nrow(faceData):1])
+```
+
+&lt;img src="lec32_files/figure-html/loadFaceData -1.png" width="432" /&gt;
+
+
+---
+
+## Face example - variance explained
+
+
+```r
+svd_face = svd(scale(faceData))
+pca_face = prcomp(faceData)
+par(mfrow=c(1,2), cex = 1.8, mar = c(4,4,1,1))
+plot(svd_face$d^2/sum(svd_face$d^2),pch=19,xlab="Singular vector",ylab="Variance explained")
+screeplot(pca_face)
+```
+
+&lt;img src="lec32_files/figure-html/unnamed-chunk-7-1.png" width="1008" /&gt;
+
+---
+
+## Face example - create approximations
+
+We can reconstruct the face using lower dimensional approximations.
+
+
+```r
+svd1 = svd(scale(faceData))
+## Note that %*% is matrix multiplication
+
+# Here svd1$d[1] is a constant
+approx1 = svd1$u[,1] %*% t(svd1$v[,1]) * svd1$d[1]
+
+# In these examples we need to make the diagonal matrix out of d
+approx5 = svd1$u[,1:5] %*% diag(svd1$d[1:5]) %*% t(svd1$v[,1:5]) 
+approx10 = svd1$u[,1:10] %*% diag(svd1$d[1:10]) %*% t(svd1$v[,1:10]) 
+```
+
+---
+
+## Face example - plot approximations
+
+
+```r
+par(mfrow=c(1,4), mar = c(4,4,1.5,1), cex = 1.5)
+image(t(approx1)[,nrow(approx1):1], main = "One component")
+image(t(approx5)[,nrow(approx5):1], main = "Five components")
+image(t(approx10)[,nrow(approx10):1], main = "Ten components")
+image(t(faceData)[,nrow(faceData):1], main = "Original data")  ## Original data
+```
+
+&lt;img src="lec32_files/figure-html/unnamed-chunk-8-1.png" width="1008" /&gt;
+
+---
+class: segue
+
+# Dimension reduction and clustering
+
+---
+
+## US arrests data
+
+.pull-left-1[
+
+```r
+library(tidyverse)
+data("USArrests")
+glimpse(USArrests)
+```
+
+```
+## Rows: 50
+## Columns: 4
+## $ Murder   &lt;dbl&gt; 13.2, 10.0, 8.1, 8.8, 9.0, 7.9, 3.3, 5.9, 15.4, 17.4, 5.3, 2.6, 10.4, 7.2, 2.2, 6…
+## $ Assault  &lt;int&gt; 236, 263, 294, 190, 276, 204, 110, 238, 335, 211, 46, 120, 249, 113, 56, 115, 109…
+## $ UrbanPop &lt;int&gt; 58, 48, 80, 50, 91, 78, 77, 72, 80, 60, 83, 54, 83, 65, 57, 66, 52, 66, 51, 67, 8…
+## $ Rape     &lt;dbl&gt; 21.2, 44.5, 31.0, 19.5, 40.6, 38.7, 11.1, 15.8, 31.9, 25.8, 20.2, 14.2, 24.0, 21.…
+```
+
+```r
+df = data.frame(scale(USArrests))
+```
+]
+.pull-right-2[
+
+```r
+GGally::ggpairs(df) + theme_bw(base_size = 30)
+```
+
+&lt;img src="lec32_files/figure-html/unnamed-chunk-10-1.png" width="864" /&gt;
+]
+
+---
+
+## PCA for US arrests
+
+
+```r
+pca_arrests = princomp(df)
+# install.packages("remotes")
+# remotes::install_github("vqv/ggbiplot")
+library(ggbiplot)
+p1 = ggscreeplot(pca_arrests) +
+  theme_bw(base_size = 20) + labs(y = "Prop. of explained variance")
+p2 = ggscreeplot(pca_arrests,type = "cev") + theme_bw(base_size = 20) + labs(y = " Cumulative prop. of explained variance")
+gridExtra::grid.arrange(p1, p2, ncol=2)
+```
+
+&lt;img src="lec32_files/figure-html/unnamed-chunk-11-1.png" width="864" /&gt;
+
+---
+
+## Biplot
+
+
+```r
+ggbiplot(pca_arrests, labels =  rownames(USArrests), labels.size = 5, varname.size = 8) +
+  theme_bw(base_size = 20) + coord_cartesian(ylim = c(-2.5,2.5), xlim = c(-2.5,2.5))
+```
+
+&lt;img src="lec32_files/figure-html/unnamed-chunk-12-1.png" width="864" /&gt;
+
+---
+
+## Clustering
+
+.pull-left-1[
+
+```r
+set.seed(1)
+cl_arrests = kmeans(
+  df, centers = 4, nstart = 10
+)
+p = ggbiplot(
+  pca_arrests,
+  groups = factor(cl_arrests$cluster),
+  ellipse = TRUE) + 
+  theme_bw(base_size = 20) +
+  theme(legend.position = "none")
+p
+```
+]
+.pull-right-2[
+&lt;img src="lec32_files/figure-html/arrest_cluster_plot-1.png" width="864" /&gt;
+]
+
+---
+
+
+```r
+library(factoextra)
+fviz_cluster(cl_arrests, data = df) + theme_classic(base_size = 26)
+```
+
+&lt;img src="lec32_files/figure-html/unnamed-chunk-13-1.png" width="864" /&gt;
+
+
+---
+
+## Wine
+
+
+```r
+data(wine)
+glimpse(wine)
+```
+
+```
+## Rows: 178
+## Columns: 13
+## $ Alcohol        &lt;dbl&gt; 14, 13, 13, 14, 13, 14, 14, 14, 15, 14, 14, 14, 14, 15, 14, 14, 14, 14, 14,…
+## $ MalicAcid      &lt;dbl&gt; 1.7, 1.8, 2.4, 1.9, 2.6, 1.8, 1.9, 2.1, 1.6, 1.4, 2.2, 1.5, 1.7, 1.7, 1.9, …
+## $ Ash            &lt;dbl&gt; 2.4, 2.1, 2.7, 2.5, 2.9, 2.5, 2.5, 2.6, 2.2, 2.3, 2.3, 2.3, 2.4, 2.4, 2.4, …
+## $ AlcAsh         &lt;dbl&gt; 16, 11, 19, 17, 21, 15, 15, 18, 14, 16, 18, 17, 16, 11, 12, 17, 20, 20, 16,…
+## $ Mg             &lt;int&gt; 127, 100, 101, 113, 118, 112, 96, 121, 97, 98, 105, 95, 89, 91, 102, 112, 1…
+## $ Phenols        &lt;dbl&gt; 2.8, 2.6, 2.8, 3.9, 2.8, 3.3, 2.5, 2.6, 2.8, 3.0, 3.0, 2.2, 2.6, 3.1, 3.3, …
+## $ Flav           &lt;dbl&gt; 3.1, 2.8, 3.2, 3.5, 2.7, 3.4, 2.5, 2.5, 3.0, 3.1, 3.3, 2.4, 2.8, 3.7, 3.6, …
+## $ NonFlavPhenols &lt;dbl&gt; 0.28, 0.26, 0.30, 0.24, 0.39, 0.34, 0.30, 0.31, 0.29, 0.22, 0.22, 0.26, 0.2…
+## $ Proa           &lt;dbl&gt; 2.3, 1.3, 2.8, 2.2, 1.8, 2.0, 2.0, 1.2, 2.0, 1.9, 2.4, 1.6, 1.8, 2.8, 3.0, …
+## $ Color          &lt;dbl&gt; 5.6, 4.4, 5.7, 7.8, 4.3, 6.8, 5.2, 5.0, 5.2, 7.2, 5.8, 5.0, 5.6, 5.4, 7.5, …
+## $ Hue            &lt;dbl&gt; 1.04, 1.05, 1.03, 0.86, 1.04, 1.05, 1.02, 1.06, 1.08, 1.01, 1.25, 1.17, 1.1…
+## $ OD             &lt;dbl&gt; 3.9, 3.4, 3.2, 3.5, 2.9, 2.9, 3.6, 3.6, 2.9, 3.5, 3.2, 2.8, 2.9, 2.7, 3.0, …
+## $ Proline        &lt;int&gt; 1065, 1050, 1185, 1480, 735, 1450, 1290, 1295, 1045, 1045, 1510, 1280, 1320…
+```
+
+---
+
+.pull-left-1[
+
+```r
+library(ggbiplot)
+wine.pca = prcomp(wine,
+                  scale. = TRUE)
+p = ggbiplot(wine.pca, 
+             obs.scale = 1, 
+             var.scale = 1, 
+             groups = wine.class,
+             ellipse = TRUE, 
+             circle = TRUE) +
+  scale_color_discrete(name = '') + 
+  theme_bw(base_size = 30) + 
+  theme(legend.direction = 'horizontal',
+        legend.position = 'top')
+p
+```
+]
+.pull-right-2[
+&lt;img src="lec32_files/figure-html/wine_pca-1.png" width="864" /&gt;
+]
+
+---
+
+##  Alternatives
+
+- [Factor analysis](http://en.wikipedia.org/wiki/Factor_analysis)
+- [t-distributed stochastic neighbor embedding](https://en.wikipedia.org/wiki/T-distributed_stochastic_neighbor_embedding)
+
+## References
+
+&lt;a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"&gt;&lt;img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /&gt;&lt;/a&gt;&lt;br /&gt;
+Some slides adapted from Prof. Di Cook's [ETC3250: Business Analytics](https://monba.dicook.org/) unit (Monash University). Hence, it is also licensed under a &lt;a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"&gt;Creative Commons Attribution-ShareAlike 4.0 International License&lt;/a&gt;.
+
+.small[
+James, G., D. Witten, T. Hastie, and R. Tibshirani (2017). _An Introduction to
+Statistical Learning: With Applications in R_. New York: Springer. URL:
+[https://www-bcf.usc.edu/~gareth/ISL/](https://www-bcf.usc.edu/~gareth/ISL/).
+
+Yuan, X., D. Ren, Z. Wang, and C. Guo (2013). "Dimension Projection Matrix/Tree:
+Interactive Subspace Visual Exploration and Analysis of High Dimensional Data". In: _IEEE
+Transactions on Visualization and Computer Graphics_ 19, pp. 2625-2633.
+]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="assets/remark-zoom.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

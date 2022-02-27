@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>DATA2002</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Garth Tarr" />
+    <script src="lec02_files/header-attrs-2.9.5/header-attrs.js"></script>
+    <link href="lec02_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/sydney-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="assets/sydney.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# DATA2002
+## Collecting data
+### Garth Tarr
+
+---
+
+class: segue
+
+
+
+
+
+.large[
+Sample surveys
+
+Controlled experiments
+
+Observational studies
+
+Simpsons Paradox
+]
+
+---
+class: segue
+
+# Sample surveys
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M400 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V80c0-26.51-21.49-48-48-48zm0 400H48V80h352v352zm-35.864-241.724L191.547 361.48c-4.705 4.667-12.303 4.637-16.97-.068l-90.781-91.516c-4.667-4.705-4.637-12.303.069-16.971l22.719-22.536c4.705-4.667 12.303-4.637 16.97.069l59.792 60.277 141.352-140.216c4.705-4.667 12.303-4.637 16.97.068l22.536 22.718c4.667 4.706 4.637 12.304-.068 16.971z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## The Literary Digest poll (1936)
+
+.pull-left[
+- 1936 Franklin D. Roosevelt was completing his term of office
+- America was struggling with high unemployment (9 million), just after the Great Depression
+- 1936 US Presidential election
+- Literary Digest polled **10 million** people (mail survey)
+- 24% response rate (**2.4 million** people reply)
+- They had predicted the winner since 1916
+- They predicted victory for .bold[.red[Landon]]
+]
+.pull-right[
+
+&lt;img src="imgs/Presidents.png" width="100%" height="100%"&gt;
+
+### Results
+
+- .bold[.blue[Roosevelt]] won by 62% to 38%. 
+- .bold[.blue[Roosevelt]] won 46 of 48 states.
+
+]
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M400 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V80c0-26.51-21.49-48-48-48zm0 400H48V80h352v352zm-35.864-241.724L191.547 361.48c-4.705 4.667-12.303 4.637-16.97-.068l-90.781-91.516c-4.667-4.705-4.637-12.303.069-16.971l22.719-22.536c4.705-4.667 12.303-4.637 16.97.069l59.792 60.277 141.352-140.216c4.705-4.667 12.303-4.637 16.97.068l22.536 22.718c4.667 4.706 4.637 12.304-.068 16.971z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Gallup poll
+
+- George Gallup was setting up his survey organisation.
+- He drew 3000 people and predicted the Digest results.
+- He also drew 50,000 people and **correctly predicted** Roosevelt victory (the actual prediction was off by a bit); 56% predicted instead of 62%.
+
+&lt;br&gt;
+
+- Digest mailed questionnaires to **10 million people** with **2.4 million replies** and still failed to predict the winner.  What went wrong?!?
+
+.footnote[
+Some data to play with if interested http://www.math.uah.edu/stat/data/LiteraryDigest.csv 
+]
+
+---
+
+## Revision
+
+- A .bold[.blue[sample]] is part of a .bold[.blue[population]]
+
+- A .bold[.blue[parameter]] is a numerical fact about a population.
+
+- Usually a parameter cannot be determined exactly, but can only be .bold[.blue[estimated]]
+
+- A .bold[.blue[statistic]] can be computed from a sample, and used to estimate a parameter.
+
+- A .bold[.blue[statistic]] summarises what the researcher knows. A .bold[.blue[parameter]] is what the researcher wants to know.
+
+- When estimating a parameter, one major issue is .bold[.blue[accuracy]]: how close is the estimated statistic to the (unknown) true parameter?
+
+---
+
+## Why not observe the whole population?
+
+
+### Typical limitations
+
+- Hard to observe the population
+- Not enough time
+- Not enough money
+- Not enough resources
+
+---
+
+## Sampling
+
+&lt;br&gt;
+The solution is for us to draw samples and hope or expect to make general statement about the entire population.  
+
+&lt;br&gt;
+Why sample?
+- Reduce the number of measurements
+- Save time, money and resources
+- Might be essential in destructive testing
+
+&lt;br&gt;
+
+Notice this is in contrast with __census__ and __experiment__.
+
+---
+
+## Survey sampling
+
+#### Survey design
+
+- What survey design is appropriate for my study?
+- How survey will be conducted/implemented?
+
+Sampling is the process of selecting a subset of observations from an entire population of interest so that characteristics from the subset (sample) can be used to draw conclusion or making inference about the entire population.  
+
+#### Sampling procedure
+
+- What sample size is needed for my study?
+- How the design will affect the sample size?
+- Appropriate survey design provides the best estimation with high reliability at the lowest cost with the available resources.  
+
+???
+
+Surveys are conducted to measure the characteristics of a population.  
+
+---
+
+## Selection bias
+
+.pull-left[
+When a selection procedure is biased, taking a larger sample DOES NOT help.  This just repeats the basic mistake at a larger scale.
+]
+.pull-right[
+&lt;img src="imgs/selectionbias.png" width="552" /&gt;
+]
+
+---
+
+## Getting an opinion
+
+&lt;br&gt;
+
+&gt;- Should a woman have control over her own body, including her reproductive system ?
+
+&gt;- Should a doctor be allowed to murder unborn children who can't defend themselves ?
+
+---
+
+## Measurement bias 
+
+- Recall bias
+- Sensitive questions
+- Misinterpret the questions
+- Wording of question
+- Other attributes of the interview as a source of bias...  
+
+Schuman and Converse (1971) performed a study to check whether or not the race of the interviewer influenced responses after major racial riots in 1968 in Detroit. A sample of 495 African American were asked:
+
+&gt; "Do you personally feel that you can trust most white people, some white people, or none at all"
+
+- White interviewer: 35% responded "most" ( `\(n = 165\)` )
+- African American interviewer: 7% responded "most" ( `\(n = 330\)` )
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M400 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V80c0-26.51-21.49-48-48-48zm0 400H48V80h352v352zm-35.864-241.724L191.547 361.48c-4.705 4.667-12.303 4.637-16.97-.068l-90.781-91.516c-4.667-4.705-4.637-12.303.069-16.971l22.719-22.536c4.705-4.667 12.303-4.637 16.97.069l59.792 60.277 141.352-140.216c4.705-4.667 12.303-4.637 16.97.068l22.536 22.718c4.667 4.706 4.637 12.304-.068 16.971z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Back to the 1936 US election
+
+.pull-left[
+- Political split followed economic lines more closely in 1936 than previous elections.
+- They later found that the 2.4 million responses didn't even represent the 10 million people who were sent the surveys.
+- Lower-income and upper-income people tend not to respond so the survey was over-represented by middle-class people.
+]
+
+--
+
+.pull-right[
+.blockquote[
+### Which mode of survey administration is best?
+
+- Mail
+- Personal interview
+- Telephone
+- Online poll at the end of an article
+- Twitter poll
+
+]
+]
+
+
+---
+
+## Bias
+
+Bias is any factor that favours certain outcomes or responses, or influences an individual's responses. Bias may be unintentional (accidental), or intentional (to achieve certain results).  
+
+When looking at data from a survey think about
+- **Selection bias / sampling bias**: the sample does not accurately represent the population. Example: Attendees at a Star Trek convention may report that their favorite genre is science fiction. 
+- **Non-response bias**: Certain groups are under-represented because they elect not to participate. Example: a restaurant may give each table a "customer satisfaction" survey with their bill.
+- **Measurement or designed bias**: Bias factors in the sampling method influence the data obtained. Example: a respondent may answer questions in the way she thinks the questioner wants her to answer.  
+
+---
+class: segue
+
+# Controlled experiments  
+
+---
+
+## Randomised controlled double-blind trials
+
+.pull-left[
+&lt;img src="imgs/doubleblind.jpg" width="100%"&gt;
+]
+
+--
+
+.pull-right[
+.right[
+&lt;img src="imgs/blind_trials.png" width="77%"&gt;
+]
+]
+
+
+---
+
+.blockquote[
+What is a randomised controlled double-blind study? Why is it good but rare?
+]
+
+1. Investigators obtain a representative sample of subjects.
+2. Investigators randomly allocate the subjects into a .bold[.blue[treatment group]] and a .bold[.red[control group]].
+3. The .bold[.red[control group]] is given a placebo, but neither  the subjects nor the investigators know the identity of the 2 groups (double-blind).
+4. Investigators compare the responses of the 2 groups.
+5. The design is good because we expect the 2 groups to be similar, hence any difference in the responses is likely to be caused by the treatment.
+
+---
+class: segue
+
+# Observational studies
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M632 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8zM553.3 87.1c-5.7-3.8-9.3-10-9.3-16.8V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v62.3c0 22 10.2 43.4 28.6 55.4 42.2 27.3 67.4 73.8 67.4 124V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-65.5-32.4-126.2-86.7-162.6zM432 352H48c-26.5 0-48 21.5-48 48v64c0 26.5 21.5 48 48 48h384c8.8 0 16-7.2 16-16V368c0-8.8-7.2-16-16-16zm-32 112H224v-64h176v64zm87.7-322.4C463.8 125 448 99.3 448 70.3V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v66.4c0 43.7 24.6 81.6 60.3 106.7 22.4 15.7 35.7 41.2 35.7 68.6V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-43.3-21-83.4-56.3-108.1zM536 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Does smoking cause cancer?
+
+.pull-left[
+.blockquote[
+"Tobacco smoking is the largest preventable cause of cancer, responsible for more cancer deaths in Australia than any other single factor. It is also directly responsible for many heart and lung diseases."
+
+.right[-- &lt;cite&gt;[Australian Cancer Council](http://www.cancer.org.au/preventing-cancer/smoking-and-tobacco/)&lt;/cite&gt;]
+]
+]
+
+.pull-right[
+&lt;img src="imgs/smoking.jpg" width="100%" height="100%"&gt;
+]
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M632 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8zM553.3 87.1c-5.7-3.8-9.3-10-9.3-16.8V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v62.3c0 22 10.2 43.4 28.6 55.4 42.2 27.3 67.4 73.8 67.4 124V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-65.5-32.4-126.2-86.7-162.6zM432 352H48c-26.5 0-48 21.5-48 48v64c0 26.5 21.5 48 48 48h384c8.8 0 16-7.2 16-16V368c0-8.8-7.2-16-16-16zm-32 112H224v-64h176v64zm87.7-322.4C463.8 125 448 99.3 448 70.3V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v66.4c0 43.7 24.6 81.6 60.3 106.7 22.4 15.7 35.7 41.2 35.7 68.6V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-43.3-21-83.4-56.3-108.1zM536 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+&lt;div align="center"&gt;
+&lt;img src="imgs/smh.jpg" width="80%" height="80%"&gt;
+&lt;/div&gt;
+
+In a hearing to the Australian High Court in 2012 disputing the introduction of cigarette plain packaging with health warnings, while British American Tobacco was prepared to accept that there are serious health consequences caused by smoking, Imperial Tobacco responded "**some people say that...**" .fn[1]
+
+
+.footnote[
+1. Source: [SMH &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"&gt;&lt;/path&gt;&lt;/svg&gt;](http://www.smh.com.au/national/health/health-issue-irrelevant-tobacco-firms-tell-court-20120312-1uwjg.html)
+]
+
+
+---
+
+## The need for observational studies
+
+- By necessity, many research questions require an **observational study**, rather than a controlled experiment. 
+- For example, with a study on the effects of smoking,  investigators cannot choose which subjects will be in the .bold[.blue[treatment group]] (smoking). Rather,  they must **observe** medical results for the 2 groups.
+- Similarly, most **educational research** is based on observational studies.
+- The  conclusions of observational studies require great care.
+
+--
+
+.blockquote[
+Observational studies can not establish causation.
+]
+
+- A good **randomised controlled experiment** can establish _causation_, an **observational study** can only establish _association_. 
+- An observational study may _suggest_ causation, but it can't _prove_ causation.
+
+---
+
+## Misleading hidden confounders
+
+- Confounding occurs when the .bold[.blue[treatment group]] and .bold[.red[control group]] differ by some third variable (other than the treatment) which influences the response that is studied. 
+
+- Confounders can be hard to find, and can mislead about a cause and effect relationship. 
+
+- Confounding (or lurking) variables can be introduced into a randomised study if any of the subjects drop out, causing **selection bias** or **survivor bias**. Similarly, if not all subjects keep taking the treatment or placebo, we get the confounding of **adherers** and **non-adherers**.
+
+.pull-down[
+[Examples: Spurious Correlations &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"&gt;&lt;/path&gt;&lt;/svg&gt;](http://www.tylervigen.com/spurious-correlations)
+]
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M632 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8zM553.3 87.1c-5.7-3.8-9.3-10-9.3-16.8V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v62.3c0 22 10.2 43.4 28.6 55.4 42.2 27.3 67.4 73.8 67.4 124V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-65.5-32.4-126.2-86.7-162.6zM432 352H48c-26.5 0-48 21.5-48 48v64c0 26.5 21.5 48 48 48h384c8.8 0 16-7.2 16-16V368c0-8.8-7.2-16-16-16zm-32 112H224v-64h176v64zm87.7-322.4C463.8 125 448 99.3 448 70.3V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v66.4c0 43.7 24.6 81.6 60.3 106.7 22.4 15.7 35.7 41.2 35.7 68.6V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-43.3-21-83.4-56.3-108.1zM536 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Lung cancer associations
+
+.blockquote[
+A study finds that having yellow fingertips is associated with lung cancer. Does having yellow fingertips cause lung cancer? 
+]
+
+&lt;br&gt;
+
+--
+
+&lt;br&gt;
+
+.blockquote[
+A study finds that smokers tend to have higher rates of lung cancer. Does smoking cause lung cancer?
+]
+
+???
+
+Yellow fingertips and lung cancer
+
+- Smoking is a confounding factor.
+- People with yellow fingertips tend to smoke, and smoking causes lung cancer.
+
+Smoking and lung cancer
+
+- Possible confounders are diet or alcohol or a gene for smoking.
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M632 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8zM553.3 87.1c-5.7-3.8-9.3-10-9.3-16.8V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v62.3c0 22 10.2 43.4 28.6 55.4 42.2 27.3 67.4 73.8 67.4 124V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-65.5-32.4-126.2-86.7-162.6zM432 352H48c-26.5 0-48 21.5-48 48v64c0 26.5 21.5 48 48 48h384c8.8 0 16-7.2 16-16V368c0-8.8-7.2-16-16-16zm-32 112H224v-64h176v64zm87.7-322.4C463.8 125 448 99.3 448 70.3V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v66.4c0 43.7 24.6 81.6 60.3 106.7 22.4 15.7 35.7 41.2 35.7 68.6V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-43.3-21-83.4-56.3-108.1zM536 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Strategy for dealing with confounders
+
+.pull-left[
+Sometimes we can make the groups more comparable by dividing them into subgroups with respect to the confounder.
+
+For example, if alcohol consumption is a potential confounding factor for smoking's affect on liver cancer, we can divide our subjects into 3 groups: 
+- heavy drinkers
+- medium drinkers
+- light drinkers. 
+
+This is called **controlling** for alcohol consumption.
+]
+.pull-right[.center[
+&lt;img src="imgs/beer.jpg" width="400" /&gt;
+]]
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M632 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8zM553.3 87.1c-5.7-3.8-9.3-10-9.3-16.8V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v62.3c0 22 10.2 43.4 28.6 55.4 42.2 27.3 67.4 73.8 67.4 124V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-65.5-32.4-126.2-86.7-162.6zM432 352H48c-26.5 0-48 21.5-48 48v64c0 26.5 21.5 48 48 48h384c8.8 0 16-7.2 16-16V368c0-8.8-7.2-16-16-16zm-32 112H224v-64h176v64zm87.7-322.4C463.8 125 448 99.3 448 70.3V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v66.4c0 43.7 24.6 81.6 60.3 106.7 22.4 15.7 35.7 41.2 35.7 68.6V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-43.3-21-83.4-56.3-108.1zM536 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Controlling for confounding
+
+We can control for confound by making 3 separate comparisons:
+
+- heavy drinking: smokers vs non-smokers
+- medium drinking: smokers vs non-smokers
+- light drinking: smokers vs non-smokers
+
+.blockquote[
+What are the limitations of this strategy?
+]
+
+--
+
+- This strategy is limited by our ability to identify all confounders and then divide the study by the confounders. 
+- This explains the long time to establish that smoking causes lung cancer. Researchers needed to control for factors such as health, fitness, diet, lifestyle, environment etc.
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M632 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8zM553.3 87.1c-5.7-3.8-9.3-10-9.3-16.8V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v62.3c0 22 10.2 43.4 28.6 55.4 42.2 27.3 67.4 73.8 67.4 124V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-65.5-32.4-126.2-86.7-162.6zM432 352H48c-26.5 0-48 21.5-48 48v64c0 26.5 21.5 48 48 48h384c8.8 0 16-7.2 16-16V368c0-8.8-7.2-16-16-16zm-32 112H224v-64h176v64zm87.7-322.4C463.8 125 448 99.3 448 70.3V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v66.4c0 43.7 24.6 81.6 60.3 106.7 22.4 15.7 35.7 41.2 35.7 68.6V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-43.3-21-83.4-56.3-108.1zM536 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Is smoking good for your longevity?
+
+A famous study by Appleton, French, and Vanderpump (1996) considered data on female subjects 20 years apart. The data came 2 studies:
+- inital [data](https://www.ncbi.nlm.nih.gov/pubmed/598014) from a 1 in 6 survey from an electoral roll in a mixed urban and rural area near Newcastle upon Tyne UK (Tunbridge, Evered, Hall, et al., 1977).
+- follow-up [data](https://www.ncbi.nlm.nih.gov/pubmed/7641412) 20 years later (Vanderpump, Tunbrldge, French, et al., 1995).
+
+The study concentrated on the 1314 women who were either smokers or non-smokers (in the full data, only 162 had stopped smoking and only 18 did not record their status).
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M632 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8zM553.3 87.1c-5.7-3.8-9.3-10-9.3-16.8V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v62.3c0 22 10.2 43.4 28.6 55.4 42.2 27.3 67.4 73.8 67.4 124V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-65.5-32.4-126.2-86.7-162.6zM432 352H48c-26.5 0-48 21.5-48 48v64c0 26.5 21.5 48 48 48h384c8.8 0 16-7.2 16-16V368c0-8.8-7.2-16-16-16zm-32 112H224v-64h176v64zm87.7-322.4C463.8 125 448 99.3 448 70.3V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v66.4c0 43.7 24.6 81.6 60.3 106.7 22.4 15.7 35.7 41.2 35.7 68.6V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-43.3-21-83.4-56.3-108.1zM536 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+### Initial results (survival over a 20 year period)
+
+.small[
+.pull-left[
+| Status      | Died | Survived | Total | Mortality Rate |
+| ----------- | ---- | -------- | ----- | :------------: |
+| Smoker      | 139  | 443      | 582   | 23.9%          |
+| Non-smoker  | 230  | 502      | 732   | 31.4%          |
+| Total       | 369  | 945      | 1314  | 28.1%          |
+
+
+
+```r
+library(readr)
+x = read_csv("https://git.io/fNGXk")
+x
+```
+
+```
+## # A tibble: 4 × 3
+##   status     survival count
+##   &lt;chr&gt;      &lt;chr&gt;    &lt;dbl&gt;
+## 1 Smoker     Died       139
+## 2 Smoker     Survived   443
+## 3 Non-smoker Died       230
+## 4 Non-smoker Survived   502
+```
+
+```r
+library(tidyr) 
+# for uncount()
+library(dplyr) 
+# for %&gt;%, group_by() and summarise()
+```
+]
+
+.pull-right[
+
+```r
+x_long = tidyr::uncount(x, weights = count)
+dim(x_long)
+```
+
+```
+## [1] 1314    2
+```
+
+```r
+x_long %&gt;% dplyr::group_by(status) %&gt;% 
+  dplyr::summarise(
+    rate = sum(survival == "Died")/n()
+  )
+```
+
+```
+## # A tibble: 2 × 2
+##   status      rate
+##   &lt;chr&gt;      &lt;dbl&gt;
+## 1 Non-smoker 0.314
+## 2 Smoker     0.239
+```
+
+```r
+x_long %&gt;% # without group_by()
+  dplyr::summarise(
+    rate = sum(survival == "Died")/n()
+  )
+```
+
+```
+## # A tibble: 1 × 1
+##    rate
+##   &lt;dbl&gt;
+## 1 0.281
+```
+]
+]
+
+.footnote[
+The URL `https://git.io/fNGXk` is a shortened link to  `https://raw.githubusercontent.com/DATA2002/data/master/appleton1996.csv`
+]
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M632 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8zM553.3 87.1c-5.7-3.8-9.3-10-9.3-16.8V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v62.3c0 22 10.2 43.4 28.6 55.4 42.2 27.3 67.4 73.8 67.4 124V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-65.5-32.4-126.2-86.7-162.6zM432 352H48c-26.5 0-48 21.5-48 48v64c0 26.5 21.5 48 48 48h384c8.8 0 16-7.2 16-16V368c0-8.8-7.2-16-16-16zm-32 112H224v-64h176v64zm87.7-322.4C463.8 125 448 99.3 448 70.3V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v66.4c0 43.7 24.6 81.6 60.3 106.7 22.4 15.7 35.7 41.2 35.7 68.6V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-43.3-21-83.4-56.3-108.1zM536 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+### Initial results (survival over a 20 year period)
+
+.pull-left-2[
+
+```r
+library(ggplot2)
+library(scales)
+ggplot(x, aes(x = status, y = count, fill = survival)) + 
+  geom_bar(stat = "identity", position="fill") + 
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(x = "", y = "Proportion") + 
+  theme_bw(base_size = 30) + 
+  scale_fill_brewer(palette = "Set1")
+```
+
+&lt;img src="lec02_files/figure-html/unnamed-chunk-4-1.png" width="864" /&gt;
+]
+
+--
+
+.pull-right-1[
+
+.blockquote[
+What does this data seem to say?
+]
+
+- It seems to imply that smoking has a 'protective effect'.
+- **Smokers live longer?**
+
+]
+
+---
+class: segue
+
+# Simpsons paradox
+
+---
+
+## Observational studies with a confounding variable can lead to Simpson's Paradox
+
+- **Simpson's Paradox** was first mentioned by British statistician [Udny Yule](https://en.wikipedia.org/wiki/Udny_Yule) in 1903.
+- It was named after [Edward H. Simpson](https://en.wikipedia.org/wiki/Edward_H._Simpson).fn[1]
+- Sometimes there is a clear trend in individual groups of data that disappears when the groups are pooled together.
+- It occurs when relationships between percentages in subgroups are reversed when the subgroups are combined, because of a confounding or lurking variable.
+- The association between a pair of variables `\((X,Y)\)` reverses sign upon conditioning of a third variable `\(Z\)`, regardless of the value taken by `\(Z\)`.
+
+&lt;img src="imgs/homer.png" width="15%" height="15%" align="right"&gt;
+
+.footnote[
+1. Original paper by Simpson (1951).
+]
+
+&lt;!-- --- --&gt;
+
+&lt;!-- &lt;iframe width="100%" height="100%" src="https://www.youtube.com/embed/wgLUDw8eLB4" frameborder="0" allowfullscreen&gt;&lt;/iframe&gt; --&gt;
+
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M632 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8zM553.3 87.1c-5.7-3.8-9.3-10-9.3-16.8V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v62.3c0 22 10.2 43.4 28.6 55.4 42.2 27.3 67.4 73.8 67.4 124V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-65.5-32.4-126.2-86.7-162.6zM432 352H48c-26.5 0-48 21.5-48 48v64c0 26.5 21.5 48 48 48h384c8.8 0 16-7.2 16-16V368c0-8.8-7.2-16-16-16zm-32 112H224v-64h176v64zm87.7-322.4C463.8 125 448 99.3 448 70.3V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v66.4c0 43.7 24.6 81.6 60.3 106.7 22.4 15.7 35.7 41.2 35.7 68.6V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-43.3-21-83.4-56.3-108.1zM536 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Mortality by age group
+
+.pull-left[.small[
+
+
+```r
+y = readr::read_csv("https://git.io/fNGSi")
+dplyr::glimpse(y)
+```
+
+```
+## Rows: 28
+## Columns: 4
+## $ status    &lt;chr&gt; "Smoker", "Smoker", "Smoker", "Smoker", …
+## $ survival  &lt;chr&gt; "Died", "Died", "Died", "Died", "Died", …
+## $ age_group &lt;chr&gt; "18-24", "25-34", "35-44", "45-54", "55-…
+## $ count     &lt;dbl&gt; 2, 3, 14, 27, 51, 29, 13, 53, 121, 95, 1…
+```
+
+We can "spread" this long form data into a "wide" table that is easier for a human to interpret.
+
+
+```r
+# might need dev version of tidyr for pivot_wider
+# devtools::install_github("tidyverse/tidyr") 
+ytab = y %&gt;%
+  tidyr::pivot_wider(id_cols = age_group, 
+                     names_from = c(status, survival), 
+                     values_from = count,
+                     names_sep = " ")
+```
+
+]
+]
+
+.pull-right[
+
+
+|Age group | Smoker Died| Smoker Survived| Non-smoker Died| Non-smoker Survived|
+|:---------|-----------:|---------------:|---------------:|-------------------:|
+|18-24     |           2|              53|               1|                  61|
+|25-34     |           3|             121|               5|                 152|
+|35-44     |          14|              95|               7|                 114|
+|45-54     |          27|             103|              12|                  66|
+|55-64     |          51|              64|              40|                  81|
+|65-74     |          29|               7|             101|                  28|
+|75+       |          13|               0|              64|                   0|
+
+]
+
+
+
+.footnote[
+The URL `https://git.io/fNGSi` is a shortened link to  `https://raw.githubusercontent.com/DATA2002/data/master/appleton1996_age.csv`
+]
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M632 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8zM553.3 87.1c-5.7-3.8-9.3-10-9.3-16.8V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v62.3c0 22 10.2 43.4 28.6 55.4 42.2 27.3 67.4 73.8 67.4 124V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-65.5-32.4-126.2-86.7-162.6zM432 352H48c-26.5 0-48 21.5-48 48v64c0 26.5 21.5 48 48 48h384c8.8 0 16-7.2 16-16V368c0-8.8-7.2-16-16-16zm-32 112H224v-64h176v64zm87.7-322.4C463.8 125 448 99.3 448 70.3V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v66.4c0 43.7 24.6 81.6 60.3 106.7 22.4 15.7 35.7 41.2 35.7 68.6V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-43.3-21-83.4-56.3-108.1zM536 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Mortality by age group
+
+.pull-left[
+.small[
+
+
+```r
+mortality = y %&gt;% 
+  uncount(weights = count) %&gt;% 
+  group_by(status, age_group) %&gt;% 
+  summarise(rate = mean(survival=="Died"))
+  # could also have used:
+  # summarise(rate = sum(survival=="Died")/n())
+  # note the n() function
+p = mortality %&gt;% 
+  ggplot() + 
+  aes(x = age_group, y = rate, fill = status) + 
+  geom_bar(stat = "identity", position = "dodge") + 
+  theme_minimal(base_size = 34) + 
+  scale_fill_brewer(palette = "Paired") + 
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(title = "Mortality rates by age group",
+       y = "Mortality rate", 
+       x = "Age group", 
+       fill = "") + 
+  theme(panel.grid.major.y = element_blank(), 
+        legend.position = "bottom") + 
+  coord_flip()
+```
+
+]]
+
+.pull-right[
+.small[
+
+
+```r
+p
+```
+
+&lt;img src="lec02_files/figure-html/unnamed-chunk-8-1.png" width="864" /&gt;
+
+]
+]
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M632 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8zM553.3 87.1c-5.7-3.8-9.3-10-9.3-16.8V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v62.3c0 22 10.2 43.4 28.6 55.4 42.2 27.3 67.4 73.8 67.4 124V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-65.5-32.4-126.2-86.7-162.6zM432 352H48c-26.5 0-48 21.5-48 48v64c0 26.5 21.5 48 48 48h384c8.8 0 16-7.2 16-16V368c0-8.8-7.2-16-16-16zm-32 112H224v-64h176v64zm87.7-322.4C463.8 125 448 99.3 448 70.3V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v66.4c0 43.7 24.6 81.6 60.3 106.7 22.4 15.7 35.7 41.2 35.7 68.6V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-43.3-21-83.4-56.3-108.1zM536 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Mortality by age group
+
+.pull-left[
+.blockquote[
+What does this summary of data reveal?
+]
+
+- Not many young people died.
+- Most old people died.
+- In the middle age groups, smokers tended to have higher mortality rates than non-smokers.
+]
+
+.pull-right[
+.small[
+
+```r
+p
+```
+
+&lt;img src="lec02_files/figure-html/unnamed-chunk-9-1.png" width="864" /&gt;
+]
+]
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M632 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8zM553.3 87.1c-5.7-3.8-9.3-10-9.3-16.8V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v62.3c0 22 10.2 43.4 28.6 55.4 42.2 27.3 67.4 73.8 67.4 124V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-65.5-32.4-126.2-86.7-162.6zM432 352H48c-26.5 0-48 21.5-48 48v64c0 26.5 21.5 48 48 48h384c8.8 0 16-7.2 16-16V368c0-8.8-7.2-16-16-16zm-32 112H224v-64h176v64zm87.7-322.4C463.8 125 448 99.3 448 70.3V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v66.4c0 43.7 24.6 81.6 60.3 106.7 22.4 15.7 35.7 41.2 35.7 68.6V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-43.3-21-83.4-56.3-108.1zM536 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## How did we got the wrong overall conclusion?
+
+.pull-left[
+Consider the distribution of samples by smoking status across age groups.
+
+.small[
+
+```r
+p2 = y %&gt;% 
+  uncount(weights = count) %&gt;%
+  ggplot() + 
+  aes(x = age_group, fill = status) + 
+  geom_bar() + 
+  theme_minimal(base_size = 34) + 
+  scale_fill_brewer(palette = "Paired") + 
+  labs(y = "Count", 
+       x = "Age group", 
+       fill = "") + 
+  theme(panel.grid.major.y = element_blank(), 
+        legend.position = "bottom") + 
+  guides(fill = guide_legend(reverse = TRUE)) + 
+  coord_flip()
+```
+]
+]
+
+.pull-right[
+
+```r
+p2
+```
+
+&lt;img src="lec02_files/figure-html/unnamed-chunk-11-1.png" width="864" /&gt;
+]
+
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M632 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8zM553.3 87.1c-5.7-3.8-9.3-10-9.3-16.8V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v62.3c0 22 10.2 43.4 28.6 55.4 42.2 27.3 67.4 73.8 67.4 124V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-65.5-32.4-126.2-86.7-162.6zM432 352H48c-26.5 0-48 21.5-48 48v64c0 26.5 21.5 48 48 48h384c8.8 0 16-7.2 16-16V368c0-8.8-7.2-16-16-16zm-32 112H224v-64h176v64zm87.7-322.4C463.8 125 448 99.3 448 70.3V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v66.4c0 43.7 24.6 81.6 60.3 106.7 22.4 15.7 35.7 41.2 35.7 68.6V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-43.3-21-83.4-56.3-108.1zM536 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## How did we got the wrong overall conclusion?
+
+.pull-left[
+.blockquote[
+What does this summary of data reveal?]
+
+-  As there are many more young women who smoked than older women, and as younger women are expected to live longer than older women, adding all the groups together makes smoking appear to be beneficial.
+- This is a classic example of Simpson's Paradox phenomenon; it shows that a trend present within multiple groups can reverse when the groups are combined. 
+]
+
+.pull-right[
+
+```r
+p2
+```
+
+&lt;img src="lec02_files/figure-html/unnamed-chunk-12-1.png" width="864" /&gt;
+]
+
+.footnote[
+&lt;i class="fa fa-link"&gt;&lt;/i&gt;
+[Further reading: Berman, DalleMule, Greene, and Lucker (2012)](https://www.statslife.org.uk/the-statistics-dictionary/2012-simpson-s-paradox-a-cautionary-tale-in-advanced-analytics)
+]
+
+&lt;!-- --- --&gt;
+
+&lt;!-- ## Observational studies result from using an historical control  --&gt;
+
+&lt;!-- Some studies present as a controlled experiment, but on further examination, there is a **historical control**, which means that time is a confounding variable. --&gt;
+
+&lt;!-- For example, investigators might compare the effect of a new medication on current patients, with an old medication on past patients. The .bold[.blue[treatment group]] (new drug) and the historical .bold[.red[control group]] (old drug) may differ in aspects beside the treatment. --&gt;
+
+&lt;!-- Controlled experiments need to be performed in the same time period - **contemporaneously**. --&gt;
+
+&lt;!-- --- --&gt;
+
+&lt;!-- ## Take care --&gt;
+
+&lt;!-- There are 3 different uses of the word 'control': --&gt;
+
+&lt;!-- 1. A control = a subject who did not get the treatment. --&gt;
+&lt;!-- 2. A controlled experiment = a study where the investigators allocate subjects to the 2 groups.  --&gt;
+&lt;!-- 3. Controlling for confounders = trying to reduce the influence of confounding variables. --&gt;
+
+---
+&lt;svg viewBox="0 0 581 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M581 226.6C581 119.1 450.9 32 290.5 32S0 119.1 0 226.6C0 322.4 103.3 402 239.4 418.1V480h99.1v-61.5c24.3-2.7 47.6-7.4 69.4-13.9L448 480h112l-67.4-113.7c54.5-35.4 88.4-84.9 88.4-139.7zm-466.8 14.5c0-73.5 98.9-133 220.8-133s211.9 40.7 211.9 133c0 50.1-26.5 85-70.3 106.4-2.4-1.6-4.7-2.9-6.4-3.7-10.2-5.2-27.8-10.5-27.8-10.5s86.6-6.4 86.6-92.7-90.6-87.9-90.6-87.9h-199V361c-74.1-21.5-125.2-67.1-125.2-119.9zm225.1 38.3v-55.6c57.8 0 87.8-6.8 87.8 27.3 0 36.5-38.2 28.3-87.8 28.3zm-.9 72.5H365c10.8 0 18.9 11.7 24 19.2-16.1 1.9-33 2.8-50.6 2.9v-22.1z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## R packages and functions
+
+.small[
+- `readr::read_csv()` for reading in csv files
+- `tidyr::uncount()` for converting tabulated data to observation level data
+- `dplyr::glimpse()` for inspecting the structure of objects
+- `dplyr::group_by()` for creating a grouping structure in your data
+- `dplyr::summarise()` for extracting summary statistics from grouped data
+- `dplyr::n()` for calculating the number of observations in a group
+- `base::dim()` for finding the dimensions (`rows columns`) of a data frame
+- `base::sum(survival == "Died")` counts the number of times the variable `survival` equals `"Died"`
+- `ggplot2::ggplot()` and associated functions from the **ggplot2** package `aes()`, `geom_bar()`, `labs()`, `scale_fill_brewer()`, `theme_bw()`, `theme_minimal()`
+- `scales::percent_format()` for nice formatting of **ggplot2** axes.  E.g. to make the y axis nicely formatted, `scale_y_continuous(labels = scales::percent_format())`
+]
+
+---
+class: font110 columns-2
+
+## References
+
+Appleton, D. R., J. M. French, and M. P. J.
+Vanderpump (1996). "Ignoring a Covariate: An Example
+of Simpson's Paradox". In: _The American
+Statistician_ 50.4, pp. 340-341. DOI:
+[10.1080/00031305.1996.10473563](https://doi.org/10.1080%2F00031305.1996.10473563).
+
+Berman, S., L. DalleMule, M. Greene, et al. (2012).
+"Simpson's Paradox: a cautionary tale in advanced
+analytics". In: _Significance_. URL:
+[https://www.significancemagazine.com/14-the-statistics-dictionary/106-simpson-s-paradox-a-cautionary-tale-in-advanced-analytics](https://www.significancemagazine.com/14-the-statistics-dictionary/106-simpson-s-paradox-a-cautionary-tale-in-advanced-analytics).
+
+Schuman, H. and J. M. Converse (1971). "The effects
+of black and white interviewers on black responses in
+1968". In: _Public Opinion Quarterly_ 35.1, pp.
+44-68. ISSN: 0033-362X. DOI:
+[10.1086/267866](https://doi.org/10.1086%2F267866).
+
+Simpson, E. H. (1951). "The Interpretation of
+Interaction in Contingency Tables". In: _Journal of
+the Royal Statistical Society. Series B
+(Methodological)_ 13.2, pp. 238-241. URL:
+[http://www.jstor.org/stable/2984065](http://www.jstor.org/stable/2984065).
+
+Tunbridge, W. M. G., D. C. Evered, R. Hall, et al.
+(1977). "The spectrum of thyroid disease in a
+community: the Whickham survey". In: _Clinical
+Endocrinology_ 7.6, pp. 481-493. DOI:
+[10.1111/j.1365-2265.1977.tb01340.x](https://doi.org/10.1111%2Fj.1365-2265.1977.tb01340.x).
+
+Vanderpump, M. P. J., W. M. G. Tunbrldge, J. M.
+French, et al. (1995). "The incidence of thyroid
+disorders in the community: a twenty-year follow-up
+of the Whickham Survey". In: _Clinical Endocrinology_
+43.1, pp. 55-68. DOI:
+[10.1111/j.1365-2265.1995.tb01894.x](https://doi.org/10.1111%2Fj.1365-2265.1995.tb01894.x).
+
+Wickham, H. (2016). _ggplot2: Elegant Graphics for
+Data Analysis_. New York, NY: Springer-Verlag. ISBN:
+978-3-319-24277-4. URL:
+[http://ggplot2.tidyverse.org/](http://ggplot2.tidyverse.org/).
+
+Wickham, H., R. François, L. Henry, et al. (2018).
+_dplyr: A Grammar of Data Manipulation_. R package
+version 0.7.5. URL:
+[https://CRAN.R-project.org/package=dplyr](https://CRAN.R-project.org/package=dplyr).
+
+Wickham, H. and L. Henry (2018). _tidyr: Easily Tidy
+Data with 'spread()' and 'gather()' Functions_. R
+package version 0.8.1. URL:
+[https://CRAN.R-project.org/package=tidyr](https://CRAN.R-project.org/package=tidyr).
+
+Wickham, H., J. Hester, and R. Francois (2017).
+_readr: Read Rectangular Text Data_. R package
+version 1.1.1. URL:
+[https://CRAN.R-project.org/package=readr](https://CRAN.R-project.org/package=readr).
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="assets/remark-zoom.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>DATA2002</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Garth Tarr" />
+    <script src="lec07_files/header-attrs-2.10/header-attrs.js"></script>
+    <link href="lec07_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } },
+      "HTML-CSS": {
+        styles: {
+          ".MathJax a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+          ".MathJax_Preview a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+        }
+      }
+      });
+    </script>
+    <link rel="stylesheet" href="assets/sydney-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="assets/sydney.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# DATA2002
+## Testing for homogeneity
+### Garth Tarr
+
+---
+
+class: segue
+
+
+
+
+
+.large[
+Testing for homogeneity in `\(2\times2\)` tables
+
+Testing for homogeneity in general tables
+]
+
+---
+class: segue
+
+# Testing for homogeneity in `\(2\times2\)` tables
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M201.5 174.8l55.7 55.8c3.1 3.1 3.1 8.2 0 11.3l-11.3 11.3c-3.1 3.1-8.2 3.1-11.3 0l-55.7-55.8-45.3 45.3 55.8 55.8c3.1 3.1 3.1 8.2 0 11.3l-11.3 11.3c-3.1 3.1-8.2 3.1-11.3 0L111 265.2l-26.4 26.4c-17.3 17.3-25.6 41.1-23 65.4l7.1 63.6L2.3 487c-3.1 3.1-3.1 8.2 0 11.3l11.3 11.3c3.1 3.1 8.2 3.1 11.3 0l66.3-66.3 63.6 7.1c23.9 2.6 47.9-5.4 65.4-23l181.9-181.9-135.7-135.7-64.9 65zm308.2-93.3L430.5 2.3c-3.1-3.1-8.2-3.1-11.3 0l-11.3 11.3c-3.1 3.1-3.1 8.2 0 11.3l28.3 28.3-45.3 45.3-56.6-56.6-17-17c-3.1-3.1-8.2-3.1-11.3 0l-33.9 33.9c-3.1 3.1-3.1 8.2 0 11.3l17 17L424.8 223l17 17c3.1 3.1 8.2 3.1 11.3 0l33.9-34c3.1-3.1 3.1-8.2 0-11.3l-73.5-73.5 45.3-45.3 28.3 28.3c3.1 3.1 8.2 3.1 11.3 0l11.3-11.3c3.1-3.2 3.1-8.2 0-11.4z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## COVID treatment
+
+Liu, Lin, Baine, et al. (2020) performed a retrospective, propensity score-matched case-control study to assess the effectiveness of convalescent plasma therapy in 39 patients with severe or life-threatening COVID-19 at The Mount Sinai Hospital in New York City. 
+
+`$$\begin{array}{l|ccc|c}
+&amp; \text{Died} &amp; \text{Discharged} &amp; \text{Censored} &amp;\\ \hline
+\text{Plasma treatment} &amp; 5 &amp; 28 &amp; 6 &amp; 39 \\
+\text{No plasma treatent} &amp; 38 &amp; 104 &amp; 14 &amp; 156 \\ \hline
+&amp;  43 &amp; 132 &amp; 20 &amp; 195 \\
+\end{array}$$`
+
+.blockquote[
+&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 448c-110.532 0-200-89.431-200-200 0-110.495 89.472-200 200-200 110.491 0 200 89.471 200 200 0 110.53-89.431 200-200 200zm107.244-255.2c0 67.052-72.421 68.084-72.421 92.863V300c0 6.627-5.373 12-12 12h-45.647c-6.627 0-12-5.373-12-12v-8.659c0-35.745 27.1-50.034 47.579-61.516 17.561-9.845 28.324-16.541 28.324-29.579 0-17.246-21.999-28.693-39.784-28.693-23.189 0-33.894 10.977-48.942 29.969-4.057 5.12-11.46 6.071-16.666 2.124l-27.824-21.098c-5.107-3.872-6.251-11.066-2.644-16.363C184.846 131.491 214.94 112 261.794 112c49.071 0 101.45 38.304 101.45 88.8zM298 368c0 23.159-18.841 42-42 42s-42-18.841-42-42 18.841-42 42-42 42 18.841 42 42z"&gt;&lt;/path&gt;&lt;/svg&gt;
+Is there any evidence that convalescent plasma is an effective treatment for severe COVID-19?
+]
+
+&lt;br&gt;
+
+**We will focus only on the patients who had an outcome that was able to be observed during the study (died or discharged).**
+
+???
+
+Convalescent plasma is the acellular component of blood that contains antibodies. When the donor is someone who has recovered from COVID-19, the plasma includes antibodies that recognise SARS-CoV-2. 
+
+The antibodies in the plasma are thought to exert an antiviral effect in the recipient, suppressing virus replication before patients have mounted their own immune responses. 
+
+---
+
+## Test of homogeneity
+
+- Suppose that observations are sampled from two independent populations, each of which is categorised according to the same set of outcomes.
+
+- We want to test whether the distribution (proportions) of the outcomes are the same across the different populations.
+
+In our COVID-19 treatment example, we will consider the proportions of patients treated with plasma who died or were discharged and (separately) the proportion of patients who were not treated with plasma who died or were discharged.
+`$$\begin{array}{l|cc|c}
+&amp; \text{Outcome 1: Died} &amp; \text{Outcome 2: Discharged} &amp; \text{Row total (fixed)} \\ \hline
+\text{Population 1: Plasma treatment}  &amp; \color{red}{p_{11}} &amp; \color{blue}{p_{12}} &amp; \color{red}{p_{11}} + \color{blue}{p_{12}} = 1\\
+\text{Population 2: No plasma treatment} &amp; \color{red}{p_{21}} &amp; \color{blue}{p_{22}} &amp; \color{red}{p_{21}} + \color{blue}{p_{22}} = 1 \\ \hline
+\end{array}$$`
+
+Under the null hypothesis of **homogeneity** the proportion of patients who died is the same in both populations `\(\color{red}{p_{11}} = \color{red}{p_{21}}\)`, and the proportion of patients who were discharged is the same in both populations `\(\color{blue}{p_{12}} = \color{blue}{p_{22}}\)`.
+
+---
+
+## Two way contigency table
+
+`$$\begin{array}{l|cc|c}
+&amp; \text{Died} &amp; \text{Discharged} &amp; \\ \hline
+\text{Plasma treatment} &amp; 5 &amp; 28 &amp; 33 \\
+\text{No plasma treatent} &amp; 38 &amp; 104 &amp; 142 \\ \hline
+&amp;  43 &amp; 132 &amp; 175 \\
+\end{array}$$`
+
+- A contingency table allows us to tabulate data from multiple categorical variables.
+
+- Contingency tables are heavily used in health, survey research, business intelligence, engineering and scientific research.
+
+- The above table is a two-way a contingency table, specifically a `\(2 \times 2\)` contingency table.
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M201.5 174.8l55.7 55.8c3.1 3.1 3.1 8.2 0 11.3l-11.3 11.3c-3.1 3.1-8.2 3.1-11.3 0l-55.7-55.8-45.3 45.3 55.8 55.8c3.1 3.1 3.1 8.2 0 11.3l-11.3 11.3c-3.1 3.1-8.2 3.1-11.3 0L111 265.2l-26.4 26.4c-17.3 17.3-25.6 41.1-23 65.4l7.1 63.6L2.3 487c-3.1 3.1-3.1 8.2 0 11.3l11.3 11.3c3.1 3.1 8.2 3.1 11.3 0l66.3-66.3 63.6 7.1c23.9 2.6 47.9-5.4 65.4-23l181.9-181.9-135.7-135.7-64.9 65zm308.2-93.3L430.5 2.3c-3.1-3.1-8.2-3.1-11.3 0l-11.3 11.3c-3.1 3.1-3.1 8.2 0 11.3l28.3 28.3-45.3 45.3-56.6-56.6-17-17c-3.1-3.1-8.2-3.1-11.3 0l-33.9 33.9c-3.1 3.1-3.1 8.2 0 11.3l17 17L424.8 223l17 17c3.1 3.1 8.2 3.1 11.3 0l33.9-34c3.1-3.1 3.1-8.2 0-11.3l-73.5-73.5 45.3-45.3 28.3 28.3c3.1 3.1 8.2 3.1 11.3 0l11.3-11.3c3.1-3.2 3.1-8.2 0-11.4z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Two way contigency table in R
+
+
+```r
+library(tidyverse)
+dat = read_csv("https://raw.githubusercontent.com/DATA2002/data/master/covidplasma.csv")
+dplyr::glimpse(dat)
+```
+
+```
+## Rows: 195
+## Columns: 3
+## $ subject   &lt;dbl&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 1…
+## $ treatment &lt;chr&gt; "Plasma", "Plasma", "Plasma", "Plasma", …
+## $ outcome   &lt;chr&gt; "Died", "Died", "Died", "Died", "Died", …
+```
+
+```r
+dat = dat %&gt;% filter(outcome != "Censored") %&gt;% 
+  mutate(treatment = factor(treatment, levels = c("Plasma", "No plasma")),
+         outcome = factor(outcome, levels = c("Died","Discharged"))) 
+```
+
+.pull-left[
+
+```r
+table(dat$treatment, dat$outcome)
+```
+
+```
+##            
+##             Died Discharged
+##   Plasma       5         28
+##   No plasma   38        104
+```
+]
+.pull-right[
+
+```r
+dat %&gt;% janitor::tabyl(treatment, outcome)
+```
+
+```
+##  treatment Died Discharged
+##     Plasma    5         28
+##  No plasma   38        104
+```
+]
+
+???
+
+The numbers in the data were extracted from the journal article, but the data file was manually generated using the following code:
+
+
+```r
+vals =  c(5, 28, 6, 38, 104, 14)
+x = matrix(vals, ncol = 3, byrow = TRUE)
+xdf = tibble::tibble(
+  subject = 1:sum(x),
+  treatment = rep(c("Plasma","No plasma"), times = rowSums(x)),
+  outcome = rep(c("Died","Discharged","Censored",
+                  "Died","Discharged","Censored"), times = vals)
+)
+write_csv(xdf, "covidplasma.csv")
+```
+
+---
+
+## Notation
+
+In `\(2\times2\)` contingency tables, for column `\(c\)` and row `\(r\)` let,
+`$$y_{\bullet c} = \sum_{j=1}^2 y_{jc} \quad \text{and} \quad y_{r \bullet} = \sum_{j=1}^2 y_{rj}$$`
+
+`$$\begin{array}{l|cc|c}
+&amp; \text{Died} &amp; \text{Discharged} &amp; \text{Row total (fixed)} \\ \hline
+\text{Plasma treatment} &amp; y_{11} &amp; y_{12} &amp; y_{1\bullet} =  n_1\\
+\text{No plasma treatment} &amp; y_{21} &amp; y_{22} &amp; y_{2\bullet} = n_2 \\ \hline
+\text{Column total} &amp;  y_{\bullet1} &amp; y_{\bullet2} &amp; n = n_1 + n_2\\
+\end{array}$$`
+
+Under the null hypothesis of homogeneity we have `\(p_{11} = p_{21}\)` and `\(p_{12} = p_{22}\)` so our best estimate of the proportion in each category is the Column total divided by the overall sample size,
+`$$\hat p_{ij} =  \frac{y_{\bullet j}}{n}.$$`
+Under `\(H_0\)`, the expected counts are `\(e_{ij} = n_i \hat{p}_{ij} = y_{i \bullet}\dfrac{y_{\bullet j}}{n}\)`.
+
+---
+
+## Chi-squared test of homogeneity
+
+With our observed counts and expected counts in each cell, we can construct a chi-squared test for homogeneity,
+`$$T = \sum_{i=1}^2\sum_{j=1}^2\frac{(Y_{ij}-e_{ij})^2}{e_{ij}}  \sim \chi^2_1$$`
+
+
+&lt;br&gt;
+
+The expected cell counts are, 
+`$$e_{ij} = n_i \hat{p}_{ij} = y_{i \bullet}\dfrac{y_{\bullet j}}{n} = \frac{\text{Row }i\text{ total}\times \text{Column }j\text{ total}}{\text{Overall total}}$$`
+
+&lt;br&gt;
+
+.blockquote[
+&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 448c-110.532 0-200-89.431-200-200 0-110.495 89.472-200 200-200 110.491 0 200 89.471 200 200 0 110.53-89.431 200-200 200zm107.244-255.2c0 67.052-72.421 68.084-72.421 92.863V300c0 6.627-5.373 12-12 12h-45.647c-6.627 0-12-5.373-12-12v-8.659c0-35.745 27.1-50.034 47.579-61.516 17.561-9.845 28.324-16.541 28.324-29.579 0-17.246-21.999-28.693-39.784-28.693-23.189 0-33.894 10.977-48.942 29.969-4.057 5.12-11.46 6.071-16.666 2.124l-27.824-21.098c-5.107-3.872-6.251-11.066-2.644-16.363C184.846 131.491 214.94 112 261.794 112c49.071 0 101.45 38.304 101.45 88.8zM298 368c0 23.159-18.841 42-42 42s-42-18.841-42-42 18.841-42 42-42 42 18.841 42 42z"&gt;&lt;/path&gt;&lt;/svg&gt; Why 1 degree of freedom for the chi-squared test?
+]
+
+
+---
+
+## Hypothesis testing workflow
+
+The chi-squared test of homogeneity for a `\(2 \times 2\)` contingency table is:
+
+&gt;- **Hypothesis:** `\(H_0\colon\ p_{11} = p_{21} \ \&amp; \ p_{12} = p_{22}\)` vs `\(H_1\colon\ p_{11} \ne p_{21} \ \&amp; \ p_{12} \ne p_{22}\)`
+
+&gt;-  **Assumptions:** observations randomly sampled from two independent populations and `\(e_{ij}=y_{i\bullet}y_{\bullet j}/n \ge 5\)`.
+
+&gt;- **Test statistic:** `\(T = \displaystyle\sum_{i=1}^2\sum_{j=1}^2\dfrac{(Y_{ij}-e_{ij})^2}{e_{ij}}\)`. Under `\(H_0\)`, `\(T \sim \chi_{1}^2\)` approx.
+
+&gt;- **Observed test statistic:** `\(t_0 = \displaystyle\sum_{i=1}^2\sum_{j=1}^2\dfrac{(y_{ij}-e_{ij})^2}{e_{ij}}\)`. 
+
+&gt;-  **P-value:** `\(P(T \ge t_0) \ = \ P(\chi_{1}^2 \ge t_0)\)`
+
+&gt;- **Decision:** Reject `\(H_0\)` if the p-value `\(&lt; \alpha\)`
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M201.5 174.8l55.7 55.8c3.1 3.1 3.1 8.2 0 11.3l-11.3 11.3c-3.1 3.1-8.2 3.1-11.3 0l-55.7-55.8-45.3 45.3 55.8 55.8c3.1 3.1 3.1 8.2 0 11.3l-11.3 11.3c-3.1 3.1-8.2 3.1-11.3 0L111 265.2l-26.4 26.4c-17.3 17.3-25.6 41.1-23 65.4l7.1 63.6L2.3 487c-3.1 3.1-3.1 8.2 0 11.3l11.3 11.3c3.1 3.1 8.2 3.1 11.3 0l66.3-66.3 63.6 7.1c23.9 2.6 47.9-5.4 65.4-23l181.9-181.9-135.7-135.7-64.9 65zm308.2-93.3L430.5 2.3c-3.1-3.1-8.2-3.1-11.3 0l-11.3 11.3c-3.1 3.1-3.1 8.2 0 11.3l28.3 28.3-45.3 45.3-56.6-56.6-17-17c-3.1-3.1-8.2-3.1-11.3 0l-33.9 33.9c-3.1 3.1-3.1 8.2 0 11.3l17 17L424.8 223l17 17c3.1 3.1 8.2 3.1 11.3 0l33.9-34c3.1-3.1 3.1-8.2 0-11.3l-73.5-73.5 45.3-45.3 28.3 28.3c3.1 3.1 8.2 3.1 11.3 0l11.3-11.3c3.1-3.2 3.1-8.2 0-11.4z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## COVID treatment
+
+Liu, Lin, Baine, et al. (2020) performed a retrospective, propensity score-matched case-control study to assess the effectiveness of convalescent plasma therapy in 39 patients with severe or life-threatening COVID-19 at The Mount Sinai Hospital in New York City. 
+
+`$$\begin{array}{l|cc|c}
+&amp; \text{Died} &amp; \text{Discharged} &amp; \\ \hline
+\text{Plasma treatment} &amp; 5 &amp; 28 &amp; 33 \\
+\text{No plasma treatent} &amp; 38 &amp; 104 &amp; 142 \\ \hline
+&amp;  43 &amp; 132 &amp; 175 \\
+\end{array}$$`
+
+.blockquote[
+&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 448c-110.532 0-200-89.431-200-200 0-110.495 89.472-200 200-200 110.491 0 200 89.471 200 200 0 110.53-89.431 200-200 200zm107.244-255.2c0 67.052-72.421 68.084-72.421 92.863V300c0 6.627-5.373 12-12 12h-45.647c-6.627 0-12-5.373-12-12v-8.659c0-35.745 27.1-50.034 47.579-61.516 17.561-9.845 28.324-16.541 28.324-29.579 0-17.246-21.999-28.693-39.784-28.693-23.189 0-33.894 10.977-48.942 29.969-4.057 5.12-11.46 6.071-16.666 2.124l-27.824-21.098c-5.107-3.872-6.251-11.066-2.644-16.363C184.846 131.491 214.94 112 261.794 112c49.071 0 101.45 38.304 101.45 88.8zM298 368c0 23.159-18.841 42-42 42s-42-18.841-42-42 18.841-42 42-42 42 18.841 42 42z"&gt;&lt;/path&gt;&lt;/svg&gt;
+Is there any evidence that convalescent plasma is an effective treatment for severe COVID-19?
+]
+
+---
+
+`$$\begin{array}{l|cc|c}
+y_{ij} &amp; \text{Died} &amp; \text{Discharged} &amp; \text{Row total} \\ \hline
+\text{Plasma treatment} &amp; 5 &amp; 28 &amp; 33 \\
+\text{No plasma treatent} &amp; 38 &amp; 104 &amp; 142 \\ \hline
+\text{Column total} &amp;  43 &amp; 132 &amp; 175 \\
+\end{array}$$`
+
+`$$\begin{array}{l|cc|c}
+e_{ij} &amp; \text{Died} &amp; \text{Discharged} &amp; \text{Row total} \\ \hline
+\text{Plasma treatment} &amp; \dfrac{33 \times 43}{175} = 8.11 &amp; \dfrac{33 \times 132}{175} = 24.89 &amp; 33 \\
+\text{No plasma treatent} &amp; \dfrac{142 \times 43}{175} = 34.89 &amp; \dfrac{142 \times 132}{175} = 107.11 &amp; 142 \\ \hline
+\text{Column total} &amp;  43 &amp; 132 &amp; 175 \\
+\end{array}$$`
+**Observed test statistic:**
+`$$\begin{align*}
+t_0 &amp; = \displaystyle\sum_{i=1}^2\sum_{j=1}^2\dfrac{(y_{ij}-e_{ij})^2}{e_{ij}} \\
+&amp; = \frac{(5 - 8.11)^2}{8.11} + \frac{(28 - 24.89)^2}{24.89} + \frac{(38 - 34.89)^2}{34.89} + \frac{(104 - 107.11)^2}{107.11}\\
+&amp; = 1.9471
+\end{align*}$$`
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M201.5 174.8l55.7 55.8c3.1 3.1 3.1 8.2 0 11.3l-11.3 11.3c-3.1 3.1-8.2 3.1-11.3 0l-55.7-55.8-45.3 45.3 55.8 55.8c3.1 3.1 3.1 8.2 0 11.3l-11.3 11.3c-3.1 3.1-8.2 3.1-11.3 0L111 265.2l-26.4 26.4c-17.3 17.3-25.6 41.1-23 65.4l7.1 63.6L2.3 487c-3.1 3.1-3.1 8.2 0 11.3l11.3 11.3c3.1 3.1 8.2 3.1 11.3 0l66.3-66.3 63.6 7.1c23.9 2.6 47.9-5.4 65.4-23l181.9-181.9-135.7-135.7-64.9 65zm308.2-93.3L430.5 2.3c-3.1-3.1-8.2-3.1-11.3 0l-11.3 11.3c-3.1 3.1-3.1 8.2 0 11.3l28.3 28.3-45.3 45.3-56.6-56.6-17-17c-3.1-3.1-8.2-3.1-11.3 0l-33.9 33.9c-3.1 3.1-3.1 8.2 0 11.3l17 17L424.8 223l17 17c3.1 3.1 8.2 3.1 11.3 0l33.9-34c3.1-3.1 3.1-8.2 0-11.3l-73.5-73.5 45.3-45.3 28.3 28.3c3.1 3.1 8.2 3.1 11.3 0l11.3-11.3c3.1-3.2 3.1-8.2 0-11.4z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## COVID treatment
+
+&gt;- **Hypothesis:** `\(H_0\colon\ p_{11} = p_{21}\)` and `\(p_{12} = p_{22}\)` vs `\(H_1\colon\ p_{11} \ne p_{21}\)` and `\(p_{12} \ne p_{22}\)` **or** death and discharge outcomes are homogenous across both the plasma and non-plasma populations.
+
+&gt;- **Assumptions:** observations randomly sampled from two independent populations and `\(e_{ij} = y_{i\bullet}y_{\bullet j}/n \ge 5\)`. 
+
+&gt;- **Test statistic:** `\(T = \displaystyle\sum_{i=1}^2\sum_{j=1}^2\dfrac{(Y_{ij}-e_{ij})^2}{e_{ij}}\)`. Under `\(H_0\)`, `\(T \sim \chi_{1}^2\)` approx.
+
+&gt;- **Observed test statistic:** `\(t_0 = 1.9471\)`
+
+&gt;-  **P-value:** `\(P(T \ge t_0) = P(\chi_{1}^2 \ge 1.9471) = 0.16\)`
+
+&gt;- **Decision:** Do not reject `\(H_0\)` as the p-value is quite large, i.e. there is no evidence to suggest there is a significant difference in the proportion of dead and discharged patients between the plasma and control groups.
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M201.5 174.8l55.7 55.8c3.1 3.1 3.1 8.2 0 11.3l-11.3 11.3c-3.1 3.1-8.2 3.1-11.3 0l-55.7-55.8-45.3 45.3 55.8 55.8c3.1 3.1 3.1 8.2 0 11.3l-11.3 11.3c-3.1 3.1-8.2 3.1-11.3 0L111 265.2l-26.4 26.4c-17.3 17.3-25.6 41.1-23 65.4l7.1 63.6L2.3 487c-3.1 3.1-3.1 8.2 0 11.3l11.3 11.3c3.1 3.1 8.2 3.1 11.3 0l66.3-66.3 63.6 7.1c23.9 2.6 47.9-5.4 65.4-23l181.9-181.9-135.7-135.7-64.9 65zm308.2-93.3L430.5 2.3c-3.1-3.1-8.2-3.1-11.3 0l-11.3 11.3c-3.1 3.1-3.1 8.2 0 11.3l28.3 28.3-45.3 45.3-56.6-56.6-17-17c-3.1-3.1-8.2-3.1-11.3 0l-33.9 33.9c-3.1 3.1-3.1 8.2 0 11.3l17 17L424.8 223l17 17c3.1 3.1 8.2 3.1 11.3 0l33.9-34c3.1-3.1 3.1-8.2 0-11.3l-73.5-73.5 45.3-45.3 28.3 28.3c3.1 3.1 8.2 3.1 11.3 0l11.3-11.3c3.1-3.2 3.1-8.2 0-11.4z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left[
+
+```r
+tab = table(dat$treatment, dat$outcome)
+tab
+```
+
+```
+##            
+##             Died Discharged
+##   Plasma       5         28
+##   No plasma   38        104
+```
+
+```r
+chisq.test(tab, correct = FALSE)
+```
+
+```
+## 
+## 	Pearson's Chi-squared test
+## 
+## data:  tab
+## X-squared = 1.9471, df = 1, p-value = 0.1629
+```
+]
+.pull-right[
+&lt;img src="lec07_files/figure-html/unnamed-chunk-6-1.png" width="864" /&gt;
+]
+
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M201.5 174.8l55.7 55.8c3.1 3.1 3.1 8.2 0 11.3l-11.3 11.3c-3.1 3.1-8.2 3.1-11.3 0l-55.7-55.8-45.3 45.3 55.8 55.8c3.1 3.1 3.1 8.2 0 11.3l-11.3 11.3c-3.1 3.1-8.2 3.1-11.3 0L111 265.2l-26.4 26.4c-17.3 17.3-25.6 41.1-23 65.4l7.1 63.6L2.3 487c-3.1 3.1-3.1 8.2 0 11.3l11.3 11.3c3.1 3.1 8.2 3.1 11.3 0l66.3-66.3 63.6 7.1c23.9 2.6 47.9-5.4 65.4-23l181.9-181.9-135.7-135.7-64.9 65zm308.2-93.3L430.5 2.3c-3.1-3.1-8.2-3.1-11.3 0l-11.3 11.3c-3.1 3.1-3.1 8.2 0 11.3l28.3 28.3-45.3 45.3-56.6-56.6-17-17c-3.1-3.1-8.2-3.1-11.3 0l-33.9 33.9c-3.1 3.1-3.1 8.2 0 11.3l17 17L424.8 223l17 17c3.1 3.1 8.2 3.1 11.3 0l33.9-34c3.1-3.1 3.1-8.2 0-11.3l-73.5-73.5 45.3-45.3 28.3 28.3c3.1 3.1 8.2 3.1 11.3 0l11.3-11.3c3.1-3.2 3.1-8.2 0-11.4z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.small[
+.pull-left[
+
+```r
+n = sum(tab)
+r = c = 2
+(row_totals = apply(tab, 1, sum))  # rowSums(tab)
+```
+
+```
+##    Plasma No plasma 
+##        33       142
+```
+
+```r
+(col_totals = apply(tab, 2, sum))  # colSums(tab)
+```
+
+```
+##       Died Discharged 
+##         43        132
+```
+
+```r
+(rt = matrix(row_totals, nrow = r, ncol = c, byrow = FALSE))
+```
+
+```
+##      [,1] [,2]
+## [1,]   33   33
+## [2,]  142  142
+```
+
+```r
+(ct = matrix(col_totals, nrow = r, ncol = c, byrow = TRUE))
+```
+
+```
+##      [,1] [,2]
+## [1,]   43  132
+## [2,]   43  132
+```
+]
+.pull-right[
+
+```r
+(etab = rt * ct / n) 
+# etab = row_totals%*%t(col_totals)/n
+```
+
+```
+##           [,1]      [,2]
+## [1,]  8.108571  24.89143
+## [2,] 34.891429 107.10857
+```
+
+```r
+etab &gt;= 5  # check Eij&gt;=5
+```
+
+```
+##      [,1] [,2]
+## [1,] TRUE TRUE
+## [2,] TRUE TRUE
+```
+
+```r
+(t0 = sum((tab - etab)^2/etab))
+```
+
+```
+## [1] 1.947113
+```
+
+```r
+(p.value = 1 - pchisq(t0, 1))
+```
+
+```
+## [1] 0.1628983
+```
+]
+]
+
+---
+class: segue
+
+# Testing for homogeneity in general tables
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M509.5 184.6L458.9 32.8C452.4 13.2 434.1 0 413.4 0H272v192h238.7c-.4-2.5-.4-5-1.2-7.4zM240 0H98.6c-20.7 0-39 13.2-45.5 32.8L2.5 184.6c-.8 2.4-.8 4.9-1.2 7.4H240V0zM0 224v240c0 26.5 21.5 48 48 48h416c26.5 0 48-21.5 48-48V224H0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Example: Voters
+
+A survey of voter sentiment was conducted in Labor and Liberal to compare the fraction of voters favouring a new tax reform package. Random samples of 100 voters were polled in each of the two parties, with results as follows:
+
+`$$\begin{array}{l|ccc|c}
+&amp; \text{Approve} &amp; \text{Not approve} &amp; \text{No comment} &amp; \text{Row total} \\ \hline
+\text{Labor} &amp; 62 &amp; 29 &amp; 9 &amp; 100 \\
+\text{Liberal} &amp; 47 &amp; 46 &amp; 7 &amp; 100 \\ \hline
+\text{Column total} &amp;  109 &amp; 75 &amp; 16 &amp; 200 \\
+\end{array}$$`
+
+.blockquote[
+&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 448c-110.532 0-200-89.431-200-200 0-110.495 89.472-200 200-200 110.491 0 200 89.471 200 200 0 110.53-89.431 200-200 200zm107.244-255.2c0 67.052-72.421 68.084-72.421 92.863V300c0 6.627-5.373 12-12 12h-45.647c-6.627 0-12-5.373-12-12v-8.659c0-35.745 27.1-50.034 47.579-61.516 17.561-9.845 28.324-16.541 28.324-29.579 0-17.246-21.999-28.693-39.784-28.693-23.189 0-33.894 10.977-48.942 29.969-4.057 5.12-11.46 6.071-16.666 2.124l-27.824-21.098c-5.107-3.872-6.251-11.066-2.644-16.363C184.846 131.491 214.94 112 261.794 112c49.071 0 101.45 38.304 101.45 88.8zM298 368c0 23.159-18.841 42-42 42s-42-18.841-42-42 18.841-42 42-42 42 18.841 42 42z"&gt;&lt;/path&gt;&lt;/svg&gt;
+Do the data present sufficient evidence to indicate that the fractions of voters favouring the new tax reform package differ in Labor and Liberal?
+]
+
+---
+
+## A general two-way contigency table
+
+`$$\begin{array}{c|cccc|c}
+&amp; \text{Category 1} &amp; \text{Category 2} &amp; \ldots &amp; \text{Category }c &amp; \text{Row total (fixed)} \\ \hline
+\text{Population 1} &amp; y_{11} &amp; y_{12} &amp; \ldots &amp; y_{1c} &amp; y_{1\bullet} \\
+\text{Population 2} &amp; y_{21} &amp; y_{22} &amp; \ldots &amp; y_{2c} &amp; y_{2\bullet} \\ 
+\vdots  &amp; \vdots &amp; \vdots &amp; &amp; \vdots &amp; \vdots \\
+\text{Population }r &amp; y_{r1} &amp; y_{r2} &amp; \ldots &amp; y_{rc} &amp; y_{r\bullet} \\ \hline
+\text{Column total} &amp; y_{\bullet 1} &amp; y_{\bullet 2} &amp; \ldots &amp; y_{\bullet c} &amp; y_{\bullet\bullet} = n
+\end{array}$$`
+
+- A contingency table allows us to tabulate data from multiple categorical variables.
+
+- We call the above table a two-way a contingency table, specifically a `\(r \times c\)` contingency table.
+
+- There are `\(rc\)` categories and either row or column totals are fixed (therefore, `\(n\)` is also fixed).
+
+---
+
+## Test of homogeneity in general two-way tables
+
+`$$\begin{array}{c|cccc|c}
+&amp; \text{Category 1} &amp; \text{Category 2} &amp; \ldots &amp; \text{Category }c &amp; \text{Row total} \\ \hline
+\text{Population 1} &amp; \color{red}{p_{11}} &amp; \color{blue}{p_{12}} &amp; \ldots &amp; \color{orange}{p_{1c}} &amp; p_{1\bullet} = 1\\
+\text{Population 2} &amp; \color{red}{p_{21}} &amp; \color{blue}{p_{22}} &amp; \ldots &amp; \color{orange}{p_{2c}} &amp; p_{2\bullet} = 1 \\ 
+\vdots  &amp; \vdots &amp; \vdots &amp; &amp; \vdots &amp; \vdots \\
+\text{Population }r &amp; \color{red}{p_{r1}} &amp; \color{blue}{p_{r2}} &amp; \ldots &amp; \color{orange}{p_{rc}} &amp; p_{r\bullet} = 1 \\ \hline
+\end{array}$$`
+
+Under the null hypothesis of **homogeneity** `\(\color{red}{p_{11}} = \color{red}{p_{21}} = \ldots = \color{red}{p_{r1}}\)`, `\(\color{blue}{p_{12}} = \color{blue}{p_{22}} = \ldots = \color{blue}{p_{r2}}\)`, `\(\ldots\)`, and `\(\color{orange}{p_{1c}} = \color{orange}{p_{2c}} = \ldots = \color{orange}{p_{rc}}\)`.
+
+---
+
+## Test of homogeneity
+
+`$$\begin{array}{l|ccc|c}
+&amp; \text{Approve} &amp; \text{Not approve} &amp; \text{No comment} &amp; \text{Row total} \\ \hline
+\text{Labor} &amp; y_{11} &amp; y_{12} &amp; y_{13} &amp; y_{1\bullet} = n_1 \\
+\text{Liberal} &amp; y_{21} &amp; y_{22} &amp; y_{23} &amp; y_{2\bullet} = n_2 \\ \hline
+\text{Column total} &amp;  y_{\bullet1} &amp; y_{\bullet2} &amp; y_{\bullet3} &amp; n \\
+\end{array}$$`
+
+Under the null hypothesis of homogeneity, `\(\color{red}{p_{11}} = \color{red}{p_{21}}\)`, `\(\color{blue}{p_{12}} = \color{blue}{p_{22}}\)` and `\(\color{orange}{p_{13}} = \color{orange}{p_{23}}\)`.  
+
+As we don't know `\(p_{ij}\)`, we need to estimate it, `\(\hat{p}_{ij} = \dfrac{y_{\bullet j}}{n}.\)`
+
+Under `\(H_0\)`, the expected counts are,
+`$$e_{ij} = n_i \hat{p}_{ij} = y_{i \bullet}\dfrac{y_{\bullet j}}{n} = \frac{\text{Row }i\text{ total}\times \text{Column }j\text{ total}}{\text{Overall total}},$$`
+and the test statistic is,
+`$$T = \sum_{i=1}^r\sum_{j=1}^c\frac{(Y_{ij}-e_{ij})^2}{e_{ij}}  \sim \chi^2_{(r-1)(c-1)}.$$`
+
+---
+
+## Degrees of freedom
+
+`$$\begin{array}{l|ccc|c}
+&amp; \text{Approve} &amp; \text{Not approve} &amp; \text{No comment} &amp; \text{Row total} \\ \hline
+\text{Labor} &amp; y_{11} &amp; y_{12} &amp; y_{13} &amp; y_{1\bullet } = n_1 \\
+\text{Liberal} &amp; y_{21} &amp; y_{22} &amp; y_{23} &amp; y_{2\bullet } = n_2 \\ \hline
+\text{Column total} &amp;  y_{\bullet 1} &amp; y_{\bullet 2} &amp; y_{\bullet 3} &amp; n \\
+\end{array}$$`
+
+- We need to estimate 3 parameters `\(\hat p_{\bullet 1}\)`, `\(\hat p_{\bullet 2}\)` and `\(\hat p_{\bullet 3}\)`.
+- The degrees of freedom for a `\(2 \times 3\)` table is `\(2\)`.
+- More generally the degress of freedom for a `\(r \ \times \ c\)` table is `\((r-1)(c-1)\)`.
+&lt;!-- `$$r(c - 1) - (c-1) = rc - r - c + 1 = (r-1)(c-1)$$` --&gt;
+
+---
+
+## Hypothesis testing workflow
+
+The chi-squared test of homogeneity for a `\(r \times c\)` contingency table is:
+
+&gt;- **Hypothesis:** `\(H_0\colon\ p_{1j}=p_{2j}= \ldots = p_{rj} \quad j=1, 2,\ldots, c\)` vs `\(H_1\colon\)` Not all equalities hold. 
+
+&gt;- **Assumptions:** `\(e_{ij}=y_{i\bullet }y_{\bullet j}/n \ge 5\)` and independent observations sampled from the `\(r\)` populations.
+
+&gt;- **Test statistic:** `\(T = \displaystyle\sum_{i=1}^r\sum_{j=1}^c\frac{(Y_{ij}-e_{ij})^2}{e_{ij}}\)`. Under `\(H_0\)`, `\(T \sim \chi_{(r-1)(c-1)}^2\)` approx.
+
+&gt;- **Observed test statistic:** `\(t_0 = \displaystyle\sum_{i=1}^r\sum_{j=1}^c\frac{(y_{ij}-e_{ij})^2}{e_{ij}}\)`
+
+&gt;- **P-value:** `\(P(T \ge t_0) = P(\chi_{(r-1)(c-1)}^2 \ge t_0)\)`
+
+&gt;- **Decision:** Reject `\(H_0\)` if the p-value `\(&lt; \alpha\)`
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M509.5 184.6L458.9 32.8C452.4 13.2 434.1 0 413.4 0H272v192h238.7c-.4-2.5-.4-5-1.2-7.4zM240 0H98.6c-20.7 0-39 13.2-45.5 32.8L2.5 184.6c-.8 2.4-.8 4.9-1.2 7.4H240V0zM0 224v240c0 26.5 21.5 48 48 48h416c26.5 0 48-21.5 48-48V224H0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Example: Voters
+
+A survey of voter sentiment was conducted in Labor and Liberal to compare the fraction of voters favouring a new tax reform package. Random samples of 100 voters were polled in each of the two parties, with results as follows:
+
+`$$\begin{array}{l|ccc|c}
+&amp; \text{Approve} &amp; \text{Not approve} &amp; \text{No comment} &amp; \text{Row total} \\ \hline
+\text{Labor} &amp; 62 &amp; 29 &amp; 9 &amp; 100 \\
+\text{Liberal} &amp; 47 &amp; 46 &amp; 7 &amp; 100 \\ \hline
+\text{Column total} &amp;  109 &amp; 75 &amp; 16 &amp; 200 \\
+\end{array}$$`
+
+.blockquote[
+&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 448c-110.532 0-200-89.431-200-200 0-110.495 89.472-200 200-200 110.491 0 200 89.471 200 200 0 110.53-89.431 200-200 200zm107.244-255.2c0 67.052-72.421 68.084-72.421 92.863V300c0 6.627-5.373 12-12 12h-45.647c-6.627 0-12-5.373-12-12v-8.659c0-35.745 27.1-50.034 47.579-61.516 17.561-9.845 28.324-16.541 28.324-29.579 0-17.246-21.999-28.693-39.784-28.693-23.189 0-33.894 10.977-48.942 29.969-4.057 5.12-11.46 6.071-16.666 2.124l-27.824-21.098c-5.107-3.872-6.251-11.066-2.644-16.363C184.846 131.491 214.94 112 261.794 112c49.071 0 101.45 38.304 101.45 88.8zM298 368c0 23.159-18.841 42-42 42s-42-18.841-42-42 18.841-42 42-42 42 18.841 42 42z"&gt;&lt;/path&gt;&lt;/svg&gt;
+Do the data present sufficient evidence to indicate that the fractions of voters favouring the new tax reform package differ in Labor and Liberal?
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M509.5 184.6L458.9 32.8C452.4 13.2 434.1 0 413.4 0H272v192h238.7c-.4-2.5-.4-5-1.2-7.4zM240 0H98.6c-20.7 0-39 13.2-45.5 32.8L2.5 184.6c-.8 2.4-.8 4.9-1.2 7.4H240V0zM0 224v240c0 26.5 21.5 48 48 48h416c26.5 0 48-21.5 48-48V224H0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Example: Voters
+
+&gt;- **Hypothesis:** `\(H_0\colon\ p_{1j}=p_{2j}\)` for `\(j=1,2,3\)`  vs  `\(H_1\colon\)` Not all equalities hold.
+
+&gt;-  **Assumptions:**  `\(e_{ij}=y_{i\bullet }y_{\bullet j}/n \ge 5\)`. 
+
+&gt;- **Test statistic:** `\(\displaystyle T=\sum_{i=1}^2\sum_{j=1}^3\frac{(Y_{ij}-e_{ij})^2}{e_{ij}}\)`. Under `\(H_0\)`, `\(T \sim \chi_{2}^2\)` approx.
+
+&gt;- **Test statistic:** `\(\displaystyle t_0=\sum_{i=1}^2\sum_{j=1}^3\frac{(y_{ij}-e_{ij})^2}{e_{ij}}=6.1676\)`
+
+&gt;- **P-value:** `\(P(T \ge t_0) = P(\chi_{2}^2 \ge 6.1676) = 0.046\)`
+
+&gt;- **Decision:** The p-value is less than 0.05, therefore we reject the null hypothesis and conclude that voter preferences about the new tax reform package are not homogenous across Liberal and Labour voters.
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M509.5 184.6L458.9 32.8C452.4 13.2 434.1 0 413.4 0H272v192h238.7c-.4-2.5-.4-5-1.2-7.4zM240 0H98.6c-20.7 0-39 13.2-45.5 32.8L2.5 184.6c-.8 2.4-.8 4.9-1.2 7.4H240V0zM0 224v240c0 26.5 21.5 48 48 48h416c26.5 0 48-21.5 48-48V224H0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+
+```r
+y = c(62, 47, 29, 46, 9, 7)
+n = sum(y)
+c = 3
+r = 2
+tab = matrix(y, nrow = r, ncol = c)  # default is to fill by column
+colnames(tab) = c("Approve", "Not approve", "No comment")
+rownames(tab) = c("Labor", "Liberal")
+tab
+```
+
+```
+##         Approve Not approve No comment
+## Labor        62          29          9
+## Liberal      47          46          7
+```
+
+```r
+chisq.test(tab, correct = FALSE)
+```
+
+```
+## 
+## 	Pearson's Chi-squared test
+## 
+## data:  tab
+## X-squared = 6.1676, df = 2, p-value = 0.04579
+```
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M509.5 184.6L458.9 32.8C452.4 13.2 434.1 0 413.4 0H272v192h238.7c-.4-2.5-.4-5-1.2-7.4zM240 0H98.6c-20.7 0-39 13.2-45.5 32.8L2.5 184.6c-.8 2.4-.8 4.9-1.2 7.4H240V0zM0 224v240c0 26.5 21.5 48 48 48h416c26.5 0 48-21.5 48-48V224H0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left[
+
+```r
+# MARGIN = 1 means apply the sum FUNction 
+# down rows. Alternative: rowSums(tab)
+(yr = apply(tab, MARGIN = 1, FUN = sum)) 
+```
+
+```
+##   Labor Liberal 
+##     100     100
+```
+
+```r
+# MARGIN = 2 means apply the sum FUNction 
+# across columns. Alternative: colSums(tab)
+(yc = apply(tab, MARGIN = 2,FUN = sum))
+```
+
+```
+##     Approve Not approve  No comment 
+##         109          75          16
+```
+
+```r
+(yr.mat = matrix(yr, nrow = r, ncol = c, 
+                 byrow = FALSE))
+```
+
+```
+##      [,1] [,2] [,3]
+## [1,]  100  100  100
+## [2,]  100  100  100
+```
+]
+.pull-right[
+
+```r
+(yc.mat = matrix(yc, nrow = r, ncol = c,
+                 byrow = TRUE))
+```
+
+```
+##      [,1] [,2] [,3]
+## [1,]  109   75   16
+## [2,]  109   75   16
+```
+
+```r
+# elementwise multiplication and division
+(etab = yr.mat * yc.mat / n) 
+```
+
+```
+##      [,1] [,2] [,3]
+## [1,] 54.5 37.5    8
+## [2,] 54.5 37.5    8
+```
+
+```r
+# could also do matrix multiplication %*%
+(etab = yr %*% t(yc) / n)
+```
+
+```
+##      Approve Not approve No comment
+## [1,]    54.5        37.5          8
+## [2,]    54.5        37.5          8
+```
+]
+
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M509.5 184.6L458.9 32.8C452.4 13.2 434.1 0 413.4 0H272v192h238.7c-.4-2.5-.4-5-1.2-7.4zM240 0H98.6c-20.7 0-39 13.2-45.5 32.8L2.5 184.6c-.8 2.4-.8 4.9-1.2 7.4H240V0zM0 224v240c0 26.5 21.5 48 48 48h416c26.5 0 48-21.5 48-48V224H0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left[
+
+```r
+etab &gt;= 5  # check e_ij &gt;= 5
+```
+
+```
+##      Approve Not approve No comment
+## [1,]    TRUE        TRUE       TRUE
+## [2,]    TRUE        TRUE       TRUE
+```
+
+```r
+(t0 = sum((tab - etab)^2/etab))
+```
+
+```
+## [1] 6.167554
+```
+
+```r
+(p.value = 1 - pchisq(t0, (r - 1) * (c - 1)))
+```
+
+```
+## [1] 0.04578601
+```
+]
+.pull-right[
+&lt;img src="lec07_files/figure-html/unnamed-chunk-14-1.png" width="864" /&gt;
+]
+
+
+&lt;!--
+
+More often than not two way tables are generated by **conditional sampling** where samples are drawn at each level of one factor and then these samples are classified according to the observed values of the second factor.
+
+For example, in a study of smoking ( `\(S\)` ) and lung cancer ( `\(R\)` ) data cannot be obtained via a simple random sample from the complete population but we can obtain information about the relationship via a **prospective study** where we take a large sample of smokers and an independent sample of non-smokers and record these people's health status for several years to determine the proportion who develop cancer. We can only estimate `\(P(R=i~|~S=j)\)` because the above method of collecting the information does not allow us to estimate the proportion of smokers in the population. 
+
+Alternatively, we can use hospital records to construct a **retrospective sample**. Under this scenario we draw samples from those known to have lung cancer and those known to be free of lung cancer and classify people according to their smoking history.  This enables us to estimate `\(P(S=j~|~R=i)\)`.
+
+Regardless of how the data are collected they are presented as a contingency table. It is critical that the person analysing the data **understands how the data were collected** as this affects the interpretation of the statistical output. 
+
+If we draw samples at each level of `\(S\)`, then we test for a common distribution for `\(R\)` across levels of `\(S\)`, i.e. 
+`$$H_0 \colon\ P (R = i~|~S = j) = P (R = i~|~S = 1), \quad 1\le i \le r, \ 1\le j \le s$$`  
+and the distribution is the same in each column (row) of the table. 
+
+Under the null hypothesis the expected frequency for the `\((i,j)\)`th cell is
+`$$\text{Number in}\; \{S = j\} \;\text{sample} \times \frac{x_{i \bullet}}{n} = \frac{x_{\bullet j} x_{i \bullet}}{n}$$`
+as `\(x_{i\bullet}/n\)` is the estimate of the common conditional probability.
+
+Thus, the expected frequencies under a test for **homogeneity of proportions** are the same as for a test of independence (see the next lecture). Furthermore, the distribution of the chi-squared test statistic is approximately `\(\chi_{(r-1)(s-1)}^2\)`.
+
+For Pearson's `\(\chi^2\)` test for independence the test statistic has an approximate `\(\chi_1^2\)` distribution. However, the conclusions drawn from the test depend on the **sampling method used**.
+
+--&gt;
+
+---
+
+## References
+
+Franke, T. M., T. Ho, and C. A. Christie (2012). "The
+Chi-Square Test: Often Used and More Often
+Misinterpreted". In: _American Journal of Evaluation_
+33.3, pp. 448-458. DOI:
+[10.1177/1098214011426594](https://doi.org/10.1177%2F1098214011426594).
+URL:
+[https://journals-sagepub-com.ezproxy.library.sydney.edu.au/doi/10.1177/1098214011426594](https://journals-sagepub-com.ezproxy.library.sydney.edu.au/doi/10.1177/1098214011426594).
+
+Liu, S. T. H., H. Lin, I. Baine, A. Wajnberg, J. P.
+Gumprecht, F. Rahman, D. Rodriguez, P. Tandon, A.
+Bassily-Marcus, J. Bander, et al. (2020).
+"Convalescent plasma treatment of severe COVID-19: a
+propensity score-matched control study". In: _Nature
+Medicine_ 26.11, pp. 1708-1713. DOI:
+[10.1038/s41591-020-1088-9](https://doi.org/10.1038%2Fs41591-020-1088-9).
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="assets/remark-zoom.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

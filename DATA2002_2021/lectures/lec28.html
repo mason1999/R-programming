@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>DATA2002</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Garth Tarr" />
+    <script src="lec28_files/header-attrs-2.11.3/header-attrs.js"></script>
+    <link href="lec28_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } },
+      "HTML-CSS": {
+        styles: {
+          ".MathJax a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+          ".MathJax_Preview a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+        }
+      }
+      });
+    </script>
+    <link rel="stylesheet" href="assets/sydney-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="assets/sydney.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# DATA2002
+## Multiple regression prediction and performance
+### Garth Tarr
+
+---
+
+class: segue
+
+
+
+
+
+.large[
+Prediction
+
+Performance
+]
+
+---
+class: segue
+
+
+## Prediction
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M494.2 221.9l-59.8-40.5 13.7-71c2.6-13.2-1.6-26.8-11.1-36.4-9.6-9.5-23.2-13.7-36.2-11.1l-70.9 13.7-40.4-59.9c-15.1-22.3-51.9-22.3-67 0l-40.4 59.9-70.8-13.7C98 60.4 84.5 64.5 75 74.1c-9.5 9.6-13.7 23.1-11.1 36.3l13.7 71-59.8 40.5C6.6 229.5 0 242 0 255.5s6.7 26 17.8 33.5l59.8 40.5-13.7 71c-2.6 13.2 1.6 26.8 11.1 36.3 9.5 9.5 22.9 13.7 36.3 11.1l70.8-13.7 40.4 59.9C230 505.3 242.6 512 256 512s26-6.7 33.5-17.8l40.4-59.9 70.9 13.7c13.4 2.7 26.8-1.6 36.3-11.1 9.5-9.5 13.6-23.1 11.1-36.3l-13.7-71 59.8-40.5c11.1-7.5 17.8-20.1 17.8-33.5-.1-13.6-6.7-26.1-17.9-33.7zm-112.9 85.6l17.6 91.2-91-17.6L256 458l-51.9-77-90.9 17.6 17.6-91.2-76.8-52 76.8-52-17.6-91.2 91 17.6L256 53l51.9 76.9 91-17.6-17.6 91.1 76.8 52-76.8 52.1zM256 152c-57.3 0-104 46.7-104 104s46.7 104 104 104 104-46.7 104-104-46.7-104-104-104zm0 160c-30.9 0-56-25.1-56-56s25.1-56 56-56 56 25.1 56 56-25.1 56-56 56z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Recall our fitted ozone model
+
+
+```r
+library(tidyverse)
+data(environmental, package = "lattice")
+environmental = environmental %&gt;% 
+  mutate(lozone = log(ozone))
+lm3 = lm(lozone ~ radiation + temperature + wind, environmental)
+lm3
+```
+
+```
+## 
+## Call:
+## lm(formula = lozone ~ radiation + temperature + wind, data = environmental)
+## 
+## Coefficients:
+## (Intercept)    radiation  temperature         wind  
+##   -0.261174     0.002515     0.049163    -0.061593
+```
+`$$\widehat{\log(\text{ozone})} = -0.261174 + 0.002515\, \text{radiation} + 0.049163\, \text{temperature} - 0.061593\, \text{wind}$$`
+
+
+---
+
+
+```r
+library(GGally)
+GGally::ggpairs(environmental) + theme_bw(base_size = 22)
+```
+
+&lt;img src="lec28_files/figure-html/unnamed-chunk-2-1.png" width="864" /&gt;
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M494.2 221.9l-59.8-40.5 13.7-71c2.6-13.2-1.6-26.8-11.1-36.4-9.6-9.5-23.2-13.7-36.2-11.1l-70.9 13.7-40.4-59.9c-15.1-22.3-51.9-22.3-67 0l-40.4 59.9-70.8-13.7C98 60.4 84.5 64.5 75 74.1c-9.5 9.6-13.7 23.1-11.1 36.3l13.7 71-59.8 40.5C6.6 229.5 0 242 0 255.5s6.7 26 17.8 33.5l59.8 40.5-13.7 71c-2.6 13.2 1.6 26.8 11.1 36.3 9.5 9.5 22.9 13.7 36.3 11.1l70.8-13.7 40.4 59.9C230 505.3 242.6 512 256 512s26-6.7 33.5-17.8l40.4-59.9 70.9 13.7c13.4 2.7 26.8-1.6 36.3-11.1 9.5-9.5 13.6-23.1 11.1-36.3l-13.7-71 59.8-40.5c11.1-7.5 17.8-20.1 17.8-33.5-.1-13.6-6.7-26.1-17.9-33.7zm-112.9 85.6l17.6 91.2-91-17.6L256 458l-51.9-77-90.9 17.6 17.6-91.2-76.8-52 76.8-52-17.6-91.2 91 17.6L256 53l51.9 76.9 91-17.6-17.6 91.1 76.8 52-76.8 52.1zM256 152c-57.3 0-104 46.7-104 104s46.7 104 104 104 104-46.7 104-104-46.7-104-104-104zm0 160c-30.9 0-56-25.1-56-56s25.1-56 56-56 56 25.1 56 56-25.1 56-56 56z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Prediction
+
+Say we want to predict the (log) ozone when the solar ratiation is 200 langley, the temperature is 90 degrees Fahrenheit and the average wind speed is 15 miles per hour.
+
+We can substitute these into our fitted model:
+
+`$$\begin{aligned}
+\widehat{\log(\text{ozone})} &amp; =-0.261174 + 0.002515\, \text{radiation} + 0.049163\, \text{temperature} - 0.061593\, \text{wind}\\ 
+&amp; = -0.261174 + 0.002515\times 200 + 0.049163\times 90 - 0.061593\times 15 \\
+&amp; = 3.74
+\end{aligned}$$`
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M494.2 221.9l-59.8-40.5 13.7-71c2.6-13.2-1.6-26.8-11.1-36.4-9.6-9.5-23.2-13.7-36.2-11.1l-70.9 13.7-40.4-59.9c-15.1-22.3-51.9-22.3-67 0l-40.4 59.9-70.8-13.7C98 60.4 84.5 64.5 75 74.1c-9.5 9.6-13.7 23.1-11.1 36.3l13.7 71-59.8 40.5C6.6 229.5 0 242 0 255.5s6.7 26 17.8 33.5l59.8 40.5-13.7 71c-2.6 13.2 1.6 26.8 11.1 36.3 9.5 9.5 22.9 13.7 36.3 11.1l70.8-13.7 40.4 59.9C230 505.3 242.6 512 256 512s26-6.7 33.5-17.8l40.4-59.9 70.9 13.7c13.4 2.7 26.8-1.6 36.3-11.1 9.5-9.5 13.6-23.1 11.1-36.3l-13.7-71 59.8-40.5c11.1-7.5 17.8-20.1 17.8-33.5-.1-13.6-6.7-26.1-17.9-33.7zm-112.9 85.6l17.6 91.2-91-17.6L256 458l-51.9-77-90.9 17.6 17.6-91.2-76.8-52 76.8-52-17.6-91.2 91 17.6L256 53l51.9 76.9 91-17.6-17.6 91.1 76.8 52-76.8 52.1zM256 152c-57.3 0-104 46.7-104 104s46.7 104 104 104 104-46.7 104-104-46.7-104-104-104zm0 160c-30.9 0-56-25.1-56-56s25.1-56 56-56 56 25.1 56 56-25.1 56-56 56z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Prediction in R
+
+We need to generate a new data frame with the same column names as the original variables:
+
+
+```r
+new_obs = data.frame(radiation = 200, temperature = 90, wind = 15)
+```
+
+And then feed this into the `predict()` function:
+
+
+```r
+predict(lm3, new_obs, interval = "prediction", level = 0.90)
+```
+
+```
+##        fit      lwr      upr
+## 1 3.742554 2.867449 4.617659
+```
+
+```r
+predict(lm3, new_obs, interval = "confidence", level = 0.90)
+```
+
+```
+##        fit      lwr     upr
+## 1 3.742554 3.510278 3.97483
+```
+
+We have two options for the interval type: **prediction interval** and **confidence interval**.
+
+
+---
+
+## Two kinds of "prediction"
+
+&lt;br&gt;
+
+&gt;- Estimate the **average log ozone concentration** when the solar ratiation is 200 langley, the temperature is 90 degrees Fahrenheit and the average wind speed is 15 miles per hour and give a `\(90\%\)` estimation interval of this estimate.
+
+&gt;- Predict the **log ozone concentration on a day** when solar ratiation is 200 langley, the temperature is 90 degrees Fahrenheit and the average wind speed is 15 miles per hour. Give a `\(90\%\)` prediction interval of this **prediction**.
+
+---
+
+## Prediction vs confidence intervals
+
+Take a regression model with `\(n\)` observations and `\(p\)` regressors:
+`$$\boldsymbol{Y}=\boldsymbol{X\beta}+\boldsymbol{\varepsilon}$$`
+
+Given a new observation vector `\(\boldsymbol{x_0}\)`, the predicted value for that observation would be
+`$$\operatorname{E}(Y ~\vert~ \boldsymbol{x_0}) = \hat y_0 = \boldsymbol{x}_0' \hat{\boldsymbol{\beta}}.$$`
+A consistent estimator of the variance of this prediction is
+`$$\widehat{\operatorname{Var}}(\hat y_0) = \hat{\sigma}^2 \boldsymbol{x}_0'(\boldsymbol{X'X})^{-1}\boldsymbol{x}_0,$$` where `$$\hat{\sigma}^2=\frac{\sum_{i=1}^{N} (y_i-\hat{y}_i)^2}{N-k} = \frac{\sum_{i=1}^{N} r_i^2}{N-k}.$$`
+
+[Think of this as the **mean square residual** in an ANOVA context.]
+
+---
+
+## Prediction vs confidence intervals
+
+The forecast error for **a particular** `\(y_0\)` is
+`$$\hat e = y_0 - \hat y_0 = (\boldsymbol{x}_0' \boldsymbol{\beta} + \varepsilon_0) - \hat y_0.$$`
+Theere is zero covariance between `\(\varepsilon_0\)` and `\(\hat{\boldsymbol{\beta}}\)` so,
+`$$\operatorname{Var}(\hat e)=\operatorname{Var}(\hat y_0)+\operatorname{Var}(\varepsilon_0),$$` and a consistent estimator of that is
+`$$\operatorname{Var}(\hat e)= \hat{\sigma}^2 \boldsymbol{x}_0'(\boldsymbol{X'X})^{-1}\boldsymbol{x}_0 + \hat{\sigma}^2.$$`
+
+The `\(1-\alpha\)` **confidence** interval will be: `\(\hat{y}_0 \pm t^\star \sqrt{\operatorname{Var}(\hat y_0)}\)`, where `\(\operatorname{Var}(\hat y_0)  = \hat{\sigma}^2 \boldsymbol{x}_0(\boldsymbol{X'X})^{-1}\boldsymbol{x}_0'\)`
+
+The `\(1-\alpha\)` **prediction** interval will be wider: `\(\hat{y}_0 \pm t^\star \sqrt{\operatorname{Var}(\hat e)}\)`
+
+
+---
+
+## Prediction vs confidence intervals
+
+.pull-left[
+
+```r
+predict(lm3, new_obs, interval = "prediction",
+        level = 0.90, se.fit = TRUE)
+```
+
+```
+## $fit
+##        fit      lwr      upr
+## 1 3.742554 2.867449 4.617659
+## 
+## $se.fit
+## [1] 0.139991
+## 
+## $df
+## [1] 107
+## 
+## $residual.scale
+## [1] 0.5085019
+```
+
+```r
+predict(lm3, new_obs, interval = "confidence",
+        level = 0.90)
+```
+
+```
+##        fit      lwr     upr
+## 1 3.742554 3.510278 3.97483
+```
+]
+.pull-right[
+
+Quantile for 90% intervals:
+
+```r
+qt(0.95, 107)
+```
+
+```
+## [1] 1.659219
+```
+
+**Prediction** interval 
+`\(\hat{y}_0 \pm t^\star \sqrt{\operatorname{Var}(\hat e)}\)`
+
+`$$3.74 \pm 1.659 \times \sqrt{0.14^2 + 0.51^2}$$`
+
+
+**Confidence** interval `\(\hat{y}_0 \pm t^\star \sqrt{\operatorname{Var}(\hat y_0)}\)`
+
+`$$3.74 \pm 1.659 \times 0.14$$`
+
+
+]
+
+---
+
+## Effect of variance on intervals
+
+Our population model is:
+`$$\boldsymbol{Y}=\boldsymbol{X\beta}+\boldsymbol{\varepsilon}$$`
+where `\(\boldsymbol{\varepsilon}\sim N_n(0,\sigma^2)\)`.
+
+
+1. The smaller the `\(\sigma^2\)`, the better the fit and hence the smaller the variances for `\(\hat{\boldsymbol{\beta}}\)` and `\(\hat{y}_0\)`.
+
+2. The larger the spread of our `\(x\)` variables, the more information we have about how `\(Y\)` responds to each `\(x\)` variable and hence the smaller the variances for `\(\hat{\boldsymbol{\beta}}\)` and `\(\hat{y}_0\)`.
+
+3. The larger the sample size `\(n\)`, the smaller the variances for `\(\hat{\boldsymbol{\beta}}\)` and `\(\hat{y}_0\)`.
+4. The closer is `\(\boldsymbol{x}_0\)` to `\(\bar{\boldsymbol{x}}\)` (the componentwise mean of the design matrix), the smaller the variances of `\(\hat{y}_0\)`
+
+---
+
+## Confidence and prediction intervals
+
+For illustration purposes, let's return to the **simple linear regression** of log ozone on temperature.
+
+
+```r
+lm2 = lm(lozone ~ temperature, data = environmental)
+new_temp = data.frame(temperature = seq(from = min(environmental$temperature),
+                                        to = max(environmental$temperature),
+                                        by = 0.1))
+pi = predict(lm2, new_temp, interval = "prediction", level = 0.90)
+ci = predict(lm2, new_temp, interval = "confidence", level = 0.90)
+interval_df = data.frame(
+  pi_upper = pi[,"upr"],
+  pi_lower = pi[,"lwr"],
+  ci_upper = ci[,"upr"],
+  ci_lower = ci[,"lwr"],
+  temperature = new_temp$temperature
+)
+```
+
+---
+
+
+```r
+ggplot(environmental, aes(x = temperature, y = lozone)) + 
+  geom_point() + theme_classic(base_size = 30) + 
+  geom_line(data = interval_df, aes(y=pi_lower), color = "red", linetype = 2) +
+  geom_line(data = interval_df, aes(y=pi_upper), color = "red", linetype = 2) +
+  geom_line(data = interval_df, aes(y=ci_lower), color = "blue", linetype = 1) +
+  geom_line(data = interval_df, aes(y=ci_upper), color = "blue", linetype = 1)
+```
+
+&lt;img src="lec28_files/figure-html/unnamed-chunk-8-1.png" width="864" /&gt;
+
+---
+
+
+```r
+ggplot(environmental, aes(x = temperature, y = lozone)) + 
+  geom_point() + theme_classic(base_size = 30) + 
+  geom_line(data = interval_df, aes(y=pi_lower), color = "red", linetype = 2) +
+  geom_line(data = interval_df, aes(y=pi_upper), color = "red", linetype = 2) +
+  geom_line(data = interval_df, aes(y=ci_lower), color = "blue", linetype = 1) +
+  geom_line(data = interval_df, aes(y=ci_upper), color = "blue", linetype = 1) + 
+* geom_smooth(method = "lm", se = TRUE)
+```
+
+&lt;img src="lec28_files/figure-html/unnamed-chunk-9-1.png" width="864" /&gt;
+
+---
+class: segue
+
+## Performance
+
+---
+
+## In sample performance vs out of sample performance
+
+### In sample 
+
+-   E.g. `\(r^2\)` comparing the simple linear regression to the full model
+
+
+```r
+summary(lm2)$r.squared # lozone ~ temperature
+```
+
+```
+## [1] 0.5547615
+```
+
+```r
+summary(lm3)$r.squared # lozone ~ radiation + temperature + wind
+```
+
+```
+## [1] 0.664515
+```
+
+-   Doesn't protect against **over fitting**
+
+### Out of sample
+
+-   How well do we predict observations that we didn't use to build the model?
+
+
+---
+
+## Comparing simple linear regression with the full model
+
+### Out of sample performance
+
+We could think about building a **training** set and using it to predict observations from a **test** set.
+
+
+```r
+n = nrow(environmental)
+n
+```
+
+```
+## [1] 111
+```
+
+```r
+n_train = floor(0.8*n)
+n_test = n - n_train
+grp_labs = rep(c("Train","Test"), times = c(n_train, n_test)) 
+environmental$grp = sample(grp_labs)
+train_dat = environmental %&gt;% filter(grp == "Train")
+lm_simple_train = lm(lozone ~ temperature, data = train_dat)
+lm_full_train = lm(lozone ~ radiation + temperature + wind, data = train_dat)
+test_dat = environmental %&gt;% filter(grp == "Test")
+simple_pred = predict(lm_simple_train, newdata = test_dat)
+full_pred = predict(lm_full_train, newdata = test_dat)
+```
+
+---
+
+## Comparing simple linear regression with the full model
+
+### Root mean square error
+
+How can we compare the predictions from the two models?  Compare them to the observed values using the root mean square error:
+
+`$$\text{RMSE} = \sqrt{\frac{\sum_{i=1}^n(y_i - \hat{y}_i)^2}{n}}$$`
+
+
+```r
+simple_mse = mean((test_dat$lozone - simple_pred)^2)
+sqrt(simple_mse)
+```
+
+```
+## [1] 0.4370441
+```
+
+```r
+full_mse = mean((test_dat$lozone - full_pred)^2)
+sqrt(full_mse)
+```
+
+```
+## [1] 0.4717252
+```
+
+---
+
+## Comparing simple linear regression with the full model
+
+### Mean absolute error
+
+An alternative measure of performance, less influenced by outliers is the **mean absolute error**,
+
+`$$\text{MAE} = \frac{\sum_{i=1}^m |y_i - \hat{y}_i|}{m}$$`
+
+
+```r
+simple_mae = mean(abs(test_dat$lozone - simple_pred))
+simple_mae
+```
+
+```
+## [1] 0.3373928
+```
+
+```r
+full_mae = mean(abs(test_dat$lozone - full_pred))
+full_mae
+```
+
+```
+## [1] 0.3807022
+```
+
+---
+
+## Out of sample performance
+
+### `\(k\)`-fold cross-validation (CV) estimation
+
+-   Data randomly divided into `\(k\)` subsets of (nearly) equal size
+
+-   Estimate your model by leaving one subset out
+
+-   Use your estimated model to predict the observations left out
+
+-   Compute error rates on the left out set
+
+-   Repeat `\(k\)` times (for each of the subsets)
+
+-   Average the error rate over the `\(k\)` runs
+
+Bias-variance tradeoff: smaller `\(k\)` can give larger bias but smaller variance
+
+Computationally intensive.
+
+---
+
+## 10-fold cross validation
+
+&lt;img src=imgs/k_fold_cv.jpg width=950 /&gt;
+
+---
+
+## 10-fold cross validation
+
+Step 1: divide our data up into 10 folds there are 111 observations, so we have 9 folds of 11 observations and 1 fold of 12 observations.
+
+
+```r
+set.seed(2)
+nrow(environmental)
+```
+
+```
+## [1] 111
+```
+
+```r
+environmental$grp = NULL # remove the grp variable we added previously
+fold_id = c(1, rep(1:10, each = 11))
+environmental$fold_id = sample(fold_id, replace = FALSE)
+head(environmental)
+```
+
+```
+##   ozone radiation temperature wind   lozone fold_id
+## 1    41       190          67  7.4 3.713572       8
+## 2    36       118          72  8.0 3.583519       8
+## 3    12       149          74 12.6 2.484907       7
+## 4    18       313          62 11.5 2.890372       1
+## 5    23       299          65  8.6 3.135494       3
+## 6    19        99          59 13.8 2.944439       1
+```
+
+---
+
+## 10-fold cross validation
+
+Step 2: estimate the model leaving one fold out, make predictions on the test set and calculate the error rate
+
+
+```r
+k = 10
+simple_mse = full_mse = vector(mode = "numeric", length = k)
+simple_mae = full_mae = vector(mode = "numeric", length = k)
+for(i in 1:k) { 
+  test_set = environmental[fold_id == i,]
+  training_set = environmental[fold_id != i,]
+  simple_lm = lm(lozone ~ temperature, data = training_set)
+  simple_pred = predict(simple_lm, test_set)
+  simple_mse[i] = mean((test_set$lozone - simple_pred)^2)
+  simple_mae[i] = mean(abs(test_set$lozone - simple_pred))
+  full_lm = lm(lozone ~ radiation + temperature + wind, data = training_set)
+  full_pred = predict(full_lm, test_set)
+  full_mse[i] = mean((test_set$lozone - full_pred)^2)
+  full_mae[i] = mean(abs(test_set$lozone - full_pred))
+}
+```
+
+---
+
+## 10-fold cross validation
+
+Step 3: aggregate the errors over the 10 folds
+
+.pull-left[
+
+```r
+cv_res = tibble(simple_mse, full_mse, 
+                simple_mae, full_mae)
+cv_res
+```
+
+```
+## # A tibble: 10 × 4
+##    simple_mse full_mse simple_mae full_mae
+##         &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;    &lt;dbl&gt;
+##  1     0.437    0.400       0.527    0.552
+##  2     0.955    0.839       0.784    0.722
+##  3     0.307    0.244       0.489    0.418
+##  4     0.348    0.194       0.396    0.297
+##  5     0.176    0.134       0.360    0.313
+##  6     0.376    0.190       0.471    0.372
+##  7     0.389    0.260       0.486    0.395
+##  8     0.0879   0.0783      0.249    0.206
+##  9     0.160    0.0975      0.322    0.284
+## 10     0.252    0.251       0.414    0.397
+```
+]
+
+.pull-right[
+Root mean square errors:
+
+```r
+c(sqrt(mean(simple_mse)),
+  sqrt(mean(full_mse))) %&gt;% round(2)
+```
+
+```
+## [1] 0.59 0.52
+```
+
+Mean absolute errors:
+
+```r
+c(mean(simple_mae),
+  mean(full_mae)) %&gt;% round(2)
+```
+
+```
+## [1] 0.45 0.40
+```
+
+
+]
+
+
+---
+
+## 10-fold cross validation
+
+We could visualise the error rates for each of the 10 folds:
+
+
+```r
+cv_res %&gt;% gather(key = "metric", value = "error") %&gt;% 
+  separate(col = metric, into = c("model","metric")) %&gt;% 
+  ggplot(aes(x = model, y = error)) + facet_wrap(~metric, scales = "free_y") + 
+  geom_boxplot() 
+```
+
+&lt;img src="lec28_files/figure-html/unnamed-chunk-19-1.png" width="864" /&gt;
+
+---
+
+## The `caret` package (Classification And REgression Training)
+
+
+.pull-left-2[
+
+```r
+library(caret)
+cv_full = train(
+  lozone ~ radiation + temperature + wind, environmental,
+  method = "lm",
+  trControl = trainControl(
+    method = "cv", number = 10,
+    verboseIter = FALSE
+  )
+)
+cv_full
+```
+
+```
+## Linear Regression 
+## 
+## 111 samples
+##   3 predictor
+## 
+## No pre-processing
+## Resampling: Cross-Validated (10 fold) 
+## Summary of sample sizes: 100, 100, 99, 100, 101, 99, ... 
+## Resampling results:
+## 
+##   RMSE       Rsquared  MAE      
+##   0.5110818  0.697293  0.3990078
+## 
+## Tuning parameter 'intercept' was held constant at a
+##  value of TRUE
+```
+]
+.pull-right-1[
+
+```r
+cv_simple = train(
+  lozone ~ temperature, 
+  environmental,
+  method = "lm",
+  trControl = trainControl(
+    method = "cv", number = 10,
+    verboseIter = FALSE
+  )
+)
+cv_simple
+```
+
+```
+## Linear Regression 
+## 
+## 111 samples
+##   1 predictor
+## 
+## No pre-processing
+## Resampling: Cross-Validated (10 fold) 
+## Summary of sample sizes: 99, 99, 100, 100, 101, 100, ... 
+## Resampling results:
+## 
+##   RMSE       Rsquared   MAE      
+##   0.5639179  0.5597842  0.4403246
+## 
+## Tuning parameter 'intercept' was held constant at a
+##  value of TRUE
+```
+]
+
+---
+
+## References
+
+Baumer, Kaplan, and Horton (2017) [Appendix E Regression modeling](https://mdsr-book.github.io/excerpts/mdsr-regression.pdf) 
+
+Baumer, B. S., D. T. Kaplan, and N. J. Horton (2017).
+_Modern Data Science with R_. Boca Raton: Chapman and
+Hall/CRC. URL:
+[https://mdsr-book.github.io/index.html](https://mdsr-book.github.io/index.html).
+
+Jed Wing, M. K. C. from, S. Weston, A. Williams, C.
+Keefer, A. Engelhardt, T. Cooper, Z. Mayer, B.
+Kenkel, the R Core Team, M. Benesty, et al. (2018).
+_caret: Classification and Regression Training_. R
+package version 6.0-80. URL:
+[https://CRAN.R-project.org/package=caret](https://CRAN.R-project.org/package=caret).
+
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="assets/remark-zoom.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

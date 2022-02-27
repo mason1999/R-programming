@@ -1,0 +1,52 @@
+% for the mathscr
+\usepackage{mathrsfs}
+% easier for bold symbols
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+% partial derivatives
+\newcommand{\partiald}[1]{\frac{\delta}{\delta#1}}
+% second partial derivative
+\newcommand{\partialdtwo}[1]{\frac{\delta^2}{\delta#1^2}}
+% for estimators
+\newcommand{\wh}[1]{\widehat{#1}}
+% for examples
+\newcommand{\gb}[1]{\greybox{#1}}
+% text over arrow
+\usepackage{mathtools}
+% command for symbols under symbols
+\newcommand{\under}[2]{\mathop{#1}\limits_{#2}}
+% cancel to zero
+\usepackage{cancel}
+% Example: \cancelto{0}{x}
+
+\titleformat{\section}{\normalfont\Large\bfseries}{}{0pt}{}
+% for sets and curly letters
+\newcommand{\cur}[1]{\mathcal{#1}}
+\newcommand{\scr}[1]{\mathscr{#1}}
+
+\usepackage{listings}
+\definecolor{royalblue}{rgb}{0.25, 0.41, 0.88}
+\definecolor{forestgreen}{rgb}{0.0, 0.27, 0.13}
+\definecolor{rust}{rgb}{0.72, 0.25, 0.05}
+
+\lstset{ 
+  language=R,                     % the language of the code
+  basicstyle=\footnotesize, % the size of the fonts that are used for the code
+  numbers=left,                   % where to put the line-numbers
+  numberstyle=\tiny\color{gray!150},  % the style that is used for the line-numbers
+  stepnumber=1,                   % the step between two line-numbers. If it is 1, each line
+                                  % will be numbered
+  numbersep=5pt,                  % how far the line-numbers are from the code
+  backgroundcolor=\color{gray!40},  % choose the background color. You must add \usepackage{color}
+  showspaces=false,               % show spaces adding particular underscores
+  showstringspaces=false,         % underline spaces within strings
+  showtabs=false,                 % show tabs within strings adding particular underscores
+  frame=single,                   % adds a frame around the code
+  rulecolor=\color{black},        % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. commens (green here))
+  tabsize=2,                      % sets default tabsize to 2 spaces
+  captionpos=b,                   % sets the caption-position to bottom
+  breaklines=true,                % sets automatic line breaking
+  breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+  keywordstyle=\color{royalblue},      % keyword style
+  commentstyle=\color{forestgreen},   % comment style
+  stringstyle=\color{rust}      % string literal style
+} 

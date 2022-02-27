@@ -1,0 +1,142 @@
+\documentclass[12pt, a4paper]{article}\usepackage[]{graphicx}\usepackage[]{color}
+% maxwidth is the original width if it is less than linewidth
+% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\usepackage{Sweavel}
+
+
+\input{./everything/everything.tex}
+\input{./everything/preamble.tex}
+
+\begin{document}
+% refer to https://yihui.org/knitr/options/#code-decoration for more options
+
+
+% (1) Remember that we want the default page style
+% (2) but for this page we want an empty page style for the title 
+% (3) we input our title 
+% (4) we call a new page and reset the page counter to 1
+\pagestyle{default}
+\thispagestyle{empty}
+\input{./title_page.tex}
+\newpage
+\setcounter{page}{1}
+\begin{enumerate}[label={\bfseries\arabic*.}]
+\item Obtain the two interval estimates based on the observation of X = 8. Call them \verb+simple+ and \verb+bayes+.
+
+\setlength{\leftskip}{3ex}
+
+\tbf{Solution}
+
+\begin{Schunk}
+\begin{Sinput}
+X = 8
+simple = c(X - 1, X + 1)
+bayes = c(2, 2 * exp(2/X))/(exp(2/X) - 1)
+simple
+\end{Sinput}
+\begin{Soutput}
+[1] 7 9
+\end{Soutput}
+\begin{Sinput}
+bayes
+\end{Sinput}
+\begin{Soutput}
+[1] 7.041623 9.041623
+\end{Soutput}
+\end{Schunk}
+
+\setlength{\leftskip}{0ex}
+
+\item We shall now write functions that compute these two intervals, so we can approximate their risk functions by simulation. Note that the procedure for constructing the interval is different (in \textit{both} cases) if the Poisson observation is zero (which is certainly possible!); in both cases for an observation of zero the interval is (0, 2). Write two functions \verb+simple()+ and \verb+bayes()+. They should both be of the same conditional form:
+\lstinputlisting{2.r}
+Once you have written them, test them out by executing both \verb+simple(8)+ and \verb+bayes(8)+
+
+\setlength{\leftskip}{3ex}
+
+\tbf{Solution}
+
+\begin{Schunk}
+\begin{Sinput}
+simple = function(x) {
+    if (x == 0) {
+        out = c(0, 2)
+    } else {
+        out = c(x - 1, x + 1)
+    }
+    out
+}
+
+bayes = function(x) {
+    if (x == 0) {
+        out = c(0, 2)
+    } else {
+        out = c(2, 2 * exp(2/x))/(exp(2/x) - 1)
+    }
+    out
+}
+\end{Sinput}
+\end{Schunk}
+
+\item Feel free to edit this part according to what you think the main idea was
+
+\begin{Schunk}
+\begin{Sinput}
+th = (1:1000)/250  # specify 1000 thetas between 0 and 4
+L = length(th)
+B = 1000  # number of random drawings, number of intervals
+noncoverage.simple = noncoverage.bayes = 0
+
+# we fix the theta value
+for (i in 1:L) {
+    s.mat = matrix(0, B, 2)
+    b.mat = matrix(0, B, 2)
+
+    # we fix the row in our matrix.
+    for (j in 1:B) {
+        X = rpois(1, th[i])  # draw one random number from pois(th[i])
+        s.mat[j, ] = simple(X)  # constructing intervals
+        b.mat[j, ] = bayes(X)
+    }
+
+    # count the number of intervals not containing theta
+    noncoverage.simple[i] = sum(th[i] < s.mat[, 1]) + sum(th[i] > s.mat[, 2])
+    noncoverage.bayes[i] = sum(th[i] < b.mat[, 1]) + sum(th[i] > b.mat[, 2])
+}
+
+plot(th, noncoverage.simple/B, type = "l", col = "red", main = "simulated risk of Poisson mean interval estimators",
+    xlab = expression(theta), ylab = "Empirical noncoverage proportion")
+lines(th, noncoverage.bayes/B, type = "l", col = "blue")
+legend("topleft", legend = c("simple", "Bayes flat prior"), col = c("red", "blue"), lty = c(1, 1))
+\end{Sinput}
+
+
+{\centering \includegraphics[width=\maxwidth]{figure/unnamed-chunk-4-1} 
+
+}
+
+\end{Schunk}
+
+\item In general as $\theta$ increases, the non-coverage rate increases. This means the risks of both methods will increase
+
+For some $\theta$ ranges, the simple interval method is better, whereas for others, the Bayes interval method is better. So we compare the two methods over several intervals:
+
+  \begin{itemize}
+  \item near 0 and just above 1, the simple interval estimation performs better than the bayes interval estimation
+  \item near 2, just above 2 and near 3 (just above 3) the simple interval method performs worse
+  \item just below 4, there are only a few $\theta$ values for which the rate of non-coverage interval is lower than that of Bayes method. so we are not convinced that the simple one performs better near 4
+  \item In the other ranges, the risks of the two estimators are very similar
+  \end{itemize}
+So no one method is uniformly better than the other one. 
+\end{enumerate}
+
+\end{document}

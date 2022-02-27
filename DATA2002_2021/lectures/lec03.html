@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>DATA2002</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Garth Tarr" />
+    <script src="lec03_files/header-attrs-2.10/header-attrs.js"></script>
+    <link href="lec03_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } },
+      "HTML-CSS": {
+        styles: {
+          ".MathJax a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+          ".MathJax_Preview a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+        }
+      }
+      });
+    </script>
+    <link rel="stylesheet" href="assets/sydney-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="assets/sydney.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# DATA2002
+## Chi-squared tests
+### Garth Tarr
+
+---
+
+class: segue
+
+
+
+
+
+.large[
+Hypothesis testing
+
+Chi-squared test for categorical data
+]
+
+---
+background-image: url("imgs/wheat_small.jpg")
+background-position: 50% 50%
+background-size: cover
+filter: blur(5px)
+
+## Genetic linkage
+
+---
+
+## Genetic linkage
+
+In a backcross.fn[1] experiment to investigate the **genetic linkage** between two genes A and B in a species of flower.  Some researchers classified 400 offspring by phenotype as follows:
+`$$\begin{array}{cccc}
+AB  &amp; Ab &amp; aB &amp; ab  \\
+128 &amp; 86 &amp; 74 &amp; 112
+\end{array}$$`
+
+- `\(A\)` might be pink flowers and `\(a\)` might be yellow flowers
+- `\(B\)` might be smooth leaves and `\(b\)` might be wrinkled leaves
+
+1. Under the *no linkage* model (&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M304.083 405.907c4.686 4.686 4.686 12.284 0 16.971l-44.674 44.674c-59.263 59.262-155.693 59.266-214.961 0-59.264-59.265-59.264-155.696 0-214.96l44.675-44.675c4.686-4.686 12.284-4.686 16.971 0l39.598 39.598c4.686 4.686 4.686 12.284 0 16.971l-44.675 44.674c-28.072 28.073-28.072 73.75 0 101.823 28.072 28.072 73.75 28.073 101.824 0l44.674-44.674c4.686-4.686 12.284-4.686 16.971 0l39.597 39.598zm-56.568-260.216c4.686 4.686 12.284 4.686 16.971 0l44.674-44.674c28.072-28.075 73.75-28.073 101.824 0 28.072 28.073 28.072 73.75 0 101.823l-44.675 44.674c-4.686 4.686-4.686 12.284 0 16.971l39.598 39.598c4.686 4.686 12.284 4.686 16.971 0l44.675-44.675c59.265-59.265 59.265-155.695 0-214.96-59.266-59.264-155.695-59.264-214.961 0l-44.674 44.674c-4.686 4.686-4.686 12.284 0 16.971l39.597 39.598zm234.828 359.28l22.627-22.627c9.373-9.373 9.373-24.569 0-33.941L63.598 7.029c-9.373-9.373-24.569-9.373-33.941 0L7.029 29.657c-9.373 9.373-9.373 24.569 0 33.941l441.373 441.373c9.373 9.372 24.569 9.372 33.941 0z"&gt;&lt;/path&gt;&lt;/svg&gt;), the four phenotypes are equally likely. 
+1. If linkage is in the *coupling phase* (&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"&gt;&lt;/path&gt;&lt;/svg&gt;), the probabilities of the four phenotypes are given by
+`$$\begin{array}{cccc}
+AB&amp;Ab&amp;aB&amp;ab\\
+\frac{1}{2} (1-p)&amp;\frac{1}{2} p&amp;\frac{1}{2} p&amp; \frac{1}{2} (1-p)
+\end{array}$$`
+where `\(p\)` is the *recombination fraction* and is estimated by the overall proportion of `\(Ab\)` and `\(aB\)`.
+
+.footnote[
+1. **Backcrossing** is a crossing of a hybrid with one of its parents or an individual genetically similar to its parent, in order to achieve offspring with a genetic identity which is closer to that of the parent. For a more detailed discussion see [here](https://www.ncbi.nlm.nih.gov/books/NBK22084/).
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M304.083 405.907c4.686 4.686 4.686 12.284 0 16.971l-44.674 44.674c-59.263 59.262-155.693 59.266-214.961 0-59.264-59.265-59.264-155.696 0-214.96l44.675-44.675c4.686-4.686 12.284-4.686 16.971 0l39.598 39.598c4.686 4.686 4.686 12.284 0 16.971l-44.675 44.674c-28.072 28.073-28.072 73.75 0 101.823 28.072 28.072 73.75 28.073 101.824 0l44.674-44.674c4.686-4.686 12.284-4.686 16.971 0l39.597 39.598zm-56.568-260.216c4.686 4.686 12.284 4.686 16.971 0l44.674-44.674c28.072-28.075 73.75-28.073 101.824 0 28.072 28.073 28.072 73.75 0 101.823l-44.675 44.674c-4.686 4.686-4.686 12.284 0 16.971l39.598 39.598c4.686 4.686 12.284 4.686 16.971 0l44.675-44.675c59.265-59.265 59.265-155.695 0-214.96-59.266-59.264-155.695-59.264-214.961 0l-44.674 44.674c-4.686 4.686-4.686 12.284 0 16.971l39.597 39.598zm234.828 359.28l22.627-22.627c9.373-9.373 9.373-24.569 0-33.941L63.598 7.029c-9.373-9.373-24.569-9.373-33.941 0L7.029 29.657c-9.373 9.373-9.373 24.569 0 33.941l441.373 441.373c9.373 9.372 24.569 9.372 33.941 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## No linkage model
+
+.pull-left[
+- **Null hypothesis:** each of the phenotypes are equally likely.
+
+- **Alternative hypothesis:** the phenotypes are not equally likely.
+
+Let `\(p_i\)` be the probability of being in the `\(i\)`th phenotype `\(i = AB,Ab,aB,ab\)`.
+
+Under the null hypothesis `\(p_i = 0.25\)` for all `\(i\)`.
+
+
+```r
+# observed counts
+y = c(128, 86, 74, 112) 
+n = sum(y)
+# hypothesised proportions
+p = c(1/4, 1/4, 1/4, 1/4) 
+# expected counts
+e = p*n
+```
+
+]
+.pull-right[
+
+What does this look like visually?
+
+
+```r
+names = c("AB", "Ab", "aB", "ab")
+par(mfrow = c(1, 2), cex = 1.5) # set up a graphics device with 1 row and 2 columns
+barplot(y, names.arg = names,
+        main = "Observed counts")
+barplot(e, names.arg = names,
+        main = "Expected counts")
+```
+
+&lt;img src="lec03_files/figure-html/unnamed-chunk-2-1.png" width="648" /&gt;
+]
+
+.footnote[
+These are base graphics, not **ggplots**, but they do the job, even though they're not pretty.
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M304.083 405.907c4.686 4.686 4.686 12.284 0 16.971l-44.674 44.674c-59.263 59.262-155.693 59.266-214.961 0-59.264-59.265-59.264-155.696 0-214.96l44.675-44.675c4.686-4.686 12.284-4.686 16.971 0l39.598 39.598c4.686 4.686 4.686 12.284 0 16.971l-44.675 44.674c-28.072 28.073-28.072 73.75 0 101.823 28.072 28.072 73.75 28.073 101.824 0l44.674-44.674c4.686-4.686 12.284-4.686 16.971 0l39.597 39.598zm-56.568-260.216c4.686 4.686 12.284 4.686 16.971 0l44.674-44.674c28.072-28.075 73.75-28.073 101.824 0 28.072 28.073 28.072 73.75 0 101.823l-44.675 44.674c-4.686 4.686-4.686 12.284 0 16.971l39.598 39.598c4.686 4.686 12.284 4.686 16.971 0l44.675-44.675c59.265-59.265 59.265-155.695 0-214.96-59.266-59.264-155.695-59.264-214.961 0l-44.674 44.674c-4.686 4.686-4.686 12.284 0 16.971l39.597 39.598zm234.828 359.28l22.627-22.627c9.373-9.373 9.373-24.569 0-33.941L63.598 7.029c-9.373-9.373-24.569-9.373-33.941 0L7.029 29.657c-9.373 9.373-9.373 24.569 0 33.941l441.373 441.373c9.373 9.372 24.569 9.372 33.941 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## No linkage model
+
+.pull-left[
+Is this a good fit?
+
+
+```r
+library(tidyverse)
+df = tibble(names,y,p,e)
+df %&gt;% ggplot() + 
+  aes(x = names, y = y) + 
+  geom_bar(stat="identity") + 
+  geom_hline(yintercept = 100, colour = "blue") + 
+  theme_minimal(base_size = 32) + 
+  labs(x = "", y = "Count")
+```
+
+&lt;img src="lec03_files/figure-html/unnamed-chunk-3-1.png" width="864" /&gt;
+]
+.pull-right[
+Consider the differences between observed counts and expected counts:
+
+
+```r
+d = y-e
+d
+```
+
+```
+## [1]  28 -14 -26  12
+```
+
+```r
+mean(d)
+```
+
+```
+## [1] 0
+```
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M304.083 405.907c4.686 4.686 4.686 12.284 0 16.971l-44.674 44.674c-59.263 59.262-155.693 59.266-214.961 0-59.264-59.265-59.264-155.696 0-214.96l44.675-44.675c4.686-4.686 12.284-4.686 16.971 0l39.598 39.598c4.686 4.686 4.686 12.284 0 16.971l-44.675 44.674c-28.072 28.073-28.072 73.75 0 101.823 28.072 28.072 73.75 28.073 101.824 0l44.674-44.674c4.686-4.686 12.284-4.686 16.971 0l39.597 39.598zm-56.568-260.216c4.686 4.686 12.284 4.686 16.971 0l44.674-44.674c28.072-28.075 73.75-28.073 101.824 0 28.072 28.073 28.072 73.75 0 101.823l-44.675 44.674c-4.686 4.686-4.686 12.284 0 16.971l39.598 39.598c4.686 4.686 12.284 4.686 16.971 0l44.675-44.675c59.265-59.265 59.265-155.695 0-214.96-59.266-59.264-155.695-59.264-214.961 0l-44.674 44.674c-4.686 4.686-4.686 12.284 0 16.971l39.597 39.598zm234.828 359.28l22.627-22.627c9.373-9.373 9.373-24.569 0-33.941L63.598 7.029c-9.373-9.373-24.569-9.373-33.941 0L7.029 29.657c-9.373 9.373-9.373 24.569 0 33.941l441.373 441.373c9.373 9.372 24.569 9.372 33.941 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Test statistic
+
+.pull-left[
+Considering the average of the differences doesn't tell us much.
+
+Let's take the squared differences, and "normalise" by dividing by the expected cell counts:
+
+`$$t_0 = \sum_{i=1}^{k}\frac{(y_i - e_i)^2}{e_i}$$`
+where `\(k\)` is the number of categories (groups).
+]
+
+--
+
+.pull-right[
+
+```r
+(y-e)^2
+```
+
+```
+## [1] 784 196 676 144
+```
+
+```r
+(y-e)^2/e
+```
+
+```
+## [1] 7.84 1.96 6.76 1.44
+```
+
+```r
+t0 = sum((y-e)^2/e)
+t0
+```
+
+```
+## [1] 18
+```
+
+&gt; Is this evidence for or against the null hypothesis?
+
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M304.083 405.907c4.686 4.686 4.686 12.284 0 16.971l-44.674 44.674c-59.263 59.262-155.693 59.266-214.961 0-59.264-59.265-59.264-155.696 0-214.96l44.675-44.675c4.686-4.686 12.284-4.686 16.971 0l39.598 39.598c4.686 4.686 4.686 12.284 0 16.971l-44.675 44.674c-28.072 28.073-28.072 73.75 0 101.823 28.072 28.072 73.75 28.073 101.824 0l44.674-44.674c4.686-4.686 12.284-4.686 16.971 0l39.597 39.598zm-56.568-260.216c4.686 4.686 12.284 4.686 16.971 0l44.674-44.674c28.072-28.075 73.75-28.073 101.824 0 28.072 28.073 28.072 73.75 0 101.823l-44.675 44.674c-4.686 4.686-4.686 12.284 0 16.971l39.598 39.598c4.686 4.686 12.284 4.686 16.971 0l44.675-44.675c59.265-59.265 59.265-155.695 0-214.96-59.266-59.264-155.695-59.264-214.961 0l-44.674 44.674c-4.686 4.686-4.686 12.284 0 16.971l39.597 39.598zm234.828 359.28l22.627-22.627c9.373-9.373 9.373-24.569 0-33.941L63.598 7.029c-9.373-9.373-24.569-9.373-33.941 0L7.029 29.657c-9.373 9.373-9.373 24.569 0 33.941l441.373 441.373c9.373 9.372 24.569 9.372 33.941 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Simulate
+
+.pull-left[
+Under the null hypothesis, the counts are _uniformly_ distributed across the 4 categories.
+
+Fixing the sample size at `\(n=400\)` we can **simulate** data assuming the null hypothesis is true.
+
+
+```r
+n = 400
+names
+```
+
+```
+## [1] "AB" "Ab" "aB" "ab"
+```
+
+```r
+set.seed(1)
+sim1 = sample(x = names, 
+              size = n, 
+              replace = TRUE, 
+              prob = c(0.25,0.25,0.25,0.25))
+```
+]
+
+
+.pull-right[
+
+```r
+table(sim1)
+```
+
+```
+## sim1
+##  ab  aB  Ab  AB 
+##  88 121  96  95
+```
+
+```r
+par(cex=2)
+barplot(table(sim1), main = "Simulated counts")
+```
+
+&lt;img src="lec03_files/figure-html/unnamed-chunk-7-1.png" width="864" /&gt;
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M304.083 405.907c4.686 4.686 4.686 12.284 0 16.971l-44.674 44.674c-59.263 59.262-155.693 59.266-214.961 0-59.264-59.265-59.264-155.696 0-214.96l44.675-44.675c4.686-4.686 12.284-4.686 16.971 0l39.598 39.598c4.686 4.686 4.686 12.284 0 16.971l-44.675 44.674c-28.072 28.073-28.072 73.75 0 101.823 28.072 28.072 73.75 28.073 101.824 0l44.674-44.674c4.686-4.686 12.284-4.686 16.971 0l39.597 39.598zm-56.568-260.216c4.686 4.686 12.284 4.686 16.971 0l44.674-44.674c28.072-28.075 73.75-28.073 101.824 0 28.072 28.073 28.072 73.75 0 101.823l-44.675 44.674c-4.686 4.686-4.686 12.284 0 16.971l39.598 39.598c4.686 4.686 12.284 4.686 16.971 0l44.675-44.675c59.265-59.265 59.265-155.695 0-214.96-59.266-59.264-155.695-59.264-214.961 0l-44.674 44.674c-4.686 4.686-4.686 12.284 0 16.971l39.597 39.598zm234.828 359.28l22.627-22.627c9.373-9.373 9.373-24.569 0-33.941L63.598 7.029c-9.373-9.373-24.569-9.373-33.941 0L7.029 29.657c-9.373 9.373-9.373 24.569 0 33.941l441.373 441.373c9.373 9.372 24.569 9.372 33.941 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Simulate
+
+.pull-left-1[
+Our test statistic for that simulated sample is:
+
+
+```r
+sim_y = table(sim1)
+sum((sim_y - e)^2/e)
+```
+
+```
+## [1] 6.26
+```
+
+which is a lot smaller than what we observed on our **actual** data:
+
+
+```r
+t0
+```
+
+```
+## [1] 18
+```
+
+But let's do this a lot of times rather than just once.
+]
+.pull-right-2[
+
+```r
+B = 3000
+sim_test_stats = vector(mode = "numeric", length = B)
+for(i in 1:B){
+  sim = sample(x = names,  size = n, replace = TRUE, 
+               prob = c(0.25,0.25,0.25,0.25))
+  sim_y = table(sim)
+  sim_test_stats[i] = sum((sim_y - e)^2/e)
+}
+par(cex = 2, mar = c(4,4,0.5,0.5))
+hist(sim_test_stats, main = "", breaks = 20)
+```
+
+&lt;img src="lec03_files/figure-html/unnamed-chunk-10-1.png" width="864" /&gt;
+
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M304.083 405.907c4.686 4.686 4.686 12.284 0 16.971l-44.674 44.674c-59.263 59.262-155.693 59.266-214.961 0-59.264-59.265-59.264-155.696 0-214.96l44.675-44.675c4.686-4.686 12.284-4.686 16.971 0l39.598 39.598c4.686 4.686 4.686 12.284 0 16.971l-44.675 44.674c-28.072 28.073-28.072 73.75 0 101.823 28.072 28.072 73.75 28.073 101.824 0l44.674-44.674c4.686-4.686 12.284-4.686 16.971 0l39.597 39.598zm-56.568-260.216c4.686 4.686 12.284 4.686 16.971 0l44.674-44.674c28.072-28.075 73.75-28.073 101.824 0 28.072 28.073 28.072 73.75 0 101.823l-44.675 44.674c-4.686 4.686-4.686 12.284 0 16.971l39.598 39.598c4.686 4.686 12.284 4.686 16.971 0l44.675-44.675c59.265-59.265 59.265-155.695 0-214.96-59.266-59.264-155.695-59.264-214.961 0l-44.674 44.674c-4.686 4.686-4.686 12.284 0 16.971l39.597 39.598zm234.828 359.28l22.627-22.627c9.373-9.373 9.373-24.569 0-33.941L63.598 7.029c-9.373-9.373-24.569-9.373-33.941 0L7.029 29.657c-9.373 9.373-9.373 24.569 0 33.941l441.373 441.373c9.373 9.372 24.569 9.372 33.941 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Simulate
+
+- Now we have a pretty good idea about the shape of the **distribution** of the test statistic when the null hypothesis is true.
+
+- We can compare the test statistic that we calculated on the original data to the "null distribution".
+
+- One way to do this is to ask the question:
+
+**Given that the null hypothesis is true, how likely is it that we observe a test statistic as or more extreme than that we calculated from our original sample.**
+
+
+```r
+mean(sim_test_stats &gt;= t0)
+```
+
+```
+## [1] 0.001
+```
+
+In 0.1% of samples when the null hypothesis is true, we got a simulated sample that was "more extreme" than our original sample.
+
+&gt; What does this tell us about the agreement between the null hypothesis and our sample of data?
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M304.083 405.907c4.686 4.686 4.686 12.284 0 16.971l-44.674 44.674c-59.263 59.262-155.693 59.266-214.961 0-59.264-59.265-59.264-155.696 0-214.96l44.675-44.675c4.686-4.686 12.284-4.686 16.971 0l39.598 39.598c4.686 4.686 4.686 12.284 0 16.971l-44.675 44.674c-28.072 28.073-28.072 73.75 0 101.823 28.072 28.072 73.75 28.073 101.824 0l44.674-44.674c4.686-4.686 12.284-4.686 16.971 0l39.597 39.598zm-56.568-260.216c4.686 4.686 12.284 4.686 16.971 0l44.674-44.674c28.072-28.075 73.75-28.073 101.824 0 28.072 28.073 28.072 73.75 0 101.823l-44.675 44.674c-4.686 4.686-4.686 12.284 0 16.971l39.598 39.598c4.686 4.686 12.284 4.686 16.971 0l44.675-44.675c59.265-59.265 59.265-155.695 0-214.96-59.266-59.264-155.695-59.264-214.961 0l-44.674 44.674c-4.686 4.686-4.686 12.284 0 16.971l39.597 39.598zm234.828 359.28l22.627-22.627c9.373-9.373 9.373-24.569 0-33.941L63.598 7.029c-9.373-9.373-24.569-9.373-33.941 0L7.029 29.657c-9.373 9.373-9.373 24.569 0 33.941l441.373 441.373c9.373 9.372 24.569 9.372 33.941 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Is there way to do it without simulation?
+
+.pull-left-1[
+Yes! A `\(\chi^2\)` test!
+
+It is known that our test statistic,
+`$$T = \sum_{i=1}^k \frac{(Y_{i}-e_i)^2}{e_i} \ \sim \ \chi^2_{k-1},$$`
+approximately, where `\(k\)` is the number of groups.
+
+Let's compare this distribution to the simulated test statistic distribution.
+]
+
+--
+
+.pull-right-2[
+
+```r
+par(cex = 2.5, mar = c(4,4,0.5,0.5))
+hist(sim_test_stats, main = "", breaks = 20, 
+     probability = TRUE, ylim = c(0, 0.25))
+curve(dchisq(x, df = 3), add = TRUE, col = "blue", lwd = 2)
+```
+
+&lt;img src="lec03_files/figure-html/unnamed-chunk-12-1.png" width="864" /&gt;
+]
+
+---
+
+## A `\(\chi^2\)` test!
+
+- The degrees of freedom from the sample is `\(k-1\)` because the first `\(k-1\)` observations `\(y_i\)` contain all the information and the last observation is fixed by `\(y_k=n-\sum_{i=1}^{k-1} y_i\)` adding no extra information.
+
+- In general, the test statistic `\(T \sim \chi^2_{k-1-q}\)` where `\(q\)` is the number of parameters need to be estimated from the sample.  In the no linkage example, `\(q=0\)` as we do not need to estimate any parameters.
+
+- The approximation will only be accurate if *no expected frequency* is too small, as a rule of thumb we require all `\(e_i \geq 5\)`. Otherwise, we need to pool adjacent categories so that the expected frequencies are always `\(\geq 5\)`.
+
+---
+
+##  Workflow: Chi-squared goodness of fit test
+
+- one categorical variable from a single population
+- want to see if it follows a hypothesised distribution
+
+&gt;- **Hypothesis:**  `\(H_0\colon\ p_1=p_{10},\ p_2=p_{20}, \cdots, \  p_{k}=p_{k0}\)`  vs `\(H_1\colon\)` at least one equality does not hold.
+
+&gt;-  **Assumptions:** independent observations and `\(e_i = np_{i0} \ge 5\)`.
+
+&gt;- **Test statistic:** `\(\displaystyle{T=\sum_{i=1}^k\frac{(Y_i-e_i)^2}{e_i}}\)`. Under `\(H_0\)`, `\(T \sim \chi_{k-1-q}^2\)` approximately where `\(k\)` is the number of groups and `\(q\)` is the number of parameters that needs to be estimated from the data.
+
+&gt;- **Observed test statistic:** `\(\displaystyle{t_0=\sum_{i=1}^k\frac{(y_i-e_i)^2}{e_i}}\)`.
+
+&gt;-  **P-value:** `\(P(T \ge t_0) \ = \ P(\chi_{k-1-q}^2 \ge t_0)\)`
+
+&gt;- **Decision:**  Reject `\(H_0\)` if the p-value `\(&lt; \alpha\)`, otherwise do not reject `\(H_0\)`.
+
+
+---
+
+## Table for calculating the test statistic
+
+If you were doing this manually, the calculations can be summarised in the following table:
+
+`$$\begin{array}{c|cccc}
+\text{Group } i  &amp;  y_i  &amp;  p_{i0}  &amp;  e_i=np_{i0} &amp; y_i - e_i  &amp;  \frac{(y_i-e_i)^2}{e_i}  \\
+\hline
+1	&amp; y_1 &amp; p_{10} &amp; np_{10} &amp; y_1 - e_1 &amp; \displaystyle{(y_1-e_1)^2/e_1}  \\
+2	&amp; y_2 &amp; p_{20} &amp; np_{20} &amp; y_2 - e_2 &amp; \displaystyle{(y_2-e_2)^2/e_2}  \\
+\vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots \\
+k &amp; y_k &amp; p_{k0} &amp; np_{k0} &amp; y_k - e_k &amp; \displaystyle{(y_k-e_k)^2/e_k}  \\
+\hline
+\text{Sum}	 &amp;	  n 	 &amp;	1	 &amp; n &amp; 0 &amp; t_0 \\
+\end{array}$$`
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M304.083 405.907c4.686 4.686 4.686 12.284 0 16.971l-44.674 44.674c-59.263 59.262-155.693 59.266-214.961 0-59.264-59.265-59.264-155.696 0-214.96l44.675-44.675c4.686-4.686 12.284-4.686 16.971 0l39.598 39.598c4.686 4.686 4.686 12.284 0 16.971l-44.675 44.674c-28.072 28.073-28.072 73.75 0 101.823 28.072 28.072 73.75 28.073 101.824 0l44.674-44.674c4.686-4.686 12.284-4.686 16.971 0l39.597 39.598zm-56.568-260.216c4.686 4.686 12.284 4.686 16.971 0l44.674-44.674c28.072-28.075 73.75-28.073 101.824 0 28.072 28.073 28.072 73.75 0 101.823l-44.675 44.674c-4.686 4.686-4.686 12.284 0 16.971l39.598 39.598c4.686 4.686 12.284 4.686 16.971 0l44.675-44.675c59.265-59.265 59.265-155.695 0-214.96-59.266-59.264-155.695-59.264-214.961 0l-44.674 44.674c-4.686 4.686-4.686 12.284 0 16.971l39.597 39.598zm234.828 359.28l22.627-22.627c9.373-9.373 9.373-24.569 0-33.941L63.598 7.029c-9.373-9.373-24.569-9.373-33.941 0L7.029 29.657c-9.373 9.373-9.373 24.569 0 33.941l441.373 441.373c9.373 9.372 24.569 9.372 33.941 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## No linkage model
+
+Under the *no linkage* model, we complete the following table:
+
+`$$\begin{array}{l|rccc}
+\text{Type} &amp;  y_i  &amp;   e_i=np_{i0}  &amp;  y_i-e_i  &amp;  \frac{(y_i-e_i)^2}{e_i}  \\
+\hline
+\text{AB}	 &amp;	128	 &amp;   	400	 \times \frac{	1	}{	4	}=	100	   &amp;  128 - 100 = ~28  &amp;   \frac{(	28 	 )^2}{	 100 	} = ~7.84 	   \\		
+\text{Ab}	 &amp; ~	86	 &amp;   	400	 \times \frac{	1	}{	4	}=	100	   &amp;  ~86	 - 100 = -14  &amp;   \frac{(	 -14 	 )^2}{	100 	} = ~1.96 	   \\		
+\text{aB}	 &amp; ~	74	 &amp;   	400	 \times \frac{	1	}{	4	}=	100	   &amp;  ~74 - 100 = -26  &amp;   \frac{(	 -26 	 )^2}{	100 	} = ~6.76 	    \\		
+\text{ab}	 &amp;	112	 &amp;   	400	 \times \frac{	1	}{	4	}=	100	   &amp;  112 - 100 = ~12  &amp;   \frac{(	12 	 )^2}{	 100 	} = ~1.44 	    \\ 	
+\hline
+\text{Total}	 &amp;	400	 &amp;   400	 &amp;   0	 &amp;    t_0=18.00 
+\end{array}$$`
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M304.083 405.907c4.686 4.686 4.686 12.284 0 16.971l-44.674 44.674c-59.263 59.262-155.693 59.266-214.961 0-59.264-59.265-59.264-155.696 0-214.96l44.675-44.675c4.686-4.686 12.284-4.686 16.971 0l39.598 39.598c4.686 4.686 4.686 12.284 0 16.971l-44.675 44.674c-28.072 28.073-28.072 73.75 0 101.823 28.072 28.072 73.75 28.073 101.824 0l44.674-44.674c4.686-4.686 12.284-4.686 16.971 0l39.597 39.598zm-56.568-260.216c4.686 4.686 12.284 4.686 16.971 0l44.674-44.674c28.072-28.075 73.75-28.073 101.824 0 28.072 28.073 28.072 73.75 0 101.823l-44.675 44.674c-4.686 4.686-4.686 12.284 0 16.971l39.598 39.598c4.686 4.686 12.284 4.686 16.971 0l44.675-44.675c59.265-59.265 59.265-155.695 0-214.96-59.266-59.264-155.695-59.264-214.961 0l-44.674 44.674c-4.686 4.686-4.686 12.284 0 16.971l39.597 39.598zm234.828 359.28l22.627-22.627c9.373-9.373 9.373-24.569 0-33.941L63.598 7.029c-9.373-9.373-24.569-9.373-33.941 0L7.029 29.657c-9.373 9.373-9.373 24.569 0 33.941l441.373 441.373c9.373 9.372 24.569 9.372 33.941 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+.pull-left[
+
+&gt;- **Hypothesis:** `\(H_0\colon\ p_{AB} = p_{Ab} = p_{aB} = p_{ab} = \frac{1}{4}\)` vs `\(H_1\colon\)` at least one equality does not hold.
+
+&gt;- **Assumptions:** independent observations and `\(e_i = np_{i0} \ge 5\)`.
+
+&gt;- **Test statistic:** `\(\displaystyle{T=\sum_{i=1}^{k}\frac{(Y_i-e_i)^2}{e_i}}\)`. Under `\(H_0\)`, `\(T \sim \chi_{3}^2\)` approx.
+
+&gt;- **Observed test statistic:** `\(t_0 = 18\)`
+
+&gt;- **P-value:** `\(P(T \ge t_0) = P(\chi_{3}^2 \ge 18) = 0.0004\)`
+
+&gt;- **Decision:**  Since the p-value is `\(&lt;0.05\)`, there is strong evidence in the data against `\(H_0\)`. Hence the four phenotypes are not equally likely. 
+
+]
+.pull-right[
+&lt;img src="lec03_files/figure-html/unnamed-chunk-13-1.png" width="864" /&gt;
+
+
+```r
+1 - pchisq(18, df = 3)
+```
+
+```
+## [1] 0.0004398497
+```
+]
+
+
+
+
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M304.083 405.907c4.686 4.686 4.686 12.284 0 16.971l-44.674 44.674c-59.263 59.262-155.693 59.266-214.961 0-59.264-59.265-59.264-155.696 0-214.96l44.675-44.675c4.686-4.686 12.284-4.686 16.971 0l39.598 39.598c4.686 4.686 4.686 12.284 0 16.971l-44.675 44.674c-28.072 28.073-28.072 73.75 0 101.823 28.072 28.072 73.75 28.073 101.824 0l44.674-44.674c4.686-4.686 12.284-4.686 16.971 0l39.597 39.598zm-56.568-260.216c4.686 4.686 12.284 4.686 16.971 0l44.674-44.674c28.072-28.075 73.75-28.073 101.824 0 28.072 28.073 28.072 73.75 0 101.823l-44.675 44.674c-4.686 4.686-4.686 12.284 0 16.971l39.598 39.598c4.686 4.686 12.284 4.686 16.971 0l44.675-44.675c59.265-59.265 59.265-155.695 0-214.96-59.266-59.264-155.695-59.264-214.961 0l-44.674 44.674c-4.686 4.686-4.686 12.284 0 16.971l39.597 39.598zm234.828 359.28l22.627-22.627c9.373-9.373 9.373-24.569 0-33.941L63.598 7.029c-9.373-9.373-24.569-9.373-33.941 0L7.029 29.657c-9.373 9.373-9.373 24.569 0 33.941l441.373 441.373c9.373 9.372 24.569 9.372 33.941 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## No linkage model
+
+.pull-left[
+
+
+```r
+y
+```
+
+```
+## [1] 128  86  74 112
+```
+
+```r
+p
+```
+
+```
+## [1] 0.25 0.25 0.25 0.25
+```
+
+```r
+(ey = n * p)  # expected counts
+```
+
+```
+## [1] 100 100 100 100
+```
+
+```r
+ey &gt;= 5  # test e_i &gt;= 5
+```
+
+```
+## [1] TRUE TRUE TRUE TRUE
+```
+
+
+]
+
+.pull-right[
+
+```r
+chisq.test(y, p = p)
+```
+
+```
+## 
+## 	Chi-squared test for given probabilities
+## 
+## data:  y
+## X-squared = 18, df = 3, p-value = 0.0004398
+```
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Linkage model
+
+
+`$$\begin{array}{cccc}
+AB &amp; Ab&amp; aB&amp;  ab\\
+128&amp; 86&amp; 74&amp; 112
+\end{array}$$`
+
+Under the *coupling phase* linkage model, the probabilities of each of the four phenotype outcomes are given by
+`$$\begin{array}{cccc}
+AB&amp;Ab&amp;aB&amp;ab\\
+\frac{1}{2} (1-p)&amp;\frac{1}{2} p&amp;\frac{1}{2} p&amp; \frac{1}{2} (1-p)
+\end{array}$$`
+
+We can estimate the parameter `\(p\)`, the recombination fraction, as the proportion of observed offspring in categories `\(Ab\)` or `\(aB\)`,
+`$$\hat p = \frac{86+74}{400} = 0.4.$$`
+Hence the four (estimated) hypothesised probabilities are, 
+`$$p_{10} = \frac{1}{2} (1-0.4)=0.3, \ p_{20} = \frac{1}{2} 0.4=0.2, \ p_{30} = \frac{1}{2} 0.4=0.2 \ \text{and} \  p_{40} = \frac{1}{2} (1-0.4)=0.3.$$`
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Linkage model
+
+
+```r
+y = c(128, 86, 74, 112)
+p = c(0.3, 0.2, 0.2, 0.3)
+names = c("AB", "Ab", "aB", "ab")
+# set up a graphics device with 1 row and 2 columns
+par(mfrow = c(1, 2), cex = 1.5, mar = c(2,2,2,1)) 
+barplot(y, names.arg = names, main = 'Observed frequencies')
+barplot(p * sum(y), names.arg = names, main = 'Expected frequencies')
+```
+
+&lt;img src="lec03_files/figure-html/unnamed-chunk-17-1.png" width="864" /&gt;
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Linkage model simulation
+
+.pull-left[
+
+
+```r
+n = 400
+hyp_probs = c(0.3, 0.2, 0.2, 0.3)
+B = 3000
+sim_test_stats = vector(mode = "numeric", 
+                        length = B)
+for(i in 1:B){
+  sim = sample(x = names, 
+               size = n, 
+               replace = TRUE, 
+               prob = hyp_probs)
+  sim_y = table(sim)
+  # estimated probability
+  p_e = sum(table(sim)[2:3])/n
+  # expected values using estimated probabilities
+  e = 400*c(1 - p_e, p_e, p_e, 1 - p_e)/2
+  sim_test_stats[i] = sum((sim_y - e)^2/e)
+}
+```
+
+]
+.pull-right[
+
+
+```r
+par(cex = 2, mar = c(4,4,0.5,0.5))
+hist(sim_test_stats, main = "", breaks = 20)
+```
+
+&lt;img src="lec03_files/figure-html/unnamed-chunk-19-1.png" width="864" /&gt;
+
+]
+
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Calculate observed test statistic
+
+`$$\begin{array}{lrrrr}
+\text{Type} &amp;  y_i  &amp;   e_i=np_{i0}  &amp;  y_i-e_i  &amp;  \frac{(y_i-e_i)^2}{e_i}  \\
+\hline
+\text{AB}	 &amp;	128	 &amp;   	400	 \times \frac{	3	}{	10	}=	120	   &amp;  128 - 120 = 8  &amp;   \frac{(	8 	 )^2}{	 120 	} = 0.53 	   \\		
+\text{Ab}	 &amp; ~	86	 &amp;   	400	 \times \frac{	2	}{	10	}=	80	   &amp; 86	 - 80 = 6  &amp;   \frac{(	 6	 )^2}{	80 	} =0.45 	   \\		
+\text{aB}	 &amp;	74	 &amp;   	400	 \times \frac{	2	}{	10	}=	80	   &amp;  74 - 80 = -6  &amp;   \frac{(	 -6 	 )^2}{	80	} = 0.45 	    \\		
+\text{ab}	 &amp;	112	 &amp;   	400	 \times \frac{	3	}{	10	}=	120	   &amp;  112 - 120 = -8  &amp;   \frac{(	-8 	 )^2}{	 120 	} = 0.53 	    \\ 	
+\hline
+\text{Total}	 &amp;	400	 &amp;   400	 &amp;   0	 &amp;    t_0=1.96 
+\end{array}$$`
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Calculate observed test statistic
+
+.pull-left[
+
+```r
+n = 400
+hyp_probs = c(0.3, 0.2, 0.2, 0.3)
+expected_counts  = hyp_probs * n
+t0 = sum((y-expected_counts)^2/expected_counts)
+t0
+```
+
+```
+## [1] 1.966667
+```
+
+Let's compare this with the distribution of test statistics that we simulated assuming the null hypothesis is true.
+
+
+```r
+mean(sim_test_stats &gt;= t0)
+```
+
+```
+## [1] 0.382
+```
+
+]
+
+.pull-right[
+
+```r
+par(cex = 2, mar = c(4,4,0.5,0.5))
+hist(sim_test_stats, main = "", breaks = 20)
+abline(v = t0, col = "blue", lwd = 2)
+```
+
+&lt;img src="lec03_files/figure-html/unnamed-chunk-22-1.png" width="864" /&gt;
+]
+
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left-2[
+&gt;- **Hypothesis:** The null hypothesis is a coupling phase linkage model, `\(H_0\colon\ p_{AB} = p_{ab}=  (1-p)/2\)` and `\(p_{Ab} = p_{aB} =  p/2\)`. The alternative hypothesis is that the proportions do not follow a coupling phase linkage model, i.e. `\(H_1\colon\)` at least one equality does not hold.
+
+&gt;- **Assumptions:** independent observations and expected cell counts at least 5, `\(e_i = np_{i0}\ge 5\)`.
+
+&gt;- **Test statistic:** `\(\displaystyle{T=\sum_{i=1}^k\frac{(Y_i-np_{i0})^2}{np_{i0}}}\)`. Under `\(H_0\)`, `\(T \sim \chi_{2}^2\)` approximately. We have estimated one parameter, `\(\hat{p}\)`, so the degrees of freedom are `\(4-1-1=2\)`.
+
+&gt;- **P-value:** `\(P(T \ge t_0) = P(\chi_{2}^2 \ge 1.97) = 0.37\)`
+
+&gt;- **Decision:**  Since the p-value is much larger than `\(0.05\)`, the data are consistent with the "coupling phase" linkage model. 
+
+]
+
+
+.pull-right-1[
+&lt;img src="lec03_files/figure-html/unnamed-chunk-23-1.png" width="864" /&gt;
+
+**Defining parameters:** 
+
+- `\(p_{AB}\)` is the probability of an offspring having phenotype `\(AB\)`,
+- `\(p_{ab}\)` is the probability of an offspring having phenotype `\(ab\)`, 
+
+and similarly for `\(p_{Ab}\)` and `\(p_{aB}\)`.
+
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## In R
+
+
+```r
+chisq.test(y, p = p)  # Note the incorrect degrees of freedom!
+```
+
+```
+## 
+## 	Chi-squared test for given probabilities
+## 
+## data:  y
+## X-squared = 1.9667, df = 3, p-value = 0.5794
+```
+
+.pull-left[
+
+```r
+n = sum(y)
+k = length(y)
+(ey = n*p)
+```
+
+```
+## [1] 120  80  80 120
+```
+
+```r
+ey &gt;= 5 # check e_i &gt;= 5
+```
+
+```
+## [1] TRUE TRUE TRUE TRUE
+```
+]
+.pull-right[
+
+```r
+(t0 = sum((y - ey)^2/ey))
+```
+
+```
+## [1] 1.967
+```
+
+```r
+(pval = 1 - pchisq(t0, k - 1 - 1))
+```
+
+```
+## [1] 0.3741
+```
+
+]
+
+---
+
+## Recap
+
+### Hypothesis
+
+- The statement against which you search for evidence is called the null hypothesis, and is denoted by `\(H_0\)`. It is generally a "no difference" statement.
+- The statement you claim is called the alternative hypothesis, and is denoted by `\(H_1\)` (or sometimes you'll see `\(H_A\)`)
+
+### Assumptions
+
+- Each observation are generally assumed to have been chosen at random from a population.
+- We say that such random variables are _iid_ (independently and identically distributed).
+- Each test we consider will have its own set of assumptions.
+
+---
+
+## Recap
+
+### Test statistic
+
+- Since observations vary from sample to sample we can never be sure whether `\(H_0\)` is true or not. 
+- A test statistic is a function of the observations, `\(T = f(X_1, ..., X_n)\)`, such that the distribution of `\(T\)` is known assuming `\(H_0\)` is true.  It can be used test if the data are consistent with `\(H_0\)`.
+- The **observed test statistic**, `\(t_0\)`, is where we plug our observed data into the formula for the test statistic.
+- Large (positive or negative depending on `\(H_1\)`) observed test statistic values is taken as evidence of poor agreement with `\(H_0\)`.
+
+### Significance
+
+The p-value is defined as the probability of getting a test statistic, `\(T\)`, _as or more extreme_ than the value we observed, `\(t_0\)`, _assuming_ that `\(H_0\)` is true.
+
+---
+
+## Recap
+
+### Decision
+
+An observed _large_ positive or negative value of `\(t_0\)` and hence small p-value is taken as evidence of poor agreement with `\(H_0\)`.
+
+- If the p-value is small, then either `\(H_0\)` is true and the poor agreement is due to an unlikely event, or `\(H_0\)` is false. .bold[.blue[The smaller the p-value, the stronger the evidence against the null hypothesis.]]
+    
+- .bold[.red[A large p-value does not mean that there is evidence that the null hypothesis is true.]]
+
+- The level of significance, `\(\alpha\)`, is the strength of evidence needed to reject `\(H_0\)` (often `\(\alpha = 0.05\)`).
+
+---
+&lt;svg viewBox="0 0 581 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M581 226.6C581 119.1 450.9 32 290.5 32S0 119.1 0 226.6C0 322.4 103.3 402 239.4 418.1V480h99.1v-61.5c24.3-2.7 47.6-7.4 69.4-13.9L448 480h112l-67.4-113.7c54.5-35.4 88.4-84.9 88.4-139.7zm-466.8 14.5c0-73.5 98.9-133 220.8-133s211.9 40.7 211.9 133c0 50.1-26.5 85-70.3 106.4-2.4-1.6-4.7-2.9-6.4-3.7-10.2-5.2-27.8-10.5-27.8-10.5s86.6-6.4 86.6-92.7-90.6-87.9-90.6-87.9h-199V361c-74.1-21.5-125.2-67.1-125.2-119.9zm225.1 38.3v-55.6c57.8 0 87.8-6.8 87.8 27.3 0 36.5-38.2 28.3-87.8 28.3zm-.9 72.5H365c10.8 0 18.9 11.7 24 19.2-16.1 1.9-33 2.8-50.6 2.9v-22.1z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+### R packages and functions
+
+- `chisq.test()` chi-squared test given probabilities
+- `pchisq()` probability of getting outcomes from a chi-squared distribution
+- `length()` number of elements in a vector
+- `sum()` add elements in a vector
+- `barplot()` for creating bar plots in base graphics
+
+
+---
+
+## References
+
+For further details see Larsen and Marx (2012), sections 10.3 and 10.4.
+
+&lt;br&gt;
+
+
+Griffiths A. J. F., J. H. Miller, D.T. Suzuki, et al. (2000). _An Introduction to Genetic Analysis._ 7th ed. New York: W. H. Freeman. Chi-square test for linkage. https://www.ncbi.nlm.nih.gov/books/NBK22084/
+
+Larsen, R. J. and M. L. Marx (2012). _An Introduction
+to Mathematical Statistics and its Applications_. 5th
+ed. Boston, MA: Prentice Hall. ISBN:
+978-0-321-69394-5.
+
+
+
+
+
+
+&lt;!-- 
+
+--- 
+class: font110
+
+## References
+
+Larsen, R. J. and M. L. Marx (2012). _An Introduction
+to Mathematical Statistics and its Applications_. 5th
+ed. Boston, MA: Prentice Hall. ISBN:
+978-0-321-69394-5.
+
+
+
+```r
+p1 = ggplot(data.frame(x = c(0,20)), aes(x)) + 
+                stat_function(fun = dchisq, args = list(df = 3),
+                colour = "blue", size = 2) + theme_minimal()
+p2 = ggplot(data.frame(x = c(-4,4)), aes(x)) + 
+                stat_function(fun = dnorm,
+                colour = "blue", size = 2) + theme_minimal()
+p3 = ggplot(data.frame(x = c(0,1)), aes(x)) + 
+                stat_function(fun = dbeta, args = list(shape1 = 0.5, shape2 = 0.5),
+                colour = "blue", size = 2) + theme_minimal()
+p4 = ggplot(data.frame(x = c(0,1)), aes(x)) + 
+                stat_function(fun = dbeta, args = list(shape1 = 0.5, shape2 = 1),
+                colour = "blue", size = 2) + theme_minimal()
+gridExtra::grid.arrange(p1,p2,p3,p4)
+```
+
+&lt;img src="lec03_files/figure-html/unnamed-chunk-29-1.png" width="864" /&gt;
+
+```r
+ggsave("distributions.png")
+```
+
+--&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="assets/remark-zoom.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

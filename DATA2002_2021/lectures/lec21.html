@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>DATA2002</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Garth Tarr" />
+    <script src="lec21_files/header-attrs-2.10/header-attrs.js"></script>
+    <link href="lec21_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } },
+      "HTML-CSS": {
+        styles: {
+          ".MathJax a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+          ".MathJax_Preview a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+        }
+      }
+      });
+    </script>
+    <link rel="stylesheet" href="assets/sydney-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="assets/sydney.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# DATA2002
+## ANOVA contrasts
+### Garth Tarr
+
+---
+
+class: segue
+
+
+
+
+
+.large[
+
+Contrasts
+
+Confidence intervals
+
+]
+
+---
+class: segue
+
+# Contrasts
+
+---
+
+## Beyond ANOVA: contrasts
+
+-   Recall our model: for `\(i=1,2,\ldots,g\)` and `\(j=1,2,\ldots,n_i\)`, 
+-   the `\(j\)`-th observation in the `\(i\)`-th sample is modelled as the
+value taken by 
+`$$Y_{ij}\sim N(\mu_i,\sigma^2)\,,$$`
+and all random variables are assumed independent.
+-   We can rewrite this as:
+`$$Y_{ij} = \mu_{i} + \varepsilon_{ij},$$`
+where `\(\varepsilon_{ij}\sim N(0,\sigma^2)\)` is the error term.
+-   The ANOVA `\(F\)`-test is a test of the hypothesis
+`$$H_0\colon\ \mu_1=\mu_2=\ldots=\mu_g\,.$$`
+-   If this hypothesis is "rejected", then what?
+-   Further analysis reduces to the study of .blue[.bold[contrasts]]
+
+---
+
+## Contrasts
+
+.pull-left[
+-   A **contrast** is a **linear combination** where the coefficients **add to zero**.
+-   In an ANOVA context, a contrast is a linear combination of **means**.
+-   We make the distinction between two kinds of contrast:
+-   **population contrasts**: contrasts involving the *population* group means i.e. the `\(\mu_i\)`'s;
+-   **sample contrasts**: contrasts involving the *sample* group means
+i.e. the `\(\bar y_{i\bullet}\)`'s and `\(\bar Y_{i\bullet}\)`'s.
+]
+.pull-right[
+For example, we might consider the *population* contrast
+`$$\mu_1 - \mu_2,$$`
+whose corresponding *observed* sample version is
+`$$\bar y_{1 \bullet} - \bar y_{2\bullet},$$`
+which is the observed value of the random variable
+`$$\bar Y_{1 \bullet} - \bar Y_{2 \bullet}.$$`
+]
+
+
+---
+&lt;svg viewBox="0 0 576 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M568.25 192c-29.04.13-135.01 6.16-213.84 83-33.12 29.63-53.36 63.3-66.41 94.86-13.05-31.56-33.29-65.23-66.41-94.86-78.83-76.84-184.8-82.87-213.84-83-4.41-.02-7.79 3.4-7.75 7.82.23 27.92 7.14 126.14 88.77 199.3C172.79 480.94 256 480 288 480s115.19.95 199.23-80.88c81.64-73.17 88.54-171.38 88.77-199.3.04-4.42-3.34-7.84-7.75-7.82zM287.98 302.6c12.82-18.85 27.6-35.78 44.09-50.52 19.09-18.61 39.58-33.3 60.26-45.18-16.44-70.5-51.72-133.05-96.73-172.22-4.11-3.58-11.02-3.58-15.14 0-44.99 39.14-80.27 101.63-96.74 172.07 20.37 11.7 40.5 26.14 59.22 44.39a282.768 282.768 0 0 1 45.04 51.46z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Plant growth data
+
+The `PlantGrowth` data has results from an experiment to compare yields (as measured by dried weight of plants) obtained under a control and two different treatment conditions Dobson (1983; Table 7.1).
+
+.pull-left[
+
+```r
+# built into R, load it into the environment
+data("PlantGrowth")
+library(tidyverse)
+ggplot(PlantGrowth, 
+       aes(y = weight, x = group, 
+           colour = group)) +
+  geom_boxplot(coef = 10) + 
+  geom_jitter(width=0.1, size = 5) + 
+  theme_bw(base_size = 36) + 
+  theme(legend.position = "none") +
+  labs(y = "Weight (g)",
+       x = "Group")
+```
+]
+
+.pull-right[
+&lt;img src="lec21_files/figure-html/plantgrowth_boxplot-1.png" width="864" /&gt;
+]
+
+We want to compare the means of the **three** groups: `\(H_0\colon\ \mu_1 = \mu_2 = \mu_3\)`.
+
+---
+&lt;svg viewBox="0 0 576 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M568.25 192c-29.04.13-135.01 6.16-213.84 83-33.12 29.63-53.36 63.3-66.41 94.86-13.05-31.56-33.29-65.23-66.41-94.86-78.83-76.84-184.8-82.87-213.84-83-4.41-.02-7.79 3.4-7.75 7.82.23 27.92 7.14 126.14 88.77 199.3C172.79 480.94 256 480 288 480s115.19.95 199.23-80.88c81.64-73.17 88.54-171.38 88.77-199.3.04-4.42-3.34-7.84-7.75-7.82zM287.98 302.6c12.82-18.85 27.6-35.78 44.09-50.52 19.09-18.61 39.58-33.3 60.26-45.18-16.44-70.5-51.72-133.05-96.73-172.22-4.11-3.58-11.02-3.58-15.14 0-44.99 39.14-80.27 101.63-96.74 172.07 20.37 11.7 40.5 26.14 59.22 44.39a282.768 282.768 0 0 1 45.04 51.46z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+plant_anova = aov(weight ~ group, data = PlantGrowth)
+summary(plant_anova)
+```
+
+```
+##             Df Sum Sq Mean Sq F value Pr(&gt;F)  
+## group        2  3.766  1.8832   4.846 0.0159 *
+## Residuals   27 10.492  0.3886                 
+## ---
+## Signif. codes:  
+## 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+The p-value, `\(P(F_{2,27}\geq 4.846) = 0.0159\)` is less than 0.05, so we reject the null hypothesis at the 5% level of significance and conclude there is evidence to suggest that at least one of the groups has a significantly different mean yeild to the others.
+
+.bold[.blue[But which one?!?!]]
+
+- Is it `ctrl` vs `trt1`?
+- Is it `ctrl` vs `trt2`?
+- Is it `trt1` vs `trt2`?
+- Or is it some other linear combination of the means that is different?
+
+---
+
+## Distribution of sample contrasts
+
+-   Any `\(c_1,\ldots,c_g\)` with `\(c_{\bullet}=\sum_{i=1}^gc_i=0\)` defines a
+*sample contrast*
+`$$\sum_{i=1}^gc_i\bar Y_{i\bullet}\,.$$`
+-   Under our *normal-with-equal-variances* model, this random variable
+has distribution given by
+`$$\sum_{i=1}^gc_i\bar Y_{i\bullet}\sim N \left( \sum_{i=1}^gc_i\mu_i,\ \sigma^2 \sum_{i=1}^g \frac{c_i^2}{n_i} \right)\,.$$`
+-   The corresponding *population contrast* is the expected value of the (random) sample contrast.
+-   Conversely, the (observed) *sample contrast* `\(\displaystyle\sum_{i=1}^gc_i \bar y_{i\bullet}\)` is an *estimate* of the corresponding *population contrast*;
+-   the (random) sample contrast `\(\displaystyle\sum_{i=1}^gc_i\bar Y_{i\bullet}\)` is the corresponding *estimator*.
+
+
+---
+
+## Behaviour of contrasts under the null hypothesis
+
+-   Under the "ANOVA null hypothesis" `\(H_0\colon\mu_1=\ldots=\mu_g(=\mu, \text{ say})\)`,
+-   all population contrasts are zero:
+`$$\sum_{i=1}^gc_i\mu_i=\sum_{i=1}^gc_i\mu=\mu\sum_{i=1}^gc_i=0\,;$$`
+-   all (random) sample contrasts have *expectation* zero:
+`$$E \left( \sum_{i=1}^gc_i\bar Y_{i\bullet}\right)=\sum_{i=1}^gc_i\mu_i=0\,.$$`
+-   Therefore the "ANOVA null hypothesis" can be rephrased as "all
+population contrasts are zero".
+
+---
+
+## Maybe not what we want
+
+-   Thus in *some* examples, in a particular sense, the "ANOVA null hypothesis" may be "too strong":
+-   we may only wish to test  one (or more) "special" population contrasts are zero.
+-   Also, the "ANOVA null hypothesis" *may not be rejected for the reason we want*:
+-   some contrasts may be non-zero, but are they the ones we are interested in?
+
+--
+
+### `\({t}\)`-tests for individual contrasts
+
+-   Suppose we really only want to test that `\(H_0\colon\ \sum_{i=1}^gc_i\mu_i=0\)` for some "special contrast" given by `\(c_1,\ldots,c_{g}\)` (with `\(\sum_{i=1}^gc_i=0\)`).
+-   We can of course perform the ANOVA Mean-Square Ratio `\(F\)`-test, but can we possibly do better?
+-   We can perform a more "targeted" `\(t\)`-test using the corresponding sample contrast *and* the .blue[.bold[residual mean square]].
+
+---
+
+-   The corresponding (random) sample contrast
+`$$\sum_{i=1}^gc_i\bar Y_{i\bullet}\sim N \left(\sum_{i=1}^gc_i\mu_{i}, \sigma^2\sum_{i=1}^g \frac{c_i^2}{n_i}\right)\,.$$`
+-   The *standardised version*
+`$$\frac{\sum_{i=1}^gc_i\bar Y_{i\bullet}-\sum_{i=1}^gc_i\mu_i}{\sigma\sqrt{\sum_{i=1}^g \frac{c_i^2}{n_i}}}$$`
+thus has a **standard normal distribution**.
+-   Replacing `\(\sigma\)` in the denominator with
+`\(\hat{\sigma}=\sqrt{\text{ResMS}}\sim \sqrt{\chi^2_{N-g}/(N-g)}\)`
+(indep. of the `\(\bar Y_{i\bullet}\)`'s) gives
+`$$\frac{\sum_{i=1}^gc_i\bar Y_{i\bullet}-\sum_{i=1}^gc_i\mu_i}{\hat\sigma\sqrt{\sum_{i=1}^g \frac{c_i^2}{n_i}}} \sim t_{N-g}\,.$$`
+
+---
+
+-   Thus a `\(t\)`-statistic for testing the hypothesis that
+`\(\sum_{i=1}^{g}c_i\mu_i=0\)` is
+
+`$$\frac{\sum_{i=1}^gc_i\bar Y_{i\bullet}}{\hat\sigma\sqrt{\sum_{i=1}^g \frac{c_i^2}{n_i}}}$$`
+which has a `\(t_{N-g}\)` distribution if `\(\sum_{i=1}^gc_i\mu_i=0\)`.
+
+-   This *generalises* the two-sample `\(t\)`-statistic.
+
+---
+&lt;svg viewBox="0 0 576 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M568.25 192c-29.04.13-135.01 6.16-213.84 83-33.12 29.63-53.36 63.3-66.41 94.86-13.05-31.56-33.29-65.23-66.41-94.86-78.83-76.84-184.8-82.87-213.84-83-4.41-.02-7.79 3.4-7.75 7.82.23 27.92 7.14 126.14 88.77 199.3C172.79 480.94 256 480 288 480s115.19.95 199.23-80.88c81.64-73.17 88.54-171.38 88.77-199.3.04-4.42-3.34-7.84-7.75-7.82zM287.98 302.6c12.82-18.85 27.6-35.78 44.09-50.52 19.09-18.61 39.58-33.3 60.26-45.18-16.44-70.5-51.72-133.05-96.73-172.22-4.11-3.58-11.02-3.58-15.14 0-44.99 39.14-80.27 101.63-96.74 172.07 20.37 11.7 40.5 26.14 59.22 44.39a282.768 282.768 0 0 1 45.04 51.46z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Yield
+
+Let `\(\mu_1, \mu_2\)` and `\(\mu_3\)` represent the population means of treatment 1, treatment 2 and the control group, respectively.
+
+Let's consider if there is a difference between treatment 1, `trt1` and treatment 2, `trt2`, this corresponds to contrast coefficients `\(c_1 = 1\)`, `\(c_2 = -1\)` and `\(c_3 = 0\)`.
+
+.pull-left[
+
+
+```r
+plant_summary = PlantGrowth %&gt;% 
+  mutate(group = factor(group, 
+      levels = c("trt1","trt2", "ctrl"))) %&gt;% 
+  group_by(group) %&gt;% 
+  summarise(n = n(),
+            mean_weight = mean(weight)) %&gt;% 
+  mutate(contrast_coefficients = c(1,-1,0))
+plant_summary
+```
+
+```
+## # A tibble: 3 × 4
+##   group     n mean_weight contrast_coefficients
+##   &lt;fct&gt; &lt;int&gt;       &lt;dbl&gt;                 &lt;dbl&gt;
+## 1 trt1     10        4.66                     1
+## 2 trt2     10        5.53                    -1
+## 3 ctrl     10        5.03                     0
+```
+
+]
+.pull-right[
+
+
+```r
+n_i = plant_summary %&gt;% pull(n)
+ybar_i = plant_summary %&gt;% pull(mean_weight)
+c_i =  plant_summary %&gt;%
+  pull(contrast_coefficients)
+```
+
+
+Sample contrast:
+
+
+```r
+sum(c_i * ybar_i)
+```
+
+```
+## [1] -0.865
+```
+
+]
+
+---
+&lt;svg viewBox="0 0 576 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M568.25 192c-29.04.13-135.01 6.16-213.84 83-33.12 29.63-53.36 63.3-66.41 94.86-13.05-31.56-33.29-65.23-66.41-94.86-78.83-76.84-184.8-82.87-213.84-83-4.41-.02-7.79 3.4-7.75 7.82.23 27.92 7.14 126.14 88.77 199.3C172.79 480.94 256 480 288 480s115.19.95 199.23-80.88c81.64-73.17 88.54-171.38 88.77-199.3.04-4.42-3.34-7.84-7.75-7.82zM287.98 302.6c12.82-18.85 27.6-35.78 44.09-50.52 19.09-18.61 39.58-33.3 60.26-45.18-16.44-70.5-51.72-133.05-96.73-172.22-4.11-3.58-11.02-3.58-15.14 0-44.99 39.14-80.27 101.63-96.74 172.07 20.37 11.7 40.5 26.14 59.22 44.39a282.768 282.768 0 0 1 45.04 51.46z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Residual standard error
+
+.pull-left[
+
+Recall the ANOVA analysis from earlier:
+
+
+```r
+plant_anova = aov(weight ~ group, 
+                  data = PlantGrowth)
+summary(plant_anova)
+```
+
+```
+##             Df Sum Sq Mean Sq F value Pr(&gt;F)  
+## group        2  3.766  1.8832   4.846 0.0159 *
+## Residuals   27 10.492  0.3886                 
+## ---
+## Signif. codes:  
+## 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+-   The "Residual standard error" is the estimate of `\(\sigma\)`, the (population) standard deviation (within each group)
+
+]
+.pull-right[
+We use the `tidy()` function from the **broom** package to help extract these terms from the anova object.
+
+
+```r
+library(broom)
+tidy(plant_anova)
+```
+
+```
+## # A tibble: 2 × 6
+##   term         df sumsq meansq statistic p.value
+##   &lt;chr&gt;     &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;
+## 1 group         2  3.77  1.88       4.85  0.0159
+## 2 Residuals    27 10.5   0.389     NA    NA
+```
+
+```r
+resid_ms = tidy(plant_anova)$meansq[2]
+resid_se = sqrt(resid_ms)
+c(resid_ms, resid_se)
+```
+
+```
+## [1] 0.3885959 0.6233746
+```
+]
+
+---
+&lt;svg viewBox="0 0 576 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M568.25 192c-29.04.13-135.01 6.16-213.84 83-33.12 29.63-53.36 63.3-66.41 94.86-13.05-31.56-33.29-65.23-66.41-94.86-78.83-76.84-184.8-82.87-213.84-83-4.41-.02-7.79 3.4-7.75 7.82.23 27.92 7.14 126.14 88.77 199.3C172.79 480.94 256 480 288 480s115.19.95 199.23-80.88c81.64-73.17 88.54-171.38 88.77-199.3.04-4.42-3.34-7.84-7.75-7.82zM287.98 302.6c12.82-18.85 27.6-35.78 44.09-50.52 19.09-18.61 39.58-33.3 60.26-45.18-16.44-70.5-51.72-133.05-96.73-172.22-4.11-3.58-11.02-3.58-15.14 0-44.99 39.14-80.27 101.63-96.74 172.07 20.37 11.7 40.5 26.14 59.22 44.39a282.768 282.768 0 0 1 45.04 51.46z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left[
+-   The `\(t\)`-statistic is obtained as follows:
+`$$\frac{\sum_{i=1}^gc_i\bar Y_{i\bullet}}{\hat\sigma\sqrt{\sum_{i=1}^g \frac{c_i^2}{n_i}}}$$`
+
+```r
+se = sqrt(resid_ms * sum((c_i^2) / n_i))
+se
+```
+
+```
+## [1] 0.2787816
+```
+
+```r
+t_stat = sum(c_i * ybar_i)/se
+t_stat
+```
+
+```
+## [1] -3.102787
+```
+]
+.pull-right[
+-   The test statistic has a `\(t_{N-g}\)` distribution if `\(\sum_{i=1}^gc_i\mu_i=0\)`.
+
+-   This is the same degrees of freedom as the denominator (residual) degrees of freedom from the ANOVA!
+
+-   A (two-sided) p-value is obtained using
+
+
+```r
+2*pt(abs(t_stat), df = plant_anova$df.res,
+     lower.tail = FALSE)
+```
+
+```
+## [1] 0.004459236
+```
+
+-   Why is this better than an ordinary two-sample `\(t\)`-test?
+    -   (Potentially) a smaller standard error! Better estimate of `\(\sigma\)`.
+
+]
+
+---
+class: segue
+
+# Confidence intervals
+
+---
+
+## Confidence interval
+
+-   A confidence interval for a population contrast can be obtained in the usual way, based on the `\(t\)`-statistic.
+-   Suppose the "multiplier", or critical value, `\(t^\star\)` satisfies
+`$$P(-t^\star \leq t_{N-g}\leq t^\star)=0.95\,.$$`
+-   Then whatever be the "true" values of the `\(\mu_i\)`'s, since the quantity
+`$$\frac{\sum_{i=1}^gc_i\bar Y_{i\bullet}-\sum_{i=1}^gc_i\mu_i}{ \hat\sigma\sqrt{\sum_{i=1}^g \frac{c_i^2}{n_i}}} \sim t_{N-g}$$`
+we have, using the usual confidence interval-type manipulations,
+`$$P \left( \sum_ic_i\bar Y_{i\bullet}- t^\star \hat{\sigma}\sqrt{\sum_i \frac{c_i^2}{n_i}} \leq \sum_ic_i\mu_i \leq \sum_ic_i\bar Y_{i\bullet}+ t^\star \hat{\sigma}\sqrt{\sum_i \frac{c_i^2}{n_i}} \right)=0.95\,.$$`
+
+---
+
+## "Observed value" of confidence interval
+
+Therefore for observed sample means `\(\bar y_{1\bullet},\ldots,\bar y_{g\bullet}\)`, a 95% confidence interval for the "true" population contrast `\(\sum_ic_i\mu_i\)` is given by
+`$$\underbrace{\sum_ic_i\bar y_{i\bullet}}_{\text{estimate}}\pm t^\star\,  \left(\underbrace{\hat{\sigma}\sqrt{\sum_i \frac{c_i^2}{n_i}}}_{\text{st.error}}\right)$$`
+where, as above, `\(\hat{\sigma}\)` denotes the square root of the .bold[.blue[residual mean square]]
+
+---
+&lt;svg viewBox="0 0 576 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M568.25 192c-29.04.13-135.01 6.16-213.84 83-33.12 29.63-53.36 63.3-66.41 94.86-13.05-31.56-33.29-65.23-66.41-94.86-78.83-76.84-184.8-82.87-213.84-83-4.41-.02-7.79 3.4-7.75 7.82.23 27.92 7.14 126.14 88.77 199.3C172.79 480.94 256 480 288 480s115.19.95 199.23-80.88c81.64-73.17 88.54-171.38 88.77-199.3.04-4.42-3.34-7.84-7.75-7.82zM287.98 302.6c12.82-18.85 27.6-35.78 44.09-50.52 19.09-18.61 39.58-33.3 60.26-45.18-16.44-70.5-51.72-133.05-96.73-172.22-4.11-3.58-11.02-3.58-15.14 0-44.99 39.14-80.27 101.63-96.74 172.07 20.37 11.7 40.5 26.14 59.22 44.39a282.768 282.768 0 0 1 45.04 51.46z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+-   A two-sided 95% confidence interval for the "special contrast" considered above is given as follows:
+-   the "multiplier" `\(t^\star\)` is determined via:
+
+```r
+t_star = qt(0.975, df = 969)
+t_star
+```
+
+```
+## [1] 1.962415
+```
+
+-   The interval is then obtained using
+
+
+```r
+sum(c_i * ybar_i) + c(-1,1) * t_star * se
+```
+
+```
+## [1] -1.4120853 -0.3179147
+```
+
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="assets/remark-zoom.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

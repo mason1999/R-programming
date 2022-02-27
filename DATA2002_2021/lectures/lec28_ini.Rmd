@@ -1,0 +1,223 @@
+---
+title: "Lecture 28"
+author: "Garth Tarr"
+output:
+  html_document:
+    code_folding: show
+---
+
+
+```{r}
+library(tidyverse)
+data(environmental, package = "lattice")
+environmental = environmental %>% 
+  mutate(lozone = log(ozone))
+lm3 = lm(lozone ~ radiation + temperature + wind, environmental)
+lm3
+```
+
+
+```{r}
+library(GGally)
+GGally::ggpairs(environmental) + theme_bw(base_size = 22)
+```
+
+
+```{r}
+new_obs = data.frame(radiation = c(200,210), temperature = c(90,80), wind = c(15,10))
+```
+
+
+```{r}
+predict(lm3, newdata = new_obs, interval = "prediction", level = 0.90)
+predict(lm3, new_obs, interval = "confidence", level = 0.90)
+```
+
+
+```{r}
+predict(lm3, new_obs, interval = "prediction",
+        level = 0.90, se.fit = TRUE)
+predict(lm3, new_obs, interval = "confidence",
+        level = 0.90)
+```
+
+
+```{r}
+qt(0.95, 107)
+```
+
+
+```{r}
+lm2 = lm(lozone ~ temperature, data = environmental)
+new_temp = data.frame(temperature = seq(from = min(environmental$temperature),
+                                        to = max(environmental$temperature),
+                                        by = 0.1))
+pi = predict(lm2, new_temp, interval = "prediction", level = 0.90)
+ci = predict(lm2, new_temp, interval = "confidence", level = 0.90)
+interval_df = data.frame(
+  pi_upper = pi[,"upr"],
+  pi_lower = pi[,"lwr"],
+  ci_upper = ci[,"upr"],
+  ci_lower = ci[,"lwr"],
+  temperature = new_temp$temperature
+)
+```
+
+
+```{r}
+ggplot(environmental, aes(x = temperature, y = lozone)) + 
+  geom_point() + theme_classic(base_size = 30) + 
+  geom_line(data = interval_df, aes(y=pi_lower), color = "red", linetype = 2) +
+  geom_line(data = interval_df, aes(y=pi_upper), color = "red", linetype = 2) +
+  geom_line(data = interval_df, aes(y=ci_lower), color = "blue", linetype = 1) +
+  geom_line(data = interval_df, aes(y=ci_upper), color = "blue", linetype = 1)
+```
+
+
+```{r}
+ggplot(environmental, aes(x = temperature, y = lozone)) + 
+  geom_point() + theme_classic(base_size = 30) + 
+  geom_line(data = interval_df, aes(y=pi_lower), color = "red", linetype = 2) +
+  geom_line(data = interval_df, aes(y=pi_upper), color = "red", linetype = 2) +
+  geom_line(data = interval_df, aes(y=ci_lower), color = "blue", linetype = 1) +
+  geom_line(data = interval_df, aes(y=ci_upper), color = "blue", linetype = 1) + 
+  geom_smooth(method = "lm", se = TRUE) #<<
+```
+
+
+```{r}
+summary(lm2)$r.squared # lozone ~ temperature
+summary(lm3)$r.squared # lozone ~ radiation + temperature + wind
+```
+
+
+```{r}
+n = nrow(environmental)
+n
+n_train = floor(0.8*n)
+n_test = n - n_train
+grp_labs = rep(c("Train","Test"), times = c(n_train, n_test)) 
+table(grp_labs)
+environmental$grp = sample(grp_labs)
+head(environmental)
+train_dat = environmental %>% filter(grp == "Train")
+lm_simple_train = lm(lozone ~ temperature, data = train_dat)
+lm_full_train = lm(lozone ~ radiation + temperature + wind, data = train_dat)
+test_dat = environmental %>% filter(grp == "Test")
+simple_pred = predict(lm_simple_train, newdata = test_dat)
+full_pred = predict(lm_full_train, newdata = test_dat)
+```
+
+
+```{r}
+simple_mse = mean((test_dat$lozone - simple_pred)^2)
+sqrt(simple_mse)
+full_mse = mean((test_dat$lozone - full_pred)^2)
+sqrt(full_mse)
+```
+
+
+```{r}
+simple_mae = mean(abs(test_dat$lozone - simple_pred))
+simple_mae
+full_mae = mean(abs(test_dat$lozone - full_pred))
+full_mae
+```
+
+
+
+```{r}
+set.seed(2)
+nrow(environmental)
+environmental$grp = NULL # remove the grp variable we added previously
+fold_id = c(1, rep(1:10, each = 11))
+environmental$fold_id = sample(fold_id, replace = FALSE)
+head(environmental)
+```
+
+
+```{r}
+k = 10
+simple_mse = vector(mode = "numeric", length = k)
+full_mse = vector(mode = "numeric", length = k)
+simple_mae = vector(mode = "numeric", length = k)
+full_mae = vector(mode = "numeric", length = k)
+
+for(i in 1:k) { 
+  test_set = environmental[fold_id == i,]
+  training_set = environmental[fold_id != i,]
+  simple_lm = lm(lozone ~ temperature, data = training_set)
+  simple_pred = predict(simple_lm, test_set)
+  simple_mse[i] = mean((test_set$lozone - simple_pred)^2)
+  simple_mae[i] = mean(abs(test_set$lozone - simple_pred))
+  full_lm = lm(lozone ~ radiation + temperature + wind, data = training_set)
+  full_pred = predict(full_lm, test_set)
+  full_mse[i] = mean((test_set$lozone - full_pred)^2)
+  full_mae[i] = mean(abs(test_set$lozone - full_pred))
+}
+```
+
+
+```{r}
+cv_res = tibble(simple_mse, full_mse, 
+                simple_mae, full_mae)
+cv_res
+```
+
+
+```{r}
+c(sqrt(mean(simple_mse)),
+  sqrt(mean(full_mse))) %>% round(2)
+```
+
+
+```{r}
+c(mean(simple_mae),
+  mean(full_mae)) %>% round(2)
+```
+
+
+```{r}
+cv_res %>% gather(key = "metric", value = "error") %>% 
+  separate(col = metric, into = c("model","metric")) %>% 
+  ggplot(aes(x = model, y = error)) + facet_wrap(~metric, scales = "free_y") + 
+  geom_boxplot()
+```
+
+
+```{r}
+library(caret)
+
+cv_settings = trainControl(
+    method = "cv", number = 10,
+    verboseIter = FALSE
+  )
+
+cv_full = train(
+  lozone ~ radiation + temperature + wind, environmental,
+  method = "lm",
+  trControl =  cv_settings
+)
+cv_full
+```
+
+
+```{r}
+cv_simple = train(
+  lozone ~ temperature, 
+  environmental,
+  method = "lm",
+  trControl = cv_settings
+)
+cv_simple
+```
+
+Combine the results and visualise:
+
+```{r}
+results = resamples(list(full = cv_full,
+                         simple = cv_simple))
+ggplot(results, metric = "RMSE") + labs(y = "RMSE")
+ggplot(results, metric = "MAE") + labs(y = "MAE")
+```
+

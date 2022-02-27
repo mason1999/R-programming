@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>DATA2002</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Garth Tarr" />
+    <script src="lec15_files/header-attrs-2.10/header-attrs.js"></script>
+    <link href="lec15_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="lec15_files/pagedtable-1.1/css/pagedtable.css" rel="stylesheet" />
+    <script src="lec15_files/pagedtable-1.1/js/pagedtable.js"></script>
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } },
+      "HTML-CSS": {
+        styles: {
+          ".MathJax a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+          ".MathJax_Preview a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+        }
+      }
+      });
+    </script>
+    <link rel="stylesheet" href="assets/sydney-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="assets/sydney.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# DATA2002
+## Wilcoxon rank-sum test
+### Garth Tarr
+
+---
+
+class: segue
+
+
+
+
+
+.large[
+Wilcoxon rank-sum test
+]
+
+---
+class: segue
+
+# Wilcoxon rank-sum test 
+
+## Also known as Mann-Whitney `\(U\)` test or &lt;br&gt; Mann-Whitney-Wilcoxon test or &lt;br&gt; Wilcoxon-Mann-Whitney test
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M64 96H0c0 123.7 100.3 224 224 224v144c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V320C288 196.3 187.7 96 64 96zm384-64c-84.2 0-157.4 46.5-195.7 115.2 27.7 30.2 48.2 66.9 59 107.6C424 243.1 512 147.9 512 32h-64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Yield
+
+.pull-left[
+The following data yield measurements by two different methods.
+
+
+```r
+A = c(32, 29, 35, 28)
+B = c(27, 31, 26, 25, 30)
+dat = data.frame(
+  yield = c(A,B),
+  method = c(rep("A", length(A)),
+             rep("B", length(B)))
+)
+```
+
+If the normality assumptions are in doubt, does the data present sufficient evidence to indicate a difference in the methods A and B?
+
+]
+.pull-right[
+.small[
+
+```r
+# boxplot(dat$yield~dat$method, ylab = "Yield")
+library(ggplot2)
+ggplot(dat, aes(x = method, y = yield)) + 
+  geom_boxplot() + 
+  theme_minimal(base_size = 26)
+```
+
+&lt;img src="lec15_files/figure-html/unnamed-chunk-2-1.png" width="324" /&gt;
+]
+]
+
+
+---
+
+## Wilcoxon rank-sum test
+
+- A non-parametric test to compare means of two independent samples
+
+- Relaxes normality assumption (like sign and Wilcoxon sign-rank tests)
+
+- Also relaxes the assumption of symmetry
+
+---
+
+## Wilcoxon rank-sum test
+
+Suppose the samples `\(X_1, X_2, \ldots, X_{n_x}\)` and `\(Y_1, Y_2, \ldots, Y_{n_y}\)` are taken from two distinct populations that follow the same kind of distribution but differ in location.  
+
+That is, `\(\mu_x = \mu_y + \theta\)`, where `\(\mu_x\)` is the population mean of `\(X\)`, `\(\mu_y\)` is the population mean of `\(Y\)` and `\(\theta\)` is a location shift parameter.
+
+.pull-left[
+
+```r
+library(tidyverse)
+N = 1000
+theta = 1
+loc = data.frame(
+  obs = c(rgamma(N,4,4), rgamma(N,4,4)+theta),
+  group = rep(c("X","Y"), each = N)
+)
+loc %&gt;% group_by(group) %&gt;% 
+  summarise(Mean = mean(obs), SD = sd(obs))
+```
+
+```
+## # A tibble: 2 × 3
+##   group  Mean    SD
+##   &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1 X      1.00 0.487
+## 2 Y      1.98 0.501
+```
+]
+.pull-right[
+
+```r
+loc %&gt;% ggplot() + 
+  aes(x = obs, fill = group) + 
+  geom_density(alpha = 0.5) + 
+  labs(x = "Observed values", 
+       y = "Density", 
+       fill = "Sample")+
+  theme_bw(base_size = 34)
+```
+
+&lt;img src="lec15_files/figure-html/densities-1.png" width="864" /&gt;
+]
+
+
+---
+
+## Wilcoxon rank-sum test
+
+Let `\(R_1, R_2, \ldots, R_N\)` with `\(N = n_x + n_y\)` be the ranks of combined sample: `\(X_1, X_2, \ldots, X_{n_x}, Y_1, Y_2, \ldots, Y_{n_y}\)`.
+
+- For one sample .red[.bold[Wilcoxon signed-rank]] test, the ranks are summed over positive side of the
+differences 
+
+- For two sample .blue[.bold[Wilcoxon rank-sum]] test, the ranks are summed over one of the samples.
+- i.e. `\(W = R_1 + R_2 + \ldots + R_{n_x}\)`
+
+If `\(H_0\)` is true, then `\(W\)` should be close to its expected value
+
+`$$\operatorname{E}(W) = \text{Proportion}\times\text{Total rank sum} = \frac{n_x}{N} \times \frac{N(N+1)}{2} = \frac{n_x(N+1)}{2}.$$`
+
+If `\(W\)` is small (large), we expect `\(\mu_x &lt; \mu_y\)` ( `\(\mu_x &gt; \mu_y\)` ).
+
+---
+
+Suppose `\(X_1, \dots, X_n\)` are drawn from some population. Given a significance level `\(\alpha\)`, we want to test on the population mean.
+
+.blockquote[
+- **Hypothesis:** `\(H_0\colon\ \mu_x=\mu_y\)` vs `\(H_1\colon\ \mu_x&gt;\mu_y, \ \mu_x &lt; \mu_y, \ \mu_x \neq \mu_y\)` 
+
+-  **Assumptions:** `\(X_i\)` and `\(Y_i\)` are independent and follow the same distribution but differ by a shift.
+
+- **Test statistic:** `\(W = R_1 + R_2 + \ldots + R_{n_x}\)`.  Under `\(H_0\)`, `\(W\)` follows the `\(WRS(n_X,n_Y)\)` distribution.
+
+- **Observed test statistic:** `\(w = r_1 + r_2 + \ldots + r_{n_x}\)`
+
+-  **p-value:** 
+`\begin{align*}
+P(W \ge w) &amp; \ \mbox{ for } \ H_1\colon\ \mu_x&gt;\mu_y \quad \text{ or } \quad P(W \le w) \ \mbox{ for } \ H_1\colon\ \mu_x&lt;\mu_y \\
+2 P(W \ge w) &amp; \ \mbox{if} \ w &gt; \frac{n_x(N+1)}{2} \ \mbox{ and } \ H_1\colon\ \mu_x \ne \mu_y \\
+2 P(W \le w) &amp; \ \mbox{if} \ w &lt; \frac{n_x(N+1)}{2} \ \mbox{ and } \ H_1\colon\ \mu_x \ne \mu_y 
+\end{align*}`
+
+- **Decision:** If p-value is less than `\(\alpha\)`, there is evidence against `\(H_0\)`. If the p-value is greater than `\(\alpha\)`, the data are consistent with `\(H_0\)`.
+]
+
+---
+
+## Calculate p-value: no ties on the data
+
+The exact p-value `\(P(W \le w)\)` is given by  in R by
+
+
+```r
+pwilcox(w - minw, m = nx, n = ny)
+```
+where `\(\min(W) = \underbrace{1+2+\ldots+n_x}_{n_x}=\dfrac{n_x(n_x+1)}{2}\)` (the smallest possible sum of ranks for the `\(X\)` sample).
+
+The distribution that `pwilcox()` uses is for the distribution of `\(W-\min(W)\)` (and so starts at 0).
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M64 96H0c0 123.7 100.3 224 224 224v144c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V320C288 196.3 187.7 96 64 96zm384-64c-84.2 0-157.4 46.5-195.7 115.2 27.7 30.2 48.2 66.9 59 107.6C424 243.1 512 147.9 512 32h-64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Yield example
+
+.pull-left[
+The following data yield measurements by two different methods.
+
+
+```r
+A = c(32, 29, 35, 28)
+B = c(27, 31, 26, 25, 30)
+dat = data.frame(
+  yield = c(A,B),
+  method = c(rep("A", length(A)),
+             rep("B", length(B)))
+)
+```
+
+If the normality assumptions are in doubt, does the data present sufficient evidence to indicate a difference in the methods A and B?
+
+]
+
+.pull-right[
+
+```r
+dat = dat %&gt;% mutate(rank = rank(yield))
+dat
+```
+
+```
+##   yield method rank
+## 1    32      A    8
+## 2    29      A    5
+## 3    35      A    9
+## 4    28      A    4
+## 5    27      B    3
+## 6    31      B    7
+## 7    26      B    2
+## 8    25      B    1
+## 9    30      B    6
+```
+
+```r
+w_A = dat %&gt;% 
+  filter(method == "A") %&gt;% 
+  pull(rank) %&gt;% 
+  sum()
+w_A
+```
+
+```
+## [1] 26
+```
+
+]
+
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M64 96H0c0 123.7 100.3 224 224 224v144c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V320C288 196.3 187.7 96 64 96zm384-64c-84.2 0-157.4 46.5-195.7 115.2 27.7 30.2 48.2 66.9 59 107.6C424 243.1 512 147.9 512 32h-64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.blockquote[
+- **Hypothesis:** `\(H_0\colon\ \mu_A=\mu_B\)` vs `\(H_1\colon\ \mu_A \neq \mu_B\)` 
+
+- **Assumptions:** `\(A_i\)` and `\(B_i\)` are independent and follow the same kind of distribution but differ by a shift.
+
+- **Test statistic:** `\(W = R_1 + R_2 + \ldots + R_{n_A}\)`.  Under `\(H_0\)`, `\(W\)` follows the `\(WRS(4,5)\)` distribution.
+
+- **Observed test statistic:** `\(w=26\)` (sum of the ranks associated with method A).
+
+- **P-value:**  `\(2 P(W \ge w) = 0.19\)`  because `\(w = 26 &gt; \frac{n_A(N+1)}{2} = 20\)` so we're looking in the upper tail.
+
+- **Decision:** As the p-value is greater than 0.05, the data are consistent with `\(H_0\)`.
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M64 96H0c0 123.7 100.3 224 224 224v144c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V320C288 196.3 187.7 96 64 96zm384-64c-84.2 0-157.4 46.5-195.7 115.2 27.7 30.2 48.2 66.9 59 107.6C424 243.1 512 147.9 512 32h-64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left-1[
+
+```r
+sum_dat = dat %&gt;%
+  group_by(method) %&gt;% 
+  summarise(n = n(),
+            w = sum(rank))
+sum_dat
+```
+
+```
+## # A tibble: 2 × 3
+##   method     n     w
+##   &lt;chr&gt;  &lt;int&gt; &lt;dbl&gt;
+## 1 A          4    26
+## 2 B          5    19
+```
+
+```r
+n_A = sum_dat %&gt;% 
+  filter(method == "A") %&gt;% 
+  pull(n)
+n_B = sum_dat %&gt;% 
+  filter(method == "B") %&gt;%
+  pull(n)
+# using the sums of the A sample
+w_A = sum_dat %&gt;% 
+  filter(method == "A") %&gt;% 
+  pull(w)
+ew_A = n_A * (n_A + n_B + 1)/2 
+minw_A = n_A * (n_A + 1)/2 
+```
+]
+
+
+.pull-right-2[
+
+```r
+c(minw_A, w_A, ew_A) # w_A &gt; ew_A
+```
+
+```
+## [1] 10 26 20
+```
+
+```r
+# looking in the upper tail, so use lower.tail = FALSE
+2 * pwilcox(w_A - minw_A - 1, n_A, n_B, lower.tail = FALSE)
+```
+
+```
+## [1] 0.1904762
+```
+
+&lt;img src="lec15_files/figure-html/unnamed-chunk-9-1.png" width="864" /&gt;
+]
+
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M64 96H0c0 123.7 100.3 224 224 224v144c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V320C288 196.3 187.7 96 64 96zm384-64c-84.2 0-157.4 46.5-195.7 115.2 27.7 30.2 48.2 66.9 59 107.6C424 243.1 512 147.9 512 32h-64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## What if we use the sums of the ranks of the B sample?
+
+.pull-left-1[
+
+```r
+sum_dat
+```
+
+```
+## # A tibble: 2 × 3
+##   method     n     w
+##   &lt;chr&gt;  &lt;int&gt; &lt;dbl&gt;
+## 1 A          4    26
+## 2 B          5    19
+```
+
+```r
+# using the sums of the B sample
+w_B = sum_dat %&gt;% 
+  filter(method == "B") %&gt;% 
+  pull(w)
+ew_B = n_B * (n_B + n_A + 1)/2 
+minw_B = n_B * (n_B + 1)/2 
+c(minw_B, w_B, ew_B)
+```
+
+```
+## [1] 15 19 25
+```
+Note that `\(w_B &lt; E(W_B)\)` so we need to look in the lower tail of the distribution.
+]
+
+
+.pull-right-2[
+
+```r
+# now looking in the lower tail
+2 * pwilcox(w_B - minw_B, n_B, n_A)
+```
+
+```
+## [1] 0.1904762
+```
+
+&lt;img src="lec15_files/figure-html/unnamed-chunk-12-1.png" width="864" /&gt;
+
+]
+
+
+
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M64 96H0c0 123.7 100.3 224 224 224v144c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V320C288 196.3 187.7 96 64 96zm384-64c-84.2 0-157.4 46.5-195.7 115.2 27.7 30.2 48.2 66.9 59 107.6C424 243.1 512 147.9 512 32h-64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Yield
+
+
+```r
+wilcox.test(A, B) # wilcox.test(yield ~ method, data = dat)
+```
+
+```
+## 
+## 	Wilcoxon rank sum exact test
+## 
+## data:  A and B
+## W = 16, p-value = 0.1905
+## alternative hypothesis: true location shift is not equal to 0
+```
+
+```r
+t.test(A, B) # t.test(yield ~ method, data = dat)
+```
+
+```
+## 
+## 	Welch Two Sample t-test
+## 
+## data:  A and B
+## t = 1.633, df = 5.8232, p-value = 0.1551
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  -1.630468  8.030468
+## sample estimates:
+## mean of x mean of y 
+##      31.0      27.8
+```
+
+---
+
+## p-value calculation: when there are ties
+
+- The p-value can be calculated using normal approximation to the distribution of test statistic:
+`$$T = \frac{W-\operatorname{E}(W)}{\sqrt {\operatorname{Var}(W)}} \sim  {\mathcal N}(0,1) \text{ approximately},$$`
+where  `\(\operatorname{E}(W)  =  \dfrac{n_x(N+1)}{2}\)` and `\(\operatorname{Var}(W) =  \dfrac{n_x n_y}{N(N-1)}\left( \displaystyle\sum_{i=1}^N r_i^2-\dfrac{N(N+1)^2}{4} \right)\)`.
+
+- Our p-value calculations are:
+- `\(\text{p-value} \approx  P\left(Z\geq  \frac{W-\operatorname{E}(W)}{\sqrt {\operatorname{Var}(W)}} \right) \qquad \mbox{for } H_1\colon\ \mu_x&gt;\mu_y\)`
+- `\(\text{p-value} \approx    P \left(Z\leq \frac{W-\operatorname{E}(W)}{\sqrt {\operatorname{Var}(W)}} \right) \qquad \mbox{for } H_1\colon\ \mu_x&lt;\mu_y\)`
+- `\(\text{p-value} \approx    2 P \left(Z\geq\left| \frac{W-\operatorname{E}(W)}{\sqrt {\operatorname{Var}(W)}} \right| \right) \qquad \mbox{for } H_1\colon\ \mu_x \not=\mu_y.\)`
+
+.footnote[
+- We use normal approximation for the test statistic `\(W\)` NOT the data `\(X_i, \ Y_i\)`. 
+- As we do not consider sign, zero measurements should be ranked in the same way as other measurements (clear membership to either sample). 
+]
+
+---
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 0C79.7 101.3 0 220.9 0 300.5 0 425 79 512 192 512s192-87 192-211.5c0-79.9-80.2-199.6-192-300.5zm0 448c-56.5 0-96-39-96-94.8 0-13.5 4.6-61.5 96-161.2 91.4 99.7 96 147.7 96 161.2 0 55.8-39.5 94.8-96 94.8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Latent heat of fusion 
+
+.pull-left-2[
+Natrella (1963; page 3-23) presents data from two methods that were used in a study of the latent heat latent heat of fusion of ice. Both method A (digital method) and Method B (method of mixtures) were conducted with the specimens cooled to -0.72°C. The data represent the change in total heat from -0.72°C to water at 0°C, in calories per gram of mass. 
+
+&gt; Does the data support the hypothesis that the electrical method (method A) gives larger results? 
+
+
+```r
+A = c(79.98, 80.04, 80.02, 80.04, 80.03, 80.03, 80.04, 
+      79.97, 80.05, 80.03, 80.02, 80.00, 80.02)
+B = c(80.02, 79.94, 79.98, 79.97, 79.97, 80.03, 79.95, 
+      79.97)
+heat = data.frame(
+  energy = c(A,B),
+  method = rep(c("A","B"), c(length(A), length(B))))
+```
+]
+.pull-right-1[
+
+```r
+heat = heat %&gt;% 
+  dplyr::mutate(r = rank(energy))
+# or equivalently
+# heat$rank = rank(heat$energy)
+heat %&gt;% arrange(r) %&gt;%  
+  rmarkdown::paged_table(
+    options = list(rows.print = 8))
+```
+
+&lt;div data-pagedtable="false"&gt;
+  &lt;script data-pagedtable-source type="application/json"&gt;
+{"columns":[{"label":["energy"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["method"],"name":[2],"type":["chr"],"align":["left"]},{"label":["r"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"79.94","2":"B","3":"1.0"},{"1":"79.95","2":"B","3":"2.0"},{"1":"79.97","2":"A","3":"4.5"},{"1":"79.97","2":"B","3":"4.5"},{"1":"79.97","2":"B","3":"4.5"},{"1":"79.97","2":"B","3":"4.5"},{"1":"79.98","2":"A","3":"7.5"},{"1":"79.98","2":"B","3":"7.5"},{"1":"80.00","2":"A","3":"9.0"},{"1":"80.02","2":"A","3":"11.5"},{"1":"80.02","2":"A","3":"11.5"},{"1":"80.02","2":"A","3":"11.5"},{"1":"80.02","2":"B","3":"11.5"},{"1":"80.03","2":"A","3":"15.5"},{"1":"80.03","2":"A","3":"15.5"},{"1":"80.03","2":"A","3":"15.5"},{"1":"80.03","2":"B","3":"15.5"},{"1":"80.04","2":"A","3":"19.0"},{"1":"80.04","2":"A","3":"19.0"},{"1":"80.04","2":"A","3":"19.0"},{"1":"80.05","2":"A","3":"21.0"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[8],"max":[8]},"pages":{}}}
+  &lt;/script&gt;
+&lt;/div&gt;
+]
+
+
+.footnote[
+Source: Rice (2006; page 423)
+]
+
+---
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 0C79.7 101.3 0 220.9 0 300.5 0 425 79 512 192 512s192-87 192-211.5c0-79.9-80.2-199.6-192-300.5zm0 448c-56.5 0-96-39-96-94.8 0-13.5 4.6-61.5 96-161.2 91.4 99.7 96 147.7 96 161.2 0 55.8-39.5 94.8-96 94.8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Latent heat of fusion 
+
+.pull-left[
+
+```r
+heat %&gt;%
+  dplyr::group_by(method) %&gt;% 
+  dplyr::summarise(
+    w = sum(r),
+    xbar = mean(energy),
+    s = sd(energy),
+    n = n()
+  ) %&gt;% 
+  knitr::kable(format = "markdown", 
+               digits = 3)
+```
+
+
+
+|method |   w|   xbar|     s|  n|
+|:------|---:|------:|-----:|--:|
+|A      | 180| 80.021| 0.024| 13|
+|B      |  51| 79.979| 0.031|  8|
+]
+.pull-right[
+
+```r
+ggplot(heat, aes(x = method, y = energy)) + 
+  geom_boxplot() + 
+  geom_dotplot(stackdir = "center",
+               binaxis = "y") +
+  theme_linedraw(base_size = 34) + 
+  labs(y = "Heat of fusion (cal/g)",
+       x = "Method")
+```
+
+&lt;img src="lec15_files/figure-html/unnamed-chunk-17-1.png" width="864" /&gt;
+
+]
+
+---
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 0C79.7 101.3 0 220.9 0 300.5 0 425 79 512 192 512s192-87 192-211.5c0-79.9-80.2-199.6-192-300.5zm0 448c-56.5 0-96-39-96-94.8 0-13.5 4.6-61.5 96-161.2 91.4 99.7 96 147.7 96 161.2 0 55.8-39.5 94.8-96 94.8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+We have `\(n_A = 13, n_B = 8\)` and `\(N = 21\)`. The Wilcoxon rank-sum test for the difference between methods A and B is
+
+.blockquote[
+- **Hypothesis:** `\(H_0\colon\ \mu_A=\mu_B\)` vs `\(H_1\colon\  \mu_A &gt; \mu_B\)` 
+
+-  **Assumptions:** `\(A_i\)` and `\(B_i\)` are independent and follow the same kind of distribution but differ by a shift.
+
+- **Test statistic:** `\(W = R_1 + R_2 + \ldots + R_{n_A}\)` (the sum of the ranks of observations in method A). Under `\(H_0\)`, `\(W \sim \operatorname{WRS}'(13,8)\)`, the WRS distribution with sizes 13, 8 and with ties as shown.
+
+- **Observed Test statistic:** `\(w = r_1 + r_2 + \ldots + r_{n_A} = 180\)`
+
+-  **p-value:** As the exact `\(\operatorname{WRS}'(13,8)\)` distribution with ties is unknown, we use a normal approximation to this distribution with `\(\operatorname{E}(W) = \frac{n_x(N+1)}{2} = \frac{13\times (13+8+1)}{2}=143\)` and
+&lt;!-- - `\(g  =   \frac{N(N+1)^2}{4} = \frac{(13+8)(13+8+1)^2}{4} = 2541\)` --&gt;
+`\(\operatorname{Var}(W)  =  \frac{n_x n_y}{N(N-1)} \left( \sum_{i=1}^N r_i^2-\frac{N(N+1)^2}{4} \right) =  \frac{13(8)(3293.5-2541)}{21(20)} =  186.33\)`
+- `\(\text{p-value}  =  P(W \ge w) \simeq P\left(Z\geq\frac{w-\operatorname{E}(W)}{\sqrt{\operatorname{Var}(W)}} \right) =  P\left(Z\geq\frac{180-143}{\sqrt{186.33}} \right) =P(Z&gt;2.7) =  0.003\)`
+
+- **Decision:** As the p-value is less than 0.05, there is sufficient evidence to reject `\(H_0\)`.
+]
+
+---
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 0C79.7 101.3 0 220.9 0 300.5 0 425 79 512 192 512s192-87 192-211.5c0-79.9-80.2-199.6-192-300.5zm0 448c-56.5 0-96-39-96-94.8 0-13.5 4.6-61.5 96-161.2 91.4 99.7 96 147.7 96 161.2 0 55.8-39.5 94.8-96 94.8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left[
+
+```r
+heat_sum = heat %&gt;%
+  dplyr::group_by(method) %&gt;% 
+  dplyr::summarise(
+    w = sum(r),
+    xbar = mean(energy),
+    s = sd(energy),
+    n = n()
+  )
+heat_sum
+```
+
+```
+## # A tibble: 2 × 5
+##   method     w  xbar      s     n
+##   &lt;chr&gt;  &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;int&gt;
+## 1 A        180  80.0 0.0240    13
+## 2 B         51  80.0 0.0314     8
+```
+
+```r
+na = heat_sum$n[heat_sum$method == "A"]
+nb = heat_sum$n[heat_sum$method == "B"]
+N = na + nb # total number of observations
+c(na, nb, N)
+```
+
+```
+## [1] 13  8 21
+```
+
+]
+.pull-right[
+
+```r
+w = heat_sum$w[heat_sum$method == "A"]
+EW = na * (N + 1)/2
+c(w, EW)
+```
+
+```
+## [1] 180 143
+```
+
+```r
+sumsqrank = sum(heat$r^2)
+g = N * (N + 1)^2/4
+varW = na * nb * (sumsqrank - g)/(N * (N - 1))
+t0 = (w - EW)/sqrt(varW)
+t0
+```
+
+```
+## [1] 2.710544
+```
+
+```r
+1 - pnorm(t0)
+```
+
+```
+## [1] 0.003358648
+```
+]
+
+
+---
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 0C79.7 101.3 0 220.9 0 300.5 0 425 79 512 192 512s192-87 192-211.5c0-79.9-80.2-199.6-192-300.5zm0 448c-56.5 0-96-39-96-94.8 0-13.5 4.6-61.5 96-161.2 91.4 99.7 96 147.7 96 161.2 0 55.8-39.5 94.8-96 94.8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+wilcox.test(A, B, alternative = 'greater', correct = FALSE)
+```
+
+```
+## Warning in wilcox.test.default(A, B, alternative =
+## "greater", correct = FALSE): cannot compute exact p-value
+## with ties
+```
+
+```
+## 
+## 	Wilcoxon rank sum test
+## 
+## data:  A and B
+## W = 89, p-value = 0.003359
+## alternative hypothesis: true location shift is greater than 0
+```
+
+```r
+t.test(A, B, alternative = 'greater')
+```
+
+```
+## 
+## 	Welch Two Sample t-test
+## 
+## data:  A and B
+## t = 3.2499, df = 12.027, p-value = 0.00347
+## alternative hypothesis: true difference in means is greater than 0
+## 95 percent confidence interval:
+##  0.01897943        Inf
+## sample estimates:
+## mean of x mean of y 
+##  80.02077  79.97875
+```
+
+---
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 0C79.7 101.3 0 220.9 0 300.5 0 425 79 512 192 512s192-87 192-211.5c0-79.9-80.2-199.6-192-300.5zm0 448c-56.5 0-96-39-96-94.8 0-13.5 4.6-61.5 96-161.2 91.4 99.7 96 147.7 96 161.2 0 55.8-39.5 94.8-96 94.8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Robustness properties
+
+.pull-left[
+What happens if there is an outlier in the data?
+
+
+```r
+# change the first value for the B method
+heat1 = heat
+heat1$energy[14] = 80.20 # instead of 80.02
+# recalculate ranks
+heat1 = heat1 %&gt;% dplyr::mutate( 
+  r = rank(energy)
+)
+```
+]
+.pull-right[
+
+```r
+heat1
+```
+
+```
+##    energy method    r
+## 1   79.98      A  7.5
+## 2   80.04      A 18.0
+## 3   80.02      A 11.0
+## 4   80.04      A 18.0
+## 5   80.03      A 14.5
+## 6   80.03      A 14.5
+## 7   80.04      A 18.0
+## 8   79.97      A  4.5
+## 9   80.05      A 20.0
+## 10  80.03      A 14.5
+## 11  80.02      A 11.0
+## 12  80.00      A  9.0
+## 13  80.02      A 11.0
+## 14  80.20      B 21.0
+## 15  79.94      B  1.0
+## 16  79.98      B  7.5
+## 17  79.97      B  4.5
+## 18  79.97      B  4.5
+## 19  80.03      B 14.5
+## 20  79.95      B  2.0
+## 21  79.97      B  4.5
+```
+]
+
+---
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 0C79.7 101.3 0 220.9 0 300.5 0 425 79 512 192 512s192-87 192-211.5c0-79.9-80.2-199.6-192-300.5zm0 448c-56.5 0-96-39-96-94.8 0-13.5 4.6-61.5 96-161.2 91.4 99.7 96 147.7 96 161.2 0 55.8-39.5 94.8-96 94.8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left[
+
+```r
+heat1 %&gt;%
+  dplyr::group_by(method) %&gt;% 
+  dplyr::summarise(
+    w = sum(r),
+    xbar = mean(energy),
+    s = sd(energy),
+    n = n()
+  ) %&gt;% 
+  knitr::kable(format = "markdown", 
+               digits = 3)
+```
+
+
+
+|method |     w|   xbar|     s|  n|
+|:------|-----:|------:|-----:|--:|
+|A      | 171.5| 80.021| 0.024| 13|
+|B      |  59.5| 80.001| 0.085|  8|
+]
+.pull-right[
+
+```r
+ggplot(heat1, aes(x = method, y = energy)) + 
+  geom_boxplot() + 
+  geom_dotplot(stackdir = "center",
+               binaxis = "y") +
+  theme_linedraw(base_size = 34) + 
+  labs(y = "Heat of fusion (cal/g)",
+       x = "Method")
+```
+
+&lt;img src="lec15_files/figure-html/unnamed-chunk-24-1.png" width="864" /&gt;
+]
+
+---
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 0C79.7 101.3 0 220.9 0 300.5 0 425 79 512 192 512s192-87 192-211.5c0-79.9-80.2-199.6-192-300.5zm0 448c-56.5 0-96-39-96-94.8 0-13.5 4.6-61.5 96-161.2 91.4 99.7 96 147.7 96 161.2 0 55.8-39.5 94.8-96 94.8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+wilcox.test(energy ~ method, data = heat1, alternative = 'greater', correct = FALSE)
+```
+
+```
+## Warning in wilcox.test.default(x = c(79.98, 80.04, 80.02,
+## 80.04, 80.03, : cannot compute exact p-value with ties
+```
+
+```
+## 
+## 	Wilcoxon rank sum test
+## 
+## data:  energy by method
+## W = 80.5, p-value = 0.01859
+## alternative hypothesis: true location shift is greater than 0
+```
+
+```r
+t.test(energy ~ method, data = heat1, alternative = 'greater')
+```
+
+```
+## 
+## 	Welch Two Sample t-test
+## 
+## data:  energy by method
+## t = 0.63712, df = 7.6977, p-value = 0.2713
+## alternative hypothesis: true difference in means is greater than 0
+## 95 percent confidence interval:
+##  -0.03774242         Inf
+## sample estimates:
+## mean in group A mean in group B 
+##        80.02077        80.00125
+```
+
+---
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 0C79.7 101.3 0 220.9 0 300.5 0 425 79 512 192 512s192-87 192-211.5c0-79.9-80.2-199.6-192-300.5zm0 448c-56.5 0-96-39-96-94.8 0-13.5 4.6-61.5 96-161.2 91.4 99.7 96 147.7 96 161.2 0 55.8-39.5 94.8-96 94.8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## A heuristic for testing for differences: notched boxplot
+
+.pull-left[
+The upper and lower edges of the notches are at 
+`$$\text{median} \pm 1.58\times\frac{\text{IQR}}{\sqrt{n}}$$`
+
+.bold[.blue[Rule of thumb:]] if the notches of two boxes do not overlap, this suggests that the medians are significantly different (Mcgill, Tukey, and Larsen, 1978).
+]
+.pull-right[
+
+```r
+ggplot(heat, aes(x = method, y = energy)) + 
+  geom_boxplot(notch = TRUE) + 
+  geom_dotplot(stackdir = "center",
+               binaxis = "y") +
+  theme_linedraw(base_size = 34) + 
+  labs(y = "Heat of fusion (cal/g)",
+       x = "Method")
+```
+
+&lt;img src="lec15_files/figure-html/unnamed-chunk-26-1.png" width="864" /&gt;
+]
+
+
+---
+
+## Final comments
+
+- The Wilcoxon rank-sum test is valid for data from any distribution, whether normal or not, and is much less sensitive to outliers than the two-sample `\(t\)`-test.
+- If one is primarily interested in differences in location between the two distributions, the Wilcoxon test has the disadvantage of also reacting to other differences between the distributions such as differences in shape.
+- When the assumptions of the two-sample `\(t\)`-test hold, the Wilcoxon rank-sum test is somewhat less likely to detect a location shift than is the two-sample `\(t\)`-test (i.e. less powerful).
+- In a practical situation in which we are uneasy about the applicability of two-sample `\(t\)`-test, we use both them and the Wilcoxon and feel happiest when both give similar conclusions. 😄
+
+---
+
+## Further reading
+
+Larsen and Marx (2012; section 14.3).
+
+&lt;br&gt;
+
+Larsen, R. J. and M. L. Marx (2012). _An Introduction
+to Mathematical Statistics and its Applications_. 5th
+ed. Boston, MA: Prentice Hall. ISBN:
+978-0-321-69394-5.
+
+Mcgill, R., J. W. Tukey, and W. A. Larsen (1978).
+"Variations of Box Plots". In: _The American
+Statistician_ 32.1, pp. 12-16. DOI:
+[10.1080/00031305.1978.10479236](https://doi.org/10.1080%2F00031305.1978.10479236).
+
+Natrella, M. G. (1963). _Experimental Statistics_.
+Vol. 91. National Bureau of Standards Handbook.
+United States Department of Commerce.
+
+Rice, J. (2006). _Mathematical Statistics and Data
+Analysis_. Advanced series. Cengage Learning. ISBN:
+9780534399429.
+
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="assets/remark-zoom.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

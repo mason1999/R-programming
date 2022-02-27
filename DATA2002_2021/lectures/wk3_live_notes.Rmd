@@ -1,0 +1,145 @@
+---
+title: "Week 3 live lecture notes"
+author: "Garth Tarr"
+output:
+  html_document:
+    code_folding: hide
+    toc: true
+    toc_float: true
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Homogeneity
+
+https://pages.github.sydney.edu.au/DATA2002/2021/lectures/lec07.html#23
+
+```{r, tidy = TRUE}
+y=c(62,47,29,46,9,7)
+n=sum(y)
+c=3
+r=2
+tab=matrix(y, nrow = r, ncol = c)  # default is to fill by column
+colnames(tab) = c("Approve", "Not approve", "No comment")
+rownames(tab) = c("Labor", "Liberal")
+tab
+chisq.test(tab, correct = FALSE)
+```
+
+
+```{r,tidy = FALSE}
+# MARGIN = 1 means apply the sum FUNction 
+# down rows. Alternative: rowSums(tab)
+(yr = apply(tab, MARGIN = 1, FUN = sum)) 
+# MARGIN = 2 means apply the sum FUNction 
+# across columns. Alternative: colSums(tab)
+(yc = apply(tab, MARGIN = 2,FUN = sum))
+(yr.mat = matrix(yr, nrow = r, ncol = c, 
+                 byrow = FALSE))
+```
+
+
+```{r,tidy = FALSE}
+(yc.mat = matrix(yc, nrow = r, ncol = c,
+                 byrow = TRUE))
+# elementwise multiplication and division
+(etab = yr.mat * yc.mat / n) 
+# could also do matrix multiplication %*%
+(etab = yr %*% t(yc) / n)
+```
+
+```{r, tidy = TRUE}
+etab >= 5 # check e_ij >= 5
+(t0 = sum((tab-etab)^2/etab))
+(p.value=1-pchisq(t0,(r-1)*(c-1)))
+```
+
+# Independence
+
+https://pages.github.sydney.edu.au/DATA2002/2021/lectures/lec08.html#26
+
+
+```{r, tidy = TRUE}
+y=c(24,32,46,22,38,38)
+n=sum(y)
+c=3
+r=2
+y.mat=matrix(y, nrow = r, ncol = c)
+colnames(y.mat) = c("Positive", "Negative", 
+                    "No opinion")
+rownames(y.mat) = c("High income", "Low income")
+y.mat
+chisq.test(y.mat,correct=FALSE)
+```
+
+
+```{r, tidy = TRUE}
+(yr=apply(y.mat,1,sum)) # rowSums(y.mat)
+(yc=apply(y.mat,2,sum)) # colSums(y.mat)
+(yr.mat=matrix(yr,r,c,byrow=FALSE))
+(yc.mat=matrix(yc,r,c,byrow=TRUE))
+```
+
+```{r,tidy=FALSE}
+# matrix mult: ey.mat = yr %*% t(yc) / n
+(ey.mat = yr.mat * yc.mat / sum(y.mat)) 
+all(ey.mat>=5) # check all e_{ij} >= 5
+(t0 = sum((y.mat - ey.mat)^2 / ey.mat))
+(pval = pchisq(t0, (r - 1) * (c - 1), 
+               lower.tail=FALSE))
+```
+
+# Monte Carlo p-value
+
+https://pages.github.sydney.edu.au/DATA2002/2021/lectures/lec09.html#29
+
+```{r}
+galton.dat <- matrix(c(5, 4, 1, 12, 42, 14, 2, 15, 10), 3, 3)
+rownames(galton.dat) = c("Arches-B", "Loops-B", "Whorls-B")
+colnames(galton.dat) = c("Arches-A", "Loops-A", "Whorls-A")
+galton.dat
+```
+
+```{r}
+chisq.test(galton.dat)
+```
+
+```{r}
+rcounts = rowSums(galton.dat)
+ccounts = colSums(galton.dat)
+B = 10000
+set.seed(123)
+x_list = r2dtable(B, rcounts, ccounts)
+x_list[[1]]
+# https://twitter.com/hadleywickham/status/643381054758363136
+chisq.test(x_list[[1]])
+```
+
+
+```{r, warning=FALSE}
+rnd.chisq = numeric(B)
+for (i in 1:B){
+  rnd.chisq[i] = chisq.test(x_list[[i]])$statistic
+}
+sum(rnd.chisq > 11.1699)/B
+```
+
+
+
+```{r}
+chisq.test(galton.dat, simulate.p.value = TRUE)
+chisq.test(galton.dat, simulate.p.value = TRUE, B = 10000)
+```
+
+
+# Degrees of freedom for chi-squared tests
+
+
+# First look at the survey data
+
+If you haven't yet, please take a few minutes to attempt the class survey: https://edstem.org/au/courses/6600/discussion/559345
+
+# Git? [If there's time]

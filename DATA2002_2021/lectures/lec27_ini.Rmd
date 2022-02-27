@@ -1,0 +1,200 @@
+---
+title: "Lecture 27"
+author: "Garth Tarr"
+output:
+  html_document:
+    code_folding: show
+---
+
+## Interpreting coefficients
+
+```{r}
+library(tidyverse)
+data(environmental, package = "lattice")
+environmental = environmental %>%
+  mutate(lozone = log(ozone))
+lm2 = lm(lozone ~ temperature, data = environmental)
+lm2
+```
+
+
+```{r}
+ggplot(environmental, aes(x = temperature, y = lozone)) +
+  geom_point() + coord_cartesian(xlim = c(0,100), ylim = c(-2, 5.5)) +
+  geom_abline(slope = 0.06767, intercept = -1.84852, colour = "red", size = 1) +
+  geom_vline(xintercept = 0) + geom_hline(yintercept = 0) + theme_minimal(base_size = 30)
+```
+
+
+## Multiple regression
+
+```{r, message=FALSE}
+library(GGally)
+ggpairs(environmental)
+```
+
+```{r}
+lm3 = lm(lozone ~ radiation + temperature + wind, environmental)
+summary(lm3)$coefficients %>% round(4)
+```
+
+
+```{r}
+summary(lm2)$r.squared
+summary(lm3)$r.squared
+```
+
+
+```{r}
+sjPlot::tab_model(lm2, lm3, digits = 4, show.ci = FALSE)
+```
+
+## ANOVA as multiple regression
+
+
+## Survival
+
+```{r}
+library(tidyverse)
+# install.packages("BHH2")
+data("poison.data", package = "BHH2")
+# rename treat as antidote to avoid confusion with the general term "treatment"
+poison.data = poison.data %>%
+  rename(antidote = treat) %>%
+  mutate(inv_survival = 1/y)
+glimpse(poison.data)
+poison.data %>% ggplot() +
+  aes(x = poison, y = inv_survival) +
+  facet_grid(~ antidote) +
+  geom_boxplot()
+```
+
+```{r}
+a1 = aov(inv_survival ~ poison*antidote, data = poison.data)
+summary(a1)
+m1 = lm(inv_survival ~ poison*antidote, data = poison.data)
+summary(m1)
+anova(m1)
+m2 = lm(inv_survival ~ poison + antidote, data = poison.data)
+library(emmeans)
+ep = emmeans(m2, ~ poison)
+pdiff = contrast(e1, method = "pairwise")
+ea s
+adiff = contrast(ae)
+
+library(ggfortify)
+autoplot(a1, which = c(1,2))
+autoplot(m1, which = c(1,2))
+```
+
+```{r}
+a2 = aov(y ~ poison*antidote, data = poison.data)
+autoplot(a2, which = c(1,2))
+```
+
+
+## Model selection
+
+```{r}
+data("UScrime", package = "MASS")
+# ?UScrime
+dim(UScrime)
+n = 47
+k = 15
+2^k
+cor_mat = cor(UScrime)
+melted_cor_mat = cor_mat %>%
+  data.frame() %>%
+  rownames_to_column(var = "var1") %>%
+  gather(key = "var2", value = "cor", -var1)
+```
+
+
+```{r}
+ggplot(data = melted_cor_mat,
+       aes(x=var1, y=var2, fill=cor)) +
+  geom_tile() + theme_minimal(base_size = 30) +
+  scale_fill_gradient2(
+    low = "blue", high = "red", mid = "white",
+    midpoint = 0, limit = c(-1,1)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+
+```{r}
+qtlcharts::iplotCorr(UScrime)
+```
+
+
+```{r}
+M0 = lm(y ~ 1,data=UScrime) # Null model
+M1 = lm(y ~ .,data=UScrime) # Full model
+round(summary(M1)$coef, 3)
+t(round(broom::glance(M1),2))
+```
+
+
+```{r}
+options(width=50,digits = 4)
+drop1(M1, test="F")
+M2 = update(M1,.~.-So)
+drop1(M2, test="F")
+M3 = update(M2,.~.-Time)
+drop1(M3, test="F")
+M4 = update(M3,.~.-LF)
+drop1(M4, test="F")
+M5 = update(M4, . ~ . - NW)
+drop1(M5, test = "F")
+```
+
+
+```{r}
+step.back.aic = step(M1,
+                     direction = "backward",
+                     trace = FALSE)
+round(summary(step.back.aic)$coef,3)
+```
+
+
+```{r}
+step.back.aic %>%
+  broom::glance() %>%
+  round(2) %>% t()
+options(width=100)
+drop1(step.back.aic,test="F")
+```
+
+
+```{r}
+M0 = lm(y ~ 1, data = UScrime)  # Null model
+M1 = lm(y ~ ., data = UScrime)  # Full model
+step.fwd.aic = step(M0, scope = list(lower = M0, upper = M1),
+                    direction = "forward", trace = FALSE)
+summary(step.fwd.aic)
+```
+
+
+```{r}
+add1(step.fwd.aic, test = "F", scope = M1)
+```
+
+
+```{r}
+sjPlot::tab_model(
+  step.fwd.aic, step.back.aic,
+  show.ci = FALSE,
+  show.aic = TRUE,
+  dv.labels = c("Forward model",
+                "Backward model")
+)
+```
+
+## Exhaustive search
+
+```{r}
+options(width = 100)
+library(leaps)
+exh = regsubsets(y~., data = UScrime, nvmax = 15)
+summary(exh)$outmat
+```
+

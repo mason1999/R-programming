@@ -1,0 +1,176 @@
+# install.packages("shiny")
+library(shiny)
+library(palmerpenguins)
+library(plotly)
+names(penguins)
+library(tidyverse)
+continuous_vars = c("Bill length (mm)" = "bill_length_mm",
+                    "Bill depth (mm)" = "bill_depth_mm",
+                    "Flipper length (mm)" = "flipper_length_mm",
+                    "Body mass (g)" = "body_mass_g")
+categorical_vars = c("Species" = "species",
+                     "Island" = "island",
+                     "Sex" = "sex"
+)
+
+
+# Define UI for application that draws a histogram
+ui <- fluidPage(
+
+    # Application title
+    titlePanel("Penguins plot"),
+
+
+    # Sidebar with a slider input for number of bins
+    sidebarLayout(
+        sidebarPanel(
+            selectInput(inputId = "var_xaxis",
+                        label = "X axis variable",
+                        choices = continuous_vars),
+            selectInput(inputId = "var_yaxis",
+                        label = "Y axis variable",
+                        choices = continuous_vars),
+            selectInput(inputId = "var_col",
+                        label = "Colouring variable",
+                        choices = categorical_vars),
+            selectInput(inputId = "var_facet",
+                        label = "Faceting variable",
+                        choices = categorical_vars),
+            sliderInput(inputId = "point_size",
+                        label = "Point size",
+                        min = 0, max = 10,value = 1,step = 0.1),
+            sliderInput(inputId = "transparency",
+                        label = "How see through should the points be?",
+                        min = 0, max = 1,value = 0.5,step = 0.05),
+            checkboxInput(inputId = "regression_line",
+                          label = "Add regression line?",
+                          value = FALSE),
+            conditionalPanel(
+                condition = "input.tabs == 'interactive_tab'",
+                checkboxInput(inputId = "log_x",
+                              label = "Use a log scale on the x axis?",
+                              value = FALSE)
+            )
+
+        ),
+
+        # Show a plot of the generated distribution
+        mainPanel(
+            tabsetPanel(
+                id = "tabs",
+                tabPanel(title =  "Static plot",
+                         plotOutput("distPlot"),
+                         br(),
+                         textOutput("correlation_text"),
+                         br(),
+                         gt::gt_output("correlations")
+
+                ),
+                tabPanel(title = "Interactive plot", value = "interactive_tab",
+                         plotly::plotlyOutput("interactive_distPlot")
+                ),
+
+                tabPanel(title = "Data table", value = "data_tab",
+                         DT::dataTableOutput("data_table")
+                )
+            )
+
+        )
+    )
+)
+
+# Define server logic required to draw a histogram
+server <- function(input, output) {
+
+    x_var_name = reactive(
+        names(continuous_vars[continuous_vars==input$var_xaxis])
+    )
+    y_var_name = reactive(
+        names(continuous_vars[continuous_vars==input$var_yaxis])
+    )
+    col_var_name = reactive({
+        names(categorical_vars[categorical_vars==input$var_col])
+    })
+    facet_var_name = reactive({
+        names(categorical_vars[categorical_vars==input$var_facet])
+    })
+
+
+
+    output$correlation_text = shiny::renderPrint({
+
+        if(input$var_facet == input$var_col){
+            glue::glue("Correlation between {x_var_name()} and {y_var_name()}, grouped by {col_var_name()}.")
+        } else{
+            glue::glue("Correlation between {x_var_name()} and {y_var_name()}, grouped by {col_var_name()} and {facet_var_name()}.")
+        }
+
+
+
+    })
+
+    output$data_table = DT::renderDataTable({
+        DT::datatable(penguins)
+    })
+
+    output$correlations = gt::render_gt({
+
+        if(input$var_facet == input$var_col){
+            tab = penguins %>%
+                group_by(!! sym(input$var_facet)) %>%
+                summarise(cor = cor(!! sym(input$var_xaxis),
+                                    !! sym(input$var_yaxis),
+                                    use = "pairwise.complete.obs")) %>%
+                gt::gt()
+        } else{
+            tab = penguins %>%
+                group_by(!!! syms(list(input$var_facet, input$var_col))) %>%
+                summarise(cor = cor(!! sym(input$var_xaxis),
+                                    !! sym(input$var_yaxis),
+                                    use = "pairwise.complete.obs")) %>%
+                gt::gt()
+        }
+
+        tab %>% gt::tab_header(title = glue::glue("Correlation between {x_var_name()} and {y_var_name()}"))
+
+
+    })
+
+    penguin_scatter = reactive({
+
+        p = penguins %>%
+            ggplot() +
+            aes(x = !! sym(input$var_xaxis),
+                y = !! sym(input$var_yaxis),
+                colour = !! sym(input$var_col)) +
+            geom_point(size = input$point_size, alpha = input$transparency) +
+            facet_grid (cols = vars(!! sym(input$var_facet)))
+
+        if(input$regression_line){
+            p = p + geom_smooth(method = "lm", se = FALSE)
+        }
+
+        if(input$log_x){
+            p = p + scale_x_log10()
+        }
+
+        return(p)
+
+    })
+
+    output$distPlot <- renderPlot({
+
+        penguin_scatter()
+
+    })
+
+    output$interactive_distPlot = plotly::renderPlotly({
+
+        return(plotly::ggplotly(penguin_scatter()))
+
+    })
+
+}
+
+# Run the application
+shinyApp(ui = ui, server = server)

@@ -1,0 +1,202 @@
+
+/*
+Masterbrand charcoal #424242;
+C=0 M=0 Y=0 K=90
+R=66 G=66 B=66
+
+Masterbrand red #e64626;
+C=0 M=0 Y=0 K=90
+R=66 G=66 B=66
+
+Masterbrand white #ffffff;
+C=0 M=0 Y=0 K=0
+R=255 G=255 B=255
+
+Masterbrand black #000000;
+C=0 M=0 Y=0 K=100
+R=10 G=10 B=10
+
+Accent yellow #FFB800
+C=0 M=25 Y=98 K=0
+R=255 G=184 B=0
+
+Accent blue #0148A4
+C=100 M=61 Y=0 K=0
+R=1 G=72 B=164
+
+Accent grey - supportive #F1F1F1
+C=0 M=0 Y=0 K=10
+R=241 G=241 B=241
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+blockquote {
+    border-left:none;
+    font-size: 1em;
+    display: block;
+    margin-top: .25em;
+    margin-left: 20px;
+}
+
+.learnout {
+  background-color: "bg-info";
+  border: 3px solid #0148A4;
+  border-radius: 5px;
+  padding-top: 10px;
+  padding-right: 10px;
+  padding-bottom: 0px;
+  padding-left: 10px;
+  font-size: 1rem;
+  line-height: 1.2em
+}
+
+.learnout b, .learnout strong {
+   color: #0148A4;
+   }
+  
+.learnout ul > li::marker {
+  font-size: 1.125em;
+  color: #0148A4;
+}
+
+.learnout li {
+    margin-bottom: 0;
+    margin-left: 0;
+    padding-left: 0;
+}
+
+d-title h1 {
+    font-size: 32px;
+        color:	#e64626;
+        font-weight: bold;
+}
+
+d-article h1 {
+    /* Masterbrand red */
+    font-size: 26px;
+    color:	#e64626;
+        font-weight: bold;
+}
+d-article h2 {
+  font-size: 24px;
+}
+d-article h3 {
+  font-size: 20px;
+}
+h4 {
+  font-size: 18px;
+}
+h2, h3, h4, h5, h6 {
+    font-weight: bold;
+    color: black;
+}
+
+/* link colour */
+a {
+    color: #0148A4;
+}
+
+/* general text colour */
+body {
+     /* Masterbrand charcoal */
+    color: #424242;
+
+}
+
+/* From https://work.smarchal.com/twbscolor/3.3.7/css/ffffffffffff424242e646260 */
+/* Might need updating when the bootstrap version changes */
+
+
+
+.right{
+    float:right;
+}
+
+.left{
+    float:left;
+}
+
+.distill-site-header a, .distill-site-header .title {
+    padding: 0px 10px 0px 10px;
+}
+
+.distill-site-nav {
+    color: #fff;
+    background-color: #333333;
+    font-weight: 300;
+    padding: 10px;
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    /* padding-bottom: 10px; */
+    /* font-size: 12px; */
+}
+.distill-site-nav > li > a:hover,
+.distill-site-nav > li > a:focus {
+  color: #e64626;
+}
+.distill-site-nav a:hover,
+.distill-site-nav a:focus {
+  color: #e64626;
+}
+.distill-site-nav > .open > a,
+.distill-site-nav > .open > a:hover,
+.distill-site-nav > .open > a:focus {
+  color: #e64626;
+}
+
+.distill-site-nav.active {
+    color: #e64626;
+    background-color: #ffffff;
+}
+
+
+
+/* End https://work.smarchal.com/twbscolor/3.3.7/css/ffffffffffff424242e646260 */
+
+/* Floating table of contents highlight colour */
+.list-group-item.active,
+.list-group-item.active:focus,
+.list-group-item.active:hover {
+    background-color: #e64626;
+}
+
+/* Hover and select dropdown menu in the navbar */
+.dropdown-menu > .active > a,
+.dropdown-menu > .active > a:hover,
+.dropdown-menu > .active > a:focus {
+    background-color: #e64626;
+}
+.dropdown-menu > li > a:hover {
+    background-color: #e64626;
+    background-image: none;
+}
+
+
+/* Clipboard --------------------------*/
+
+.hasCopyButton {
+  position: relative;
+}
+
+.btn-copy-ex {
+  position: absolute;
+  right: 0;
+  /* use top: 0 without code folding */
+  top: 0;
+  /* use bottom: 0 with code folding */
+  /* bottom: 0; */
+  visibility: hidden;
+}
+
+.hasCopyButton:hover button.btn-copy-ex {
+  visibility: visible;
+}

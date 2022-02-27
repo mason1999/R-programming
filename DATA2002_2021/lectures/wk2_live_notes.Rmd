@@ -1,0 +1,106 @@
+---
+title: "Week 2 live lecture notes"
+author: "Garth Tarr"
+output:
+  html_document:
+    code_folding: hide
+    toc: true
+    toc_float: true
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Sway quiz
+
+https://edstem.org/au/courses/6600/sway/
+
+# Hypothesis testing review
+
+[Handwritten notes](hyp_test.pdf)
+
+# Odds ratios in the wild
+
+- Simoes et al. (2021). Effects of pre-operative isolation on postoperative pulmonary complications after elective surgery: an international prospective cohort study. _Anaesthesia._ DOI: [10.1111/anae.15560](https://associationofanaesthetists-publications.onlinelibrary.wiley.com/doi/full/10.1111/anae.15560)
+
+```{r}
+table2 = matrix(c(67993, 1386,
+           6877, 91,
+           10483, 206,
+           8910, 252), 
+           ncol = 2, byrow = TRUE)
+colnames(table2) = c("No complications", "Postop complication(s)")
+rownames(table2) = c("No isolation","<= 3 days", "4-7 days",">= 8 days")
+table2
+```
+
+## <= 3 days isolation
+
+Relative to baseline
+
+```{r}
+e1 = table2[1:2,2:1]
+e1
+# install.packages("mosaic")
+mosaic::oddsRatio(e1, verbose = TRUE)
+```
+
+Understanding this output:
+
+
+```{r}
+e1
+rowsums = rowSums(e1)
+# looking within row 1 (no isolation)
+p1 = e1[1, 1]/rowsums[1]
+# looking within row 1 (<= 3 days isolation)
+p2 = e1[2, 1]/rowsums[2]
+o1 = p1/(1 - p1)
+o2 = p2/(1 - p2)
+RR = p2/p1
+OR = o2/o1
+RR
+OR
+```
+
+So if we're interpreting this, 
+
+```{r}
+# OR confidence interval
+se = sqrt(sum(1/e1))
+log_or_ci = log(OR) + c(-1,1)*qnorm(0.95)*se
+or_ci = exp(log_or_ci)
+or_ci
+```
+
+Is this a statistically significant result? At what level of significance?
+
+
+
+
+## 4-7 days isolation
+
+Relative to baseline
+
+```{r}
+e2 = table2[c(1,3),2:1]
+e2
+# install.packages("mosaic")
+mosaic::oddsRatio(e2)
+mosaic::relrisk(e2)
+```
+
+
+## >= 8 days isolation
+
+Relative to baseline
+
+```{r}
+e3 = table2[c(1,4),2:1]
+e3
+mosaic::oddsRatio(e3)
+mosaic::relrisk(e3)
+```
+

@@ -1,0 +1,3 @@
+ fn=function(c,alpha,n) { 
+	 ...
+}

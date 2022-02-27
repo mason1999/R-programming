@@ -1,0 +1,232 @@
+---
+title: "Lecture 31"
+output: html_document
+---
+
+```{r Packages, message = FALSE}
+library(class)
+library(randomForest)
+library(cvTools)
+library(caret)
+library(tidyverse)
+library(GGally)
+```
+
+
+```{r Setting up the Data, message = FALSE}
+diabetes = read_csv("https://raw.githubusercontent.com/DATA2002/data/master/diabetes.csv")
+glimpse(diabetes)
+diabetes$class = factor(diabetes$class)
+diabetes = diabetes %>% 
+  mutate(across(
+    c(glucose, hg, thickness, insulin, bmi), 
+    .fns = ~ na_if(., 0))) %>% 
+  drop_na()
+ggpairs(diabetes, aes(colour=class, alpha = 0.5)) + theme_bw()
+norm_fn = function(x) { (x - min(x))/(max(x) - min(x)) }
+d_norm = diabetes %>%
+  mutate(across(.cols = where(is.numeric), .fns = norm_fn))
+# Separate Responses
+X = d_norm %>% select(-class) # Everything except last column
+y = d_norm %>% select(class) %>% pull()
+```
+
+
+```{r Setting up CV parameters}
+n = nrow(X)
+K = 5 # Choose 5 fold CV
+```
+
+# Task 1. CV loop for different values of k for KNN
+
+```{r KNN values of K}
+set.seed(1)
+
+cvSets = cvFolds(n,K) # permute all the data, into 5 folds
+
+k.vals = 1:50 #test neighbours from 1 NN to 50 NN
+
+# For each k fit a knn classifier and calculate the cv error
+knn.cv.error = c()
+for(i in k.vals){
+
+  error.fold = c()
+  
+  for(j in 1:K){
+    test.inds = cvSets$subsets[cvSets$which == j]
+    # separate training and test sets
+    X.test = X[test.inds,]
+    X.train = X[-test.inds,]
+    y.test = y[test.inds]
+    y.train = y[-test.inds]
+    fit = knn(X.train, X.test, y.train, k=k.vals[i])
+    error.fold[j] = sum(fit != y.test)
+  }
+  
+  knn.cv.error[i] = sum(error.fold)/n
+}
+
+knn.cv.error
+
+best.k = which.min(knn.cv.error)
+best.k
+```
+
+We can plot the error as a function of *k*.
+
+```{r plotting}
+errors = data.frame(k.vals = k.vals, 
+                    knn.cv.error=knn.cv.error)
+
+ggplot(errors, aes(x=k.vals, y=knn.cv.error)) + geom_line() + 
+  xlab("Value of k neighbours") + 
+  ylab("5-Fold CV error") +
+  ggtitle("5 fold CV for KNN for Diabetes dataset")
+```
+
+The best value of k, for a *single CV run*, is k = `r best.k`.
+
+# Task 2. CV loop for randomForest
+
+```{r}
+set.seed(1)
+cvSets = cvFolds(n,K)
+error.fold = c()
+for(j in 1:K){
+  test.inds = cvSets$subsets[cvSets$which == j]
+  X.test = X[test.inds,]
+  X.train = X[-test.inds,]
+  y.test = y[test.inds]
+  y.train = y[-test.inds]
+  rf.model = randomForest(X.train, y.train)
+  fit = predict(rf.model, X.test)
+  error.fold[j] = sum(fit!=y.test)
+}
+  
+rf.cv.error = sum(error.fold)/n
+rf.cv.error
+
+```
+
+We can see that randomForest is outperforming KNN.
+
+# Task 3. Repeated CV loop for KNN (10 times) using the best K value
+
+```{r repeated KNN CV loop}
+reps = 10
+knn.rep.cv.error = c()
+for(i in 1:reps){
+  set.seed(i)
+  cvSets = cvFolds(n,K)
+  error.fold = c()
+  for(j in 1:K){
+    test.inds = cvSets$subsets[cvSets$which == j]    
+    X.test = X[test.inds,]
+    X.train = X[-test.inds,]
+    y.test = y[test.inds]
+    y.train = y[-test.inds]
+    fit = knn(X.train, X.test, y.train, k=best.k)
+    error.fold[j] = sum(fit!=y.test)
+  }
+  knn.rep.cv.error[i] = sum(error.fold)/n
+}
+knn.rep.cv.error
+
+```
+
+# Task 4. Repeated CV loop for randomForest
+
+```{r repeated randomForest CV loop}
+reps = 10
+rf.rep.cv.error = c()
+for(i in 1:reps){
+  set.seed(i)
+  cvSets = cvFolds(n,K)
+  error.fold = c()
+  for(j in 1:K){
+    test.inds = cvSets$subsets[cvSets$which == j]    
+    X.test = X[test.inds,]
+    X.train = X[-test.inds,]
+    y.test = y[test.inds]
+    y.train = y[-test.inds]
+    
+    rf.model = randomForest(X.train, y.train)
+    fit = predict(rf.model, X.test)
+  
+    error.fold[j] = sum(fit!=y.test)
+  }
+  
+  rf.rep.cv.error[i] = sum(error.fold)/n
+  
+}
+
+rf.rep.cv.error
+
+```
+
+We can compare the CV results between KNN and RF easily
+
+```{r quick compare}
+boxplot(knn.rep.cv.error, rf.rep.cv.error, main="10 Repeat, 5 Fold CV on Diabetes data", ylab="5 Fold CV errors", xlab="Method", names=c("KNN", "RF"))
+```
+
+# Task 5. Using the `caret` package and comparing results
+
+```{r caret for KNN}
+fitControl = trainControl(## 5-fold CV
+                           method = "repeatedcv",
+                           number = 5,
+                           ## repeated ten times
+                           repeats = 10)
+
+set.seed(1)
+knnFit1 = train(class ~ ., data = d_norm, 
+                 method = "knn", 
+                 trControl = fitControl)
+knnFit1
+
+cv.err.knn = 1-knnFit1$results$Accuracy[3]
+```
+
+```{r caret for RF}
+
+set.seed(1)
+rfFit1 = train(class ~ ., data = diabetes, 
+                 method = "rf", 
+                 trControl = fitControl) #same fitControl as KNN
+rfFit1
+
+cv.err.rf = 1-rfFit1$results$Accuracy[1]
+
+```
+
+```{r caret for GLM}
+
+set.seed(1)
+glmFit1 = train(class ~ ., data = diabetes, 
+                 method = "glm",
+                 family="binomial", #need extra information for glm family
+                 trControl = fitControl) #same fitControl as KNN
+glmFit1
+
+cv.err.glm = 1-glmFit1$results$Accuracy
+```
+
+```{r caret for rpart}
+
+set.seed(1)
+rpartFit1 = train(class ~ ., data = diabetes, 
+                 method = "rpart",
+                 trControl = fitControl) #same fitControl as KNN
+rpartFit1
+
+cv.err.rpart = 1-rpartFit1$results$Accuracy[1]
+```
+
+## Comparing results
+```{r}
+cv.err.glm
+cv.err.rpart
+cv.err.rf
+cv.err.knn
+```

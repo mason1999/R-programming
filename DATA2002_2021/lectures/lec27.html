@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>DATA2002</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Garth Tarr" />
+    <script src="lec27_files/header-attrs-2.11.3/header-attrs.js"></script>
+    <link href="lec27_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <script src="lec27_files/htmlwidgets-1.5.4/htmlwidgets.js"></script>
+    <script src="lec27_files/d3-7.0.0/d3.min.js"></script>
+    <link href="lec27_files/d3panels-1.8.0/d3panels.min.css" rel="stylesheet" />
+    <script src="lec27_files/d3panels-1.8.0/d3panels.min.js"></script>
+    <script src="lec27_files/qtlcharts_iplotCorr-0.14/iplotCorr.js"></script>
+    <script src="lec27_files/qtlcharts_iplotCorr-0.14/iplotCorr_noscat.js"></script>
+    <script src="lec27_files/iplotCorr-binding-0.14/iplotCorr.js"></script>
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } },
+      "HTML-CSS": {
+        styles: {
+          ".MathJax a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+          ".MathJax_Preview a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+        }
+      }
+      });
+    </script>
+    <link rel="stylesheet" href="assets/sydney-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="assets/sydney.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# DATA2002
+## Multiple regression and model selection
+### Garth Tarr
+
+---
+
+class: segue
+
+
+
+
+
+.large[
+Interpreting model coefficients
+
+Multiple regression
+
+Model selection
+]
+
+---
+class: segue
+
+## Interpreting model coefficients
+
+---
+
+## How can we interpret the estimated coefficients?
+
+.Large[
+`$$Y = \beta_0 + \beta_1 x + \varepsilon$$`
+]
+
+
+-   The intercept is the expected value of `\(Y\)` when `\(x=0\)`.  I.e. `\(\operatorname{E}(Y ~|~ x=0) = \beta_0\)`.
+-   The slope is the amount we expect `\(Y\)` to change by when `\(x\)` increases one unit.  I.e. for a one unit increase in `\(x\)` we expect `\(Y\)` to change by `\(\beta_1\)` (could be an increase or decrease depending on the sign).
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M494.2 221.9l-59.8-40.5 13.7-71c2.6-13.2-1.6-26.8-11.1-36.4-9.6-9.5-23.2-13.7-36.2-11.1l-70.9 13.7-40.4-59.9c-15.1-22.3-51.9-22.3-67 0l-40.4 59.9-70.8-13.7C98 60.4 84.5 64.5 75 74.1c-9.5 9.6-13.7 23.1-11.1 36.3l13.7 71-59.8 40.5C6.6 229.5 0 242 0 255.5s6.7 26 17.8 33.5l59.8 40.5-13.7 71c-2.6 13.2 1.6 26.8 11.1 36.3 9.5 9.5 22.9 13.7 36.3 11.1l70.8-13.7 40.4 59.9C230 505.3 242.6 512 256 512s26-6.7 33.5-17.8l40.4-59.9 70.9 13.7c13.4 2.7 26.8-1.6 36.3-11.1 9.5-9.5 13.6-23.1 11.1-36.3l-13.7-71 59.8-40.5c11.1-7.5 17.8-20.1 17.8-33.5-.1-13.6-6.7-26.1-17.9-33.7zm-112.9 85.6l17.6 91.2-91-17.6L256 458l-51.9-77-90.9 17.6 17.6-91.2-76.8-52 76.8-52-17.6-91.2 91 17.6L256 53l51.9 76.9 91-17.6-17.6 91.1 76.8 52-76.8 52.1zM256 152c-57.3 0-104 46.7-104 104s46.7 104 104 104 104-46.7 104-104-46.7-104-104-104zm0 160c-30.9 0-56-25.1-56-56s25.1-56 56-56 56 25.1 56 56-25.1 56-56 56z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Recall our fitted model
+
+
+```r
+library(tidyverse)
+data(environmental, package = "lattice")
+environmental = environmental %&gt;% 
+  mutate(lozone = log(ozone))
+lm2 = lm(lozone ~ temperature, data = environmental)
+lm2
+```
+
+```
+## 
+## Call:
+## lm(formula = lozone ~ temperature, data = environmental)
+## 
+## Coefficients:
+## (Intercept)  temperature  
+##    -1.84852      0.06767
+```
+
+`$$\widehat{\log(\text{ozone})} = -1.84852 + 0.06767\times\text{temperature}$$`
+How do we interpret this model?
+
+-   Does it make sense to interpret the intercept?
+
+---
+
+
+```r
+ggplot(environmental, aes(x = temperature, y = lozone)) + 
+  geom_point() + coord_cartesian(xlim = c(0,100), ylim = c(-2, 5.5)) + 
+  geom_abline(slope = 0.06767, intercept = -1.84852, colour = "red", size = 1) + 
+  geom_vline(xintercept = 0) + geom_hline(yintercept = 0) + theme_minimal(base_size = 30)
+```
+
+&lt;img src="lec27_files/figure-html/unnamed-chunk-2-1.png" width="864" /&gt;
+
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M494.2 221.9l-59.8-40.5 13.7-71c2.6-13.2-1.6-26.8-11.1-36.4-9.6-9.5-23.2-13.7-36.2-11.1l-70.9 13.7-40.4-59.9c-15.1-22.3-51.9-22.3-67 0l-40.4 59.9-70.8-13.7C98 60.4 84.5 64.5 75 74.1c-9.5 9.6-13.7 23.1-11.1 36.3l13.7 71-59.8 40.5C6.6 229.5 0 242 0 255.5s6.7 26 17.8 33.5l59.8 40.5-13.7 71c-2.6 13.2 1.6 26.8 11.1 36.3 9.5 9.5 22.9 13.7 36.3 11.1l70.8-13.7 40.4 59.9C230 505.3 242.6 512 256 512s26-6.7 33.5-17.8l40.4-59.9 70.9 13.7c13.4 2.7 26.8-1.6 36.3-11.1 9.5-9.5 13.6-23.1 11.1-36.3l-13.7-71 59.8-40.5c11.1-7.5 17.8-20.1 17.8-33.5-.1-13.6-6.7-26.1-17.9-33.7zm-112.9 85.6l17.6 91.2-91-17.6L256 458l-51.9-77-90.9 17.6 17.6-91.2-76.8-52 76.8-52-17.6-91.2 91 17.6L256 53l51.9 76.9 91-17.6-17.6 91.1 76.8 52-76.8 52.1zM256 152c-57.3 0-104 46.7-104 104s46.7 104 104 104 104-46.7 104-104-46.7-104-104-104zm0 160c-30.9 0-56-25.1-56-56s25.1-56 56-56 56 25.1 56 56-25.1 56-56 56z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Slope interpretation
+
+`$$\widehat{\log(\text{ozone})} = -1.84852 + 0.06767\times\text{temperature}$$`
+
+-   Interpreting the slope: a one degree Fahrenheit increase in temperature results in a 0.07 unit **increase** in log ozone, on average.
+
+-   A nicer way to interpret this is: a one degree Fahrenheit increase in temperature results in a 7% **increase** in ozone, on average.
+
+---
+
+## Interpreting models with log transformations
+
+&lt;br&gt;
+
+### Log-linear `\(\quad \log(Y) = \beta_0 + \beta_1 x\)`
+
+On average, a one unit increase in `\(x\)` will result in a `\(\beta_1 \times 100\%\)` change in `\(Y\)`.
+
+### Linear-log `\(\quad Y = \beta_0 + \beta_1 \log(x)\)`
+
+On average, a one percent increase in `\(x\)` will result in a `\(\beta_1/100\)` change in `\(Y\)`.
+
+### Log-log `\(\quad \log(Y) = \beta_0 + \beta_1 \log(x)\)`
+
+On average, a one percent increase in `\(x\)` will result in a `\(\beta_1\%\)` change in `\(Y\)`.
+
+---
+class: segue
+
+# Multiple regression
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M494.2 221.9l-59.8-40.5 13.7-71c2.6-13.2-1.6-26.8-11.1-36.4-9.6-9.5-23.2-13.7-36.2-11.1l-70.9 13.7-40.4-59.9c-15.1-22.3-51.9-22.3-67 0l-40.4 59.9-70.8-13.7C98 60.4 84.5 64.5 75 74.1c-9.5 9.6-13.7 23.1-11.1 36.3l13.7 71-59.8 40.5C6.6 229.5 0 242 0 255.5s6.7 26 17.8 33.5l59.8 40.5-13.7 71c-2.6 13.2 1.6 26.8 11.1 36.3 9.5 9.5 22.9 13.7 36.3 11.1l70.8-13.7 40.4 59.9C230 505.3 242.6 512 256 512s26-6.7 33.5-17.8l40.4-59.9 70.9 13.7c13.4 2.7 26.8-1.6 36.3-11.1 9.5-9.5 13.6-23.1 11.1-36.3l-13.7-71 59.8-40.5c11.1-7.5 17.8-20.1 17.8-33.5-.1-13.6-6.7-26.1-17.9-33.7zm-112.9 85.6l17.6 91.2-91-17.6L256 458l-51.9-77-90.9 17.6 17.6-91.2-76.8-52 76.8-52-17.6-91.2 91 17.6L256 53l51.9 76.9 91-17.6-17.6 91.1 76.8 52-76.8 52.1zM256 152c-57.3 0-104 46.7-104 104s46.7 104 104 104 104-46.7 104-104-46.7-104-104-104zm0 160c-30.9 0-56-25.1-56-56s25.1-56 56-56 56 25.1 56 56-25.1 56-56 56z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Multiple regression
+
+What if we extended our question? Can *radiation*, *temperature* and *wind* be used to predict the log of *ozone*?  
+
+`$$\log(\text{ozone})_i = \beta_0 + \beta_1 \text{radiation}_i + \beta_2 \text{temperature}_i + \beta_3 \text{wind}_i + \varepsilon_i$$`
+
+
+```r
+lm3 = lm(lozone ~ radiation + temperature + wind, environmental)
+summary(lm3)$coefficients %&gt;% round(4)
+```
+
+```
+##             Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept)  -0.2612     0.5534 -0.4719   0.6379
+## radiation     0.0025     0.0006  4.5176   0.0000
+## temperature   0.0492     0.0061  8.0776   0.0000
+## wind         -0.0616     0.0157 -3.9222   0.0002
+```
+
+
+Fitted model:
+`$$\widehat{\log(\text{ozone})} = -0.2612 + 0.0025\, \text{radiation} + 0.0492\, \text{temperature} - 0.0616\, \text{wind}$$`
+
+---
+
+## Multiple regression
+
+Multiple regression is a natural extension of simple linear regression that incorporates multiple explanatory (or predictor) variables. It has the general form:
+`$$Y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \ldots + \beta_p x_p + \varepsilon,$$`
+where `\(\varepsilon\sim N(0,\sigma^2)\)`.
+
+Often it's convenient to write the model in matrix format,
+
+`$$\boldsymbol{Y} = \boldsymbol{X}\boldsymbol{\beta} + \boldsymbol{\varepsilon}$$`
+where `\(\boldsymbol{Y} = (Y_1, Y_2, \ldots, Y_n)'\)`, `\(\boldsymbol{\beta} = (\beta_0, \beta_1,\beta_2,\ldots, \beta_p)'\)`, `\(\boldsymbol{\varepsilon} \sim N_n(\mathbf{0}, \sigma^2\boldsymbol{I})\)` and 
+`$$\boldsymbol{X} = \left[\begin{array}{c}
+\boldsymbol{x}_1' \\
+\boldsymbol{x}_2' \\
+\vdots \\
+\boldsymbol{x}_n' 
+\end{array}\right] = \left[\begin{array}{ccccc}
+1 &amp; x_{11} &amp; x_{12} &amp; \ldots &amp; x_{1p} \\
+1 &amp; x_{21} &amp; x_{22} &amp; \ldots &amp; x_{2p} \\
+\vdots &amp; \vdots &amp; \vdots &amp;  &amp; \vdots \\
+1 &amp; x_{n1} &amp; x_{n2} &amp; \ldots &amp; x_{np} 
+\end{array}\right],$$`
+where `\(\boldsymbol{x}_i = (1, x_{i1}, x_{i2}, \ldots, x_{ip})\)` is the vector of predictors for the `\(i\)`th observation.
+
+---
+
+## Multiple regression
+
+The least squares solution is:
+
+.Large[.Large[
+`$$\hat{\boldsymbol{\beta}} = (\boldsymbol{X}'\boldsymbol{X})^{-1}\boldsymbol{X}'\boldsymbol{y}.$$`
+]]
+
+---
+
+## Interpretation
+
+The estimated coefficients ( `\(\hat{\beta}\)`'s ) are now interpreted as "consitional on" the other variables - each `\(\beta_i\)` reflects the predicted change in `\(y\)` associated with a one unit increase in `\(x_i\)`, holding the other variables constant (i.e. a marginal effect).
+
+`$$\widehat{\log(\text{ozone})} = -0.2612 + 0.0025\, \text{radiation} + 0.0492\, \text{temperature} - 0.0616\, \text{wind}$$`
+
+-   A one degree Fahrenheit increase in temperature results in a 5% **increase** in ozone on average, holding radiation and wind speed constant.
+
+-   A one langley increase solar ratiation results in a 0.3% **increase** in ozone on average, holding radiation and wind constant.
+-   A 10 langley increase solar ratiation results in a 3% **increase** in ozone on average, holding radiation and wind constant.
+
+-   A one mile per hour increase in average wind speed results in a 6% **decrease** in ozone on average, holding radiation and temperature constant.
+
+---
+
+## In-sample performance
+
+.pull-left-1[
+The `\(r^2\)` value has the same interpretation: proportion of total variability in `\(Y\)` explained by the regression model.
+
+#### Simple linear regression model
+
+
+```r
+summary(lm2)$r.squared
+```
+
+```
+## [1] 0.5547615
+```
+
+#### "Full" model
+
+
+```r
+summary(lm3)$r.squared
+```
+
+```
+## [1] 0.664515
+```
+
+]
+
+.pull-right-2[
+
+
+```r
+sjPlot::tab_model(lm2, lm3, digits = 4, show.ci = FALSE)
+```
+
+&lt;table style="border-collapse:collapse; border:none;"&gt;
+&lt;tr&gt;
+&lt;th style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm;  text-align:left; "&gt;&amp;nbsp;&lt;/th&gt;
+&lt;th colspan="2" style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm; "&gt;lozone&lt;/th&gt;
+&lt;th colspan="2" style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm; "&gt;lozone&lt;/th&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  text-align:left; "&gt;Predictors&lt;/td&gt;
+&lt;td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  "&gt;Estimates&lt;/td&gt;
+&lt;td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  "&gt;p&lt;/td&gt;
+&lt;td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  "&gt;Estimates&lt;/td&gt;
+&lt;td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  "&gt;p&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; "&gt;(Intercept)&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&amp;#45;1.8485&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&lt;strong&gt;&amp;lt;0.001&lt;/strong&gt;&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&amp;#45;0.2612&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;0.638&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; "&gt;temperature&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;0.0677&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&lt;strong&gt;&amp;lt;0.001&lt;/strong&gt;&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;0.0492&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&lt;strong&gt;&amp;lt;0.001&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; "&gt;radiation&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;0.0025&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&lt;strong&gt;&amp;lt;0.001&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; "&gt;wind&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&amp;#45;0.0616&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&lt;strong&gt;&amp;lt;0.001&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm; border-top:1px solid;"&gt;Observations&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="2"&gt;111&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="2"&gt;111&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;"&gt;R&lt;sup&gt;2&lt;/sup&gt; / R&lt;sup&gt;2&lt;/sup&gt; adjusted&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="2"&gt;0.555 / 0.551&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="2"&gt;0.665 / 0.655&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;/table&gt;
+
+
+]
+---
+class: segue
+
+# Model selection
+
+---
+background-image: url("imgs/burglar.jpg")
+background-position: 100% 100%
+background-size: 40% 100%
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M504.971 199.362l-22.627-22.627c-9.373-9.373-24.569-9.373-33.941 0l-5.657 5.657L329.608 69.255l5.657-5.657c9.373-9.373 9.373-24.569 0-33.941L312.638 7.029c-9.373-9.373-24.569-9.373-33.941 0L154.246 131.48c-9.373 9.373-9.373 24.569 0 33.941l22.627 22.627c9.373 9.373 24.569 9.373 33.941 0l5.657-5.657 39.598 39.598-81.04 81.04-5.657-5.657c-12.497-12.497-32.758-12.497-45.255 0L9.373 412.118c-12.497 12.497-12.497 32.758 0 45.255l45.255 45.255c12.497 12.497 32.758 12.497 45.255 0l114.745-114.745c12.497-12.497 12.497-32.758 0-45.255l-5.657-5.657 81.04-81.04 39.598 39.598-5.657 5.657c-9.373 9.373-9.373 24.569 0 33.941l22.627 22.627c9.373 9.373 24.569 9.373 33.941 0l124.451-124.451c9.372-9.372 9.372-24.568 0-33.941z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## US crime rate data
+
+.pull-left[
+
+- Ehrlich (1973) considered crime data from 47 states of the USA in 1960
+
+- Our aim is to model the crime rate as a function of up to 15 potential explanatory variables
+
+- We will consider .bold[.blue[stepwise]] search schemes
+
+
+```r
+data("UScrime", package = "MASS")
+# ?UScrime
+dim(UScrime)
+```
+
+```
+## [1] 47 16
+```
+
+
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M504.971 199.362l-22.627-22.627c-9.373-9.373-24.569-9.373-33.941 0l-5.657 5.657L329.608 69.255l5.657-5.657c9.373-9.373 9.373-24.569 0-33.941L312.638 7.029c-9.373-9.373-24.569-9.373-33.941 0L154.246 131.48c-9.373 9.373-9.373 24.569 0 33.941l22.627 22.627c9.373 9.373 24.569 9.373 33.941 0l5.657-5.657 39.598 39.598-81.04 81.04-5.657-5.657c-12.497-12.497-32.758-12.497-45.255 0L9.373 412.118c-12.497 12.497-12.497 32.758 0 45.255l45.255 45.255c12.497 12.497 32.758 12.497 45.255 0l114.745-114.745c12.497-12.497 12.497-32.758 0-45.255l-5.657-5.657 81.04-81.04 39.598 39.598-5.657 5.657c-9.373 9.373-9.373 24.569 0 33.941l22.627 22.627c9.373 9.373 24.569 9.373 33.941 0l124.451-124.451c9.372-9.372 9.372-24.568 0-33.941z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Crime data: variables in the data set
+
+.font75[
+
+Variable | Description
+------ | ------
+M     | percentage of males aged 14-24
+So    | indicator variable for a southern state
+Ed    | mean years of schooling
+Po1   | police expenditure in 1960
+Po2   | police expenditure in 1959
+LF    | labour force participation rate
+M.F   | number of males per 1000 females
+Pop   | state population
+NW    | number of nonwhites per 1000 people
+U1    | unemployment rate of urban males 14-24
+U2    | unemployment rate of urban males 35-39
+GDP   | gross domestic product per head
+Ineq  | income inequality
+Prob  | probability of imprisonment
+Time  | average time served in state prisons
+y     | rate of crimes in a particular category per head of population
+
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M504.971 199.362l-22.627-22.627c-9.373-9.373-24.569-9.373-33.941 0l-5.657 5.657L329.608 69.255l5.657-5.657c9.373-9.373 9.373-24.569 0-33.941L312.638 7.029c-9.373-9.373-24.569-9.373-33.941 0L154.246 131.48c-9.373 9.373-9.373 24.569 0 33.941l22.627 22.627c9.373 9.373 24.569 9.373 33.941 0l5.657-5.657 39.598 39.598-81.04 81.04-5.657-5.657c-12.497-12.497-32.758-12.497-45.255 0L9.373 412.118c-12.497 12.497-12.497 32.758 0 45.255l45.255 45.255c12.497 12.497 32.758 12.497 45.255 0l114.745-114.745c12.497-12.497 12.497-32.758 0-45.255l-5.657-5.657 81.04-81.04 39.598 39.598-5.657 5.657c-9.373 9.373-9.373 24.569 0 33.941l22.627 22.627c9.373 9.373 24.569 9.373 33.941 0l124.451-124.451c9.372-9.372 9.372-24.568 0-33.941z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Crime data
+
+.pull-left[
+
+```r
+data("UScrime", package = "MASS")
+dim(UScrime)
+```
+
+```
+## [1] 47 16
+```
+
+```r
+n = 47
+k = 15
+2^k
+```
+
+```
+## [1] 32768
+```
+
+```r
+cor_mat = cor(UScrime)
+melted_cor_mat = cor_mat %&gt;%
+  data.frame() %&gt;% 
+  rownames_to_column(var = "var1") %&gt;% 
+  gather(key = "var2", value = "cor", -var1)
+```
+]
+.pull-right[
+
+```r
+ggplot(data = melted_cor_mat, 
+       aes(x=var1, y=var2, fill=cor)) + 
+  geom_tile() + theme_minimal(base_size = 30) +
+  scale_fill_gradient2(
+    low = "blue", high = "red", mid = "white", 
+    midpoint = 0, limit = c(-1,1)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+&lt;img src="lec27_files/figure-html/unnamed-chunk-9-1.png" width="864" /&gt;
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M504.971 199.362l-22.627-22.627c-9.373-9.373-24.569-9.373-33.941 0l-5.657 5.657L329.608 69.255l5.657-5.657c9.373-9.373 9.373-24.569 0-33.941L312.638 7.029c-9.373-9.373-24.569-9.373-33.941 0L154.246 131.48c-9.373 9.373-9.373 24.569 0 33.941l22.627 22.627c9.373 9.373 24.569 9.373 33.941 0l5.657-5.657 39.598 39.598-81.04 81.04-5.657-5.657c-12.497-12.497-32.758-12.497-45.255 0L9.373 412.118c-12.497 12.497-12.497 32.758 0 45.255l45.255 45.255c12.497 12.497 32.758 12.497 45.255 0l114.745-114.745c12.497-12.497 12.497-32.758 0-45.255l-5.657-5.657 81.04-81.04 39.598 39.598-5.657 5.657c-9.373 9.373-9.373 24.569 0 33.941l22.627 22.627c9.373 9.373 24.569 9.373 33.941 0l124.451-124.451c9.372-9.372 9.372-24.568 0-33.941z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Interactive correlation matrix
+
+
+```r
+qtlcharts::iplotCorr(UScrime)
+```
+
+<div id="htmlwidget-0485668a7412e103b8e3" style="width:864px;height:482.4px;" class="iplotCorr html-widget"></div>
+<script type="application/json" data-for="htmlwidget-0485668a7412e103b8e3">{"x":{"data":{"indID":["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47"],"var":["M","So","Ed","Po1","Po2","LF","M.F","Pop","NW","U1","U2","GDP","Ineq","Prob","Time","y"],"corr":[[1,0.58436,-0.53024,-0.50574,-0.51317,-0.16095,-0.02868,-0.28064,0.5932,-0.22438,-0.24484,-0.67006,0.63921,0.36112,0.11451,-0.089472],[0.58436,1,-0.70274,-0.37264,-0.37617,-0.50547,-0.31473,-0.049918,0.7671,-0.17242,0.071693,-0.63695,0.73718,0.53086,0.066813,-0.090637],[-0.53024,-0.70274,1,0.48295,0.49941,0.56118,0.43691,-0.017227,-0.66488,0.018103,-0.21568,0.736,-0.76866,-0.38992,-0.25397,0.32283],[-0.50574,-0.37264,0.48295,1,0.99359,0.12149,0.03376,0.52628,-0.21371,-0.043698,0.18509,0.78723,-0.6305,-0.47325,0.10336,0.6876],[-0.51317,-0.37617,0.49941,0.99359,1,0.10635,0.022843,0.51379,-0.21877,-0.051712,0.16922,0.79426,-0.64815,-0.47303,0.075627,0.66671],[-0.16095,-0.50547,0.56118,0.12149,0.10635,1,0.51356,-0.12367,-0.34121,-0.2294,-0.42076,0.29463,-0.26989,-0.25009,-0.12364,0.18887],[-0.02868,-0.31473,0.43691,0.03376,0.022843,0.51356,1,-0.41063,-0.3273,0.35189,-0.018692,0.17961,-0.16709,-0.050858,-0.4277,0.21391],[-0.28064,-0.049918,-0.017227,0.52628,0.51379,-0.12367,-0.41063,1,0.095153,-0.03812,0.27042,0.30826,-0.12629,-0.34729,0.46421,0.33747],[0.5932,0.7671,-0.66488,-0.21371,-0.21877,-0.34121,-0.3273,0.095153,1,-0.15645,0.080908,-0.59011,0.67731,0.42806,0.2304,0.032599],[-0.22438,-0.17242,0.018103,-0.043698,-0.051712,-0.2294,0.35189,-0.03812,-0.15645,1,0.74592,0.044857,-0.063832,-0.007469,-0.16985,-0.050478],[-0.24484,0.071693,-0.21568,0.18509,0.16922,-0.42076,-0.018692,0.27042,0.080908,0.74592,1,0.092072,0.015678,-0.061592,0.10136,0.17732],[-0.67006,-0.63695,0.736,0.78723,0.79426,0.29463,0.17961,0.30826,-0.59011,0.044857,0.092072,1,-0.884,-0.55533,0.00064856,0.44132],[0.63921,0.73718,-0.76866,-0.6305,-0.64815,-0.26989,-0.16709,-0.12629,0.67731,-0.063832,0.015678,-0.884,1,0.46532,0.10182,-0.17902],[0.36112,0.53086,-0.38992,-0.47325,-0.47303,-0.25009,-0.050858,-0.34729,0.42806,-0.007469,-0.061592,-0.55533,0.46532,1,-0.43625,-0.42742],[0.11451,0.066813,-0.25397,0.10336,0.075627,-0.12364,-0.4277,0.46421,0.2304,-0.16985,0.10136,0.00064856,0.10182,-0.43625,1,0.14987],[-0.089472,-0.090637,0.32283,0.6876,0.66671,0.18887,0.21391,0.33747,0.032599,-0.050478,0.17732,0.44132,-0.17902,-0.42742,0.14987,1]],"rows":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],"cols":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],"dat":[[151,143,142,136,141,121,127,131,157,140,124,134,128,135,152,142,143,135,130,125,126,157,132,131,130,131,135,152,119,166,140,125,147,126,123,150,177,133,149,145,148,141,162,136,139,126,130],[1,0,1,0,0,0,1,1,1,0,0,0,0,0,1,1,0,1,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1,0,0,0,1,0,1,1,0,0,1,0,1,0,0],[91,113,89,121,121,110,111,109,90,118,105,108,113,117,87,88,110,104,116,108,108,89,96,116,116,121,109,112,107,89,93,109,104,118,102,100,87,104,88,104,122,109,99,121,88,104,121],[58,103,45,149,109,118,82,115,65,71,121,75,67,62,57,81,66,123,128,113,74,47,87,78,63,160,69,82,166,58,55,90,63,97,97,109,58,51,61,82,72,56,75,95,46,106,90],[56,95,44,141,101,115,79,109,62,68,116,71,60,61,53,77,63,115,128,105,67,44,83,73,57,143,71,76,157,54,54,81,64,97,87,98,56,47,54,74,66,54,70,96,41,97,91],[510,583,533,577,591,547,519,542,553,632,580,595,624,595,530,497,537,537,536,567,602,512,564,574,641,631,540,571,521,521,535,586,560,542,526,531,638,599,515,560,601,523,522,574,480,599,623],[950,1012,969,994,985,964,982,969,955,1029,966,972,972,986,986,956,977,978,934,985,984,962,953,1038,984,1071,965,1018,938,973,1045,964,972,990,948,964,974,1024,953,981,998,968,996,1012,968,989,1049],[33,13,18,157,18,25,4,50,39,7,101,47,28,22,30,33,10,31,51,78,34,22,43,7,14,3,6,10,168,46,6,97,23,18,113,9,24,7,36,96,9,4,40,29,19,40,3],[301,102,219,80,30,44,139,179,286,15,106,59,10,46,72,321,6,170,24,94,12,423,92,36,26,77,4,79,89,254,20,82,95,21,76,24,349,40,165,126,19,2,208,36,49,24,22],[108,96,94,102,91,84,97,79,81,100,77,83,77,77,92,116,114,89,78,130,102,97,83,142,70,102,80,103,92,72,135,105,76,102,124,87,76,99,86,88,84,107,73,111,135,78,113],[41,36,33,39,20,29,38,35,28,24,35,31,25,27,43,47,35,34,34,58,33,34,32,42,21,41,22,28,36,26,40,43,24,35,50,38,28,27,35,31,20,37,27,37,53,25,40],[394,557,318,673,578,689,620,472,421,526,657,580,507,529,405,427,487,631,627,626,557,288,513,540,486,674,564,537,637,396,453,617,462,589,572,559,382,425,395,488,590,489,496,622,457,593,588],[261,194,250,167,174,126,168,206,239,174,170,172,206,190,264,247,166,165,135,166,195,276,227,176,196,152,139,215,154,237,200,163,233,166,158,153,254,225,251,228,144,170,224,162,249,171,160],[0.084602,0.029599,0.083401,0.015801,0.041399,0.034201,0.0421,0.040099,0.071697,0.044498,0.016201,0.031201,0.045302,0.0532,0.0691,0.052099,0.076299,0.1198,0.019099,0.034801,0.0228,0.089502,0.0307,0.041598,0.069197,0.041698,0.036099,0.038201,0.0234,0.075298,0.041999,0.042698,0.049499,0.040799,0.0207,0.0069,0.045198,0.053998,0.047099,0.038801,0.0251,0.088904,0.054902,0.0281,0.056202,0.046598,0.052802],[26.201,25.3,24.301,29.901,21.3,21,20.699,24.599,29.4,19.599,41.6,34.298,36.299,21.501,22.701,26.099,19.1,18.2,24.901,26.401,37.6,37.099,25.199,17.6,21.9,22.101,28.5,25.801,36.701,28.301,21.8,30.901,25.5,21.7,37.401,44,31.7,16.7,27.3,29.3,30,12.2,31.999,30,32.6,16.7,16.1],[791,1635,578,1969,1234,682,963,1555,856,705,1674,849,511,664,798,946,539,929,750,1225,742,439,1216,968,523,1993,342,1216,1043,696,373,754,1072,923,653,1272,831,566,826,1151,880,542,823,1030,455,508,849]],"group":[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],"scatterplots":true},"chartOpts":null},"evals":[],"jsHooks":[]}</script>
+
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M504.971 199.362l-22.627-22.627c-9.373-9.373-24.569-9.373-33.941 0l-5.657 5.657L329.608 69.255l5.657-5.657c9.373-9.373 9.373-24.569 0-33.941L312.638 7.029c-9.373-9.373-24.569-9.373-33.941 0L154.246 131.48c-9.373 9.373-9.373 24.569 0 33.941l22.627 22.627c9.373 9.373 24.569 9.373 33.941 0l5.657-5.657 39.598 39.598-81.04 81.04-5.657-5.657c-12.497-12.497-32.758-12.497-45.255 0L9.373 412.118c-12.497 12.497-12.497 32.758 0 45.255l45.255 45.255c12.497 12.497 32.758 12.497 45.255 0l114.745-114.745c12.497-12.497 12.497-32.758 0-45.255l-5.657-5.657 81.04-81.04 39.598 39.598-5.657 5.657c-9.373 9.373-9.373 24.569 0 33.941l22.627 22.627c9.373 9.373 24.569 9.373 33.941 0l124.451-124.451c9.372-9.372 9.372-24.568 0-33.941z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Crime data: null and full model
+
+.pull-left-2[
+
+```r
+M0 = lm(y ~ 1, data = UScrime)  # Null model
+M1 = lm(y ~ ., data = UScrime)  # Full model
+round(summary(M1)$coef, 3)
+```
+
+```
+##              Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept) -5984.288   1628.318  -3.675    0.001
+## M               8.783      4.171   2.106    0.043
+## So             -3.803    148.755  -0.026    0.980
+## Ed             18.832      6.209   3.033    0.005
+## Po1            19.280     10.611   1.817    0.079
+## Po2           -10.942     11.748  -0.931    0.359
+## LF             -0.664      1.470  -0.452    0.655
+## M.F             1.741      2.035   0.855    0.399
+## Pop            -0.733      1.290  -0.568    0.574
+## NW              0.420      0.648   0.649    0.521
+## U1             -5.827      4.210  -1.384    0.176
+## U2             16.780      8.234   2.038    0.050
+## GDP             0.962      1.037   0.928    0.361
+## Ineq            7.067      2.272   3.111    0.004
+## Prob        -4855.266   2272.375  -2.137    0.041
+## Time           -3.479      7.165  -0.486    0.631
+```
+]
+
+.pull-right-1[
+.pull-down[
+
+```r
+t(round(broom::glance(M1), 2))
+```
+
+```
+##                     [,1]
+## r.squared           0.80
+## adj.r.squared       0.71
+## sigma             209.06
+## statistic           8.43
+## p.value             0.00
+## df                 15.00
+## logLik           -308.01
+## AIC               650.03
+## BIC               681.48
+## deviance      1354945.77
+## df.residual        31.00
+## nobs               47.00
+```
+]
+]
+
+---
+
+## The `drop1` and `update` command in R
+
+- For a response variable `Y` and explanatory variables `x1`, `...`, `xk`  stored in the data frame `dat` consider 
+- `M1 = lm(Y ~ ., data = dat)`
+- The function `drop1(M1, test = "F")` returns a number of information criteria for all explanatory variables used in `M1`
+- In particular, this includes the p-values of the F-test for `\(H_0: \beta_j = 0\)` versus `\(H_1: \beta_j \neq 0\)`
+for all `\(j = 1,\ldots,k\)`
+- To efficiently delete a variable from regression model `M1`, say `x1`, the `update()` function can be used: 
+- `M2 = update(M1, . ~ . - x1)`
+- The full stops in the `update()` formula `.~.` stand for "whatever was in the corresponding position in the old formula"
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M504.971 199.362l-22.627-22.627c-9.373-9.373-24.569-9.373-33.941 0l-5.657 5.657L329.608 69.255l5.657-5.657c9.373-9.373 9.373-24.569 0-33.941L312.638 7.029c-9.373-9.373-24.569-9.373-33.941 0L154.246 131.48c-9.373 9.373-9.373 24.569 0 33.941l22.627 22.627c9.373 9.373 24.569 9.373 33.941 0l5.657-5.657 39.598 39.598-81.04 81.04-5.657-5.657c-12.497-12.497-32.758-12.497-45.255 0L9.373 412.118c-12.497 12.497-12.497 32.758 0 45.255l45.255 45.255c12.497 12.497 32.758 12.497 45.255 0l114.745-114.745c12.497-12.497 12.497-32.758 0-45.255l-5.657-5.657 81.04-81.04 39.598 39.598-5.657 5.657c-9.373 9.373-9.373 24.569 0 33.941l22.627 22.627c9.373 9.373 24.569 9.373 33.941 0l124.451-124.451c9.372-9.372 9.372-24.568 0-33.941z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Crime data: `drop1` and `update`
+
+.pull-left[
+
+Start with the full model, `M1`
+
+.code70[
+
+
+```r
+drop1(M1, test = "F")
+```
+
+```
+## Single term deletions
+## 
+## Model:
+## y ~ M + So + Ed + Po1 + Po2 + LF + M.F + Pop + NW + U1 + U2 + 
+##     GDP + Ineq + Prob + Time
+##        Df Sum of Sq     RSS AIC F value Pr(&gt;F)   
+## &lt;none&gt;              1354946 515                  
+## M       1    193770 1548716 519    4.43 0.0434 * 
+## So      1        29 1354974 513    0.00 0.9798   
+## Ed      1    402117 1757063 525    9.20 0.0049 **
+## Po1     1    144306 1499252 517    3.30 0.0789 . 
+## Po2     1     37919 1392865 514    0.87 0.3588   
+## LF      1      8917 1363862 513    0.20 0.6547   
+## M.F     1     31967 1386913 514    0.73 0.3990   
+## Pop     1     14122 1369068 513    0.32 0.5738   
+## NW      1     18395 1373341 513    0.42 0.5213   
+## U1      1     83722 1438668 515    1.92 0.1762   
+## U2      1    181536 1536482 519    4.15 0.0502 . 
+## GDP     1     37613 1392558 514    0.86 0.3608   
+## Ineq    1    423031 1777977 525    9.68 0.0040 **
+## Prob    1    199538 1554484 519    4.57 0.0406 * 
+## Time    1     10304 1365250 513    0.24 0.6307   
+## ---
+## Signif. codes:  
+## 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+]
+
+Remove `So` and create `M2`
+
+]
+
+.pull-right[
+.code70[
+
+
+```r
+M2 = update(M1, . ~ . - So)
+drop1(M2, test = "F")
+```
+
+```
+## Single term deletions
+## 
+## Model:
+## y ~ M + Ed + Po1 + Po2 + LF + M.F + Pop + NW + U1 + U2 + GDP + 
+##     Ineq + Prob + Time
+##        Df Sum of Sq     RSS AIC F value Pr(&gt;F)   
+## &lt;none&gt;              1354974 513                  
+## M       1    195084 1550059 517    4.61 0.0395 * 
+## Ed      1    403140 1758114 523    9.52 0.0042 **
+## Po1     1    144302 1499277 515    3.41 0.0742 . 
+## Po2     1     37954 1392929 512    0.90 0.3509   
+## LF      1     10878 1365852 511    0.26 0.6157   
+## M.F     1     32449 1387423 512    0.77 0.3879   
+## Pop     1     14127 1369101 511    0.33 0.5676   
+## NW      1     21626 1376600 511    0.51 0.4800   
+## U1      1     96420 1451395 514    2.28 0.1411   
+## U2      1    189859 1544834 517    4.48 0.0421 * 
+## GDP     1     39223 1394197 512    0.93 0.3430   
+## Ineq    1    488834 1843808 525   11.54 0.0018 **
+## Prob    1    204463 1559437 517    4.83 0.0353 * 
+## Time    1     10341 1365315 511    0.24 0.6246   
+## ---
+## Signif. codes:  
+## 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+```r
+M3 = update(M2, . ~ . - Time)
+```
+
+]
+
+]
+
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M504.971 199.362l-22.627-22.627c-9.373-9.373-24.569-9.373-33.941 0l-5.657 5.657L329.608 69.255l5.657-5.657c9.373-9.373 9.373-24.569 0-33.941L312.638 7.029c-9.373-9.373-24.569-9.373-33.941 0L154.246 131.48c-9.373 9.373-9.373 24.569 0 33.941l22.627 22.627c9.373 9.373 24.569 9.373 33.941 0l5.657-5.657 39.598 39.598-81.04 81.04-5.657-5.657c-12.497-12.497-32.758-12.497-45.255 0L9.373 412.118c-12.497 12.497-12.497 32.758 0 45.255l45.255 45.255c12.497 12.497 32.758 12.497 45.255 0l114.745-114.745c12.497-12.497 12.497-32.758 0-45.255l-5.657-5.657 81.04-81.04 39.598 39.598-5.657 5.657c-9.373 9.373-9.373 24.569 0 33.941l22.627 22.627c9.373 9.373 24.569 9.373 33.941 0l124.451-124.451c9.372-9.372 9.372-24.568 0-33.941z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Crime data: `drop1` and `update`
+
+.pull-left[.code70[
+
+
+```r
+drop1(M3, test = "F")
+```
+
+```
+## Single term deletions
+## 
+## Model:
+## y ~ M + Ed + Po1 + Po2 + LF + M.F + Pop + NW + U1 + U2 + GDP + 
+##     Ineq + Prob
+##        Df Sum of Sq     RSS AIC F value Pr(&gt;F)   
+## &lt;none&gt;              1365315 511                  
+## M       1    186110 1551425 515    4.50 0.0415 * 
+## Ed      1    409448 1774763 521    9.90 0.0035 **
+## Po1     1    134137 1499452 513    3.24 0.0809 . 
+## Po2     1     28932 1394247 510    0.70 0.4090   
+## LF      1     10533 1375848 509    0.25 0.6172   
+## M.F     1     41784 1407099 510    1.01 0.3222   
+## Pop     1     21846 1387161 510    0.53 0.4726   
+## NW      1     15482 1380797 510    0.37 0.5449   
+## U1      1     91420 1456735 512    2.21 0.1466   
+## U2      1    184143 1549458 515    4.45 0.0426 * 
+## GDP     1     36070 1401385 510    0.87 0.3572   
+## Ineq    1    502909 1868224 524   12.16 0.0014 **
+## Prob    1    237493 1602808 517    5.74 0.0224 * 
+## ---
+## Signif. codes:  
+## 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+]
+
+
+```r
+M4 = update(M3, . ~ . - LF)
+```
+
+]
+
+.pull-right[.code70[
+
+
+```r
+drop1(M4, test = "F")
+```
+
+```
+## Single term deletions
+## 
+## Model:
+## y ~ M + Ed + Po1 + Po2 + M.F + Pop + NW + U1 + U2 + GDP + Ineq + 
+##     Prob
+##        Df Sum of Sq     RSS AIC F value Pr(&gt;F)   
+## &lt;none&gt;              1375848 509                  
+## M       1    217716 1593564 514    5.38 0.0265 * 
+## Ed      1    413254 1789103 520   10.21 0.0030 **
+## Po1     1    123896 1499744 511    3.06 0.0892 . 
+## Po2     1     21418 1397266 508    0.53 0.4719   
+## M.F     1     31252 1407100 508    0.77 0.3857   
+## Pop     1     27803 1403651 508    0.69 0.4129   
+## NW      1     11675 1387523 508    0.29 0.5947   
+## U1      1     80954 1456802 510    2.00 0.1663   
+## U2      1    190746 1566594 513    4.71 0.0370 * 
+## GDP     1     35035 1410883 509    0.87 0.3587   
+## Ineq    1    500944 1876792 522   12.38 0.0013 **
+## Prob    1    226971 1602819 515    5.61 0.0237 * 
+## ---
+## Signif. codes:  
+## 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+```r
+M5 = update(M4, . ~ . - NW)
+## drop1(M5, test = "F")
+```
+
+]
+
+and so on...
+
+]
+
+---
+
+## Backward variable selection
+
+1. Start with model containing .red[all] possible explanatory variables
+
+2. For each variable in turn, investigate effect of removing variable from current model
+
+3. .red[Remove the least informative variable], unless this variable is nonetheless supplying significant information about the response
+
+4. Go to step 2. Stop only if all variables in the current model are
+important
+
+
+---
+
+## The Akaike information criterion
+
+-  .bold[.red[AIC]] is the most widely known and used model selection method (of course this does not imply it is the best/recommended method to use)
+
+-  The .bold[.red[AIC]] was introduced by Hirotugu Akaike in his seminal 1973 paper and for our linear regression models, is defined as,
+`$$\color{red}{\text{AIC}} = n\log\left(\frac{\text{Residual sum of squares}}{n}\right) + 2p$$`
+-  The smaller the .bold[.red[AIC]] the better the model
+
+-  Models that differ by less than one or two .bold[.red[AIC]] values can be regarded as somewhat equally well fitting
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M504.971 199.362l-22.627-22.627c-9.373-9.373-24.569-9.373-33.941 0l-5.657 5.657L329.608 69.255l5.657-5.657c9.373-9.373 9.373-24.569 0-33.941L312.638 7.029c-9.373-9.373-24.569-9.373-33.941 0L154.246 131.48c-9.373 9.373-9.373 24.569 0 33.941l22.627 22.627c9.373 9.373 24.569 9.373 33.941 0l5.657-5.657 39.598 39.598-81.04 81.04-5.657-5.657c-12.497-12.497-32.758-12.497-45.255 0L9.373 412.118c-12.497 12.497-12.497 32.758 0 45.255l45.255 45.255c12.497 12.497 32.758 12.497 45.255 0l114.745-114.745c12.497-12.497 12.497-32.758 0-45.255l-5.657-5.657 81.04-81.04 39.598 39.598-5.657 5.657c-9.373 9.373-9.373 24.569 0 33.941l22.627 22.627c9.373 9.373 24.569 9.373 33.941 0l124.451-124.451c9.372-9.372 9.372-24.568 0-33.941z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Crime data: backward search using AIC
+
+.pull-left-2[
+
+```r
+step.back.aic = step(M1, 
+                     direction = "backward", 
+                     trace = FALSE)
+round(summary(step.back.aic)$coef,3)
+```
+
+```
+##              Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept) -6426.101   1194.611  -5.379    0.000
+## M               9.332      3.350   2.786    0.008
+## Ed             18.012      5.275   3.414    0.002
+## Po1            10.265      1.552   6.613    0.000
+## M.F             2.234      1.360   1.642    0.109
+## U1             -6.087      3.339  -1.823    0.076
+## U2             18.735      7.248   2.585    0.014
+## Ineq            6.133      1.396   4.394    0.000
+## Prob        -3796.032   1490.646  -2.547    0.015
+```
+
+Use `trace = TRUE` to see the sequence of models considered by the procedure.
+]
+.pull-right-1[
+.pull-down[
+
+```r
+step.back.aic %&gt;%
+  broom::glance() %&gt;% 
+  round(2) %&gt;% t()
+```
+
+```
+##                     [,1]
+## r.squared           0.79
+## adj.r.squared       0.74
+## sigma             195.55
+## statistic          17.74
+## p.value             0.00
+## df                  8.00
+## logLik           -309.66
+## AIC               639.32
+## BIC               657.82
+## deviance      1453067.77
+## df.residual        38.00
+## nobs               47.00
+```
+]
+]
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M504.971 199.362l-22.627-22.627c-9.373-9.373-24.569-9.373-33.941 0l-5.657 5.657L329.608 69.255l5.657-5.657c9.373-9.373 9.373-24.569 0-33.941L312.638 7.029c-9.373-9.373-24.569-9.373-33.941 0L154.246 131.48c-9.373 9.373-9.373 24.569 0 33.941l22.627 22.627c9.373 9.373 24.569 9.373 33.941 0l5.657-5.657 39.598 39.598-81.04 81.04-5.657-5.657c-12.497-12.497-32.758-12.497-45.255 0L9.373 412.118c-12.497 12.497-12.497 32.758 0 45.255l45.255 45.255c12.497 12.497 32.758 12.497 45.255 0l114.745-114.745c12.497-12.497 12.497-32.758 0-45.255l-5.657-5.657 81.04-81.04 39.598 39.598-5.657 5.657c-9.373 9.373-9.373 24.569 0 33.941l22.627 22.627c9.373 9.373 24.569 9.373 33.941 0l124.451-124.451c9.372-9.372 9.372-24.568 0-33.941z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Crime data: `drop1`
+
+We could try to see if we can drop any variables from the backward stepwise using AIC model:
+
+
+```r
+drop1(step.back.aic, test = "F")
+```
+
+```
+## Single term deletions
+## 
+## Model:
+## y ~ M + Ed + Po1 + M.F + U1 + U2 + Ineq + Prob
+##        Df Sum of Sq     RSS AIC F value  Pr(&gt;F)    
+## &lt;none&gt;              1453068 504                    
+## M       1    296790 1749858 511    7.76  0.0083 ** 
+## Ed      1    445788 1898855 515   11.66  0.0015 ** 
+## Po1     1   1672038 3125105 538   43.73 8.3e-08 ***
+## M.F     1    103159 1556227 505    2.70  0.1087    
+## U1      1    127044 1580112 506    3.32  0.0762 .  
+## U2      1    255443 1708511 510    6.68  0.0137 *  
+## Ineq    1    738244 2191312 521   19.31 8.6e-05 ***
+## Prob    1    247978 1701046 509    6.49  0.0151 *  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+---
+
+## Forward variable selection
+
+1.  Start with model containing no explanatory variables, i.e.
+`lm(y ~ 1, data = dat)`.
+2. For each variable in turn, investigate effect of adding variable
+from current model
+3. .red[Add the most informative/significant variable], unless this variable is
+not supplying significant information about the response
+4. Go to step 2. Stop only if none of the non-included variables is important
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M504.971 199.362l-22.627-22.627c-9.373-9.373-24.569-9.373-33.941 0l-5.657 5.657L329.608 69.255l5.657-5.657c9.373-9.373 9.373-24.569 0-33.941L312.638 7.029c-9.373-9.373-24.569-9.373-33.941 0L154.246 131.48c-9.373 9.373-9.373 24.569 0 33.941l22.627 22.627c9.373 9.373 24.569 9.373 33.941 0l5.657-5.657 39.598 39.598-81.04 81.04-5.657-5.657c-12.497-12.497-32.758-12.497-45.255 0L9.373 412.118c-12.497 12.497-12.497 32.758 0 45.255l45.255 45.255c12.497 12.497 32.758 12.497 45.255 0l114.745-114.745c12.497-12.497 12.497-32.758 0-45.255l-5.657-5.657 81.04-81.04 39.598 39.598-5.657 5.657c-9.373 9.373-9.373 24.569 0 33.941l22.627 22.627c9.373 9.373 24.569 9.373 33.941 0l124.451-124.451c9.372-9.372 9.372-24.568 0-33.941z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Crime data: forward search using AIC
+
+.scroll-output[
+
+```r
+M0 = lm(y ~ 1, data = UScrime)  # Null model
+M1 = lm(y ~ ., data = UScrime)  # Full model
+step.fwd.aic = step(M0, scope = list(lower = M0, upper = M1), direction = "forward", trace = FALSE)
+summary(step.fwd.aic)
+```
+
+```
+## 
+## Call:
+## lm(formula = y ~ Po1 + Ineq + Ed + M + Prob + U2, data = UScrime)
+## 
+## Residuals:
+##    Min     1Q Median     3Q    Max 
+## -470.7  -78.4  -19.7  133.1  556.2 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) -5040.50     899.84   -5.60  1.7e-06 ***
+## Po1            11.50       1.38    8.36  2.6e-10 ***
+## Ineq            6.77       1.39    4.85  1.9e-05 ***
+## Ed             19.65       4.48    4.39  8.1e-05 ***
+## M              10.50       3.33    3.15   0.0031 ** 
+## Prob        -3801.84    1528.10   -2.49   0.0171 *  
+## U2              8.94       4.09    2.18   0.0348 *  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 201 on 40 degrees of freedom
+## Multiple R-squared:  0.766,	Adjusted R-squared:  0.731 
+## F-statistic: 21.8 on 6 and 40 DF,  p-value: 3.42e-11
+```
+]
+
+---
+
+## The `add1()` function
+
+- For a response variable `Y` and explanatory variables `x1`, ..., `xk`  stored in the data frame `dat` consider  &lt;br&gt; `M0 = lm(Y ~ 1, data = dat)`
+- The R function &lt;br&gt;
+`add1(M0, scope = ~ x1+x2+...+xk, data=dat, test="F")` &lt;br&gt;
+returns a number of information criteria for all variables specified after the option `scope= ~` to model the response variable
+- Alternatively you can avoid listing all the variable names by coding up a full model  &lt;br&gt; `Mf = lm(Y ~ ., data = dat)`  &lt;br&gt; and then using  &lt;br&gt; `add1(M0, scope = Mf, data = dat, test = "F")`
+- In particular, this includes the p-values of the `\(F\)`-test for `\(H_0: \beta_j = 0\)` versus `\(H_1: \beta_j \neq 0\)` for all `\(j \not\in \alpha_{\text{M0}}\)`
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M504.971 199.362l-22.627-22.627c-9.373-9.373-24.569-9.373-33.941 0l-5.657 5.657L329.608 69.255l5.657-5.657c9.373-9.373 9.373-24.569 0-33.941L312.638 7.029c-9.373-9.373-24.569-9.373-33.941 0L154.246 131.48c-9.373 9.373-9.373 24.569 0 33.941l22.627 22.627c9.373 9.373 24.569 9.373 33.941 0l5.657-5.657 39.598 39.598-81.04 81.04-5.657-5.657c-12.497-12.497-32.758-12.497-45.255 0L9.373 412.118c-12.497 12.497-12.497 32.758 0 45.255l45.255 45.255c12.497 12.497 32.758 12.497 45.255 0l114.745-114.745c12.497-12.497 12.497-32.758 0-45.255l-5.657-5.657 81.04-81.04 39.598 39.598-5.657 5.657c-9.373 9.373-9.373 24.569 0 33.941l22.627 22.627c9.373 9.373 24.569 9.373 33.941 0l124.451-124.451c9.372-9.372 9.372-24.568 0-33.941z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Crime data: `add1()`
+
+
+```r
+add1(step.fwd.aic, test = "F", scope = M1)
+```
+
+```
+## Single term additions
+## 
+## Model:
+## y ~ Po1 + Ineq + Ed + M + Prob + U2
+##        Df Sum of Sq     RSS AIC F value Pr(&gt;F)
+## &lt;none&gt;              1611057 505               
+## So      1     17958 1593098 506    0.44   0.51
+## Po2     1     25017 1586040 506    0.62   0.44
+## LF      1     13179 1597878 506    0.32   0.57
+## M.F     1     30945 1580112 506    0.76   0.39
+## Pop     1     51320 1559737 505    1.28   0.26
+## NW      1       359 1610698 507    0.01   0.93
+## U1      1     54830 1556227 505    1.37   0.25
+## GDP     1     59910 1551147 505    1.51   0.23
+## Time    1      7159 1603898 507    0.17   0.68
+```
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M504.971 199.362l-22.627-22.627c-9.373-9.373-24.569-9.373-33.941 0l-5.657 5.657L329.608 69.255l5.657-5.657c9.373-9.373 9.373-24.569 0-33.941L312.638 7.029c-9.373-9.373-24.569-9.373-33.941 0L154.246 131.48c-9.373 9.373-9.373 24.569 0 33.941l22.627 22.627c9.373 9.373 24.569 9.373 33.941 0l5.657-5.657 39.598 39.598-81.04 81.04-5.657-5.657c-12.497-12.497-32.758-12.497-45.255 0L9.373 412.118c-12.497 12.497-12.497 32.758 0 45.255l45.255 45.255c12.497 12.497 32.758 12.497 45.255 0l114.745-114.745c12.497-12.497 12.497-32.758 0-45.255l-5.657-5.657 81.04-81.04 39.598 39.598-5.657 5.657c-9.373 9.373-9.373 24.569 0 33.941l22.627 22.627c9.373 9.373 24.569 9.373 33.941 0l124.451-124.451c9.372-9.372 9.372-24.568 0-33.941z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Comparing forward and backwards stepwise
+
+.pull-left-1[
+
+```r
+sjPlot::tab_model(
+  step.fwd.aic, step.back.aic, 
+  show.ci = FALSE, 
+  show.aic = TRUE,
+  dv.labels = c("Forward model",
+                "Backward model")
+)
+```
+]
+.pull-left-2[
+&lt;table style="border-collapse:collapse; border:none;"&gt;
+&lt;tr&gt;
+&lt;th style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm;  text-align:left; "&gt;&amp;nbsp;&lt;/th&gt;
+&lt;th colspan="2" style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm; "&gt;Forward model&lt;/th&gt;
+&lt;th colspan="2" style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm; "&gt;Backward model&lt;/th&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  text-align:left; "&gt;Predictors&lt;/td&gt;
+&lt;td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  "&gt;Estimates&lt;/td&gt;
+&lt;td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  "&gt;p&lt;/td&gt;
+&lt;td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  "&gt;Estimates&lt;/td&gt;
+&lt;td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  "&gt;p&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; "&gt;(Intercept)&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&amp;#45;5040.50&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&lt;strong&gt;&amp;lt;0.001&lt;/strong&gt;&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&amp;#45;6426.10&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&lt;strong&gt;&amp;lt;0.001&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; "&gt;Po1&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;11.50&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&lt;strong&gt;&amp;lt;0.001&lt;/strong&gt;&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;10.27&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&lt;strong&gt;&amp;lt;0.001&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; "&gt;Ineq&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;6.77&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&lt;strong&gt;&amp;lt;0.001&lt;/strong&gt;&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;6.13&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&lt;strong&gt;&amp;lt;0.001&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; "&gt;Ed&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;19.65&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&lt;strong&gt;&amp;lt;0.001&lt;/strong&gt;&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;18.01&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&lt;strong&gt;0.002&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; "&gt;M&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;10.50&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&lt;strong&gt;0.003&lt;/strong&gt;&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;9.33&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&lt;strong&gt;0.008&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; "&gt;Prob&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&amp;#45;3801.84&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&lt;strong&gt;0.017&lt;/strong&gt;&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&amp;#45;3796.03&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&lt;strong&gt;0.015&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; "&gt;U2&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;8.94&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&lt;strong&gt;0.035&lt;/strong&gt;&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;18.73&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&lt;strong&gt;0.014&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; "&gt;M.F&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;2.23&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;0.109&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; "&gt;U1&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&amp;#45;6.09&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;0.076&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm; border-top:1px solid;"&gt;Observations&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="2"&gt;47&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="2"&gt;47&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;"&gt;R&lt;sup&gt;2&lt;/sup&gt; / R&lt;sup&gt;2&lt;/sup&gt; adjusted&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="2"&gt;0.766 / 0.731&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="2"&gt;0.789 / 0.744&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;"&gt;AIC&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="2"&gt;640.166&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="2"&gt;639.315&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;/table&gt;
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M504.971 199.362l-22.627-22.627c-9.373-9.373-24.569-9.373-33.941 0l-5.657 5.657L329.608 69.255l5.657-5.657c9.373-9.373 9.373-24.569 0-33.941L312.638 7.029c-9.373-9.373-24.569-9.373-33.941 0L154.246 131.48c-9.373 9.373-9.373 24.569 0 33.941l22.627 22.627c9.373 9.373 24.569 9.373 33.941 0l5.657-5.657 39.598 39.598-81.04 81.04-5.657-5.657c-12.497-12.497-32.758-12.497-45.255 0L9.373 412.118c-12.497 12.497-12.497 32.758 0 45.255l45.255 45.255c12.497 12.497 32.758 12.497 45.255 0l114.745-114.745c12.497-12.497 12.497-32.758 0-45.255l-5.657-5.657 81.04-81.04 39.598 39.598-5.657 5.657c-9.373 9.373-9.373 24.569 0 33.941l22.627 22.627c9.373 9.373 24.569 9.373 33.941 0l124.451-124.451c9.372-9.372 9.372-24.568 0-33.941z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Exhaustive searches
+
+Exhaustive searching the full set of possible models is totally feasible for `\(p&lt;100\)`.
+
+
+```r
+library(leaps)
+exh = regsubsets(y~., data = UScrime, nvmax = 15)
+summary(exh)$outmat
+```
+
+```
+##           M   So  Ed  Po1 Po2 LF  M.F Pop NW  U1  U2  GDP Ineq Prob Time
+## 1  ( 1 )  " " " " " " "*" " " " " " " " " " " " " " " " " " "  " "  " " 
+## 2  ( 1 )  " " " " " " "*" " " " " " " " " " " " " " " " " "*"  " "  " " 
+## 3  ( 1 )  " " " " "*" "*" " " " " " " " " " " " " " " " " "*"  " "  " " 
+## 4  ( 1 )  "*" " " "*" "*" " " " " " " " " " " " " " " " " "*"  " "  " " 
+## 5  ( 1 )  "*" " " "*" "*" " " " " " " " " " " " " " " " " "*"  "*"  " " 
+## 6  ( 1 )  "*" " " "*" "*" " " " " " " " " " " " " "*" " " "*"  "*"  " " 
+## 7  ( 1 )  "*" " " "*" "*" " " " " " " " " " " " " "*" "*" "*"  "*"  " " 
+## 8  ( 1 )  "*" " " "*" "*" " " " " "*" " " " " "*" "*" " " "*"  "*"  " " 
+## 9  ( 1 )  "*" " " "*" "*" " " " " "*" " " " " "*" "*" "*" "*"  "*"  " " 
+## 10  ( 1 ) "*" " " "*" "*" " " " " "*" "*" " " "*" "*" "*" "*"  "*"  " " 
+## 11  ( 1 ) "*" " " "*" "*" "*" " " "*" "*" " " "*" "*" "*" "*"  "*"  " " 
+## 12  ( 1 ) "*" " " "*" "*" "*" " " "*" "*" "*" "*" "*" "*" "*"  "*"  " " 
+## 13  ( 1 ) "*" " " "*" "*" "*" "*" "*" "*" "*" "*" "*" "*" "*"  "*"  " " 
+## 14  ( 1 ) "*" " " "*" "*" "*" "*" "*" "*" "*" "*" "*" "*" "*"  "*"  "*" 
+## 15  ( 1 ) "*" "*" "*" "*" "*" "*" "*" "*" "*" "*" "*" "*" "*"  "*"  "*"
+```
+
+---
+
+## Review: stepwise variable selection
+
+1.  Start with .red[.bold[some]] model, typically null model (with no explanatory variables) or full model (with all variables)
+2.  For each variable in the current model, .red[.bold[investigate]] effect of .red[.bold[removing]] it
+3.  .red[.bold[Remove]] the least informative variable, unless this variable is nonetheless supplying significant information about the response
+4.  For each variable not in the current model, .red[.bold[investigate]] effect of .red[.bold[including]] it
+5.  .red[.bold[Include]] the most statistically significant variable not currently in model (unless no significant variable exists)
+6.  Go to step 2. Stop only if no change in steps 2-5
+
+---
+
+## References
+
+Akaike, H. (1973). "Information theory and and extension of the maximum likelihood
+principle". In: _Second International Symposium on Information Theory_. Ed. by B. Petrov
+and F. Csaki. Academiai Kiado, pp. 267-281.
+
+Baumer, B. S., D. T. Kaplan, and N. J. Horton (2017). _Modern Data Science with R_. Boca
+Raton: Chapman and Hall/CRC. URL:
+[https://mdsr-book.github.io/index.html](https://mdsr-book.github.io/index.html).
+
+Ehrlich, I. (1973). "Participation in Illegitimate Activities: A Theoretical and
+Empirical Investigation". In: _Journal of Political Economy_ 81.3, pp. 521-565. URL:
+[http://www.jstor.org/stable/1831025](http://www.jstor.org/stable/1831025).
+
+Tarr, G., S. Müller, and A. Welsh (2018). "mplot: An R Package for Graphical Model
+Stability and Variable Selection Procedures". In: _Journal of Statistical Software_ 83.9,
+pp. 1-28. DOI: [10.18637/jss.v083.i09](https://doi.org/10.18637%2Fjss.v083.i09).
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="assets/remark-zoom.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

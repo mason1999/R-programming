@@ -1,0 +1,1 @@
+uniroot(fn,lower=0,upper=...,alpha=0.04,n=5)

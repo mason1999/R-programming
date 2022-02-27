@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>DATA2002</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Garth Tarr" />
+    <script src="lec25_files/header-attrs-2.10/header-attrs.js"></script>
+    <link href="lec25_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } },
+      "HTML-CSS": {
+        styles: {
+          ".MathJax a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+          ".MathJax_Preview a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+        }
+      }
+      });
+    </script>
+    <link rel="stylesheet" href="assets/sydney-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="assets/sydney.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# DATA2002
+## Two-factor ANOVA with interactions
+### Garth Tarr
+
+---
+
+class: segue
+
+
+
+
+
+.large[
+
+Two-factor ANOVA: more than one treatment
+
+Interaction plots
+
+Post hoc tests
+]
+
+---
+class: segue
+
+# Two-factor ANOVA
+
+---
+
+## Multi-factor ANOVA
+
+-   In some experiments there is more than one *factor* that might affect the response.
+-   We can think of such an experiment as a "big one-way ANOVA" where each *combination of factors* is a different "treatment".
+-   Interest lies in determining not only if there are differences between each treatment, but other questions, such as whether
+    -   each factor has an effect;
+    -   the effect of one factor is the same across all levels of the
+        other factor(s).
+-   We shall focus on the case of **two factors**.
+
+---
+
+## General setup
+
+We have observations 
+
+.Large[
+`$$\{y_{ijk}\colon\ i=1,\ldots,a;\ j=1,\ldots,b;\ k=1,\ldots,n\}$$`
+]
+
+where `\(y_{ijk}\)` is the `\(k\)`-th observation receiving the treatment combination corresponding to level `\(i\)` of factor A and level `\(j\)` of factor B.
+
+-   There are `\(n\)` observations receiving each treatment combination.
+-   The **full model** is that `\(y_{ijk}\)` is the value taken by
+    `\(Y_{ijk}\sim N(\mu_{ij},\sigma^2)\)`.
+
+
+---
+class: segue
+
+# Examples
+
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 0C114.6 0 0 100.3 0 224c0 70.1 36.9 132.6 94.5 173.7 9.6 6.9 15.2 18.1 13.5 29.9l-9.4 66.2c-1.4 9.6 6 18.2 15.7 18.2H192v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h64v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h77.7c9.7 0 17.1-8.6 15.7-18.2l-9.4-66.2c-1.7-11.7 3.8-23 13.5-29.9C475.1 356.6 512 294.1 512 224 512 100.3 397.4 0 256 0zm-96 320c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64zm192 0c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Poisons and antidotes
+
+-   In a famous paper Box and Cox (1964) analyse an experiment where one of each of .red[.bold[3 poisons]] and .blue[.bold[4 antidotes]] were administered to a sample of 4 animals, giving 48 observations all together (4 observations on each of the 12 treatment combinations).
+    -   The response was **survival time**.
+    -   They showed the **reciprocal** of the survival time was an appropriate transformation to use on the response.
+-   The aim of the study was to determine how each `antidote` affected survival in the presence of each `poison`.
+-   This is a "3-by-4 factorial experiment".
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 0C114.6 0 0 100.3 0 224c0 70.1 36.9 132.6 94.5 173.7 9.6 6.9 15.2 18.1 13.5 29.9l-9.4 66.2c-1.4 9.6 6 18.2 15.7 18.2H192v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h64v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h77.7c9.7 0 17.1-8.6 15.7-18.2l-9.4-66.2c-1.7-11.7 3.8-23 13.5-29.9C475.1 356.6 512 294.1 512 224 512 100.3 397.4 0 256 0zm-96 320c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64zm192 0c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Poisons and antidotes
+
+The data can be found in the **BHH2** package (Barrios, 2016).
+
+
+```r
+# install.packages("BHH2")
+data("poison.data", package = "BHH2")
+glimpse(poison.data)
+```
+
+```
+## Rows: 48
+## Columns: 3
+## $ poison &lt;fct&gt; I, I, I, I, II, II, II, II, III, III, III, …
+## $ treat  &lt;fct&gt; A, A, A, A, A, A, A, A, A, A, A, A, B, B, B…
+## $ y      &lt;dbl&gt; 0.31, 0.45, 0.46, 0.43, 0.36, 0.29, 0.40, 0…
+```
+
+```r
+# rename treat as antidote to avoid confusion with the general term "treatment"
+poison.data = poison.data %&gt;% 
+  rename(antidote = treat)
+glimpse(poison.data)
+```
+
+```
+## Rows: 48
+## Columns: 3
+## $ poison   &lt;fct&gt; I, I, I, I, II, II, II, II, III, III, III…
+## $ antidote &lt;fct&gt; A, A, A, A, A, A, A, A, A, A, A, A, B, B,…
+## $ y        &lt;dbl&gt; 0.31, 0.45, 0.46, 0.43, 0.36, 0.29, 0.40,…
+```
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 0C114.6 0 0 100.3 0 224c0 70.1 36.9 132.6 94.5 173.7 9.6 6.9 15.2 18.1 13.5 29.9l-9.4 66.2c-1.4 9.6 6 18.2 15.7 18.2H192v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h64v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h77.7c9.7 0 17.1-8.6 15.7-18.2l-9.4-66.2c-1.7-11.7 3.8-23 13.5-29.9C475.1 356.6 512 294.1 512 224 512 100.3 397.4 0 256 0zm-96 320c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64zm192 0c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+##  Visualising the data
+
+.pull-left[
+
+```r
+poison.data %&gt;% ggplot() + 
+  aes(x = interaction(poison, antidote), y = y) +
+  geom_boxplot() + 
+  theme_classic(base_size = 30) + 
+  labs(y = "Survival time")
+```
+
+&lt;img src="lec25_files/figure-html/unnamed-chunk-2-1.png" width="864" /&gt;
+]
+
+.pull-right[
+
+```r
+poison.data %&gt;% ggplot() + 
+  aes(x = poison, y = y) +
+  geom_boxplot() + 
+  theme_classic(base_size = 30) + 
+  facet_wrap(~antidote, ncol = 4) + 
+  labs(y = "Survival time")
+```
+
+&lt;img src="lec25_files/figure-html/unnamed-chunk-3-1.png" width="864" /&gt;
+]
+
+The variance is much less for groups with lower means.  A transformation is clearly needed here to satisfy normality, equal variance assumptions.
+
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 0C114.6 0 0 100.3 0 224c0 70.1 36.9 132.6 94.5 173.7 9.6 6.9 15.2 18.1 13.5 29.9l-9.4 66.2c-1.4 9.6 6 18.2 15.7 18.2H192v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h64v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h77.7c9.7 0 17.1-8.6 15.7-18.2l-9.4-66.2c-1.7-11.7 3.8-23 13.5-29.9C475.1 356.6 512 294.1 512 224 512 100.3 397.4 0 256 0zm-96 320c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64zm192 0c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left[
+
+```r
+poison.data = poison.data %&gt;% 
+  mutate(inv_survival = 1/y)
+poison.data %&gt;% ggplot() + 
+  aes(x = poison, y = inv_survival) + 
+  geom_boxplot() + 
+  theme_classic(base_size = 30) + 
+  facet_wrap(~antidote, ncol = 4) + 
+  labs(y = "1/Survival time")
+```
+
+&lt;img src="lec25_files/figure-html/unnamed-chunk-4-1.png" width="864" /&gt;
+]
+.pull-right[
+-   The reciprocal transformation is much better;
+    -   while spreads still differ somewhat, they don't get systematically smaller with smaller mean.
+]
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M446.7 98.6l-67.6 318.8c-5.1 22.5-18.4 28.1-37.3 17.5l-103-75.9-49.7 47.8c-5.5 5.5-10.1 10.1-20.7 10.1l7.4-104.9 190.9-172.5c8.3-7.4-1.8-11.5-12.9-4.1L117.8 284 16.2 252.2c-22.1-6.9-22.5-22.1 4.6-32.7L418.2 66.4c18.4-6.9 34.5 4.1 28.5 32.2z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Paper planes
+
+-   Mackisack (1994) has the results from an experiment where statistics students launched paper planes in a controlled environment, controlling for various factors, including
+    -   `Paper` quality: 1 (80gsm) and 2 (50gsm);
+    -   `Plane` design: 1 (High-performance glider) and 2 (Incredibly simple glider).
+-   The response was distance travelled in mm.
+-   Four "flights" were conducted  at each of the 4 treatment combinations.
+-   Do either `Paper` or `Plane` (or both) have any impact on the distance "flown"?
+-   This is a "2-by-2 factorial experiment".
+
+.footnote[
+Data source: http://www.statsci.org/data/oz/planes.html
+]
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M446.7 98.6l-67.6 318.8c-5.1 22.5-18.4 28.1-37.3 17.5l-103-75.9-49.7 47.8c-5.5 5.5-10.1 10.1-20.7 10.1l7.4-104.9 190.9-172.5c8.3-7.4-1.8-11.5-12.9-4.1L117.8 284 16.2 252.2c-22.1-6.9-22.5-22.1 4.6-32.7L418.2 66.4c18.4-6.9 34.5 4.1 28.5 32.2z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+planes = read_tsv("https://raw.githubusercontent.com/DATA2002/data/master/planes.txt")
+glimpse(planes)
+```
+
+```
+## Rows: 16
+## Columns: 5
+## $ Distance &lt;dbl&gt; 2160, 1511, 4596, 3706, 3854, 1690, 5088,…
+## $ Paper    &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2,…
+## $ Angle    &lt;dbl&gt; 1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 2, 2,…
+## $ Plane    &lt;dbl&gt; 1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2, 1, 1,…
+## $ Order    &lt;dbl&gt; 12, 11, 8, 6, 4, 2, 1, 7, 3, 9, 14, 5, 16…
+```
+
+.pull-left[
+
+```r
+planes = planes %&gt;% 
+  mutate(
+    Paper = case_when(
+      Paper == 1 ~ "80gsm",
+      Paper == 2 ~ "50gsm"
+    ),
+    Plane = case_when(
+      Plane == 1 ~ "HiPerf",
+      Plane == 2 ~ "Simple"
+    )
+  )
+```
+
+]
+.pull-right[
+
+```r
+glimpse(planes)
+```
+
+```
+## Rows: 16
+## Columns: 5
+## $ Distance &lt;dbl&gt; 2160, 1511, 4596, 3706, 3854, 1690, 5088,…
+## $ Paper    &lt;chr&gt; "80gsm", "80gsm", "80gsm", "80gsm", "80gs…
+## $ Angle    &lt;dbl&gt; 1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 2, 2,…
+## $ Plane    &lt;chr&gt; "HiPerf", "HiPerf", "Simple", "Simple", "…
+## $ Order    &lt;dbl&gt; 12, 11, 8, 6, 4, 2, 1, 7, 3, 9, 14, 5, 16…
+```
+]
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M446.7 98.6l-67.6 318.8c-5.1 22.5-18.4 28.1-37.3 17.5l-103-75.9-49.7 47.8c-5.5 5.5-10.1 10.1-20.7 10.1l7.4-104.9 190.9-172.5c8.3-7.4-1.8-11.5-12.9-4.1L117.8 284 16.2 252.2c-22.1-6.9-22.5-22.1 4.6-32.7L418.2 66.4c18.4-6.9 34.5 4.1 28.5 32.2z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+p1 = ggplot(planes, aes(x = Plane, y = Distance)) + 
+  geom_boxplot() + labs(y = "Distance (mm)") 
+p2 = ggplot(planes, aes(x = Paper, y = Distance)) + 
+  geom_boxplot() + labs(y = "Distance (mm)") 
+gridExtra::grid.arrange(p1, p2, ncol = 2)
+```
+
+&lt;img src="lec25_files/figure-html/unnamed-chunk-8-1.png" width="864" /&gt;
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M446.7 98.6l-67.6 318.8c-5.1 22.5-18.4 28.1-37.3 17.5l-103-75.9-49.7 47.8c-5.5 5.5-10.1 10.1-20.7 10.1l7.4-104.9 190.9-172.5c8.3-7.4-1.8-11.5-12.9-4.1L117.8 284 16.2 252.2c-22.1-6.9-22.5-22.1 4.6-32.7L418.2 66.4c18.4-6.9 34.5 4.1 28.5 32.2z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+p3 = p1 + facet_wrap(~ Paper) + coord_flip()
+p4 = p2 + facet_wrap(~ Plane) + coord_flip()
+gridExtra::grid.arrange(p3, p4, ncol = 1)
+```
+
+&lt;img src="lec25_files/figure-html/unnamed-chunk-9-1.png" width="864" /&gt;
+
+---
+
+## General setup
+
+-   For each `\(i=1,\ldots,a\)`, `\(j=1,\ldots,b\)`, `\(k=1,\ldots,n\)`, `\(y_{ijk}\)` is the  `\(k\)`-th observation receiving level `\(i\)` of factor A and level `\(j\)` of factor B and is modelled as the value taken by the random variable,
+`$$Y_{ijk}\sim N(\mu_{ij},\sigma^2)\,,$$`
+    and all random variables are assumed independent.
+
+
+---
+
+## Various "questions"
+
+-   We might "ask various questions" about the structure of the
+    `\(\mu_{ij}\)`'s (i.e. *test various null hypotheses*), e.g.:
+    -   `\(H_0\colon \mu_{ij}\equiv\mu\)` (i.e. straight 1-way ANOVA between all treatment combinations)
+    -   `\(H_0\colon \mu_{ij}\equiv\mu_i\)` for all `\(j\)` (so factor B has no effect)
+    -   `\(H_0\colon \mu_{ij}\equiv\mu_j\)` for all `\(i\)` (so factor A has no effect)
+-   We can also ask if an **interaction** is present
+    -   `\(H_0\colon \mu_{ij}=\mu+\alpha_i+\gamma_j\)` for some constants `\(\mu\)`, `\(\alpha_i\)` ( `\(i=1,\ldots,a\)` ), `\(\gamma_j\)` ( `\(j=1,\ldots,b\)` ), so that the two factors combine **additively**.
+    -   If this is true then the adjustment for each level of factor A is *the same within each level of factor B*, and vice versa.
+    -   If this is **not** true, then we say there is some **interaction** between factors A and B.
+        -   This is (therefore) known as a "*test of no interaction*".
+
+---
+
+## This is **not** a two-way ANOVA (in the sense of adjusting for blocks)
+
+-   This looks very similar to our earlier model where we were adjusting
+    for blocks.
+-   However, it is **very different**.
+-   When adjusting for blocks:
+    -   the full model is `\(E(Y_{ij})=\mu_{ij}=\mu+\alpha_i+\beta_j\)` (i.e. treatments and blocks combine additively);
+    -   the null hypothesis is that `\(\mu_{ij}=\mu+\beta_j\)` (i.e. all "treatment effects" `\(\alpha_i\)` are zero);
+    -   the `\(\beta_j\)`'s are **not** treatment effects, they are block effects.
+-   In **this** scenario, 
+    -   the full model is `\(E(Y_{ijk})=\mu_{ij}\)` (i.e. unrestricted);
+    -   the null hypothesis is `\(\mu_{ij}=\mu+\alpha_i+\gamma_j\)` (factor A and factor B effects combine additively);
+    -   both `\(\alpha_i\)` and `\(\gamma_j\)` are related to treatment effects.
+
+---
+
+## 
+
+-   We therefore use `\(\gamma_j\)` (i.e. a different Greek letter to
+    `\(\beta_j\)`) to stress this difference.
+-   In many books
+    -   `\(\beta_j\)` is used for both: **bad!**;
+    -   this setup is called "two-way ANOVA with replicates": **also bad**;
+        -   better to call it "two-factor ANOVA".
+
+---
+class: segue
+
+# Some theory!
+
+---
+
+## Reparametrisation: contrasts!
+
+-   We introduce some new "parameters".
+-   Define
+    - `\(\mu = \bar\mu_{\bullet\bullet}\)` ("overall mean")
+    - `\(\alpha_i = \bar{\mu}_{i\bullet}-\bar\mu_{\bullet\bullet}\)` ("main effect due to `\(i\)`-th level of factor A")
+    - `\(\gamma_j = \bar{\mu}_{\bullet j}-\bar\mu_{\bullet\bullet}\)` ("main effect due to `\(j\)`-th level of factor B")
+    - and the interaction effect between level `\(i\)` of factor A and level `\(j\)` of factor B:
+`$$(\alpha\gamma)_{ij} = \mu_{ij}-(\mu+\alpha_i+\gamma_j) =\mu_{ij}-\bar \mu_{i\bullet} -\bar\mu_{\bullet j}+\bar \mu_{\bullet\bullet}$$`
+-   Then we may write
+    `$$\mu_{ij}=\mu + \alpha_i + \gamma_j + (\alpha\gamma)_{ij}\ .$$`
+-   The `\(\alpha_i\)`'s, `\(\gamma_j\)`'s and `\((\alpha\gamma)_{ij}\)`'s are all **contrasts** in the `\(\mu_{ij}\)`'s!
+
+---
+class: eg
+
+## Main effects: contrasts!
+
+-   Each `\(\alpha_i\)` is a contrast in the `\(\mu_{ij}\)`'s. For example, 
+    
+`$$\begin{aligned}
+\alpha_1 = \bar \mu_{1\bullet}-\bar\mu_{\bullet\bullet} &amp;= \frac{1}{b} (\mu_{11}+\ldots+\mu_{1b}) - \frac{1}{ab}(\mu_{11}+\ldots+\mu_{ab})\\
+&amp;= \left[ \frac{1}{b}-\frac{1}{ab} \right] (\underbrace{\mu_{11}+\ldots+\mu_{1b}}_{b\text{ terms here}}) -  \frac{1}{ab}(\underbrace{\mu_{21}+\ldots+\mu_{ab}}_{(a-1)b\text{ terms here}})
+\end{aligned}$$`
+-   This is of the form `\(\sum_{i=1}^a\sum_{j=1}^bc_{ij}\mu_{ij}\)` where
+    -   `\(b\)` of the `\(c_{ij}\)`'s are equal to `\(\frac{1}{b}-\frac{1}{ab}= \frac{a-1}{ab}\)`;
+    -   the remaining `\((a-1)b\)` terms are equal to `\(-\frac{1}{ab}\)`.
+    -   these add to
+        `$$b \frac{(a-1)}{ab} - (a-1)b \frac{1}{ab}=0\,.$$`
+        *so `\(\alpha_1\)` is a contrast in the `\(\mu_{ij}\)`'s!*
+
+.footnote[
+This slide is only shown for the interests of mathematically inclined students.
+]
+
+???
+
+Move to DATA2902 slide deck next year.
+
+---
+
+## Main effects: interpretation
+
+-   So each `\(\alpha_i\)` in fact is a contrast in the (treatment
+    combination) group means
+    that measures in some overall sense how the means for level `\(i\)` of factor A
+    differ from the overall average.
+-   In exactly the same way, each `\(\gamma_j\)` is a contrast (in the
+    `\(\mu_{ij}\)`'s) that compares
+    (in some overall sense) level `\(j\)` of factor B to the overall average.
+
+---
+
+## Interaction effects
+
+-   A similar (but more complicated) calculation can be used to show that each `\((\alpha\gamma)_{ij}\)` is also a contrast in the `\(\mu_{ij}\)`'s.
+-   Each
+    `$$(\alpha\gamma)_{ij}=\mu_{ij}-(\mu+\alpha_i+\gamma_j)$$`
+    compares a mean `\(\mu_{ij}\)`  to the corresponding "additive prediction" `\(\mu+\alpha_i+\gamma_j\)`.
+    -   If the factor levels *actually do* combine additively, then each
+        such interaction (population) contrast is zero.
+-   Therefore a "test for no interaction" can be formulated as the
+    following null hypothesis:
+`$$H_0\colon\ (\alpha\gamma)_{ij}=0 \ \text{ for all }i,j.$$`
+
+---
+
+## Constraints: main effects degrees of freedom
+
+-   Note that (as with our earlier models) these "effects" satisfy
+    certain constraints:
+-   Both sets of main effects add to zero:
+    `$$\sum_{i=1}^a\alpha_i = \sum_{j=1}^b\gamma_j=0\,.$$`
+-   There are thus
+    -   `\(a-1\)` "free" `\(\alpha_i\)`'s and
+    -   `\(b-1\)` "free" `\(\gamma_j\)`'s.
+-   That is to say, there are
+    -   `\(a-1\)` degrees of freedom for the factor A main effects;
+    -   `\(b-1\)` degrees of freedom for the factor B main effects.
+
+.footnote[
+The model specification, the constraints required to make the model "work" and the degrees of freedom are examinable!
+]
+
+---
+
+## Constraints: interaction effects degrees of freedom
+
+-   The interaction terms are such that for each fixed `\(i\)`, 
+`$$\sum_{j=1}^b(\alpha\gamma)_{ij}=0$$`
+    and vice versa for each fixed `\(j\)`.
+-   There are thus `\((a-1)(b-1)\)` "free" interaction effects (like in an `\(a\)` by `\(b\)` two-way contingency table where all row and column sums are fixed).
+-   That is to say, there are `\((a-1)(b-1)\)` degrees of freedom for the interaction effects.
+
+---
+class: eg
+
+## Fitted values and residuals for each model
+
+-   We thus have two models:
+    -   the full model where `\(\mu_{ij}\)` is "unrestricted";
+    -   the ("no interaction") null hypothesis where
+        `\(\mu_{ij}=\mu+\alpha_i+\gamma_j\)`.
+-   Under each model, each observation `\(y_{ijk}\)` is decomposed into two parts:
+    -   a fitted value `\(\hat{\mu}_{ij}\)`;
+    -   a residual `\(y_{ijk}-\hat\mu_{ij}\)`.
+-   Under the full model `\(\hat{\mu}_{ij}=\bar y_{ij\bullet}\)`, the mean of the `\((i,j)\)`-th **treatment combination**.
+-   Under the  "no interaction" model, the fitted value is
+`$$\hat\mu_{ij}=\hat\mu + \hat{\alpha}_i+ \hat{\gamma}_j= \bar y_{\bullet\bullet\bullet}+(\bar y_{i\bullet\bullet}-\bar y_{\bullet\bullet\bullet}) + (\bar y_{\bullet j\bullet}-\bar y_{\bullet\bullet\bullet})= \bar y_{i\bullet\bullet}+\bar y_{\bullet j \bullet}- \bar y_{\bullet\bullet\bullet}$$`
+
+.footnote[
+Not examinable
+]
+
+---
+class: eg
+
+## Residual sum of squares for each model
+
+-   So for the **full model**:
+    -   the `\((i,j,k)\)`-th residual is `\(y_{ijk}-\bar y_{ij\bullet}\)`;
+    -   the **residual sum of squares** is 
+`$$\sum_{i=1}^a\sum_{j=1}^b\sum_{k=1}^n \left( y_{ijk}-\bar y_{ij\bullet} \right)^2\,.$$`
+-   For the **no interaction model**:
+    -   the `\((i,j,k)\)`-th residual is `\(y_{ijk}-\bar y_{i\bullet\bullet}-\bar y_{\bullet j\bullet}+\bar y_{\bullet\bullet\bullet}\)`;
+    -   the **residual sum of squares** is 
+`$$\sum_{i=1}^a\sum_{j=1}^b\sum_{k=1}^n \left( y_{ijk}-\bar y_{i\bullet\bullet}-\bar y_{\bullet j\bullet}+\bar y_{\bullet\bullet\bullet} \right)^2\,.$$`
+
+.footnote[
+Not examinable
+]
+
+---
+class: eg
+
+## Decomposition
+
+.small[
+`$$\begin{aligned}
+\text{Total SS} &amp; = \sum_{i=1}^a\sum_{j=1}^b\sum_{k=1}^n(y_{ijk}-\bar y_{\bullet\bullet\bullet})^2\\
+&amp; = \sum_{i=1}^a\sum_{j=1}^b\sum_{k=1}^n\left[(\bar y_{i\bullet\bullet}-\bar y_{\bullet\bullet\bullet}) + (\bar y_{\bullet j\bullet}-\bar y_{\bullet\bullet\bullet})+(y_{ijk}-\bar y_{i\bullet\bullet} - \bar y_{\bullet j\bullet} +\bar y_{\bullet\bullet\bullet})\right]^2\\
+&amp; = \underbrace{\sum_{i=1}^abn (\bar y_{i\bullet\bullet}-\bar y_{\bullet\bullet\bullet})^2}_{\text{Factor A Sum Sq.}} + \underbrace{\sum_{j=1}^ban (\bar y_{\bullet j\bullet}-\bar y_{\bullet\bullet\bullet})^2}_{\text{Factor B Sum Sq.}} + \underbrace{\sum_{i=1}^a\sum_{j=1}^b\sum_{k=1}^n (y_{ijk}-\bar y_{i\bullet\bullet} - \bar y_{\bullet j\bullet} +\bar y_{\bullet\bullet\bullet})^2}_{\text{no interaction model Res Sum Sq.}} + \text{ cross-product terms (all 0)}\\
+&amp; = \sum_{i=1}^abn (\bar y_{i\bullet\bullet}-\bar y_{\bullet\bullet\bullet})^2 + \sum_{j=1}^ban (\bar y_{\bullet j\bullet}-\bar y_{\bullet\bullet\bullet})^2 + \sum_{i=1}^a\sum_{j=1}^b\sum_{k=1}^n \left[(\bar y_{ij\bullet}-\bar y_{i\bullet\bullet} - \bar y_{\bullet j\bullet} + \bar y_{\bullet\bullet\bullet})+(y_{ijk}-\bar y_{ij\bullet})\right]^2\\
+&amp; = \sum_{i=1}^abn (\bar y_{i\bullet\bullet}-\bar y_{\bullet\bullet\bullet})^2 + \sum_{j=1}^ban (\bar y_{\bullet j\bullet}-\bar y_{\bullet\bullet\bullet})^2\\
+&amp; \ \ \  + \underbrace{ \sum_{i=1}^a\sum_{j=1}^bn (\bar y_{ij\bullet}-\bar y_{i\bullet\bullet} - \bar y_{\bullet j\bullet} + \bar y_{\bullet\bullet\bullet})^2}_{\text{Interaction Sum Sq.}}  + \underbrace{\sum_{i=1}^a\sum_{j=1}^b\sum_{k=1}^n (y_{ijk}-\bar y_{ij\bullet})^2}_{\text{full model Res Sum Sq.}} + \text{ a cross-product term which is zero}\,.
+\end{aligned}$$`
+]
+
+.footnote[
+Not examinable
+]
+
+---
+class: eg
+
+## Interaction sum of squares
+
+-   The "no interaction" model **residual sum of squares** can itself be decomposed into two pieces:
+    -   the *full model* **residual sum of squares** and
+    -   whatever is left over, which is 
+`$$\sum_{i=1}^a\sum_{j=1}^bn (\bar y_{ij\bullet}-\bar y_{i\bullet\bullet} -\bar y_{\bullet j\bullet} +\bar y_{\bullet\bullet\bullet})^2\,.$$`
+    -   This is the **interaction sum of squares**.
+-   To see why, note that the `\((i,j)\)`-th *estimated interaction effect* is
+`$$(\widehat{\alpha\gamma})_{ij}=\hat\mu_{ij}-\left[\hat{\mu} + \hat{\alpha}_i+ \hat{\gamma}_j\right] = \bar y_{ij\bullet}-\left[ \bar y_{\bullet\bullet\bullet} + (\bar y_{i\bullet\bullet}-\bar y_{\bullet\bullet\bullet}) + (\bar y_{\bullet j\bullet}-\bar y_{\bullet\bullet\bullet})\right] = \bar y_{ij\bullet}-\bar y_{i\bullet\bullet}-\bar y_{\bullet j\bullet} + \bar y_{\bullet\bullet\bullet}\,,$$`
+    so the **interaction sum of squares** is precisely `\(n\)` times the sum of squares of the *estimated interaction effects*.
+    
+.footnote[
+Not examinable
+]
+
+---
+
+
+## `\(F\)`-test for no interaction
+
+-   As usual, under the full model, the (random variable version of the) **residual sum of squares**
+`$$\sum_{i=1}^a\sum_{j=1}^b\sum_{k=1}^n (Y_{ijk}-\bar Y_{ij\bullet})^2\sim \sigma^2\chi^2_{ab(n-1)}\,,$$`
+    since
+    -   the total sample size is `\(N=abn\)`;
+    -   the number of groups is `\(g=ab\)` so
+    -   the degrees of freedom for residuals is `\(N-g=abn-ab=ab(n-1)\)`.
+-   It turns out that *under the no interaction model* (the null hypothesis) the (random variable version of the) interaction sum of squares
+`$$\sum_{i=1}^a\sum_{j=1}^bn (\bar Y_{ij\bullet}-\bar Y_{i\bullet\bullet} -\bar Y_{\bullet j\bullet} +\bar Y_{\bullet\bullet\bullet})^2 \sim \sigma^2 \chi^2_{(a-1)(b-1)}$$`
+    (we have already established there are `\((a-1)(b-1)\)` df for interactions).
+
+.footnote[
+Not examinable
+]
+
+---
+
+## 
+
+-   The `\(F\)`-statistic for testing the null hypothesis of no interactions is
+`$$\begin{aligned}
+\frac{\text{Interaction Mean Square}}{\text{(full model) Residual Mean Square}} &amp;= \frac{(\text{Int Sum Sq.})/[(a-1)(b-1)]}{\text{(full model Residual Sum Sq.)}/[ab(n-1)]}\\&amp;\sim F_{(a-1)(b-1),ab(n-1)}
+\end{aligned}$$`
+    if the null hypothesis of no interactions is true.
+
+---
+class: segue
+
+# Back to our examples
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 0C114.6 0 0 100.3 0 224c0 70.1 36.9 132.6 94.5 173.7 9.6 6.9 15.2 18.1 13.5 29.9l-9.4 66.2c-1.4 9.6 6 18.2 15.7 18.2H192v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h64v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h77.7c9.7 0 17.1-8.6 15.7-18.2l-9.4-66.2c-1.7-11.7 3.8-23 13.5-29.9C475.1 356.6 512 294.1 512 224 512 100.3 397.4 0 256 0zm-96 320c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64zm192 0c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Poisons and antidotes
+
+Recall we have two factors, `poison` with 3 levels:
+
+```r
+levels(poison.data$poison)
+```
+
+```
+## [1] "I"   "II"  "III"
+```
+
+and `antidote` with 4 levels:
+
+
+```r
+levels(poison.data$antidote)
+```
+
+```
+## [1] "A" "B" "C" "D"
+```
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 0C114.6 0 0 100.3 0 224c0 70.1 36.9 132.6 94.5 173.7 9.6 6.9 15.2 18.1 13.5 29.9l-9.4 66.2c-1.4 9.6 6 18.2 15.7 18.2H192v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h64v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h77.7c9.7 0 17.1-8.6 15.7-18.2l-9.4-66.2c-1.7-11.7 3.8-23 13.5-29.9C475.1 356.6 512 294.1 512 224 512 100.3 397.4 0 256 0zm-96 320c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64zm192 0c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## `poison:antidote`
+
+.pull-left-2[
+
+-   Given the two separate factors `poison` and `antidote`, the R object `poison:antidote` is  a new factor which has as its levels every possible `poison:antidote` combination:
+
+
+```r
+poison.data$poison:poison.data$antidote
+```
+
+```
+##  [1] I:A   I:A   I:A   I:A   II:A  II:A  II:A  II:A  III:A
+## [10] III:A III:A III:A I:B   I:B   I:B   I:B   II:B  II:B 
+## [19] II:B  II:B  III:B III:B III:B III:B I:C   I:C   I:C  
+## [28] I:C   II:C  II:C  II:C  II:C  III:C III:C III:C III:C
+## [37] I:D   I:D   I:D   I:D   II:D  II:D  II:D  II:D  III:D
+## [46] III:D III:D III:D
+## 12 Levels: I:A I:B I:C I:D II:A II:B II:C II:D ... III:D
+```
+
+-   This factor indicates the 12 groups in the "big 1-way ANOVA" where each `poison:antidote` combination is a different treatment;
+    -   there are 4 observations on each "treatment".
+
+]
+
+.pull-right-1[
+
+
+```r
+poison.data %&gt;% 
+  group_by(poison, antidote) %&gt;% 
+  count()
+```
+
+```
+## # A tibble: 12 × 3
+## # Groups:   poison, antidote [12]
+##    poison antidote     n
+##    &lt;fct&gt;  &lt;fct&gt;    &lt;int&gt;
+##  1 I      A            4
+##  2 I      B            4
+##  3 I      C            4
+##  4 I      D            4
+##  5 II     A            4
+##  6 II     B            4
+##  7 II     C            4
+##  8 II     D            4
+##  9 III    A            4
+## 10 III    B            4
+## 11 III    C            4
+## 12 III    D            4
+```
+
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 0C114.6 0 0 100.3 0 224c0 70.1 36.9 132.6 94.5 173.7 9.6 6.9 15.2 18.1 13.5 29.9l-9.4 66.2c-1.4 9.6 6 18.2 15.7 18.2H192v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h64v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h77.7c9.7 0 17.1-8.6 15.7-18.2l-9.4-66.2c-1.7-11.7 3.8-23 13.5-29.9C475.1 356.6 512 294.1 512 224 512 100.3 397.4 0 256 0zm-96 320c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64zm192 0c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+-   We could fit the full model (the "big 1-way ANOVA"):
+
+
+```r
+a1 = aov(inv_survival ~ poison:antidote, data = poison.data)
+anova(a1)
+```
+
+```
+## Analysis of Variance Table
+## 
+## Response: inv_survival
+##                 Df Sum Sq Mean Sq F value    Pr(&gt;F)    
+## poison:antidote 11 56.862  5.1693  21.531 1.289e-12 ***
+## Residuals       36  8.643  0.2401                      
+## ---
+## Signif. codes:  
+## 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+-   There is a clear treatment effect
+-   Note there are 47 df in total:
+    -   11 for treatments
+    -   36 for residuals
+
+
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 0C114.6 0 0 100.3 0 224c0 70.1 36.9 132.6 94.5 173.7 9.6 6.9 15.2 18.1 13.5 29.9l-9.4 66.2c-1.4 9.6 6 18.2 15.7 18.2H192v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h64v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h77.7c9.7 0 17.1-8.6 15.7-18.2l-9.4-66.2c-1.7-11.7 3.8-23 13.5-29.9C475.1 356.6 512 294.1 512 224 512 100.3 397.4 0 256 0zm-96 320c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64zm192 0c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## A better approach
+
+.pull-left-2[
+-   A full, appropriate two-factor ANOVA table can be produced by using an appropriate formula:
+    
+    -   fit `poison:antidote` *after* fitting the main effects:
+    
+
+```r
+a3 = aov(inv_survival ~ poison + antidote + poison:antidote, 
+         data = poison.data)
+summary(a3)
+```
+
+```
+##                 Df Sum Sq Mean Sq F value   Pr(&gt;F)    
+## poison           2  34.88  17.439   72.64 2.31e-13 ***
+## antidote         3  20.41   6.805   28.34 1.38e-09 ***
+## poison:antidote  6   1.57   0.262    1.09    0.387    
+## Residuals       36   8.64   0.240                     
+## ---
+## Signif. codes:  
+## 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+]
+.pull-right-1[
+-   The sum of squares for `poison:antidote` here only contains the variation explained by treatments *not already explained by main effects*.
+-   This provides a convenient *partition* of the "big 1-way ANOVA"
+    **treatment sum of squares** (11 df in total) into 3 contributions:
+    -   2 df for `poison` main effect;
+    -   3 df for `antidote` (antidote) main effect;
+    -   6 df for the interaction effect.
+
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 0C114.6 0 0 100.3 0 224c0 70.1 36.9 132.6 94.5 173.7 9.6 6.9 15.2 18.1 13.5 29.9l-9.4 66.2c-1.4 9.6 6 18.2 15.7 18.2H192v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h64v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h77.7c9.7 0 17.1-8.6 15.7-18.2l-9.4-66.2c-1.7-11.7 3.8-23 13.5-29.9C475.1 356.6 512 294.1 512 224 512 100.3 397.4 0 256 0zm-96 320c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64zm192 0c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Alternate formula for two-factor ANOVA
+
+-   An *equivalent* formula which includes main effects followed by interactions is given as follows:
+
+
+```r
+summary(aov(inv_survival ~ poison * antidote, data = poison.data))
+```
+
+```
+##                 Df Sum Sq Mean Sq F value   Pr(&gt;F)    
+## poison           2  34.88  17.439   72.64 2.31e-13 ***
+## antidote         3  20.41   6.805   28.34 1.38e-09 ***
+## poison:antidote  6   1.57   0.262    1.09    0.387    
+## Residuals       36   8.64   0.240                     
+## ---
+## Signif. codes:  
+## 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+-   This is what most people use, although the equivalent (but longer) form used initially (i.e. `poison+antidote+poison:antidote`) is perhaps more useful for beginners.
+
+-   The `poison` and `antidote` main effects **are significant** (i.e. there is a significant difference between the levels of each treatment group).
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M446.7 98.6l-67.6 318.8c-5.1 22.5-18.4 28.1-37.3 17.5l-103-75.9-49.7 47.8c-5.5 5.5-10.1 10.1-20.7 10.1l7.4-104.9 190.9-172.5c8.3-7.4-1.8-11.5-12.9-4.1L117.8 284 16.2 252.2c-22.1-6.9-22.5-22.1 4.6-32.7L418.2 66.4c18.4-6.9 34.5 4.1 28.5 32.2z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Paper planes
+
+-   Let us perform a similar analysis on the Paper Planes data.
+-   First, we check the "big 1-way ANOVA":
+
+
+```r
+summary(aov(Distance ~ Paper:Plane, data = planes))
+```
+
+```
+##             Df   Sum Sq Mean Sq F value  Pr(&gt;F)   
+## Paper:Plane  3 25491258 8497086   10.66 0.00106 **
+## Residuals   12  9561029  796752                   
+## ---
+## Signif. codes:  
+## 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+There is a strong Treatment effect.
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M446.7 98.6l-67.6 318.8c-5.1 22.5-18.4 28.1-37.3 17.5l-103-75.9-49.7 47.8c-5.5 5.5-10.1 10.1-20.7 10.1l7.4-104.9 190.9-172.5c8.3-7.4-1.8-11.5-12.9-4.1L117.8 284 16.2 252.2c-22.1-6.9-22.5-22.1 4.6-32.7L418.2 66.4c18.4-6.9 34.5 4.1 28.5 32.2z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+-   Now we partition the **treatment sum of squares** into main effects and
+    interactions:
+
+
+```r
+plane_aov = aov(Distance ~ Paper * Plane, data = planes)
+summary(plane_aov)
+```
+
+```
+##             Df   Sum Sq  Mean Sq F value   Pr(&gt;F)    
+## Paper        1  1718721  1718721   2.157 0.167628    
+## Plane        1   385641   385641   0.484 0.499861    
+## Paper:Plane  1 23386896 23386896  29.353 0.000156 ***
+## Residuals   12  9561029   796752                     
+## ---
+## Signif. codes:  
+## 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+-   There is  a *strong* interaction effect.
+-   Note the large p-values for the main effects.
+    -   Are they significant? No.
+    -   Should they be dropped from the model: **absolutely not**!
+-   If an interaction is significant, we must retain the **full model**.
+
+---
+class: segue
+
+# Interaction plots
+
+---
+
+## Interaction plots
+
+-   We can graphically examine interactions using **interaction plots**.
+-   These involve choosing one of the factors as the `x.factor` and one
+    as the `trace.factor`:
+    -   levels of the `x.factor` are marked, equally spaced, on the "x-axis";
+    -   then a *trace* of each level of the (other) `trace.factor` is created by
+        -   plotting mean responses for that level against the corresponding
+            level on the x-axis;
+        -   joining the mean responses within in each level by a piecewise
+            linear curve.
+-   If there is **no interaction** the traces should be "roughly parallel".
+-   If there **is** an interaction, the traces may cross or deviate from
+    parallelism in some other way.
+
+.footnote[
+The notation `x.factor` and `trace.factor` come from the R function `interaction.plot()` but we will use **ggplot2**.
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 0C114.6 0 0 100.3 0 224c0 70.1 36.9 132.6 94.5 173.7 9.6 6.9 15.2 18.1 13.5 29.9l-9.4 66.2c-1.4 9.6 6 18.2 15.7 18.2H192v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h64v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h77.7c9.7 0 17.1-8.6 15.7-18.2l-9.4-66.2c-1.7-11.7 3.8-23 13.5-29.9C475.1 356.6 512 294.1 512 224 512 100.3 397.4 0 256 0zm-96 320c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64zm192 0c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Poisons/antidotes interaction plots
+
+.pull-left-2[
+
+-   The mean responses by treatment combination:
+
+
+```r
+sum_dat = poison.data %&gt;% group_by(poison, antidote) %&gt;% 
+  summarise(mean = mean(inv_survival))
+glimpse(sum_dat)
+```
+
+```
+## Rows: 12
+## Columns: 3
+## Groups: poison [3]
+## $ poison   &lt;fct&gt; I, I, I, I, II, II, II, II, III, III, III…
+## $ antidote &lt;fct&gt; A, B, C, D, A, B, C, D, A, B, C, D
+## $ mean     &lt;dbl&gt; 2.486881, 1.163464, 1.862724, 1.689682, 3…
+```
+
+```r
+sum_dat %&gt;% spread(key = poison, value = mean)
+```
+
+```
+## # A tibble: 4 × 4
+##   antidote     I    II   III
+##   &lt;fct&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1 A         2.49  3.27  4.80
+## 2 B         1.16  1.39  3.03
+## 3 C         1.86  2.71  4.26
+## 4 D         1.69  1.70  3.09
+```
+
+]
+
+
+.pull-right-1[
+
+![](imgs/tidyr-spread-gather.gif)&lt;!-- --&gt;
+
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 0C114.6 0 0 100.3 0 224c0 70.1 36.9 132.6 94.5 173.7 9.6 6.9 15.2 18.1 13.5 29.9l-9.4 66.2c-1.4 9.6 6 18.2 15.7 18.2H192v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h64v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h77.7c9.7 0 17.1-8.6 15.7-18.2l-9.4-66.2c-1.7-11.7 3.8-23 13.5-29.9C475.1 356.6 512 294.1 512 224 512 100.3 397.4 0 256 0zm-96 320c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64zm192 0c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Poisons/antidotes interaction plots
+
+.pull-left[
+
+
+```r
+sum_dat %&gt;% 
+  ggplot(aes(x = antidote, y = mean,
+             group = poison, 
+             linetype = poison,
+             colour = poison)) + 
+  geom_point(size = 4) +
+  geom_line(size = 1.5) + 
+  theme_classic(base_size = 36)
+```
+
+&lt;img src="lec25_files/figure-html/unnamed-chunk-21-1.png" width="864" /&gt;
+
+]
+
+.pull-right[
+
+
+```r
+sum_dat %&gt;%
+  ggplot(aes(x = poison, y = mean,
+             group = antidote, 
+             linetype = antidote,
+             colour = antidote)) + 
+  geom_point(size = 4) +
+  geom_line(size = 1.5) + 
+  theme_classic(base_size = 36)
+```
+
+&lt;img src="lec25_files/figure-html/unnamed-chunk-22-1.png" width="864" /&gt;
+
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 0C114.6 0 0 100.3 0 224c0 70.1 36.9 132.6 94.5 173.7 9.6 6.9 15.2 18.1 13.5 29.9l-9.4 66.2c-1.4 9.6 6 18.2 15.7 18.2H192v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h64v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h77.7c9.7 0 17.1-8.6 15.7-18.2l-9.4-66.2c-1.7-11.7 3.8-23 13.5-29.9C475.1 356.6 512 294.1 512 224 512 100.3 397.4 0 256 0zm-96 320c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64zm192 0c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Using emmeans
+
+The `emmip()` function from the **emmeans** package can do this for us:
+
+.pull-left[
+
+```r
+library(emmeans)
+emmip(a1, poison ~ antidote) +
+  theme_classic(base_size = 36)
+```
+
+&lt;img src="lec25_files/figure-html/unnamed-chunk-23-1.png" width="864" /&gt;
+]
+
+.pull-right[
+
+```r
+emmip(a1, antidote ~ poison) +
+  theme_classic(base_size = 36)
+```
+
+&lt;img src="lec25_files/figure-html/unnamed-chunk-24-1.png" width="864" /&gt;
+]
+
+.footnote[
+`emmip()` is named after: estimated marginal means interaction plot.
+]
+
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M446.7 98.6l-67.6 318.8c-5.1 22.5-18.4 28.1-37.3 17.5l-103-75.9-49.7 47.8c-5.5 5.5-10.1 10.1-20.7 10.1l7.4-104.9 190.9-172.5c8.3-7.4-1.8-11.5-12.9-4.1L117.8 284 16.2 252.2c-22.1-6.9-22.5-22.1 4.6-32.7L418.2 66.4c18.4-6.9 34.5 4.1 28.5 32.2z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Paper planes interaction plots
+
+-   Recall that there was a strong interaction effect.
+-   What would be expect to see here?
+
+--
+
+.pull-left[
+
+
+```r
+plane_sum_dat = planes %&gt;% 
+  group_by(Plane, Paper) %&gt;% 
+  summarise(mean = mean(Distance))
+plane_sum_dat
+```
+
+```
+## # A tibble: 4 × 3
+## # Groups:   Plane [2]
+##   Plane  Paper  mean
+##   &lt;chr&gt;  &lt;chr&gt; &lt;dbl&gt;
+## 1 HiPerf 50gsm 5377.
+## 2 HiPerf 80gsm 2304.
+## 3 Simple 50gsm 2649.
+## 4 Simple 80gsm 4411.
+```
+
+]
+
+.pull-right[
+
+
+```r
+plane_sum_dat %&gt;% 
+  spread(key = Plane, value = mean)
+```
+
+```
+## # A tibble: 2 × 3
+##   Paper HiPerf Simple
+##   &lt;chr&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+## 1 50gsm  5377.  2649.
+## 2 80gsm  2304.  4411.
+```
+
+]
+
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M446.7 98.6l-67.6 318.8c-5.1 22.5-18.4 28.1-37.3 17.5l-103-75.9-49.7 47.8c-5.5 5.5-10.1 10.1-20.7 10.1l7.4-104.9 190.9-172.5c8.3-7.4-1.8-11.5-12.9-4.1L117.8 284 16.2 252.2c-22.1-6.9-22.5-22.1 4.6-32.7L418.2 66.4c18.4-6.9 34.5 4.1 28.5 32.2z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Paper planes interaction plots
+
+.pull-left[
+
+
+```r
+plane_sum_dat %&gt;%
+  ggplot(aes(x = Paper, y = mean,
+             group = Plane, 
+             linetype = Plane)) + 
+  geom_point(size = 4) +
+  geom_line(size = 1.5) + 
+  theme_classic(base_size = 36)
+```
+
+&lt;img src="lec25_files/figure-html/unnamed-chunk-27-1.png" width="864" /&gt;
+
+]
+
+.pull-right[
+
+
+```r
+plane_sum_dat %&gt;% 
+  ggplot(aes(x = Plane, y = mean,
+             group = Paper, 
+             linetype = Paper)) + 
+  geom_point(size = 4) +
+  geom_line(size = 1.5) + 
+  theme_classic(base_size = 36)
+```
+
+&lt;img src="lec25_files/figure-html/unnamed-chunk-28-1.png" width="864" /&gt;
+
+]
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M446.7 98.6l-67.6 318.8c-5.1 22.5-18.4 28.1-37.3 17.5l-103-75.9-49.7 47.8c-5.5 5.5-10.1 10.1-20.7 10.1l7.4-104.9 190.9-172.5c8.3-7.4-1.8-11.5-12.9-4.1L117.8 284 16.2 252.2c-22.1-6.9-22.5-22.1 4.6-32.7L418.2 66.4c18.4-6.9 34.5 4.1 28.5 32.2z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Using emmeans
+
+The `emmip()` function from the **emmeans** package can do this for us:
+
+.pull-left[
+
+```r
+emmip(plane_aov, Plane ~ Paper) +
+  theme_classic(base_size = 36)
+```
+
+&lt;img src="lec25_files/figure-html/unnamed-chunk-29-1.png" width="864" /&gt;
+]
+
+.pull-right[
+
+```r
+emmip(plane_aov, Paper ~ Plane) +
+  theme_classic(base_size = 36)
+```
+
+&lt;img src="lec25_files/figure-html/unnamed-chunk-30-1.png" width="864" /&gt;
+]
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M446.7 98.6l-67.6 318.8c-5.1 22.5-18.4 28.1-37.3 17.5l-103-75.9-49.7 47.8c-5.5 5.5-10.1 10.1-20.7 10.1l7.4-104.9 190.9-172.5c8.3-7.4-1.8-11.5-12.9-4.1L117.8 284 16.2 252.2c-22.1-6.9-22.5-22.1 4.6-32.7L418.2 66.4c18.4-6.9 34.5 4.1 28.5 32.2z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Crossing traces: interaction 
+
+-   The traces cross dramatically, highlighting the .bold[.red[strong interaction effect]].
+-   What is going on here?
+    -   The high performance design flies further with lighter paper;
+    -   the simple design flies further with heavier paper.
+
+---
+class: segue
+
+# Post hoc comparisons
+
+---
+
+## Post hoc comparisons
+
+-   As with any analysis of variance, once we establish that there is something going on, we would like to "zoom in" and learn more about what is leading to the significance.
+-   **However** in this two-factor scenario, *exactly which* comparisons one might be interested in *may depend on whether there was a significant interaction or not*.
+
+-   If there **is a significant interaction**, we might like to know if one factor has a strong effect of the *other* factor within some or all of its levels.
+
+-   If there is **no significant interaction**, the levels of factor A can be compared "independently" of levels of factor B. We may wish to determine:
+    -   which levels of factor A are significantly different from one another, or
+    -   which levels of factor B are significantly different from one another.
+
+-   The main thing to realise is that any within-factor comparison is, at the end of the day, just a *contrast* in the original `\(\mu_{ij}\)`'s and so an appropriate multiple comparisons adjustment can be made accordingly.
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 0C114.6 0 0 100.3 0 224c0 70.1 36.9 132.6 94.5 173.7 9.6 6.9 15.2 18.1 13.5 29.9l-9.4 66.2c-1.4 9.6 6 18.2 15.7 18.2H192v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h64v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h77.7c9.7 0 17.1-8.6 15.7-18.2l-9.4-66.2c-1.7-11.7 3.8-23 13.5-29.9C475.1 356.6 512 294.1 512 224 512 100.3 397.4 0 256 0zm-96 320c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64zm192 0c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Comparing poisons
+
+-   We determined that there is no interaction between `poison` and `antidote`, so we can perhaps go ahead and compare different `poison` (to each other) and also compare antidote treatments (`antidote`) (to each other).
+
+.pull-left[
+
+```r
+poison.data %&gt;% 
+  ggplot(aes(x = poison, y = inv_survival)) +
+  geom_boxplot() + 
+  theme_classic(base_size = 30)
+```
+
+&lt;img src="lec25_files/figure-html/unnamed-chunk-31-1.png" width="864" /&gt;
+]
+
+.pull-right[
+
+```r
+poison.data %&gt;% 
+  ggplot(aes(x = antidote, y = inv_survival)) +
+  geom_boxplot() +
+  theme_classic(base_size = 30)
+```
+
+&lt;img src="lec25_files/figure-html/unnamed-chunk-32-1.png" width="864" /&gt;
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 0C114.6 0 0 100.3 0 224c0 70.1 36.9 132.6 94.5 173.7 9.6 6.9 15.2 18.1 13.5 29.9l-9.4 66.2c-1.4 9.6 6 18.2 15.7 18.2H192v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h64v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h77.7c9.7 0 17.1-8.6 15.7-18.2l-9.4-66.2c-1.7-11.7 3.8-23 13.5-29.9C475.1 356.6 512 294.1 512 224 512 100.3 397.4 0 256 0zm-96 320c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64zm192 0c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Pairwise difference `\(t\)`-statistics
+
+
+```r
+a2 = aov(inv_survival ~ poison + antidote, data = poison.data)
+emmeans(a2, ~ poison) %&gt;% contrast(method = "pairwise", adjust = "none")
+```
+
+```
+##  contrast estimate    SE df t.ratio p.value
+##  I - II     -0.469 0.174 42  -2.688  0.0103
+##  I - III    -1.996 0.174 42 -11.451  &lt;.0001
+##  II - III   -1.528 0.174 42  -8.763  &lt;.0001
+## 
+## Results are averaged over the levels of: antidote
+```
+
+```r
+emmeans(a2, ~ antidote) %&gt;% contrast(method = "pairwise", adjust = "none")
+```
+
+```
+##  contrast estimate    SE df t.ratio p.value
+##  A - B       1.657 0.201 42   8.233  &lt;.0001
+##  A - C       0.572 0.201 42   2.842  0.0069
+##  A - D       1.358 0.201 42   6.747  &lt;.0001
+##  B - C      -1.085 0.201 42  -5.391  &lt;.0001
+##  B - D      -0.299 0.201 42  -1.485  0.1449
+##  C - D       0.786 0.201 42   3.905  0.0003
+## 
+## Results are averaged over the levels of: poison
+```
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 0C114.6 0 0 100.3 0 224c0 70.1 36.9 132.6 94.5 173.7 9.6 6.9 15.2 18.1 13.5 29.9l-9.4 66.2c-1.4 9.6 6 18.2 15.7 18.2H192v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h64v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h77.7c9.7 0 17.1-8.6 15.7-18.2l-9.4-66.2c-1.7-11.7 3.8-23 13.5-29.9C475.1 356.6 512 294.1 512 224 512 100.3 397.4 0 256 0zm-96 320c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64zm192 0c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Assessing significance
+
+-   We have a few options, when it comes to comparing these:
+    -   use a Bonferroni approach;
+    -   Tukey's method;
+    -   Scheffe's method.
+-   There may be some doubt as to the validity of the first two,
+    depending on whether the decision of **which** comparisons to look at
+    came **after the initial hypothesis test** or not.
+-   **If** the 3+6=9 within-factor comparisons were planned *before
+    looking at the data* then a Bonferroni adjustment could be made as follows:
+    -   multiply all *unadjusted* two-sided `\(t\)`-test p-values by 9.
+
+---
+
+
+```r
+p_emm = contrast(emmeans(a2, ~poison), method = "pairwise", adjust = "bonferroni")
+p_emm
+```
+
+```
+##  contrast estimate    SE df t.ratio p.value
+##  I - II     -0.469 0.174 42  -2.688  0.0308
+##  I - III    -1.996 0.174 42 -11.451  &lt;.0001
+##  II - III   -1.528 0.174 42  -8.763  &lt;.0001
+## 
+## Results are averaged over the levels of: antidote 
+## P value adjustment: bonferroni method for 3 tests
+```
+
+```r
+a_emm = contrast(emmeans(a2, ~antidote), method = "pairwise", adjust = "bonferroni")
+a_emm
+```
+
+```
+##  contrast estimate    SE df t.ratio p.value
+##  A - B       1.657 0.201 42   8.233  &lt;.0001
+##  A - C       0.572 0.201 42   2.842  0.0414
+##  A - D       1.358 0.201 42   6.747  &lt;.0001
+##  B - C      -1.085 0.201 42  -5.391  &lt;.0001
+##  B - D      -0.299 0.201 42  -1.485  0.8693
+##  C - D       0.786 0.201 42   3.905  0.0020
+## 
+## Results are averaged over the levels of: poison 
+## P value adjustment: bonferroni method for 6 tests
+```
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 0C114.6 0 0 100.3 0 224c0 70.1 36.9 132.6 94.5 173.7 9.6 6.9 15.2 18.1 13.5 29.9l-9.4 66.2c-1.4 9.6 6 18.2 15.7 18.2H192v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h64v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h77.7c9.7 0 17.1-8.6 15.7-18.2l-9.4-66.2c-1.7-11.7 3.8-23 13.5-29.9C475.1 356.6 512 294.1 512 224 512 100.3 397.4 0 256 0zm-96 320c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64zm192 0c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Bonferroni method
+
+The **emmeans** package didn't know we were looking at **9** tests.  But we can tell it that we are:
+
+.pull-left-2[
+
+```r
+pa_emm = update(p_emm + a_emm)
+pa_emm
+```
+
+```
+##  contrast estimate    SE df t.ratio p.value
+##  I - II     -0.469 0.174 42  -2.688  0.0924
+##  I - III    -1.996 0.174 42 -11.451  &lt;.0001
+##  II - III   -1.528 0.174 42  -8.763  &lt;.0001
+##  A - B       1.657 0.201 42   8.233  &lt;.0001
+##  A - C       0.572 0.201 42   2.842  0.0620
+##  A - D       1.358 0.201 42   6.747  &lt;.0001
+##  B - C      -1.085 0.201 42  -5.391  &lt;.0001
+##  B - D      -0.299 0.201 42  -1.485  1.0000
+##  C - D       0.786 0.201 42   3.905  0.0030
+## 
+## Results are averaged over some or all of the levels of: antidote, poison 
+## P value adjustment: bonferroni method for 9 tests
+```
+]
+.pull-right-1[
+-   For `poison`: the `I-III` and `II-III` differences are highly significant, while
+    the `I-II` has an adjusted p-value of about 0.09 (not really
+    significant).
+-   For `antidote`: all differences are highly significant except
+    `B-D` (not at all significant) and `A-C` (p=0.06).
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 0C114.6 0 0 100.3 0 224c0 70.1 36.9 132.6 94.5 173.7 9.6 6.9 15.2 18.1 13.5 29.9l-9.4 66.2c-1.4 9.6 6 18.2 15.7 18.2H192v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h64v-56c0-4.4 3.6-8 8-8h16c4.4 0 8 3.6 8 8v56h77.7c9.7 0 17.1-8.6 15.7-18.2l-9.4-66.2c-1.7-11.7 3.8-23 13.5-29.9C475.1 356.6 512 294.1 512 224 512 100.3 397.4 0 256 0zm-96 320c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64zm192 0c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+plot(pa_emm) + theme_bw(base_size = 30) + geom_vline(xintercept = 0) + 
+  labs(x = "Estimated pairwise mean difference", 
+       caption = "95% confidence intervals adjusted for\nmultiple testing using the Bonferroni method")
+```
+
+&lt;img src="lec25_files/figure-html/unnamed-chunk-36-1.png" width="864" /&gt;
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M446.7 98.6l-67.6 318.8c-5.1 22.5-18.4 28.1-37.3 17.5l-103-75.9-49.7 47.8c-5.5 5.5-10.1 10.1-20.7 10.1l7.4-104.9 190.9-172.5c8.3-7.4-1.8-11.5-12.9-4.1L117.8 284 16.2 252.2c-22.1-6.9-22.5-22.1 4.6-32.7L418.2 66.4c18.4-6.9 34.5 4.1 28.5 32.2z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Paper planes
+
+-   For this case, where the full model must be retained, we really do have a "big 1-way ANOVA".
+-   In such a case, all pairwise comparisons between *all treatment combinations*, or some other set of comparisons, may be of interest.  For example, we can use Tukey's all pairwise comparisons:
+
+
+
+```r
+plane_aov = aov(Distance ~ Plane*Paper, data = planes)
+plane_emm = emmeans(plane_aov,  ~ Paper + Plane)
+contrast(plane_emm, method = "pairwise", adjust = "tukey")
+```
+
+```
+##  contrast                    estimate  SE df t.ratio p.value
+##  50gsm HiPerf - 80gsm HiPerf     3074 631 12   4.870  0.0019
+##  50gsm HiPerf - 50gsm Simple     2728 631 12   4.323  0.0047
+##  50gsm HiPerf - 80gsm Simple      966 631 12   1.530  0.4508
+##  80gsm HiPerf - 50gsm Simple     -345 631 12  -0.547  0.9457
+##  80gsm HiPerf - 80gsm Simple    -2108 631 12  -3.339  0.0262
+##  50gsm Simple - 80gsm Simple    -1762 631 12  -2.792  0.0677
+## 
+## P value adjustment: tukey method for comparing a family of 4 estimates
+```
+
+-   Note that all *within-level* comparisons are quite significant.
+
+---
+
+### Want to know more?
+
+[Applied Linear Models - STAT3022](https://sydney.edu.au/courses/units-of-study/2020/stat/stat3022.html) runs in Semester 1.
+
+## References
+
+.small[
+Barrios, E. (2016). _BHH2: Useful Functions for Box, Hunter and Hunter II_. R
+package version 2016.05.31. URL:
+[https://CRAN.R-project.org/package=BHH2](https://CRAN.R-project.org/package=BHH2).
+
+Box, G. E. P. and D. R. Cox (1964). "An Analysis of Transformations". In:
+_Journal of the Royal Statistical Society. Series B (Methodological)_ 26.2, pp.
+211-252. ISSN: 00359246. URL:
+[http://www.jstor.org/stable/2984418](http://www.jstor.org/stable/2984418).
+
+Lenth, R. (2018). _emmeans: Estimated Marginal Means, aka Least-Squares Means_.
+R package version 1.2.3. URL:
+[https://CRAN.R-project.org/package=emmeans](https://CRAN.R-project.org/package=emmeans).
+
+Mackisack, M. (1994). "What Is the Use of Experiments Conducted By Statistics
+Students?" In: _Journal of Statistics Education_ 2.1. URL:
+[http://www.amstat.org/publications/jse/v2n1/mackisack.html](http://www.amstat.org/publications/jse/v2n1/mackisack.html).
+
+]
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="assets/remark-zoom.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

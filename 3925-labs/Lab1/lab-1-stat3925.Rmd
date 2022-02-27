@@ -1,0 +1,136 @@
+---
+title: "lab-1-stat3925"
+author: "Mason"
+date: "27/02/2022"
+output:
+  bookdown::html_document2:
+    theme: paper
+    code_folding: show 
+    toc: true
+    toc_float: true
+    number_sections: false 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      warning = FALSE,
+                      error = FALSE,
+                      message = FALSE,
+                      tidy = TRUE,
+                      fig.width = 6, 
+                      fig.height = 6, 
+                      fig.align = "center")
+```
+# Question 1
+In this question we store the data in a variable called **data**. we then use the **ts.plot()** function to plot data. Since it's difficult to change the x-values on the x axis with the **ts.plot()** function, we revert back to the normal **plot()** function to do this. We then change the title to an appropriate title and note that this plot has non-constant mean and variance with a downward linear trend. It also looks to be seasonal...
+```{r}
+data = c(50.0,36.5,43.0,44.5,38.9,38.1,32.6,38.7,41.7,41.1,33.8,37.5,36.5,38.6,33.1)
+ts.plot(data)
+x_names = 1948:1962
+plot(x_names, data, type = "l", lty = 1, xlab = "year")
+title("Time series of average annual production of a certain commodity")
+```
+
+# Question 2
+Consider the time series in Q1. Find the following moving averages for this time series.
+
+  (i) 5 year moving averages and store in f1. Recall that the weights are (1/5,1/5,1/5,1/5,1/5)
+  
+```{r}
+f1 = filter(data, rep(1/5, 5))
+```
+  
+  
+  (ii) 4 year centred moving averages and store in f2. Recall that the weights are (1/8,1/4,1/4,1/4,1/8)
+  
+```{r}
+weights = c(1/(2*4), rep(1/4, 4 - 1), 1/(2*4))
+f2 = filter(data, weights)
+```
+
+# Question 3
+(Ref Q2 above): Graph the moving averages (ma) in (i) and (ii) together with the original time series using: 
+
+```{r}
+ts.plot(cbind(data,f1,f2), lty = c(1, 2, 3))
+legend("topright", c("Time series of average annual production",
+                     "5 year MA", "4 year cent. MA"), lty=c(1,2,3))
+```
+
+# Question 4
+Three sets of time series data (from course notes, P2) are attached to analyse. Copy and paste the set 1 on your R window. Obtain the time series plot of this data, label the axes and give its title. Comment on this time series.
+
+```{r}
+data1 = c(464, 675, 703, 887, 1139, 1077, 1318, 1260, 1120, 963, 996, 960, 530, 883, 894, 1045, 1199, 1287, 1565, 1577, 1076,
+918, 1008, 1063, 544, 635, 804, 980, 1018, 1064, 1404, 1286, 1104, 999, 996, 1015, 615, 722, 832, 977, 1270, 1437, 1520,
+1708, 1151, 934, 1159, 1209, 699, 830, 996, 1124, 1458, 1270, 1753, 2258, 1208, 1241, 1265, 1828, 809, 997, 1164, 1205,
+1538, 1513, 1378, 2083, 1357, 1536, 1526, 1376, 779, 1005, 1193, 1522, 1539, 1546, 2116, 2326, 1596, 1356, 1553, 1613,
+814, 1150, 1225, 1691, 1759, 1754, 2100, 2062, 2012, 1897, 1964, 2186, 966, 1549, 1538, 1612, 2078, 2137, 2907, 2249,
+1883, 1739, 1828, 1868, 1138, 1430, 1809, 1763, 2200, 2067, 2503, 2141, 2103, 1972, 2181, 2344, 970, 1199, 1718, 1683,
+2025, 2051, 2439, 2353, 2230, 1852, 2147, 2286, 1007, 1665, 1642, 1518, 1831, 2207, 2822, 2393, 2306, 1785, 2047, 2171,
+1212, 1335, 2011, 1860, 1954, 2152, 2835, 2224, 2182, 1992, 2389, 2724, 891, 1247, 2017, 2257, 2255, 2255, 3057, 3330,
+1896, 2096, 2374, 2535, 1041, 1728, 2201, 2455, 2204, 2660, 3670, 2665, 2639, 2226, 2586, 2684, 1185, 1749, 2459, 2618,
+2585, 3310, 3923)
+ts.plot(data1, xlab = "Month", ylab = "wine sale figures")
+title("Monthly Australian red wine sales: January 1980 - July 1995")
+f1 = filter(data1, rep(1/5, 5))
+weights = c(1/(2*4), rep(1/4, 4 - 1), 1/(2*4))
+f2 = filter(data1, weights)
+ts.plot(cbind(data1,f1,f2), lty = c(1, 2, 3), col = c("blue", "red", "green"))
+legend("topright", c("Time series of Monthly Australian red wine sales",
+                     "5 year MA", "4 year cent. MA"), lty=c(1,2,3), col = c("blue", "red", "green"))
+```
+
+
+A preliminary look at this data shows that the mean and variance are not stable. There is an upward linear trend. There seems to be some periodicity here.
+
+  
+# Question 5
+Repeat the above steps for the remaining two time series data sets.
+
+```{r}
+data2 = c(153, 189, 221, 215, 302, 223, 201, 173, 121, 106, 86, 87, 108, 133, 177, 241, 228, 283, 255, 238, 164, 128, 108, 87, 74, 95,
+145, 200, 187, 201, 292, 220, 233, 172, 119, 81, 65, 76, 74, 111, 170, 243, 178, 248, 202, 163, 139, 120, 96, 95, 53, 94)
+
+ts.plot(data2, xlab = "4-week periods", ylab = "sales of a company")
+title("Sales of a Company in successive 4-week periods. 1967-1970. Chat
+eld, 2nd ed., (1980).")
+f1 = filter(data2, rep(1/5, 5))
+weights = c(1/(2*4), rep(1/4, 4 - 1), 1/(2*4))
+f2 = filter(data2, weights)
+ts.plot(cbind(data2,f1,f2), lty = c(1, 2, 3), col = c("blue", "red", "green"))
+legend("topright", c("Time series of Monthly Australian red wine sales",
+                     "5 year MA", "4 year cent. MA"), lty=c(1,2,3), col = c("blue", "red", "green"))
+```
+The mean doesn't seem stable but the variance does. We also see that there is a downward linear trend and that there is a strong seasonal component. 
+
+
+```{r}
+data3 = c(445, 448, 450, 447, 451, 453, 454, 454, 459, 440, 446, 443, 443, 440, 439, 435, 435, 436, 435, 435, 435, 433, 429, 428,
+425, 427, 425, 422, 409, 407, 423, 422, 417, 421, 424, 414, 419, 429, 426, 425, 424, 425, 425, 424, 425, 421, 414, 410, 411,
+406, 406, 413, 411, 410, 405, 409, 410, 405, 401, 401, 401, 414, 419, 425, 423, 411, 414, 420, 412, 415, 412, 412, 411, 412,
+409, 407, 408, 415, 413, 413, 410, 405, 410, 412, 413, 411, 411, 409, 406, 407, 410, 408, 408, 409, 410, 409, 405, 406, 405,
+407, 409, 407, 409, 425, 425, 428, 436, 442, 442, 433, 435, 433, 435, 429, 439, 437, 439, 438, 435, 433, 437, 437, 444, 441,
+440, 441, 439, 439, 438, 437, 441, 442, 441, 437, 427, 423, 424, 428, 428, 431, 425, 423, 420, 426, 418, 416, 419, 418, 416,
+419, 425, 421, 422, 422, 417, 420, 417, 418, 419, 419, 417, 419, 422, 423, 422, 421, 421, 419, 418, 421, 420, 413, 413, 408,
+409, 415, 415, 420, 420, 424, 426, 423, 423, 425, 431, 436, 436, 440, 436, 443, 445, 439, 443, 445, 450, 461, 471, 467, 462,
+456, 464, 463, 465, 464, 456, 460, 458, 453, 453, 449, 447, 453, 450, 459, 457, 453, 455, 453, 450, 456, 461, 463, 463, 461,
+465, 473, 473, 475, 499, 485, 491, 496, 504, 504, 509, 511, 524, 525, 541, 531, 529, 530, 531, 527, 525, 519, 514, 509, 505,
+513, 525, 519, 519, 522, 522)
+
+
+ts.plot(data3, xlab = "day", ylab = "stock closing prices")
+title("IBM common stock closing prices: daily, 29th June 1959 to 30th June 1960. Box & Jenkins (1976)")
+f1 = filter(data3, rep(1/5, 5))
+weights = c(1/(2*4), rep(1/4, 4 - 1), 1/(2*4))
+f2 = filter(data3, weights)
+ts.plot(cbind(data3,f1,f2), lty = c(1, 2, 3), col = c("blue", "red", "green"))
+legend("topright", c("Time series of daily IBM stock prices",
+                     "5 year MA", "4 year cent. MA"), lty=c(1,2,3), col = c("blue", "red", "green"))
+```
+
+There is no stable mean or variance in this time series data set. There seems to be some sort of linear trend. Seasonal components don't seem apparent. Irregular components seem more present. 
+
+# Question 6
+Obtain the acf values at lags 1 and 2, r1 and r2 for the time series in Q2(b) (Tutorial). Find r using the data in table in Q2(c). Comment on r and r1.
+  

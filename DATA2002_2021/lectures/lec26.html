@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>DATA2002</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Garth Tarr" />
+    <script src="lec26_files/header-attrs-2.11.3/header-attrs.js"></script>
+    <link href="lec26_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } },
+      "HTML-CSS": {
+        styles: {
+          ".MathJax a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+          ".MathJax_Preview a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+        }
+      }
+      });
+    </script>
+    <link rel="stylesheet" href="assets/sydney-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="assets/sydney.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# DATA2002
+## Regression
+### Garth Tarr
+
+---
+
+class: segue
+
+
+
+
+
+.large[
+Learning and prediction
+
+Simple linear regression
+
+Inference
+
+In-sample performance
+]
+
+---
+class: segue
+
+# Module 4: learning and prediction
+
+---
+
+## Types of learning
+
+.pull-left[
+### Supervised learning
+
+- We have knowledge of class labels or values.
+
+- Goal: train a model using known class labels to predict class or value label for a new data point.
+
+]
+.pull-right[
+### Unsupervised learning
+
+- No knowledge of output class or value – data is unlabelled.
+
+- Goal: determine data patterns/groupings.
+
+]
+
+.center[
+&lt;img src="imgs/learning.png", width="60%"&gt;
+]
+
+???
+
+Image credit: Towards Data Science
+
+---
+
+## Supervised learning
+
+Supervised learning can be further broken down into two main classes: **classification** and **regression**.
+
+.center[
+&lt;img src="imgs/classification_regression.png", width="60%"&gt;
+]
+
+**Classification** maps inputs to an output label (e.g. decision trees, nearest neighbour, logistic regression, naive bayes, support vector machines, artificial neural networks, and random forests)
+
+**Regression** maps inputs to a continuous output
+
+???
+
+Image source: https://towardsdatascience.com/supervised-vs-unsupervised-learning-14f68e32ea8d
+
+---
+class: segue
+
+# Regression
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M494.2 221.9l-59.8-40.5 13.7-71c2.6-13.2-1.6-26.8-11.1-36.4-9.6-9.5-23.2-13.7-36.2-11.1l-70.9 13.7-40.4-59.9c-15.1-22.3-51.9-22.3-67 0l-40.4 59.9-70.8-13.7C98 60.4 84.5 64.5 75 74.1c-9.5 9.6-13.7 23.1-11.1 36.3l13.7 71-59.8 40.5C6.6 229.5 0 242 0 255.5s6.7 26 17.8 33.5l59.8 40.5-13.7 71c-2.6 13.2 1.6 26.8 11.1 36.3 9.5 9.5 22.9 13.7 36.3 11.1l70.8-13.7 40.4 59.9C230 505.3 242.6 512 256 512s26-6.7 33.5-17.8l40.4-59.9 70.9 13.7c13.4 2.7 26.8-1.6 36.3-11.1 9.5-9.5 13.6-23.1 11.1-36.3l-13.7-71 59.8-40.5c11.1-7.5 17.8-20.1 17.8-33.5-.1-13.6-6.7-26.1-17.9-33.7zm-112.9 85.6l17.6 91.2-91-17.6L256 458l-51.9-77-90.9 17.6 17.6-91.2-76.8-52 76.8-52-17.6-91.2 91 17.6L256 53l51.9 76.9 91-17.6-17.6 91.1 76.8 52-76.8 52.1zM256 152c-57.3 0-104 46.7-104 104s46.7 104 104 104 104-46.7 104-104-46.7-104-104-104zm0 160c-30.9 0-56-25.1-56-56s25.1-56 56-56 56 25.1 56 56-25.1 56-56 56z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Air pollution
+
+The data frame **environmental** has four environmental variables `ozone`, `radiation`, `temperature` and `wind` taken in New York City from May to September of 1973. 
+
+
+
+```r
+library(tidyverse)
+data(environmental, package = "lattice")
+# ?environmental
+glimpse(environmental)
+```
+
+```
+## Rows: 111
+## Columns: 4
+## $ ozone       &lt;dbl&gt; 41, 36, 12, 18, 23, 19, 8, 16, 11, 14,…
+## $ radiation   &lt;dbl&gt; 190, 118, 149, 313, 299, 99, 19, 256, …
+## $ temperature &lt;dbl&gt; 67, 72, 74, 62, 65, 59, 61, 69, 66, 68…
+## $ wind        &lt;dbl&gt; 7.4, 8.0, 12.6, 11.5, 8.6, 13.8, 20.1,…
+```
+
+&gt; We'd like to assess whether the maximum daily temperature has an influence on average ozone concentration.
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M494.2 221.9l-59.8-40.5 13.7-71c2.6-13.2-1.6-26.8-11.1-36.4-9.6-9.5-23.2-13.7-36.2-11.1l-70.9 13.7-40.4-59.9c-15.1-22.3-51.9-22.3-67 0l-40.4 59.9-70.8-13.7C98 60.4 84.5 64.5 75 74.1c-9.5 9.6-13.7 23.1-11.1 36.3l13.7 71-59.8 40.5C6.6 229.5 0 242 0 255.5s6.7 26 17.8 33.5l59.8 40.5-13.7 71c-2.6 13.2 1.6 26.8 11.1 36.3 9.5 9.5 22.9 13.7 36.3 11.1l70.8-13.7 40.4 59.9C230 505.3 242.6 512 256 512s26-6.7 33.5-17.8l40.4-59.9 70.9 13.7c13.4 2.7 26.8-1.6 36.3-11.1 9.5-9.5 13.6-23.1 11.1-36.3l-13.7-71 59.8-40.5c11.1-7.5 17.8-20.1 17.8-33.5-.1-13.6-6.7-26.1-17.9-33.7zm-112.9 85.6l17.6 91.2-91-17.6L256 458l-51.9-77-90.9 17.6 17.6-91.2-76.8-52 76.8-52-17.6-91.2 91 17.6L256 53l51.9 76.9 91-17.6-17.6 91.1 76.8 52-76.8 52.1zM256 152c-57.3 0-104 46.7-104 104s46.7 104 104 104 104-46.7 104-104-46.7-104-104-104zm0 160c-30.9 0-56-25.1-56-56s25.1-56 56-56 56 25.1 56 56-25.1 56-56 56z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+ggplot(environmental, aes(x = temperature, y = ozone)) + 
+  geom_point() + theme_classic(base_size = 26) + 
+  labs(x = "Temperature (°F)", y = "Average ozone concentration\n(parts per billion)")
+```
+
+&lt;img src="lec26_files/figure-html/unnamed-chunk-2-1.png" width="864" /&gt;
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M494.2 221.9l-59.8-40.5 13.7-71c2.6-13.2-1.6-26.8-11.1-36.4-9.6-9.5-23.2-13.7-36.2-11.1l-70.9 13.7-40.4-59.9c-15.1-22.3-51.9-22.3-67 0l-40.4 59.9-70.8-13.7C98 60.4 84.5 64.5 75 74.1c-9.5 9.6-13.7 23.1-11.1 36.3l13.7 71-59.8 40.5C6.6 229.5 0 242 0 255.5s6.7 26 17.8 33.5l59.8 40.5-13.7 71c-2.6 13.2 1.6 26.8 11.1 36.3 9.5 9.5 22.9 13.7 36.3 11.1l70.8-13.7 40.4 59.9C230 505.3 242.6 512 256 512s26-6.7 33.5-17.8l40.4-59.9 70.9 13.7c13.4 2.7 26.8-1.6 36.3-11.1 9.5-9.5 13.6-23.1 11.1-36.3l-13.7-71 59.8-40.5c11.1-7.5 17.8-20.1 17.8-33.5-.1-13.6-6.7-26.1-17.9-33.7zm-112.9 85.6l17.6 91.2-91-17.6L256 458l-51.9-77-90.9 17.6 17.6-91.2-76.8-52 76.8-52-17.6-91.2 91 17.6L256 53l51.9 76.9 91-17.6-17.6 91.1 76.8 52-76.8 52.1zM256 152c-57.3 0-104 46.7-104 104s46.7 104 104 104 104-46.7 104-104-46.7-104-104-104zm0 160c-30.9 0-56-25.1-56-56s25.1-56 56-56 56 25.1 56 56-25.1 56-56 56z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+
+```r
+ggplot(environmental, aes(x = temperature, y = ozone)) + 
+  geom_point() + theme_classic(base_size = 26) + 
+  labs(x = "Temperature (°F)", y = "Average ozone concentration\n(parts per billion)") +
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+&lt;img src="lec26_files/figure-html/unnamed-chunk-3-1.png" width="864" /&gt;
+
+---
+
+## Simple linear regression
+
+A **simple linear regression** model aims to predict an outcome variable, `\(Y\)`, using a single predictor variable `\(x\)`,
+
+.Large[
+`$$Y_i = \beta_0 + \beta_1 x_i + \varepsilon_i$$`
+]
+
+for `\(i=1,2,\ldots,n\)` where `\(n\)` is the number of observations (rows) in the data set.
+
+This is just the equation of a straight line (like `\(y = mx + b\)`) plus some additional variation,
+
+-   `\(\beta_0\)` is the population intercept parameter
+-   `\(\beta_1\)` is the population slope parameter
+-   `\(\varepsilon_i\)` is the error term and typically assumed to follow `\(N(0,\sigma^2)\)`
+
+Hence,
+.Large[
+`$$Y_i \sim N( \beta_0 + \beta_1 x_i,\ \sigma^2).$$`
+]
+
+---
+
+## Fitting a straight line by least squares
+
+How to estimate `\(\beta_0\)` and `\(\beta_1\)`?  We aim to **minimise the sum of squared residuals**.
+
+-   What's a residual?
+`$$r_i = y_i - \hat{y}_i$$`
+    where `\(\hat{y}_i\)` is the fitted value, the value we predict for the `\(i\)`th observation given the `\(i\)`th predictor value:
+`$$\hat{y}_i = \hat{\beta}_0 + \hat{\beta}_1 x_i$$`
+
+-   The estimated intercept ( `\(\hat{\beta}_0\)` ) and estimated slope ( `\(\hat\beta_1\)` ) are found by solving the following optimisation problem:
+`$$\operatorname{argmin}_{\beta_0, \beta_1}\sum_{i=1}^n (y_i - (\beta_0 + \beta_1x_i))^2.$$`
+-   Closed form solutions exist for `\(\hat{\beta}_0\)` and `\(\hat{\beta}_1\)`.  
+
+-   R does this for us with the `lm()` function (short for linear model).
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M494.2 221.9l-59.8-40.5 13.7-71c2.6-13.2-1.6-26.8-11.1-36.4-9.6-9.5-23.2-13.7-36.2-11.1l-70.9 13.7-40.4-59.9c-15.1-22.3-51.9-22.3-67 0l-40.4 59.9-70.8-13.7C98 60.4 84.5 64.5 75 74.1c-9.5 9.6-13.7 23.1-11.1 36.3l13.7 71-59.8 40.5C6.6 229.5 0 242 0 255.5s6.7 26 17.8 33.5l59.8 40.5-13.7 71c-2.6 13.2 1.6 26.8 11.1 36.3 9.5 9.5 22.9 13.7 36.3 11.1l70.8-13.7 40.4 59.9C230 505.3 242.6 512 256 512s26-6.7 33.5-17.8l40.4-59.9 70.9 13.7c13.4 2.7 26.8-1.6 36.3-11.1 9.5-9.5 13.6-23.1 11.1-36.3l-13.7-71 59.8-40.5c11.1-7.5 17.8-20.1 17.8-33.5-.1-13.6-6.7-26.1-17.9-33.7zm-112.9 85.6l17.6 91.2-91-17.6L256 458l-51.9-77-90.9 17.6 17.6-91.2-76.8-52 76.8-52-17.6-91.2 91 17.6L256 53l51.9 76.9 91-17.6-17.6 91.1 76.8 52-76.8 52.1zM256 152c-57.3 0-104 46.7-104 104s46.7 104 104 104 104-46.7 104-104-46.7-104-104-104zm0 160c-30.9 0-56-25.1-56-56s25.1-56 56-56 56 25.1 56 56-25.1 56-56 56z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left[
+
+
+```r
+lm1 = lm(ozone ~ temperature, 
+         data = environmental)
+lm1
+```
+
+```
+## 
+## Call:
+## lm(formula = ozone ~ temperature, data = environmental)
+## 
+## Coefficients:
+## (Intercept)  temperature  
+##    -147.646        2.439
+```
+
+
+
+Our estimated model is:
+`$$\widehat{\text{ozone}} = -147.646 + 2.439\times \text{temperature}$$`
+
+]
+.pull-right[
+
+Using base graphics:
+
+
+```r
+par(cex = 2)
+plot(ozone~temperature, data = environmental)
+abline(lm1, lwd = 3, col = "red")
+```
+
+&lt;img src="lec26_files/figure-html/unnamed-chunk-5-1.png" width="864" /&gt;
+
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M494.2 221.9l-59.8-40.5 13.7-71c2.6-13.2-1.6-26.8-11.1-36.4-9.6-9.5-23.2-13.7-36.2-11.1l-70.9 13.7-40.4-59.9c-15.1-22.3-51.9-22.3-67 0l-40.4 59.9-70.8-13.7C98 60.4 84.5 64.5 75 74.1c-9.5 9.6-13.7 23.1-11.1 36.3l13.7 71-59.8 40.5C6.6 229.5 0 242 0 255.5s6.7 26 17.8 33.5l59.8 40.5-13.7 71c-2.6 13.2 1.6 26.8 11.1 36.3 9.5 9.5 22.9 13.7 36.3 11.1l70.8-13.7 40.4 59.9C230 505.3 242.6 512 256 512s26-6.7 33.5-17.8l40.4-59.9 70.9 13.7c13.4 2.7 26.8-1.6 36.3-11.1 9.5-9.5 13.6-23.1 11.1-36.3l-13.7-71 59.8-40.5c11.1-7.5 17.8-20.1 17.8-33.5-.1-13.6-6.7-26.1-17.9-33.7zm-112.9 85.6l17.6 91.2-91-17.6L256 458l-51.9-77-90.9 17.6 17.6-91.2-76.8-52 76.8-52-17.6-91.2 91 17.6L256 53l51.9 76.9 91-17.6-17.6 91.1 76.8 52-76.8 52.1zM256 152c-57.3 0-104 46.7-104 104s46.7 104 104 104 104-46.7 104-104-46.7-104-104-104zm0 160c-30.9 0-56-25.1-56-56s25.1-56 56-56 56 25.1 56 56-25.1 56-56 56z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Fitted values and residuals
+
+.pull-left[
+The fitted values ( `\(\hat{y}\)` ) are obtained by plugging the observed predictor ( `\(x\)` ) values into our estimated model, `\(\hat{y}_i  =\hat{\beta}_0 + \hat{\beta}_1 x_i\)`.
+
+
+```r
+environmental = environmental %&gt;% 
+  mutate(
+    fitted = -147.646 + 2.439 * temperature
+  )
+```
+
+The residuals are the differences between the observed outcome variable ( `\(y\)` ) and the value the estimated model predicts for that observation (the fitted value, `\(\hat{y}\)`),
+`$$r_i = y_i - \hat{y}_i\ .$$`
+
+
+```r
+environmental = environmental %&gt;% 
+  mutate(resid = ozone - fitted)
+```
+]
+
+.pull-right[
+An easier alternative is to extract the residuals and fitted values from the `lm1` object directly:
+
+
+```r
+environmental = environmental %&gt;% 
+  mutate(
+    resid = lm1$residuals,
+    fitted = lm1$fitted.values
+  )
+```
+
+Alternatively we could have used the `augment()` function from the **broom** package to do this:
+
+
+```r
+broom::augment(lm1) %&gt;% glimpse()
+```
+
+```
+## Rows: 111
+## Columns: 8
+## $ ozone       &lt;dbl&gt; 41, 36, 12, 18, 23, 19, 8, 16, 11, 14,…
+## $ temperature &lt;dbl&gt; 67, 72, 74, 62, 65, 59, 61, 69, 66, 68…
+## $ .fitted     &lt;dbl&gt; 15.774291, 27.969841, 32.848061, 3.578…
+## $ .resid      &lt;dbl&gt; 25.225709, 8.030159, -20.848061, 14.42…
+## $ .hat        &lt;dbl&gt; 0.02066883, 0.01236793, 0.01044894, 0.…
+## $ .sigma      &lt;dbl&gt; 23.90523, 24.01815, 23.94597, 23.98922…
+## $ .cooksd     &lt;dbl&gt; 0.0119834582, 0.0007144860, 0.00405289…
+## $ .std.resid  &lt;dbl&gt; 1.06564582, 0.33780095, -0.87615482, 0…
+```
+]
+
+
+
+
+
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M494.2 221.9l-59.8-40.5 13.7-71c2.6-13.2-1.6-26.8-11.1-36.4-9.6-9.5-23.2-13.7-36.2-11.1l-70.9 13.7-40.4-59.9c-15.1-22.3-51.9-22.3-67 0l-40.4 59.9-70.8-13.7C98 60.4 84.5 64.5 75 74.1c-9.5 9.6-13.7 23.1-11.1 36.3l13.7 71-59.8 40.5C6.6 229.5 0 242 0 255.5s6.7 26 17.8 33.5l59.8 40.5-13.7 71c-2.6 13.2 1.6 26.8 11.1 36.3 9.5 9.5 22.9 13.7 36.3 11.1l70.8-13.7 40.4 59.9C230 505.3 242.6 512 256 512s26-6.7 33.5-17.8l40.4-59.9 70.9 13.7c13.4 2.7 26.8-1.6 36.3-11.1 9.5-9.5 13.6-23.1 11.1-36.3l-13.7-71 59.8-40.5c11.1-7.5 17.8-20.1 17.8-33.5-.1-13.6-6.7-26.1-17.9-33.7zm-112.9 85.6l17.6 91.2-91-17.6L256 458l-51.9-77-90.9 17.6 17.6-91.2-76.8-52 76.8-52-17.6-91.2 91 17.6L256 53l51.9 76.9 91-17.6-17.6 91.1 76.8 52-76.8 52.1zM256 152c-57.3 0-104 46.7-104 104s46.7 104 104 104 104-46.7 104-104-46.7-104-104-104zm0 160c-30.9 0-56-25.1-56-56s25.1-56 56-56 56 25.1 56 56-25.1 56-56 56z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## The `lm` object
+
+.pull-left[
+
+What other hidden treasures does the `lm1` object hold? 
+
+
+
+
+
+```r
+names(lm1)
+```
+
+```
+##  [1] "coefficients"  "residuals"    
+##  [3] "effects"       "rank"         
+##  [5] "fitted.values" "assign"       
+##  [7] "qr"            "df.residual"  
+##  [9] "xlevels"       "call"         
+## [11] "terms"         "model"
+```
+
+E.g. we can extract the coefficients:
+
+
+```r
+lm1$coefficients
+```
+
+```
+## (Intercept) temperature 
+##  -147.64607     2.43911
+```
+
+]
+
+.pull-right[
+Or we can use the `tidy()` function from the **broom** package:
+
+
+```r
+lm1 %&gt;% broom::tidy()
+```
+
+```
+## # A tibble: 2 × 5
+##   term        estimate std.error statistic
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+## 1 (Intercept)  -148.      18.8       -7.87
+## 2 temperature     2.44     0.239     10.2 
+## # … with 1 more variable: p.value &lt;dbl&gt;
+```
+]
+
+
+
+
+
+---
+
+## Linear regression assumptions
+
+There are 4 assumptions underling our linear regression model:
+
+1.  **Linearity** - the relationship between `\(Y\)` and `\(x\)` is linear
+2.  **Independence** - all the errors are independent of each other
+3.  **Homoskedasticity** - the errors have constant variance `\(\operatorname{Var}(\varepsilon_i) = \sigma^2\)` for all `\(i = 1,2,\ldots,n\)`
+4.  **Normality** - the errors follow a normal distribution
+
+The last three can be written succinctly as `\(\varepsilon_i \sim\)` iid `\(N(0,\sigma^2)\)`.
+
+---
+
+## Assumption 1: linearity
+
+-   Violations to the linearity assumption are very serious, it means your predictions are likely to be .bold[.blue[systematically wrong]]
+
+### Checking for linearity
+
+1. Before running the regression: plot `\(y\)` against `\(x\)` and look to see if the relationship is approximately linear
+2. After running the regression: look at a plot of the residuals against `\(x\)`
+    -   Residuals should be symmetrically distributed above and below zero
+    -   A curved pattern in the residuals is evidence for non-linearity, i.e. for some values of `\(x\)` the model regularly overestimates `\(y\)` while in other regions the model regularly underestimates `\(y\)`
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M494.2 221.9l-59.8-40.5 13.7-71c2.6-13.2-1.6-26.8-11.1-36.4-9.6-9.5-23.2-13.7-36.2-11.1l-70.9 13.7-40.4-59.9c-15.1-22.3-51.9-22.3-67 0l-40.4 59.9-70.8-13.7C98 60.4 84.5 64.5 75 74.1c-9.5 9.6-13.7 23.1-11.1 36.3l13.7 71-59.8 40.5C6.6 229.5 0 242 0 255.5s6.7 26 17.8 33.5l59.8 40.5-13.7 71c-2.6 13.2 1.6 26.8 11.1 36.3 9.5 9.5 22.9 13.7 36.3 11.1l70.8-13.7 40.4 59.9C230 505.3 242.6 512 256 512s26-6.7 33.5-17.8l40.4-59.9 70.9 13.7c13.4 2.7 26.8-1.6 36.3-11.1 9.5-9.5 13.6-23.1 11.1-36.3l-13.7-71 59.8-40.5c11.1-7.5 17.8-20.1 17.8-33.5-.1-13.6-6.7-26.1-17.9-33.7zm-112.9 85.6l17.6 91.2-91-17.6L256 458l-51.9-77-90.9 17.6 17.6-91.2-76.8-52 76.8-52-17.6-91.2 91 17.6L256 53l51.9 76.9 91-17.6-17.6 91.1 76.8 52-76.8 52.1zM256 152c-57.3 0-104 46.7-104 104s46.7 104 104 104 104-46.7 104-104-46.7-104-104-104zm0 160c-30.9 0-56-25.1-56-56s25.1-56 56-56 56 25.1 56 56-25.1 56-56 56z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Assumption 1: linearity
+
+.pull-left[
+
+```r
+p1 = environmental %&gt;% ggplot() + 
+  aes(x = temperature, y = ozone) + 
+  geom_point(size = 3) + 
+  theme_classic(base_size = 30) + 
+  labs(x = "Temperature (°F)",
+       y = "Average ozone concentration\n(parts per billion)") +
+  geom_smooth(method = "lm", se = FALSE)
+p1
+```
+
+&lt;img src="lec26_files/figure-html/unnamed-chunk-15-1.png" width="864" /&gt;
+]
+.pull-right[
+
+```r
+p2 = environmental %&gt;% ggplot() + 
+  aes(x = temperature, y = resid) + 
+  geom_point(size = 3) + 
+  theme_classic(base_size = 30) + 
+  labs(x = "Temperature (°F)",
+       y = "Residual") +
+  geom_hline(yintercept = 0)
+p2
+```
+
+&lt;img src="lec26_files/figure-html/unnamed-chunk-16-1.png" width="864" /&gt;
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M494.2 221.9l-59.8-40.5 13.7-71c2.6-13.2-1.6-26.8-11.1-36.4-9.6-9.5-23.2-13.7-36.2-11.1l-70.9 13.7-40.4-59.9c-15.1-22.3-51.9-22.3-67 0l-40.4 59.9-70.8-13.7C98 60.4 84.5 64.5 75 74.1c-9.5 9.6-13.7 23.1-11.1 36.3l13.7 71-59.8 40.5C6.6 229.5 0 242 0 255.5s6.7 26 17.8 33.5l59.8 40.5-13.7 71c-2.6 13.2 1.6 26.8 11.1 36.3 9.5 9.5 22.9 13.7 36.3 11.1l70.8-13.7 40.4 59.9C230 505.3 242.6 512 256 512s26-6.7 33.5-17.8l40.4-59.9 70.9 13.7c13.4 2.7 26.8-1.6 36.3-11.1 9.5-9.5 13.6-23.1 11.1-36.3l-13.7-71 59.8-40.5c11.1-7.5 17.8-20.1 17.8-33.5-.1-13.6-6.7-26.1-17.9-33.7zm-112.9 85.6l17.6 91.2-91-17.6L256 458l-51.9-77-90.9 17.6 17.6-91.2-76.8-52 76.8-52-17.6-91.2 91 17.6L256 53l51.9 76.9 91-17.6-17.6 91.1 76.8 52-76.8 52.1zM256 152c-57.3 0-104 46.7-104 104s46.7 104 104 104 104-46.7 104-104-46.7-104-104-104zm0 160c-30.9 0-56-25.1-56-56s25.1-56 56-56 56 25.1 56 56-25.1 56-56 56z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Assumption 1: linearity
+
+In the plot below the residuals are above zero for low temperatures, then they go below zero and end up again above zero for high temperatures (as highlighted by the local smoothing curve).
+
+.pull-left[
+
+```r
+p2 + geom_smooth(method = "loess", se = FALSE)
+```
+
+&lt;img src="lec26_files/figure-html/unnamed-chunk-17-1.png" width="864" /&gt;
+]
+.pull-right[
+This means that we .bold[.red[underestimate]] the ozone level for low and high temperatures and .bold[.red[overestimate]] the ozone level at moderate temperatures.
+
+Our predictions are .bold[.blue[systematically wrong]] for certain ranges of temperature.
+
+&lt;br&gt;
+
+_If the linearity assumption fails, there's not much point checking the other assumptions because it's not an appropriate prediction model._
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M494.2 221.9l-59.8-40.5 13.7-71c2.6-13.2-1.6-26.8-11.1-36.4-9.6-9.5-23.2-13.7-36.2-11.1l-70.9 13.7-40.4-59.9c-15.1-22.3-51.9-22.3-67 0l-40.4 59.9-70.8-13.7C98 60.4 84.5 64.5 75 74.1c-9.5 9.6-13.7 23.1-11.1 36.3l13.7 71-59.8 40.5C6.6 229.5 0 242 0 255.5s6.7 26 17.8 33.5l59.8 40.5-13.7 71c-2.6 13.2 1.6 26.8 11.1 36.3 9.5 9.5 22.9 13.7 36.3 11.1l70.8-13.7 40.4 59.9C230 505.3 242.6 512 256 512s26-6.7 33.5-17.8l40.4-59.9 70.9 13.7c13.4 2.7 26.8-1.6 36.3-11.1 9.5-9.5 13.6-23.1 11.1-36.3l-13.7-71 59.8-40.5c11.1-7.5 17.8-20.1 17.8-33.5-.1-13.6-6.7-26.1-17.9-33.7zm-112.9 85.6l17.6 91.2-91-17.6L256 458l-51.9-77-90.9 17.6 17.6-91.2-76.8-52 76.8-52-17.6-91.2 91 17.6L256 53l51.9 76.9 91-17.6-17.6 91.1 76.8 52-76.8 52.1zM256 152c-57.3 0-104 46.7-104 104s46.7 104 104 104 104-46.7 104-104-46.7-104-104-104zm0 160c-30.9 0-56-25.1-56-56s25.1-56 56-56 56 25.1 56 56-25.1 56-56 56z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Transformations
+
+.pull-left[
+If we see a non-linear relationship between `\(y\)` and `\(x\)` we might be able to transform the data so that we have a linear relationship between the transformed variable(s).
+
+What if we considered the log of ozone concentration?
+
+
+
+```r
+p1 = ggplot(environmental, 
+            aes(x = temperature,
+                y = ozone)) + 
+  geom_point(size = 3) + 
+  scale_y_log10() + 
+  theme_classic(base_size = 36) + 
+  labs(x = "Temperature (°F)",
+       y = "Average ozone concentration\n(parts per billion)") +
+  geom_smooth(method = "lm", se = FALSE)
+```
+]
+
+.pull-right[
+
+```r
+p1
+```
+
+&lt;img src="lec26_files/figure-html/unnamed-chunk-19-1.png" width="864" /&gt;
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M494.2 221.9l-59.8-40.5 13.7-71c2.6-13.2-1.6-26.8-11.1-36.4-9.6-9.5-23.2-13.7-36.2-11.1l-70.9 13.7-40.4-59.9c-15.1-22.3-51.9-22.3-67 0l-40.4 59.9-70.8-13.7C98 60.4 84.5 64.5 75 74.1c-9.5 9.6-13.7 23.1-11.1 36.3l13.7 71-59.8 40.5C6.6 229.5 0 242 0 255.5s6.7 26 17.8 33.5l59.8 40.5-13.7 71c-2.6 13.2 1.6 26.8 11.1 36.3 9.5 9.5 22.9 13.7 36.3 11.1l70.8-13.7 40.4 59.9C230 505.3 242.6 512 256 512s26-6.7 33.5-17.8l40.4-59.9 70.9 13.7c13.4 2.7 26.8-1.6 36.3-11.1 9.5-9.5 13.6-23.1 11.1-36.3l-13.7-71 59.8-40.5c11.1-7.5 17.8-20.1 17.8-33.5-.1-13.6-6.7-26.1-17.9-33.7zm-112.9 85.6l17.6 91.2-91-17.6L256 458l-51.9-77-90.9 17.6 17.6-91.2-76.8-52 76.8-52-17.6-91.2 91 17.6L256 53l51.9 76.9 91-17.6-17.6 91.1 76.8 52-76.8 52.1zM256 152c-57.3 0-104 46.7-104 104s46.7 104 104 104 104-46.7 104-104-46.7-104-104-104zm0 160c-30.9 0-56-25.1-56-56s25.1-56 56-56 56 25.1 56 56-25.1 56-56 56z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+environmental = environmental %&gt;% 
+  mutate(lozone = log(ozone))
+lm2 = lm(lozone ~ temperature, data = environmental)
+lm2
+```
+
+```
+## 
+## Call:
+## lm(formula = lozone ~ temperature, data = environmental)
+## 
+## Coefficients:
+## (Intercept)  temperature  
+##    -1.84852      0.06767
+```
+Now the fitted model is:
+`$$\widehat{\log(\text{ozone})} = -1.84852 + 0.06767\times\text{temperature}$$`
+
+```r
+environmental = environmental %&gt;% 
+  mutate(
+    lfitted = lm2$fitted.values,
+    lresid = lm2$residuals
+  )
+```
+
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M494.2 221.9l-59.8-40.5 13.7-71c2.6-13.2-1.6-26.8-11.1-36.4-9.6-9.5-23.2-13.7-36.2-11.1l-70.9 13.7-40.4-59.9c-15.1-22.3-51.9-22.3-67 0l-40.4 59.9-70.8-13.7C98 60.4 84.5 64.5 75 74.1c-9.5 9.6-13.7 23.1-11.1 36.3l13.7 71-59.8 40.5C6.6 229.5 0 242 0 255.5s6.7 26 17.8 33.5l59.8 40.5-13.7 71c-2.6 13.2 1.6 26.8 11.1 36.3 9.5 9.5 22.9 13.7 36.3 11.1l70.8-13.7 40.4 59.9C230 505.3 242.6 512 256 512s26-6.7 33.5-17.8l40.4-59.9 70.9 13.7c13.4 2.7 26.8-1.6 36.3-11.1 9.5-9.5 13.6-23.1 11.1-36.3l-13.7-71 59.8-40.5c11.1-7.5 17.8-20.1 17.8-33.5-.1-13.6-6.7-26.1-17.9-33.7zm-112.9 85.6l17.6 91.2-91-17.6L256 458l-51.9-77-90.9 17.6 17.6-91.2-76.8-52 76.8-52-17.6-91.2 91 17.6L256 53l51.9 76.9 91-17.6-17.6 91.1 76.8 52-76.8 52.1zM256 152c-57.3 0-104 46.7-104 104s46.7 104 104 104 104-46.7 104-104-46.7-104-104-104zm0 160c-30.9 0-56-25.1-56-56s25.1-56 56-56 56 25.1 56 56-25.1 56-56 56z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Assumption 1: linearity
+
+.pull-left[
+
+```r
+p1 = ggplot(environmental, aes(x = temperature,
+                          y = lozone)) + 
+  geom_point(size = 3) + 
+  theme_classic(base_size = 30) + 
+  labs(x = "Temperature (°F)",
+       y = "Log ozone concentration") +
+  geom_smooth(method = "lm", se = FALSE)
+p1
+```
+
+&lt;img src="lec26_files/figure-html/unnamed-chunk-22-1.png" width="864" /&gt;
+]
+.pull-right[
+
+```r
+p2 = ggplot(environmental, aes(x = temperature, 
+                          y = lresid)) + 
+  geom_point(size = 3) + 
+  theme_classic(base_size = 30) + 
+  labs(x = "Temperature (°F)",
+       y = "Residual") +
+  geom_hline(yintercept = 0)
+p2
+```
+
+&lt;img src="lec26_files/figure-html/unnamed-chunk-23-1.png" width="864" /&gt;
+]
+
+---
+
+## Assumption 2: independence
+
+The assumption of independence between the errors is usually dealt with in the experimental design phase - before data collection.
+
+-   You aim to design the experiment so that the observations are not related to one another.
+-   If you don't have a random sample, your estimates `\(\hat{\beta}_0\)` and `\(\hat{\beta}_1\)` may be biased.
+-   Violations of independence often arise in time series data where observations are measured on the same subject through time and therefore may be related to one another. This is beyond the scope of DATA2002.
+
+In the environmental data, there may be dependence that we haven't accounted as it is a time series data set (though we don't know which days they were taken on and if the records were sequential).
+
+
+---
+
+## Assumption 3: homoskedasticity
+
+-   Homoskedasticity (homo: same, skedasticity: spread)
+-   Constant error variance is important to ensure the hypothesis tests to give valid results.
+-   Violations of homoskedasticity, called **heteroskedasticity**, make it difficult to estimate the "true" standard deviation of the errors, resulting in confidence intervals that are too wide or too narrow.
+-   Heteroskedasticity may also have the effect of giving too much weight to small subset of the data (namely the subset where the error variance was largest) when estimating coefficients.
+-   You can check for homoskedasticity in plots of residuals versus `\(x\)`. If it appears the residuals are getting more spread-out, that is evidence of heteroskedasticity
+
+---
+
+
+## Assumption 3: checking for homoskedasticity
+
+
+&lt;img src="lec26_files/figure-html/unnamed-chunk-24-1.png" width="864" /&gt;
+
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M494.2 221.9l-59.8-40.5 13.7-71c2.6-13.2-1.6-26.8-11.1-36.4-9.6-9.5-23.2-13.7-36.2-11.1l-70.9 13.7-40.4-59.9c-15.1-22.3-51.9-22.3-67 0l-40.4 59.9-70.8-13.7C98 60.4 84.5 64.5 75 74.1c-9.5 9.6-13.7 23.1-11.1 36.3l13.7 71-59.8 40.5C6.6 229.5 0 242 0 255.5s6.7 26 17.8 33.5l59.8 40.5-13.7 71c-2.6 13.2 1.6 26.8 11.1 36.3 9.5 9.5 22.9 13.7 36.3 11.1l70.8-13.7 40.4 59.9C230 505.3 242.6 512 256 512s26-6.7 33.5-17.8l40.4-59.9 70.9 13.7c13.4 2.7 26.8-1.6 36.3-11.1 9.5-9.5 13.6-23.1 11.1-36.3l-13.7-71 59.8-40.5c11.1-7.5 17.8-20.1 17.8-33.5-.1-13.6-6.7-26.1-17.9-33.7zm-112.9 85.6l17.6 91.2-91-17.6L256 458l-51.9-77-90.9 17.6 17.6-91.2-76.8-52 76.8-52-17.6-91.2 91 17.6L256 53l51.9 76.9 91-17.6-17.6 91.1 76.8 52-76.8 52.1zM256 152c-57.3 0-104 46.7-104 104s46.7 104 104 104 104-46.7 104-104-46.7-104-104-104zm0 160c-30.9 0-56-25.1-56-56s25.1-56 56-56 56 25.1 56 56-25.1 56-56 56z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Assumption 3: homoskedasticity
+
+.pull-left-2[
+
+```r
+p2
+```
+
+&lt;img src="lec26_files/figure-html/unnamed-chunk-25-1.png" width="864" /&gt;
+]
+.pull-right-1[
+The spread looks reasonably constant over the range of temperature values.
+
+In the region above 85°F, the spread might be somewhat smaller than the spread in the region below 85°F but it's nothing to get too worried about.
+]
+
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M494.2 221.9l-59.8-40.5 13.7-71c2.6-13.2-1.6-26.8-11.1-36.4-9.6-9.5-23.2-13.7-36.2-11.1l-70.9 13.7-40.4-59.9c-15.1-22.3-51.9-22.3-67 0l-40.4 59.9-70.8-13.7C98 60.4 84.5 64.5 75 74.1c-9.5 9.6-13.7 23.1-11.1 36.3l13.7 71-59.8 40.5C6.6 229.5 0 242 0 255.5s6.7 26 17.8 33.5l59.8 40.5-13.7 71c-2.6 13.2 1.6 26.8 11.1 36.3 9.5 9.5 22.9 13.7 36.3 11.1l70.8-13.7 40.4 59.9C230 505.3 242.6 512 256 512s26-6.7 33.5-17.8l40.4-59.9 70.9 13.7c13.4 2.7 26.8-1.6 36.3-11.1 9.5-9.5 13.6-23.1 11.1-36.3l-13.7-71 59.8-40.5c11.1-7.5 17.8-20.1 17.8-33.5-.1-13.6-6.7-26.1-17.9-33.7zm-112.9 85.6l17.6 91.2-91-17.6L256 458l-51.9-77-90.9 17.6 17.6-91.2-76.8-52 76.8-52-17.6-91.2 91 17.6L256 53l51.9 76.9 91-17.6-17.6 91.1 76.8 52-76.8 52.1zM256 152c-57.3 0-104 46.7-104 104s46.7 104 104 104 104-46.7 104-104-46.7-104-104-104zm0 160c-30.9 0-56-25.1-56-56s25.1-56 56-56 56 25.1 56 56-25.1 56-56 56z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Assumption 4: normality
+
+-   Violations of normality of the errors can compromise our inferences. The calculation of confidence intervals may be too wide or narrow and our conclusions from our hypothesis tests may be incorrect.
+-   The best way to check (visually) for normality is a QQ plot.
+-   In some cases, the problem may be due to one or two outliers. Such values should be scrutinised closely: are they genuine, are they explainable, are similar events likely to occur again in the future.
+-   Sometimes the extreme values in the data provide the most useful information.
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M494.2 221.9l-59.8-40.5 13.7-71c2.6-13.2-1.6-26.8-11.1-36.4-9.6-9.5-23.2-13.7-36.2-11.1l-70.9 13.7-40.4-59.9c-15.1-22.3-51.9-22.3-67 0l-40.4 59.9-70.8-13.7C98 60.4 84.5 64.5 75 74.1c-9.5 9.6-13.7 23.1-11.1 36.3l13.7 71-59.8 40.5C6.6 229.5 0 242 0 255.5s6.7 26 17.8 33.5l59.8 40.5-13.7 71c-2.6 13.2 1.6 26.8 11.1 36.3 9.5 9.5 22.9 13.7 36.3 11.1l70.8-13.7 40.4 59.9C230 505.3 242.6 512 256 512s26-6.7 33.5-17.8l40.4-59.9 70.9 13.7c13.4 2.7 26.8-1.6 36.3-11.1 9.5-9.5 13.6-23.1 11.1-36.3l-13.7-71 59.8-40.5c11.1-7.5 17.8-20.1 17.8-33.5-.1-13.6-6.7-26.1-17.9-33.7zm-112.9 85.6l17.6 91.2-91-17.6L256 458l-51.9-77-90.9 17.6 17.6-91.2-76.8-52 76.8-52-17.6-91.2 91 17.6L256 53l51.9 76.9 91-17.6-17.6 91.1 76.8 52-76.8 52.1zM256 152c-57.3 0-104 46.7-104 104s46.7 104 104 104 104-46.7 104-104-46.7-104-104-104zm0 160c-30.9 0-56-25.1-56-56s25.1-56 56-56 56 25.1 56 56-25.1 56-56 56z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Assumption 4: normality
+
+.pull-left-2[
+
+```r
+environmental %&gt;% ggplot() + 
+  aes(sample = lresid) +
+  geom_qq(size = 2) + geom_qq_line()
+```
+
+&lt;img src="lec26_files/figure-html/unnamed-chunk-26-1.png" width="864" /&gt;
+]
+
+--
+
+.pull-right-1[
+Apart from three points in the lower tail, the majority of the points lie quite close to the diagonal line in the QQ plot. Hence, the normality assumption for the residuals is reasonably well satisfied.
+
+Additionally, we have quite a large sample size so we can also rely on the central limit theorem to give us approximately valid inferences.
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M494.2 221.9l-59.8-40.5 13.7-71c2.6-13.2-1.6-26.8-11.1-36.4-9.6-9.5-23.2-13.7-36.2-11.1l-70.9 13.7-40.4-59.9c-15.1-22.3-51.9-22.3-67 0l-40.4 59.9-70.8-13.7C98 60.4 84.5 64.5 75 74.1c-9.5 9.6-13.7 23.1-11.1 36.3l13.7 71-59.8 40.5C6.6 229.5 0 242 0 255.5s6.7 26 17.8 33.5l59.8 40.5-13.7 71c-2.6 13.2 1.6 26.8 11.1 36.3 9.5 9.5 22.9 13.7 36.3 11.1l70.8-13.7 40.4 59.9C230 505.3 242.6 512 256 512s26-6.7 33.5-17.8l40.4-59.9 70.9 13.7c13.4 2.7 26.8-1.6 36.3-11.1 9.5-9.5 13.6-23.1 11.1-36.3l-13.7-71 59.8-40.5c11.1-7.5 17.8-20.1 17.8-33.5-.1-13.6-6.7-26.1-17.9-33.7zm-112.9 85.6l17.6 91.2-91-17.6L256 458l-51.9-77-90.9 17.6 17.6-91.2-76.8-52 76.8-52-17.6-91.2 91 17.6L256 53l51.9 76.9 91-17.6-17.6 91.1 76.8 52-76.8 52.1zM256 152c-57.3 0-104 46.7-104 104s46.7 104 104 104 104-46.7 104-104-46.7-104-104-104zm0 160c-30.9 0-56-25.1-56-56s25.1-56 56-56 56 25.1 56 56-25.1 56-56 56z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Autoplot
+
+The **ggfortify** package provides an `autoplot()` method for `lm` objects.
+
+
+
+```r
+library(ggfortify)
+autoplot(lm2, which = 1:2)
+```
+
+&lt;img src="lec26_files/figure-html/unnamed-chunk-27-1.png" width="864" /&gt;
+
+---
+class: segue
+
+# Inference in regression models
+
+---
+
+## Inference
+
+Recall our simple linear regression population model:
+`$$Y_i = \beta_0 + \beta_1 x_i + \varepsilon_i.$$`
+
+Typically, we are interested in hypotheses of the form, `\(H_0\colon\ \beta_1 = 0\)` vs `\(H_1\colon\ \beta_1 \neq 0\)` or `\(\beta_1 &gt; 0\)` or `\(\beta_1 &lt; 0\)`
+
+To do this we use a `\(t\)`-test:
+
+`$$T = \frac{\hat{\beta}_1 - \beta_1}{\text{SE}(\hat{\beta}_1)} \sim t_{n-2}$$`
+where `\(\hat{\beta}_1\)` and `\(\text{SE}(\hat{\beta}_1)\)` are given in the R output.
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M494.2 221.9l-59.8-40.5 13.7-71c2.6-13.2-1.6-26.8-11.1-36.4-9.6-9.5-23.2-13.7-36.2-11.1l-70.9 13.7-40.4-59.9c-15.1-22.3-51.9-22.3-67 0l-40.4 59.9-70.8-13.7C98 60.4 84.5 64.5 75 74.1c-9.5 9.6-13.7 23.1-11.1 36.3l13.7 71-59.8 40.5C6.6 229.5 0 242 0 255.5s6.7 26 17.8 33.5l59.8 40.5-13.7 71c-2.6 13.2 1.6 26.8 11.1 36.3 9.5 9.5 22.9 13.7 36.3 11.1l70.8-13.7 40.4 59.9C230 505.3 242.6 512 256 512s26-6.7 33.5-17.8l40.4-59.9 70.9 13.7c13.4 2.7 26.8-1.6 36.3-11.1 9.5-9.5 13.6-23.1 11.1-36.3l-13.7-71 59.8-40.5c11.1-7.5 17.8-20.1 17.8-33.5-.1-13.6-6.7-26.1-17.9-33.7zm-112.9 85.6l17.6 91.2-91-17.6L256 458l-51.9-77-90.9 17.6 17.6-91.2-76.8-52 76.8-52-17.6-91.2 91 17.6L256 53l51.9 76.9 91-17.6-17.6 91.1 76.8 52-76.8 52.1zM256 152c-57.3 0-104 46.7-104 104s46.7 104 104 104 104-46.7 104-104-46.7-104-104-104zm0 160c-30.9 0-56-25.1-56-56s25.1-56 56-56 56 25.1 56 56-25.1 56-56 56z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Inference
+
+
+```r
+summary(lm2)
+```
+
+```
+## 
+## Call:
+## lm(formula = lozone ~ temperature, data = environmental)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -2.14417 -0.32555  0.02066  0.34234  1.49100 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) -1.848518   0.455080  -4.062  9.2e-05 ***
+## temperature  0.067673   0.005807  11.654  &lt; 2e-16 ***
+## ---
+## Signif. codes:  
+## 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.5804 on 109 degrees of freedom
+## Multiple R-squared:  0.5548,	Adjusted R-squared:  0.5507 
+## F-statistic: 135.8 on 1 and 109 DF,  p-value: &lt; 2.2e-16
+```
+
+???
+
+## Estimate of `\(\sigma^2\)`
+
+For the simple linear regression model,
+`$$Y_i=\beta_0 + \beta_1\, x_i+\epsilon_i, \quad  \epsilon_i \stackrel{\mbox{iid}}{\sim} {\mathcal N}(0,\sigma^2)$$`
+
+The variances of `\(\hat{\beta}_0\)` and `\(\hat{\beta}_1\)` depend on the residuals variance `\(\sigma^2\)`. Hence we need to estimate `\(\sigma^2\)`.  
+
+Since `\(\sigma^2\)` is the variance of residuals, an estimate `\(S^2\)` of `\(\sigma^2\)` is based on the  *Residual Sum of Squares* ($SSR$)
+`$$S^2=\frac{SSR}{n-2}$$`
+is an unbiased estimate of `\(\sigma^2\)`, i.e., `\(E(S^2)=\sigma^2\)`.  
+
+where `\(SSR=\sum_{i=1}^n \epsilon_i^2=\sum_{i=1}^n(y_i-\hat{\beta}_0-\hat{\beta}_1\, x_i)^2.\)`
+
+## Estimate of `\(\sigma^2\)`
+Note that
+$$
+`\begin{eqnarray*}
+SSR &amp; = &amp; \sum_{i=1}^n(y_i-  \hat{\beta}_0 -\hat{\beta}_1\,x_i)^2=\sum_{i=1}^n[(y_i- \bar y ) -  \hat{\beta}_1  (x_i- \bar x )]^2\\
+&amp; = &amp; \sum_{i=1}^n(y_i-\bar y)^2 -2\hat{\beta}_1\sum_{i=1}^n(x_i-\bar x)(y_i-\bar y)+\hat{\beta}_1^2\sum_{i=1}^n(x_i-\bar x)^2 \\
+&amp; = &amp; S_{yy}-2 \hat{\beta}_1 S_{xy}+ \hat{\beta}_1 \frac{S_{xy}}{S_{xx}} S_{xx} \\
+&amp; = &amp;  S_{yy}-\hat{\beta}_1\, S_{xy} = SST_o - SST  \\
+&amp; \stackrel{\mbox{or}}{=} &amp; S_{yy}-\frac{S_{xy}}{S_{xx}}\, S_{xy} =  \frac{S_{yy}S_{xx}-S_{xy}^2}{S_{xx}} 
+\end{eqnarray*}`
+$$
+since `\(\hat{\beta}_0=\bar y - \hat{\beta}_1 \bar x\)` and `\(\displaystyle{\hat{\beta}_1=\frac{S_{xy}}{S_{xx}}}\)`.
+
+
+## Variances of `\(\beta\)`
+
+Under the assumptions of the regression model, we have
+
+$$
+`\begin{eqnarray*}
+\operatorname{Var}(\hat{\beta}_1) &amp; = &amp;  \operatorname{Var} \left( \frac{\sum\limits_{i=1}^n (x_i-\bar x)Y_i}{S_{xx}} \right) \\
+&amp; = &amp; \frac{\sum \limits_{i=1}^n (x_i-\bar x)^2 
+\operatorname{Var}(Y_i)}{S_{xx}^2} \\
+&amp; = &amp; \frac{S_{xx}\sigma^2 }{S_{xx}^2}\\
+&amp; = &amp; \frac{\sigma^2}{S_{xx}}\\
+\end{eqnarray*}`
+$$
+
+since `\(\operatorname{Var}(a Y)=a^2 \operatorname{Var}(Y)\)`
+
+## Variances of `\(\alpha\)`
+
+Under the assumptions of the regression model, we have
+
+$$
+`\begin{eqnarray*}
+\operatorname{Var}(\hat{\beta}_0)&amp;=&amp; \operatorname{Var}(\bar Y-\hat{\beta}_1 \bar x)= \operatorname{Var}(\bar Y)+\bar x^2 \operatorname{Var}(\hat{\beta}_1)\\ 
+&amp;=&amp; \frac{\sigma^2}{n}+\frac{\bar x^2 \sigma^2}{S_{xx}} \\
+&amp; = &amp;  \sigma^2 \left( \frac{1}{n}+\frac {\bar x^2}{S_{xx}} \right) = \frac{\sigma^2(S_{xx}+n \bar x^2)}{nS_{xx}} \\
+&amp; = &amp; \frac{\sigma^2 \left( \sum\limits_{i=1}^n x_i^2-n\bar x^2+n \bar x^2 \right)}{nS_{xx}} \\
+&amp; = &amp; \frac{\sigma^2\sum\limits_{i=1}^n x_i^2}{nS_{xx}}
+\end{eqnarray*}`
+$$
+
+## Inference on regression coefficients
+
+Assume that  we have a linear regression model:
+`$$Y_i=\alpha+\beta \, x_i+\epsilon_i, \quad \epsilon_i \sim N(0, \sigma^2), \quad i=1,2,\ldots, n.$$`
+Under this model,
+$$
+`\begin{eqnarray*}
+\frac{\hat{\beta}_0-\alpha}{\sqrt{\operatorname{Var}(\hat{\beta}_0)}}&amp;=&amp;
+\frac{\hat{\beta}_0-\alpha}{\sigma\sqrt {\frac{1}{n}+{(\bar x)^2 \over S_{xx}}}}\ \sim {\mathcal N}(0,1),\\
+&amp; &amp;\\
+\frac{\hat{\beta}_1-\beta}{\sqrt{\operatorname{Var}(\hat{\beta}_1)}}&amp;=&amp; \frac{\hat{\beta}_1-\beta}{\sigma \sqrt {\frac{1}{S_{xx}}}}\ \sim\ {\mathcal N}(0,1).
+\end{eqnarray*}`
+$$
+
+## Inference on regression coefficients
+
+If `\(\sigma\)` is unknown then
+
+$$
+`\begin{eqnarray*}
+\frac{(n-2)S^2}{\sigma^2}&amp;\sim&amp; \chi_{n-2}^2,\\
+&amp; &amp;\\
+\frac{\hat{\beta}_0-\alpha}{S\sqrt {\frac{1}{n}+ {(\bar x)^2 \over S_{xx}}}}&amp;\sim&amp; t_{n-2},\\
+&amp; &amp;\\
+\frac{\hat{\beta}_1-\beta}{S\sqrt {\frac{1}{S_{xx}}}}&amp;\sim&amp; t_{n-2}, \quad \mbox{or} \quad \frac{(\hat{\beta}_1-\beta)^2}{\frac{S^2}{S_{xx}}}  \sim F_{1,n-2}.
+\end{eqnarray*}`
+$$
+
+## Does this look familiar?
+
+- `\(t\)` can be calculated by 
+`$$\begin{eqnarray*}
+t=\frac{\sqrt {n-2}}{\sqrt{n-2}}\frac{(\hat{\beta}_1-\beta_0)}{\sqrt {s^2/S_{xx}}}&amp;=&amp; \frac{\sqrt{n-2}(S_{xy}/S_{xx}-\beta_0)}{\sqrt{(S_{xx}S_{yy}-S_{xy}^2)/S_{xx}^2}}.
+\end{eqnarray*}$$`
+
+- In particular, if `\(\beta_0=0\)`, 
+`$$\begin{eqnarray*}
+t&amp;=&amp; \frac{\sqrt {n-2}\,S_{xy}}{\sqrt{S_{xx}S_{yy}-S_{xy}^2}}=\frac{\sqrt {n-2}\,\frac{S_{xy}}{\sqrt{S_{xx} S_{yy}}}}{\sqrt{1-\frac{S_{xy}^2}{S_{xx} S_{yy}}}}=\frac{\sqrt {n-2}\,r}{\sqrt{1-r^2}}
+\end{eqnarray*}$$`
+
+---
+
+## Nicer model output
+
+.pull-left[
+
+```r
+sjPlot::tab_model(lm2, show.ci = FALSE)
+```
+
+&lt;table style="border-collapse:collapse; border:none;"&gt;
+&lt;tr&gt;
+&lt;th style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm;  text-align:left; "&gt;&amp;nbsp;&lt;/th&gt;
+&lt;th colspan="2" style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm; "&gt;lozone&lt;/th&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  text-align:left; "&gt;Predictors&lt;/td&gt;
+&lt;td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  "&gt;Estimates&lt;/td&gt;
+&lt;td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  "&gt;p&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; "&gt;(Intercept)&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&amp;#45;1.85&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&lt;strong&gt;&amp;lt;0.001&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; "&gt;temperature&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;0.07&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "&gt;&lt;strong&gt;&amp;lt;0.001&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm; border-top:1px solid;"&gt;Observations&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="2"&gt;111&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;"&gt;R&lt;sup&gt;2&lt;/sup&gt; / R&lt;sup&gt;2&lt;/sup&gt; adjusted&lt;/td&gt;
+&lt;td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="2"&gt;0.555 / 0.551&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;/table&gt;
+
+
+]
+
+.pull-right[
+
+
+```r
+# install.packages("equatiomatic")
+library(equatiomatic)
+extract_eq(lm2)
+```
+
+$$
+\operatorname{lozone} = \alpha + \beta_{1}(\operatorname{temperature}) + \epsilon
+$$
+
+```r
+extract_eq(lm2, use_coefs = TRUE)
+```
+
+$$
+\operatorname{\widehat{lozone}} = -1.85 + 0.07(\operatorname{temperature})
+$$
+
+&lt;!-- See also: the **stargazer** package (in lab next week). --&gt;
+
+]
+
+---
+
+## Testing for the significance of the slope parameter `\(\beta_1\)`
+
+The workflow to test the significance of `\(\beta_1\)` (i.e. `\(\beta_1 = 0\)`) and hence the
+regression model are
+
+&gt;- **Hypothesis:** `\(H_0\colon\ \beta_1=0\)` vs `\(H_1\colon\ \beta_1 &gt; 0, \, \beta_1 &lt; 0, \, \beta_1 \neq 0\)`
+
+&gt;-  **Assumptions:** The residuals `\(\varepsilon_i\)` are iid `\(N(0,\sigma^2)\)` and there is a linear relationship between `\(y\)` and `\(x\)`.
+
+&gt;- **Test statistic:** `\(T = \dfrac{\hat{\beta}_1}{\text{SE}(\hat{\beta_1})} \sim t_{n-2}\)` under `\(H_0\)`.
+
+&gt;- **Observed test statistic:** `\(t_0\)` (from R)
+   
+&gt;-  **p-value:** `\(P(t_{n-2} \geq t_0)\)` for `\(H_1\colon\ \beta_1 &gt; 0,\)`
+
+&gt;-    `\(P(t_{n-2} \leq t_0)\)` for `\(H_1\colon\ \beta_1 &lt; 0;\)`
+
+&gt;-    `\(2 P(t_{n-2} \geq |t_0|)\)` for `\(H_1\colon\ \beta_1 \ne 0.\)`
+
+&gt;- **Conclusion:** Reject `\(H_0\)` if the p-value is less than the level of significance, `\(\alpha\)`.
+
+---
+
+## p-values mean nothing if you haven't looked at your data!
+
+&lt;img src="imgs/xyrel.png" alt="Drawing" style="width: 700px;"/&gt;
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M494.2 221.9l-59.8-40.5 13.7-71c2.6-13.2-1.6-26.8-11.1-36.4-9.6-9.5-23.2-13.7-36.2-11.1l-70.9 13.7-40.4-59.9c-15.1-22.3-51.9-22.3-67 0l-40.4 59.9-70.8-13.7C98 60.4 84.5 64.5 75 74.1c-9.5 9.6-13.7 23.1-11.1 36.3l13.7 71-59.8 40.5C6.6 229.5 0 242 0 255.5s6.7 26 17.8 33.5l59.8 40.5-13.7 71c-2.6 13.2 1.6 26.8 11.1 36.3 9.5 9.5 22.9 13.7 36.3 11.1l70.8-13.7 40.4 59.9C230 505.3 242.6 512 256 512s26-6.7 33.5-17.8l40.4-59.9 70.9 13.7c13.4 2.7 26.8-1.6 36.3-11.1 9.5-9.5 13.6-23.1 11.1-36.3l-13.7-71 59.8-40.5c11.1-7.5 17.8-20.1 17.8-33.5-.1-13.6-6.7-26.1-17.9-33.7zm-112.9 85.6l17.6 91.2-91-17.6L256 458l-51.9-77-90.9 17.6 17.6-91.2-76.8-52 76.8-52-17.6-91.2 91 17.6L256 53l51.9 76.9 91-17.6-17.6 91.1 76.8 52-76.8 52.1zM256 152c-57.3 0-104 46.7-104 104s46.7 104 104 104 104-46.7 104-104-46.7-104-104-104zm0 160c-30.9 0-56-25.1-56-56s25.1-56 56-56 56 25.1 56 56-25.1 56-56 56z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left-2[
+
+Recall our population model: `\(Y_i = \beta_0 + \beta_1 x_i + \varepsilon_i\)`.
+
+&gt;- **Hypothesis:** `\(H_0\colon\ \beta_1 = 0\)` vs `\(H_1\colon\ \beta_1 \neq 0\)`
+
+&gt;-  **Assumptions:** The residuals `\(\varepsilon_i\)` are iid `\(N(0,\sigma^2)\)` and there is a linear relationship between `\(y\)` and `\(x\)` (checked previously).
+
+&gt;- **Test statistic:** `\(T = \dfrac{\hat{\beta}_1}{\text{SE}(\hat{\beta_1})} \sim t_{n-2}\)` under `\(H_0\)`.
+
+&gt;- **Observed test statistic:** `\(t_0 = \dfrac{0.0677}{0.00581} = 11.65\)`
+
+&gt;-  **P-value:** `\(2P(t_{109}\ge 11.95) &lt; 0.0001\)`
+
+&gt;- **Decision:**  There is very strong evidence in the data to indicate a linear relationship between temperature and the logarithm of ozone concentration.
+]
+
+
+.pull-right-1[
+
+.small[
+
+
+```r
+lm2 %&gt;% broom::tidy()
+```
+
+```
+## # A tibble: 2 × 5
+##   term        estimate std.error statistic  p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)  -1.85     0.455       -4.06 9.20e- 5
+## 2 temperature   0.0677   0.00581     11.7  7.17e-21
+```
+
+]
+
+
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M494.2 221.9l-59.8-40.5 13.7-71c2.6-13.2-1.6-26.8-11.1-36.4-9.6-9.5-23.2-13.7-36.2-11.1l-70.9 13.7-40.4-59.9c-15.1-22.3-51.9-22.3-67 0l-40.4 59.9-70.8-13.7C98 60.4 84.5 64.5 75 74.1c-9.5 9.6-13.7 23.1-11.1 36.3l13.7 71-59.8 40.5C6.6 229.5 0 242 0 255.5s6.7 26 17.8 33.5l59.8 40.5-13.7 71c-2.6 13.2 1.6 26.8 11.1 36.3 9.5 9.5 22.9 13.7 36.3 11.1l70.8-13.7 40.4 59.9C230 505.3 242.6 512 256 512s26-6.7 33.5-17.8l40.4-59.9 70.9 13.7c13.4 2.7 26.8-1.6 36.3-11.1 9.5-9.5 13.6-23.1 11.1-36.3l-13.7-71 59.8-40.5c11.1-7.5 17.8-20.1 17.8-33.5-.1-13.6-6.7-26.1-17.9-33.7zm-112.9 85.6l17.6 91.2-91-17.6L256 458l-51.9-77-90.9 17.6 17.6-91.2-76.8-52 76.8-52-17.6-91.2 91 17.6L256 53l51.9 76.9 91-17.6-17.6 91.1 76.8 52-76.8 52.1zM256 152c-57.3 0-104 46.7-104 104s46.7 104 104 104 104-46.7 104-104-46.7-104-104-104zm0 160c-30.9 0-56-25.1-56-56s25.1-56 56-56 56 25.1 56 56-25.1 56-56 56z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## CI for regression coefficients
+
+`\(100(1-\alpha)\%\)` confidence intervals can be constructed for regression coefficients in the usual way:
+
+`$$\hat{\beta}_1 \pm t^\star \times \text{SE}(\hat{\beta}_1)$$`
+where `\(t^\star\)` is the `\(\alpha/2\)` quantile from a `\(t\)` distribution with `\(n-2\)` degrees of freedom.
+
+.pull-left[
+
+```r
+# summary(lm2)$coefficients %&gt;% round(4)
+lm2 %&gt;% broom::tidy() %&gt;% 
+  knitr::kable(digits = 4)
+```
+
+
+
+|term        | estimate| std.error| statistic| p.value|
+|:-----------|--------:|---------:|---------:|-------:|
+|(Intercept) |  -1.8485|    0.4551|   -4.0620|   1e-04|
+|temperature |   0.0677|    0.0058|   11.6539|   0e+00|
+
+```r
+qt(0.025, df = 109) %&gt;% round(3)
+```
+
+```
+## [1] -1.982
+```
+
+
+
+]
+.pull-right[
+Plugging in these values
+`$$0.0677 \pm 1.982 \times 0.0058 = (0.056, 0.079)$$`
+
+Or we can use the `confint()` function 
+
+```r
+confint(lm2) %&gt;% round(3)
+```
+
+```
+##              2.5 % 97.5 %
+## (Intercept) -2.750 -0.947
+## temperature  0.056  0.079
+```
+]
+
+
+---
+class: segue
+
+# In-sample performance
+
+---
+
+## Decomposing the error
+
+.pull-left[
+&lt;img src="imgs/reg_decomposition_small.png" width="681" /&gt;
+]
+.pull-right[
+$$
+`\begin{aligned}
+\underbrace{\sum_{i=1}^n(y_i-\bar y)^2}_{SST_o} = &amp; \underbrace{\sum_{i=1}^n(\hat y_i-\bar y)^2}_{SST} + \underbrace{\sum_{i=1}^n (y_i-\hat y_i)^2}_{SSR}
+\end{aligned}`
+$$
+where
+
+-   `\(SST_o\)` is the **total** variation in `\(Y\)`
+-   `\(SST\)` is the sum of squares **explained** by the regression line 
+-   `\(SSR = SST_o - SST\)` is the variation in `\(Y\)` remain **unexplained**
+]
+
+.footnote[
+Image source: Fox (2016; Figure 5.5 p. 91)
+]
+
+---
+
+## Coefficient of determination `\(r^2\)`
+
+The square of correlation coefficient `\(r^2\)` called the **coefficient of determination** measures the proportion of *total* variation in `\(Y\)` *explained* by the linear regression model:
+
+It is "one minus the proportion of variation not explained by the model":
+`$$r^2 = 1 - \frac{\sum_i (y_i -\hat y_i)^2}{\sum_i (y_i-\bar y)^2} = 1 - \frac{SSR}{SST_o}.$$`
+
+
+Hence the **coefficient of determination** `\(r^2\)` measures the strength of the linear relationship between `\(x\)` and `\(y\)` by the percentage of variation in `\(y\)` explained by the linear regression model in `\(x\)`.
+
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M494.2 221.9l-59.8-40.5 13.7-71c2.6-13.2-1.6-26.8-11.1-36.4-9.6-9.5-23.2-13.7-36.2-11.1l-70.9 13.7-40.4-59.9c-15.1-22.3-51.9-22.3-67 0l-40.4 59.9-70.8-13.7C98 60.4 84.5 64.5 75 74.1c-9.5 9.6-13.7 23.1-11.1 36.3l13.7 71-59.8 40.5C6.6 229.5 0 242 0 255.5s6.7 26 17.8 33.5l59.8 40.5-13.7 71c-2.6 13.2 1.6 26.8 11.1 36.3 9.5 9.5 22.9 13.7 36.3 11.1l70.8-13.7 40.4 59.9C230 505.3 242.6 512 256 512s26-6.7 33.5-17.8l40.4-59.9 70.9 13.7c13.4 2.7 26.8-1.6 36.3-11.1 9.5-9.5 13.6-23.1 11.1-36.3l-13.7-71 59.8-40.5c11.1-7.5 17.8-20.1 17.8-33.5-.1-13.6-6.7-26.1-17.9-33.7zm-112.9 85.6l17.6 91.2-91-17.6L256 458l-51.9-77-90.9 17.6 17.6-91.2-76.8-52 76.8-52-17.6-91.2 91 17.6L256 53l51.9 76.9 91-17.6-17.6 91.1 76.8 52-76.8 52.1zM256 152c-57.3 0-104 46.7-104 104s46.7 104 104 104 104-46.7 104-104-46.7-104-104-104zm0 160c-30.9 0-56-25.1-56-56s25.1-56 56-56 56 25.1 56 56-25.1 56-56 56z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left-2[
+
+```r
+summary(lm2)
+```
+
+```
+## 
+## Call:
+## lm(formula = lozone ~ temperature, data = environmental)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -2.14417 -0.32555  0.02066  0.34234  1.49100 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) -1.848518   0.455080  -4.062  9.2e-05 ***
+## temperature  0.067673   0.005807  11.654  &lt; 2e-16 ***
+## ---
+## Signif. codes:  
+## 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.5804 on 109 degrees of freedom
+## Multiple R-squared:  0.5548,	Adjusted R-squared:  0.5507 
+## F-statistic: 135.8 on 1 and 109 DF,  p-value: &lt; 2.2e-16
+```
+]
+.pull-right-1[
+The `\(r^2\)` in the ozone example is 0.5548.
+
+**Interpretation:** We can say that temperature explains 55% of the observed variation in the logarithm of ozone concentration.
+
+.pull-down[
+Can we do better if we use more variables to help explain the logarithm of ozone concentration?
+]
+]
+
+---
+
+## References
+
+-   This module will largely follow a few chapters from Baumer, Kaplan, and Horton (2017).
+-   It is available on Canvas through the Reading List tab. You can download the relevant chapters.
+    -   II: Statistics and Modeling
+        - Chapter 8 Statistical learning and predictive analytics
+        - Chapter 9 Unsupervised learning
+    -   [IV: Appendix E Regression modeling](https://mdsr-book.github.io/excerpts/mdsr-regression.pdf) [freely available from the book website]
+
+Baumer, B. S., D. T. Kaplan, and N. J. Horton (2017).
+_Modern Data Science with R_. Boca Raton: Chapman and
+Hall/CRC. URL:
+[https://mdsr-book.github.io/index.html](https://mdsr-book.github.io/index.html).
+
+Fox, J. (2016). _Applied regression analysis and
+generalized linear models_. 3rd ed. Thousand Oaks,
+California: SAGE.
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="assets/remark-zoom.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

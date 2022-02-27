@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>DATA2002</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Garth Tarr" />
+    <script src="lec31_files/header-attrs-2.11/header-attrs.js"></script>
+    <link href="lec31_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } },
+      "HTML-CSS": {
+        styles: {
+          ".MathJax a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+          ".MathJax_Preview a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+        }
+      }
+      });
+    </script>
+    <link rel="stylesheet" href="assets/sydney-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="assets/sydney.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# DATA2002
+## Nearest neighbours
+### Garth Tarr
+
+---
+
+class: segue
+
+
+
+
+
+.large[
+Nearest neighbours
+
+Case study: diabetes
+]
+
+???
+
+https://campus.datacamp.com/courses/supervised-learning-in-r-classification/chapter-1-k-nearest-neighbors-knn?ex=1
+
+
+---
+
+## Microchip test data
+
+.pull-left[
+
+
+```r
+library(tidyverse)
+data = read_csv("https://raw.githubusercontent.com/DATA2002/data/master/Microchips.csv")
+glimpse(data)
+```
+
+```
+## Rows: 118
+## Columns: 3
+## $ Test1 &lt;dbl&gt; 0.051267, -0.092742, -0.213710, -0.375000, -…
+## $ Test2 &lt;dbl&gt; 0.699560, 0.684940, 0.692250, 0.502190, 0.46…
+## $ Label &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,…
+```
+
+The `Microchips` dataset contains test scores `Test1` and `Test2`, and `Label` indicating whether or not the chip passed the test.
+
+
+&gt; Why **can't** we use logistic regression or decision trees to predict the class for a new data point?
+
+]
+.pull-right[
+
+```r
+ggplot(data, aes(x=Test1, y=Test2, color=factor(Label))) +
+  geom_point(size=5, alpha = 0.8) + 
+  theme_classic(base_size=30)
+```
+
+&lt;img src="lec31_files/figure-html/unnamed-chunk-2-1.png" width="864" /&gt;
+]
+
+
+---
+
+## Different data types require different approaches
+
+We can use logistic regression to .purple[**classify**] binary observations, this isn't feasible when:
+
+-   We have high class separation in our data (perfect separation)
+-   We have a non-linear combination of predictors influencing our response
+
+&lt;br&gt;
+
+We can use decision trees to .purple[**classify**] observations into 2 or more classes, but this
+
+-   Can be complicated
+-   Might overfit
+-   Only draws boundaries parallel to axes
+
+&lt;br&gt;
+
+### .purple[**So, what other options do we have?**]
+
+---
+
+## The k-nearest neighbours algorithm
+
+.pull-left[
+&gt; Data with `\(p\)` attributes (explanatory variables) are points in a `\(p\)`-dimensional space.  We can calculate **distances** between these points.
+
+&lt;br&gt;
+
+-   .red[**k-nearest neighbours (kNN)**] is a non-parametric algorithm (doesn't assume the data follows any particular shape).
+
+&lt;br&gt;
+
+-   In kNN, we vote on the class of a new data point by looking at the majority class of the .red[**k**] nearest neighbours.
+]
+
+.pull-right[
+&lt;img src="imgs/knn2-Natasha-Latysheva.jpg", width="100%"&gt;
+]
+
+.footnote[
+Credit to Natasha Latysheva
+]
+
+---
+
+## k-nearest neighbours
+
+.pull-left[
+The Euclidean distance between any two points is the square root of the sum of the squared deviations:
+`$$d(\boldsymbol{x},\boldsymbol{z}) = \sqrt{(x_{1} - z_{1})^2 + (x_{2} - z_{2})^2 + \ldots + (x_{p} - z_{p})^2}$$`
+
+-   It makes sense to talk about the distance between two observations (rows in the data frame) in `\(p\)` dimensional space.
+
+-   .purple[**k-nearest neighbours**] uses these distances and the understanding that points "close" to each other probably have similar outcomes.
+]
+.pull-right[
+-   Suppose we have a set of training data `\((\boldsymbol{X},\boldsymbol{y})\)`.
+
+-   For some positive integer `\(k\)`, a `\(k\)`-nearest neighbour algorithm classifies a new observation `\(\boldsymbol{x}^\star\)` by:
+
+1.  Finding the `\(k\)` observations in the training data `\(\boldsymbol{X}\)`, that are closest to `\(\boldsymbol{x}^\star\)` according to some distance metric (usually Euclidian),
+2.  Denote the set of `\(k\)` closest observations as `\(D(\boldsymbol{x}^\star) \subseteq (\boldsymbol{X},\boldsymbol{y})\)`.
+3.  Define an aggregation function `\(f\)` (e.g. the majority rules aggregation function) and compute `\(y^\star = f(y)\)` for the `\(k\)` vaues of `\(y\)` in `\(D(\boldsymbol{x}^\star)\)`.
+]
+
+---
+
+## k-nearest neighbours
+
+Note that the kNN classifier doesn't need to pre-process the training data to make predictions - it can do this on the fly.
+
+The distance metric only makes sense for quantitative variables (not categorical variables).
+
+### Advantages
+
+-   kNN is easy to understand
+-   Doesn't require any preprocessing time
+
+## Disadvantages
+
+-   Predictions can be slow (as data is processed at that time)
+-   Usefulness depends on the geometry of the data: are the points clustered together? What is the distribution of differences among each variable? A wider scale on one variable can dwarf a narrow scale on another variable.
+
+---
+
+## Choosing `\(k\)`
+
+-   An appropriate choice of `\(k\)` will depend on the application and the data.
+
+-   Cross validation can be used to optimise the choice of `\(k\)`.
+
+-   Misclassification rate increases as `\(k\)` increases.  This implies that if you're looking to minimise the misclassification rate on a particular data set, the optimal value of `\(k\)` is 1.
+
+&lt;br&gt;
+
+[**Voroni**](https://rstudio.github.io/r2d3/articles/gallery/voronoi/)
+
+---
+&lt;svg viewBox="0 0 581 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M581 226.6C581 119.1 450.9 32 290.5 32S0 119.1 0 226.6C0 322.4 103.3 402 239.4 418.1V480h99.1v-61.5c24.3-2.7 47.6-7.4 69.4-13.9L448 480h112l-67.4-113.7c54.5-35.4 88.4-84.9 88.4-139.7zm-466.8 14.5c0-73.5 98.9-133 220.8-133s211.9 40.7 211.9 133c0 50.1-26.5 85-70.3 106.4-2.4-1.6-4.7-2.9-6.4-3.7-10.2-5.2-27.8-10.5-27.8-10.5s86.6-6.4 86.6-92.7-90.6-87.9-90.6-87.9h-199V361c-74.1-21.5-125.2-67.1-125.2-119.9zm225.1 38.3v-55.6c57.8 0 87.8-6.8 87.8 27.3 0 36.5-38.2 28.3-87.8 28.3zm-.9 72.5H365c10.8 0 18.9 11.7 24 19.2-16.1 1.9-33 2.8-50.6 2.9v-22.1z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## kNN in R
+
+.pull-left[
+
+Split our data into **predictors** (`X`), and response (`cl` for *class*),
+
+```r
+X = data %&gt;% dplyr::select(Test1, Test2)
+cl = as.factor(data$Label)
+```
+We will give the function a grid of new data points.
+
+```r
+new.X = expand.grid(
+  Test1 = seq(min(X$Test1 - 0.5),
+              max(X$Test1 + 0.5), by = 0.1),
+  Test2 = seq(min(X$Test2 - 0.5), 
+              max(X$Test2 + 0.5), by = 0.1))
+```
+
+]
+
+
+.pull-right[
+
+```r
+p = ggplot(new.X) +
+  geom_point(aes(x=Test1, y=Test2), alpha=0.1) + 
+  theme_classic(base_size = 30)
+p
+```
+
+&lt;img src="lec31_files/figure-html/unnamed-chunk-5-1.png" width="864" /&gt;
+
+]
+
+???
+
+
+```r
+# library(class)
+# pred_cl = knn(X, new.X, cl, k = 3, prob=TRUE)
+# pred_prob = attr(pred_cl, "prob")
+# dataf = bind_rows(mutate(new.X,
+#                            pred_prob=pred_prob,
+#                            cls=1,
+#                            prob_cls=ifelse(pred_cl==cls, 1, 0)),
+#                     mutate(new.X,
+#                            pred_prob=pred_prob,
+#                            cls=0,
+#                            prob_cls=ifelse(pred_cl==cls, 1, 0)))
+```
+
+---
+&lt;svg viewBox="0 0 581 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M581 226.6C581 119.1 450.9 32 290.5 32S0 119.1 0 226.6C0 322.4 103.3 402 239.4 418.1V480h99.1v-61.5c24.3-2.7 47.6-7.4 69.4-13.9L448 480h112l-67.4-113.7c54.5-35.4 88.4-84.9 88.4-139.7zm-466.8 14.5c0-73.5 98.9-133 220.8-133s211.9 40.7 211.9 133c0 50.1-26.5 85-70.3 106.4-2.4-1.6-4.7-2.9-6.4-3.7-10.2-5.2-27.8-10.5-27.8-10.5s86.6-6.4 86.6-92.7-90.6-87.9-90.6-87.9h-199V361c-74.1-21.5-125.2-67.1-125.2-119.9zm225.1 38.3v-55.6c57.8 0 87.8-6.8 87.8 27.3 0 36.5-38.2 28.3-87.8 28.3zm-.9 72.5H365c10.8 0 18.9 11.7 24 19.2-16.1 1.9-33 2.8-50.6 2.9v-22.1z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## kNN in R
+
+.pull-left-1[
+Now we call the `knn` function, putting in our original observations and their observed the classes as well as the grid of "new points" that we'll be predicting.  
+
+We also need to specify how many neighbours we want to learn from. For now let `\(k=3\)`.
+
+
+```r
+library(class)
+pred_cl_k3 = knn(X, new.X, cl,
+                 k = 3, prob=TRUE)
+pred_prob_k3 = attr(pred_cl_k3, 
+                    "prob")
+```
+
+]
+
+
+.pull-right-2[
+
+&lt;img src="lec31_files/figure-html/contour_k3-1.png" width="864" /&gt;
+]
+
+???
+
+
+```r
+dataf_k3 = bind_rows(
+  mutate(new.X, pred_prob = pred_prob_k3, cls = 1,
+         prob_cls = ifelse(pred_cl_k3 == cls, 1, 0)),
+  mutate(new.X, pred_prob = pred_prob_k3, cls = 0,
+         prob_cls = ifelse(pred_cl_k3 == cls, 1, 0)))
+ggplot() +
+  geom_point(aes(x = Test1, y = Test2, col = cls, size = pred_prob),
+             data = mutate(new.X, cls = pred_cl_k3, pred_prob = pred_prob_k3), alpha=0.5) + 
+  scale_size(range = c(0.8, 2)) +
+  geom_contour(aes(x = Test1, y = Test2, z = prob_cls, 
+                   group = as.factor(cls), color = as.factor(cls)), 
+               bins = 2, data = dataf_k3) +
+  geom_point(aes(x = Test1, y = Test2, col = factor(Label)), size = 5, data = data) +
+  geom_point(aes(x = Test1, y = Test2), size = 5, shape = 1, data = data) + 
+  theme_classic(base_size = 30)
+```
+
+---
+&lt;svg viewBox="0 0 581 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M581 226.6C581 119.1 450.9 32 290.5 32S0 119.1 0 226.6C0 322.4 103.3 402 239.4 418.1V480h99.1v-61.5c24.3-2.7 47.6-7.4 69.4-13.9L448 480h112l-67.4-113.7c54.5-35.4 88.4-84.9 88.4-139.7zm-466.8 14.5c0-73.5 98.9-133 220.8-133s211.9 40.7 211.9 133c0 50.1-26.5 85-70.3 106.4-2.4-1.6-4.7-2.9-6.4-3.7-10.2-5.2-27.8-10.5-27.8-10.5s86.6-6.4 86.6-92.7-90.6-87.9-90.6-87.9h-199V361c-74.1-21.5-125.2-67.1-125.2-119.9zm225.1 38.3v-55.6c57.8 0 87.8-6.8 87.8 27.3 0 36.5-38.2 28.3-87.8 28.3zm-.9 72.5H365c10.8 0 18.9 11.7 24 19.2-16.1 1.9-33 2.8-50.6 2.9v-22.1z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## kNN in R
+
+.pull-left-1[
+
+We can also see how our decisions change based on the number of neighbours we consider! Here, we consider `k=9`.
+
+
+```r
+pred_cl_k9 = knn(X, new.X, cl, 
+                 k = 9, prob=TRUE)
+pred_prob_k9 = attr(pred_cl_k9,
+                    "prob")
+```
+
+
+]
+
+.pull-right-2[
+
+&lt;img src="lec31_files/figure-html/contour_k9-1.png" width="864" /&gt;
+]
+
+???
+
+
+```r
+dataf_k9 = bind_rows(
+  mutate(new.X, pred_prob = pred_prob_k9, cls = 1,
+         prob_cls=ifelse(pred_cl_k9 == cls, 1, 0)),
+  mutate(new.X, pred_prob=pred_prob_k9, cls = 0,
+         prob_cls = ifelse(pred_cl_k9 == cls, 1, 0)))
+ggplot() +
+  geom_point(aes(x=Test1, y=Test2, col=cls, size=pred_prob),
+             data = mutate(new.X, cls = pred_cl_k9, pred_prob = pred_prob_k9), alpha=0.5) + 
+  scale_size(range=c(0.8, 2)) +
+  geom_contour(aes(x=Test1, y=Test2, z = prob_cls, 
+                   group = as.factor(cls), color=as.factor(cls)),
+               bins=2, data=dataf_k9) +
+  geom_point(aes(x=Test1, y=Test2, col=factor(Label)),
+             size=5, data = data) +
+  geom_point(aes(x=Test1, y=Test2),
+             size=5, shape=1, data = data) + 
+  theme_classic(base_size = 30)
+```
+
+
+---
+class: segue
+
+# Performance assessment
+
+---
+
+## Let's compare k=3 and k=9
+
+### In sample confusion matrix
+
+
+```r
+library(caret)
+```
+
+.pull-left[
+#### k=3
+
+```r
+k3 = knn(train = X, test = X, cl = cl, k = 3)
+confusionMatrix(k3, cl)$table
+```
+
+```
+##           Reference
+## Prediction  0  1
+##          0 50  6
+##          1 10 52
+```
+
+```r
+confusionMatrix(k3, cl)$overall[1] %&gt;% round(2)
+```
+
+```
+## Accuracy 
+##     0.86
+```
+]
+.pull-right[
+#### k=9
+
+```r
+k9 = knn(train = X, test = X, cl = cl, k = 9)
+confusionMatrix(k9, cl)$table
+```
+
+```
+##           Reference
+## Prediction  0  1
+##          0 51 11
+##          1  9 47
+```
+
+```r
+confusionMatrix(k9, cl)$overall[1] %&gt;% round(2)
+```
+
+```
+## Accuracy 
+##     0.83
+```
+]
+
+---
+
+## Let's compare lots of k!  (Still in-sample)
+
+.pull-left[
+
+```r
+res = data.frame(
+  k = 1:20,
+  accuracy = NA
+)
+for(k in res$k){
+  k_temp = knn(train = X, test = X, 
+               cl = cl, k = k)
+  cmat = confusionMatrix(k_temp, cl)
+  res$accuracy[k] = cmat$overall[1]
+}
+```
+]
+.pull-right[
+
+```r
+ggplot(res, aes(x = k, y = accuracy)) + 
+  geom_point() + geom_line() + 
+  theme_classic(base_size = 36)
+```
+
+&lt;img src="lec31_files/figure-html/unnamed-chunk-13-1.png" width="864" /&gt;
+
+What's with the saw-tooth pattern?!?!
+]
+
+---
+
+## Out of sample 5 fold CV
+
+For `\(k=3\)`
+
+.pull-left[
+
+```r
+n = length(cl)
+n
+```
+
+```
+## [1] 118
+```
+
+```r
+n/5
+```
+
+```
+## [1] 23.6
+```
+
+```r
+set.seed(1)
+fold_id = sample(c(1,2,3,rep(1:5, each = 23)))
+length(fold_id)
+```
+
+```
+## [1] 118
+```
+
+```r
+cv_acc = NA
+```
+]
+.pull-right[
+
+```r
+for(i in 1:5){
+  k_temp = knn(train = X[fold_id!=i,], 
+               test = X[fold_id==i,], 
+               cl = cl[fold_id!=i], k = 3)
+  cmat = confusionMatrix(k_temp, 
+                         cl[fold_id==i])
+  cv_acc[i] = cmat$overall[1]
+}
+mean(cv_acc)
+```
+
+```
+## [1] 0.7108696
+```
+]
+
+---
+
+## Out of sample 5 fold CV
+
+To help choose `\(k\)`
+
+.pull-left-2[
+
+```r
+set.seed(1)
+fold_id = sample(c(1,2,3,rep(1:5, each = 23)))
+cv_acc_k = matrix(nrow = 20, ncol = 5)
+for(k in 1:20){
+  for(i in 1:5){
+    k_temp = knn(train = X[fold_id!=i,], 
+                 test = X[fold_id==i,], 
+                 cl = cl[fold_id!=i], k = k)
+    cmat = confusionMatrix(k_temp, cl[fold_id==i])
+    cv_acc_k[k,i] = cmat$overall[1]
+  }
+}
+cv_res = data.frame(
+  k = 1:20,
+  k_acc = apply(cv_acc_k, 1, mean)
+)
+```
+]
+.pull-right-1[
+
+```r
+ggplot(cv_res, aes(x = k, y = k_acc)) + 
+  geom_point() + geom_line() + 
+  theme_classic(base_size = 36)
+```
+
+&lt;img src="lec31_files/figure-html/unnamed-chunk-17-1.png" width="864" /&gt;
+]
+
+
+---
+
+## Out of sample 5 fold CV
+
+To help choose `\(k\)`
+
+.pull-left-2[
+
+```r
+set.seed(2)
+fold_id = sample(c(1,2,3,rep(1:5, each = 23)))
+cv_acc_k = matrix(nrow = 20, ncol = 5)
+for(k in 1:20){
+  for(i in 1:5){
+    k_temp = knn(train = X[fold_id!=i,],
+                 test = X[fold_id==i,], 
+                 cl = cl[fold_id!=i], k = k)
+    cmat = confusionMatrix(k_temp, cl[fold_id==i])
+    cv_acc_k[k,i] = cmat$overall[1]
+  }
+}
+cv_res = data.frame(
+  k = 1:20,
+  k_acc = apply(cv_acc_k, 1, mean)
+)
+```
+]
+.pull-right-1[
+
+```r
+ggplot(cv_res, aes(x = k, y = k_acc)) + 
+  geom_point() + geom_line() + 
+  theme_classic(base_size = 36)
+```
+
+&lt;img src="lec31_files/figure-html/unnamed-chunk-19-1.png" width="864" /&gt;
+]
+
+
+---
+
+## Out of sample 5 fold CV
+
+To help choose `\(k\)`
+
+.pull-left-2[
+
+```r
+set.seed(3)
+fold_id = sample(c(1,2,3,rep(1:5, each = 23)))
+cv_acc_k = matrix(nrow = 20, ncol = 5)
+for(k in 1:20){
+  for(i in 1:5){
+    k_temp = knn(train = X[fold_id!=i,], 
+                 test = X[fold_id==i,], 
+                 cl = cl[fold_id!=i], k = k)
+    cmat = confusionMatrix(k_temp, cl[fold_id==i])
+    cv_acc_k[k,i] = cmat$overall[1]
+  }
+}
+cv_res = data.frame(
+  k = 1:20,
+  k_acc = apply(cv_acc_k, 1, mean)
+)
+```
+]
+.pull-right-1[
+
+```r
+ggplot(cv_res, aes(x = k, y = k_acc)) + 
+  geom_point() + geom_line() + 
+  theme_classic(base_size = 36)
+```
+
+&lt;img src="lec31_files/figure-html/unnamed-chunk-21-1.png" width="864" /&gt;
+]
+
+
+---
+
+## Out of sample 5 fold CV
+
+To help choose `\(k\)`
+
+.pull-left-2[
+
+```r
+set.seed(4)
+fold_id = sample(c(1,2,3,rep(1:5, each = 23)))
+cv_acc_k = matrix(nrow = 20, ncol = 5)
+for(k in 1:20){
+  for(i in 1:5){
+    k_temp = knn(train = X[fold_id!=i,], 
+                 test = X[fold_id==i,], 
+                 cl = cl[fold_id!=i], k = k)
+    cmat = confusionMatrix(k_temp, cl[fold_id==i])
+    cv_acc_k[k,i] = cmat$overall[1]
+  }
+}
+cv_res = data.frame(
+  k = 1:20,
+  k_acc = apply(cv_acc_k, 1, mean)
+)
+```
+]
+.pull-right-1[
+
+```r
+ggplot(cv_res, aes(x = k, y = k_acc)) + 
+  geom_point() + geom_line() + 
+  theme_classic(base_size = 36)
+```
+
+&lt;img src="lec31_files/figure-html/unnamed-chunk-23-1.png" width="864" /&gt;
+]
+
+
+
+---
+
+## Out of sample 5 fold CV
+
+To help choose `\(k\)`
+
+.pull-left-2[
+
+```r
+set.seed(5)
+fold_id = sample(c(1,2,3,rep(1:5, each = 23)))
+cv_acc_k = matrix(nrow = 20, ncol = 5)
+for(k in 1:20){
+  for(i in 1:5){
+    k_temp = knn(train = X[fold_id!=i,], 
+                 test = X[fold_id==i,], 
+                 cl = cl[fold_id!=i], k = k)
+    cmat = confusionMatrix(k_temp, cl[fold_id==i])
+    cv_acc_k[k,i] = cmat$overall[1]
+  }
+}
+cv_res = data.frame(
+  k = 1:20,
+  k_acc = apply(cv_acc_k, 1, mean)
+)
+```
+]
+.pull-right-1[
+
+```r
+ggplot(cv_res, aes(x = k, y = k_acc)) + 
+  geom_point() + geom_line() + 
+  theme_classic(base_size = 36)
+```
+
+&lt;img src="lec31_files/figure-html/unnamed-chunk-25-1.png" width="864" /&gt;
+]
+
+
+
+---
+
+## Repeated K fold CV
+
+Often we want to repeat the CV process, to get a range of error values.
+
+&lt;center&gt;
+
+&lt;img src="imgs/repeat1.png", width="90%"&gt;
+
+&lt;/center&gt;
+
+---
+
+## Repeated K fold CV
+
+Often we want to repeat the CV process, to get a range of error values.
+
+&lt;center&gt;
+
+&lt;img src="imgs/repeat2.png", width="90%"&gt;
+
+&lt;/center&gt;
+
+
+---
+
+## Repeated K fold CV
+
+Often we want to repeat the CV process, to get a range of error values.
+
+&lt;center&gt;
+
+&lt;img src="imgs/repeat3.png", width="90%"&gt;
+
+&lt;/center&gt;
+
+---
+
+## Repeated 5 fold CV
+
+To help choose `\(k\)`
+
+.pull-left-2[
+
+```r
+set.seed(1)
+cv_acc_k = array(dim = c(20, 5, 100))
+for(j in 1:100){
+  fold_id = sample(c(1,2,3,rep(1:5, each = 23)))
+  for(k in 1:20){
+    for(i in 1:5){
+      k_temp = knn(train = X[fold_id!=i,], 
+                   test = X[fold_id==i,], 
+                   cl = cl[fold_id!=i], k = k)
+      cmat = confusionMatrix(k_temp, cl[fold_id==i])
+      cv_acc_k[k,i,j] = cmat$overall[1]
+    }
+  }
+}
+cv_res = data.frame(
+  k = 1:20,
+  k_acc = apply(cv_acc_k, 1, mean),
+  k_acc_n = apply(cv_acc_k, 1, length)
+)
+```
+]
+.pull-right-1[
+
+```r
+ggplot(cv_res, aes(x = k, y = k_acc)) + 
+  geom_point() + geom_line() + 
+  theme_classic(base_size = 36)
+```
+
+&lt;img src="lec31_files/figure-html/unnamed-chunk-27-1.png" width="864" /&gt;
+]
+
+
+---
+
+## Repeated 5 fold CV
+
+To help choose `\(k\)`
+
+.pull-left-2[
+
+```r
+set.seed(2)
+cv_acc_k = array(dim = c(20, 5, 100))
+for(j in 1:100){
+  fold_id = sample(c(1,2,3,rep(1:5, each = 23)))
+  for(k in 1:20){
+    for(i in 1:5){
+      k_temp = knn(train = X[fold_id!=i,], 
+                   test = X[fold_id==i,], 
+                   cl = cl[fold_id!=i], k = k)
+      cmat = confusionMatrix(k_temp, cl[fold_id==i])
+      cv_acc_k[k,i,j] = cmat$overall[1]
+    }
+  }
+}
+cv_res = data.frame(
+  k = 1:20,
+  k_acc = apply(cv_acc_k, 1, mean),
+  k_acc_n = apply(cv_acc_k, 1, length)
+)
+```
+]
+.pull-right-1[
+
+```r
+ggplot(cv_res, aes(x = k, y = k_acc)) + 
+  geom_point() + geom_line() + 
+  theme_classic(base_size = 36)
+```
+
+&lt;img src="lec31_files/figure-html/unnamed-chunk-29-1.png" width="864" /&gt;
+]
+
+---
+
+## Using the caret package
+
+
+```r
+library(caret)
+fitCtrl = trainControl(method = "repeatedcv", number = 5, repeats = 100)
+set.seed(1)
+knnFit1 = caret::train(factor(Label) ~ ., data = data, method = "knn",  trControl = fitCtrl)
+knnFit1
+```
+
+```
+## k-Nearest Neighbors 
+## 
+## 118 samples
+##   2 predictor
+##   2 classes: '0', '1' 
+## 
+## No pre-processing
+## Resampling: Cross-Validated (5 fold, repeated 100 times) 
+## Summary of sample sizes: 94, 95, 94, 95, 94, 94, ... 
+## Resampling results across tuning parameters:
+## 
+##   k  Accuracy   Kappa    
+##   5  0.7254891  0.4507026
+##   7  0.7228406  0.4455525
+##   9  0.7162029  0.4325306
+## 
+## Accuracy was used to select the optimal model using
+##  the largest value.
+## The final value used for the model was k = 5.
+```
+
+
+---
+
+
+```r
+confusionMatrix(knnFit1)
+```
+
+```
+## Cross-Validated (5 fold, repeated 100 times) Confusion Matrix 
+## 
+## (entries are percentual average cell counts across resamples)
+##  
+##           Reference
+## Prediction    0    1
+##          0 36.8 13.4
+##          1 14.0 35.7
+##                             
+##  Accuracy (average) : 0.7255
+```
+
+
+---
+class: segue
+
+## Case study: Diabetes data
+
+---
+
+## Case study: Diabetes data
+
+
+```r
+diabetes = read_csv("https://raw.githubusercontent.com/DATA2002/data/master/diabetes.csv")
+glimpse(diabetes)
+```
+
+```
+## Rows: 768
+## Columns: 9
+## $ pregnant  &lt;dbl&gt; 6, 1, 8, 1, 0, 5, 3, 10, 2, 8, 4, 10, 10…
+## $ glucose   &lt;dbl&gt; 148, 85, 183, 89, 137, 116, 78, 115, 197…
+## $ hg        &lt;dbl&gt; 72, 66, 64, 66, 40, 74, 50, 0, 70, 96, 9…
+## $ thickness &lt;dbl&gt; 35, 29, 0, 23, 35, 0, 32, 0, 45, 0, 0, 0…
+## $ insulin   &lt;dbl&gt; 0, 0, 0, 94, 168, 0, 88, 0, 543, 0, 0, 0…
+## $ bmi       &lt;dbl&gt; 33.6, 26.6, 23.3, 28.1, 43.1, 25.6, 31.0…
+## $ pedigree  &lt;dbl&gt; 0.627, 0.351, 0.672, 0.167, 2.288, 0.201…
+## $ age       &lt;dbl&gt; 50, 31, 32, 21, 33, 30, 26, 29, 53, 54, …
+## $ class     &lt;dbl&gt; 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1…
+```
+
+```r
+diabetes$class = factor(diabetes$class)
+```
+
+Aim: to build a model to predict whether or not the patients in the dataset have diabetes (`class`).
+
+---
+
+
+```r
+library(GGally)
+ggpairs(diabetes, aes(colour=class, alpha = 0.5)) + theme_bw(base_size = 20)
+```
+
+&lt;img src="lec31_files/figure-html/unnamed-chunk-33-1.png" width="864" /&gt;
+
+---
+
+.scroll-output[
+Some unusual zero values...
+
+
+```r
+diabetes = diabetes %&gt;% 
+  mutate(across(
+    c(glucose, hg, thickness, insulin, bmi), .fns = ~ na_if(., 0))) %&gt;% 
+  drop_na()
+ggpairs(diabetes, aes(colour=class, alpha = 0.5)) + theme_bw(base_size = 20)
+```
+
+&lt;img src="lec31_files/figure-html/unnamed-chunk-34-1.png" width="864" /&gt;
+]
+
+
+---
+
+
+```r
+par(mar = c(4,8,1,1), cex = 1.5)
+boxplot(diabetes, horizontal = TRUE, las = 1)
+```
+
+&lt;img src="lec31_files/figure-html/unnamed-chunk-35-1.png" width="864" /&gt;
+
+---
+
+## Normalisation
+
+We need to **normalise** our predictors:
+
+
+```r
+norm_fn = function(x) { (x - min(x))/(max(x) - min(x)) }
+d_norm = diabetes %&gt;% 
+  mutate(across(where(is.numeric), .fns = norm_fn))
+par(mar = c(4,8,1,1), cex = 2)
+boxplot(d_norm, horizontal = TRUE, las = 1)
+```
+
+&lt;img src="lec31_files/figure-html/unnamed-chunk-36-1.png" width="864" /&gt;
+
+---
+
+## 5-fold CV for Diabetes `knn` model 
+
+Let's perform a .orange[5-fold] CV for the `knn` model.  First, we split up our response and predictors.
+
+
+```r
+library(class) # for kNN function
+K =  5 # number of folds
+n = nrow(d_norm) # number of data points
+X = d_norm %&gt;% select(-class) # predictors
+y = d_norm %&gt;% select(class) %&gt;% pull()
+```
+
+---
+&lt;svg viewBox="0 0 581 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M581 226.6C581 119.1 450.9 32 290.5 32S0 119.1 0 226.6C0 322.4 103.3 402 239.4 418.1V480h99.1v-61.5c24.3-2.7 47.6-7.4 69.4-13.9L448 480h112l-67.4-113.7c54.5-35.4 88.4-84.9 88.4-139.7zm-466.8 14.5c0-73.5 98.9-133 220.8-133s211.9 40.7 211.9 133c0 50.1-26.5 85-70.3 106.4-2.4-1.6-4.7-2.9-6.4-3.7-10.2-5.2-27.8-10.5-27.8-10.5s86.6-6.4 86.6-92.7-90.6-87.9-90.6-87.9h-199V361c-74.1-21.5-125.2-67.1-125.2-119.9zm225.1 38.3v-55.6c57.8 0 87.8-6.8 87.8 27.3 0 36.5-38.2 28.3-87.8 28.3zm-.9 72.5H365c10.8 0 18.9 11.7 24 19.2-16.1 1.9-33 2.8-50.6 2.9v-22.1z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+# K-fold CV in R using `cvTools`
+
+Using the `cvTools` package, we can use the function `cvFolds` to separate our `n` data points into `K` partitions for cross validation.
+
+
+```r
+library(cvTools)
+set.seed(1)
+*cvSets = cvFolds(n,K)
+glimpse(cvSets)
+```
+
+```
+## List of 5
+##  $ n      : num 392
+##  $ K      : num 5
+##  $ R      : num 1
+##  $ subsets: int [1:392, 1] 324 167 129 299 270 187 307 85 277 362 ...
+##  $ which  : int [1:392] 1 2 3 4 5 1 2 3 4 5 ...
+##  - attr(*, "class")= chr "cvFolds"
+```
+
+-   The important outputs are `subsets` and `which`. 
+
+-   For each fold (given by `which`), `subset` tells us which index of the data belongs to what fold. E.g., observation 204 belongs to fold 1, etc
+
+---
+&lt;svg viewBox="0 0 581 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M581 226.6C581 119.1 450.9 32 290.5 32S0 119.1 0 226.6C0 322.4 103.3 402 239.4 418.1V480h99.1v-61.5c24.3-2.7 47.6-7.4 69.4-13.9L448 480h112l-67.4-113.7c54.5-35.4 88.4-84.9 88.4-139.7zm-466.8 14.5c0-73.5 98.9-133 220.8-133s211.9 40.7 211.9 133c0 50.1-26.5 85-70.3 106.4-2.4-1.6-4.7-2.9-6.4-3.7-10.2-5.2-27.8-10.5-27.8-10.5s86.6-6.4 86.6-92.7-90.6-87.9-90.6-87.9h-199V361c-74.1-21.5-125.2-67.1-125.2-119.9zm225.1 38.3v-55.6c57.8 0 87.8-6.8 87.8 27.3 0 36.5-38.2 28.3-87.8 28.3zm-.9 72.5H365c10.8 0 18.9 11.7 24 19.2-16.1 1.9-33 2.8-50.6 2.9v-22.1z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+# K-fold CV in R using `cvTools`
+
+.pull-left-2[
+
+```r
+error.fold = NA
+for(j in 1:K){
+  
+  test.inds = cvSets$subsets[cvSets$which == j]
+  
+  X.test = X[test.inds,]
+  X.train = X[-test.inds,]
+  y.test = y[test.inds]
+  y.train = y[-test.inds]
+  
+  fit = knn(X.train, X.test, y.train, k=9)
+  
+  error.fold[j] = sum(fit != y.test)
+}
+
+cv.error = sum(error.fold)/n
+cv.error
+```
+
+```
+## [1] 0.2244898
+```
+]
+
+.pull-right-1[
+
+```r
+glimpse(cvSets)
+```
+
+```
+## List of 5
+##  $ n      : num 392
+##  $ K      : num 5
+##  $ R      : num 1
+##  $ subsets: int [1:392, 1] 324 167 129 299 270 187 307 85 277 362 ...
+##  $ which  : int [1:392] 1 2 3 4 5 1 2 3 4 5 ...
+##  - attr(*, "class")= chr "cvFolds"
+```
+]
+
+---
+
+## .orange[Task 1]
+
+We want to know which value of k (neighbours) from `k.vals = 1:50` fits the data best. Embed the CV loop on the previous slide in another loop to determine which value of `k` gives the lowest error.
+
+## .orange[Task 2]
+
+Fit a CV loop for `randomForest`. Does it perform better than the best value of `k` you found in Task 1?
+
+---
+
+## Repeated K-fold CV
+
+.pull-left[
+
+
+```r
+set.seed(1)
+*reps = 10
+*cv.error = c()
+*for(i in 1:reps){
+  cvSets = cvFolds(n,K)
+  
+  error.fold = c()
+  for(j in 1:K){
+    
+    fold.j = which(cvSets$which==j)
+    test.inds = cvSets$subsets[fold.j]
+    
+    X.test = X[test.inds,]
+    X.train = X[-test.inds,]
+    y.test = y[test.inds]
+    y.train = y[-test.inds]
+    
+    fit = knn(X.train, X.test, y.train, k=9)
+    
+    error.fold[j] = sum(fit!=y.test)
+  }
+* cv.error[i] = sum(error.fold)/n
+*} 
+```
+]
+
+.pull-right[
+-   To perform a **repeated** cross validation, all we do is embed our existing CV loop into another loop that repeats the process `reps` times.
+
+-   We can then easily visualise our repeated cross validation errors!
+
+&lt;img src="lec31_files/figure-html/unnamed-chunk-42-1.png" width="864" /&gt;
+]
+
+---
+
+# .orange[Task 3]
+
+Perform a 10 repeat, 5 fold Cross Validation, for `randomForest`.
+
+# .orange[Task 4]
+
+Boxplot the results of `knn` (with best k) vs `randomForest`. Which model performs better?
+
+---
+
+## Using the caret package
+
+.pull-left-1[
+
+-   Using the `caret` package, we first set up details of of CV, including how many repeats we want, and how many folds.
+-   Next, we specify the response and its predictors, as well as what method we want to use, and the training parameters.
+
+
+```r
+fitCtrl = trainControl(
+  method = "repeatedcv",
+  number = 5,
+  repeats = 10)
+set.seed(1)
+knnFit1 = train(
+  class ~ ., data = d_norm, 
+  method = "knn", 
+  trControl = fitCtrl)
+```
+
+]
+.pull-right-2[
+
+```r
+knnFit1
+```
+
+```
+## k-Nearest Neighbors 
+## 
+## 392 samples
+##   8 predictor
+##   2 classes: '0', '1' 
+## 
+## No pre-processing
+## Resampling: Cross-Validated (5 fold, repeated 10 times) 
+## Summary of sample sizes: 314, 314, 314, 313, 313, 313, ... 
+## Resampling results across tuning parameters:
+## 
+##   k  Accuracy   Kappa    
+##   5  0.7671081  0.4496161
+##   7  0.7681207  0.4473379
+##   9  0.7648458  0.4347491
+## 
+## Accuracy was used to select the optimal model using
+##  the largest value.
+## The final value used for the model was k = 7.
+```
+]
+
+---
+
+## kNN
+
+- kNN is considered a **lazy** learning algorithm
+- Data processing is deferred until it receives a request to classify an unlabelled example.
+- The constructed algorithm is discarded along with any intermediate results
+
+### Advantages
+
+-   Analytically tractable and simple implementation
+-   Performance improves as the sample size grows
+-   Uses **local** information, and is highly adaptive
+-   Can be easily parallelised
+
+### Disadvantages
+
+-   Large storage requirements (need to store full data set)
+-   Computationally intensive when predicting new observations
+-   Highly susceptible to the **curse of dimensionality**
+
+
+---
+class: columns-2
+
+## References
+
+.small[
+Hastie, T., R. Tibshirani, and J. Friedman (2009).
+_The Elements of Statistical Learning_. 2nd ed.
+Springer Series in Statistics. New York, NY, USA:
+Springer. URL:
+[https://web.stanford.edu/~hastie/ElemStatLearn/](https://web.stanford.edu/~hastie/ElemStatLearn/).
+
+James, G., D. Witten, T. Hastie, and R. Tibshirani
+(2017). _An Introduction to Statistical Learning:
+With Applications in R_. New York: Springer. URL:
+[https://www-bcf.usc.edu/~gareth/ISL/](https://www-bcf.usc.edu/~gareth/ISL/).
+
+Jed Wing, M. K. C. from, S. Weston, A. Williams, C.
+Keefer, A. Engelhardt, T. Cooper, Z. Mayer, B.
+Kenkel, the R Core Team, M. Benesty, et al. (2018).
+_caret: Classification and Regression Training_. R
+package version 6.0-80. URL:
+[https://CRAN.R-project.org/package=caret](https://CRAN.R-project.org/package=caret).
+
+Liaw, A. and M. Wiener (2002). "Classification and
+Regression by randomForest". In: _R News_ 2.3, pp.
+18-22. URL:
+[https://CRAN.R-project.org/doc/Rnews/](https://CRAN.R-project.org/doc/Rnews/).
+
+Therneau, T. and B. Atkinson (2018). _rpart:
+Recursive Partitioning and Regression Trees_. R
+package version 4.1-13. URL:
+[https://CRAN.R-project.org/package=rpart](https://CRAN.R-project.org/package=rpart).
+]
+
+
+## Acknowledgements
+
+Special thanks to [Sarah Romanes &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"&gt;&lt;/path&gt;&lt;/svg&gt;](https://twitter.com/sarah_romanes) for providing content inspiration from her R Ladies talks on machine learning:
+
+-   [sarahromanes.github.io/r-ladies-ML-1](https://sarahromanes.github.io/r-ladies-ML-1/) 
+-   [sarahromanes.github.io/r-ladies-ML-2](https://sarahromanes.github.io/r-ladies-ML-2/)
+
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="assets/remark-zoom.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

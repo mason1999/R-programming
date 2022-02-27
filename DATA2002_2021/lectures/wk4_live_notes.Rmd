@@ -1,0 +1,41 @@
+---
+title: "Week 4 live lecture notes"
+author: "Garth Tarr"
+output:
+  html_document:
+    code_folding: hide
+    toc: true
+    toc_float: true
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(gt)
+```
+
+# First look at the survey data
+
+```{r, message=FALSE}
+url = "https://docs.google.com/spreadsheets/d/1-DmA1UUM6QmZyucYiutuZX4Q0omtSCDwSOCNzHibkto/export?format=csv"
+survey = readr::read_csv(url)
+# colnames(survey) %>%
+#   tibble() %>%
+#   gt::gt()
+```
+
+Rename the column names so that they are more manageable.
+
+```{r}
+questions = colnames(survey)
+short_names = c("time","covid_tests","living_arrangements","height",
+                "wednesday","in_aus","math_ability","r_ability",
+                "data2002","year","webcam","vaccination","social_media",
+                "gender","steak_preference","dominant_hand","stress",
+                "lonely","emails","sign_off","salary","unit","major","exercise")
+colnames(survey) = short_names
+```
+
+
+# Git? [If there's time]

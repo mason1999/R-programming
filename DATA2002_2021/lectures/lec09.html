@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>DATA2002</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Garth Tarr" />
+    <script src="lec09_files/header-attrs-2.10/header-attrs.js"></script>
+    <link href="lec09_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } },
+      "HTML-CSS": {
+        styles: {
+          ".MathJax a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+          ".MathJax_Preview a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+        }
+      }
+      });
+    </script>
+    <link rel="stylesheet" href="assets/sydney-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="assets/sydney.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# DATA2002
+## Testing in small samples
+### Garth Tarr
+
+---
+
+class: segue
+
+
+
+
+
+.large[
+Fisher's exact test
+
+Yate's corrected `\(\chi^2\)` test
+
+Monte Carlo p-values
+]
+
+---
+class: segue
+
+# Fisher's exact test
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 384h192c53 0 96-43 96-96h32c70.6 0 128-57.4 128-128S582.6 32 512 32H120c-13.3 0-24 10.7-24 24v232c0 53 43 96 96 96zM512 96c35.3 0 64 28.7 64 64s-28.7 64-64 64h-32V96h32zm47.7 384H48.3c-47.6 0-61-64-36-64h583.3c25 0 11.8 64-35.9 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Lady tasting tea
+
+.pull-left[
+
+&lt;br&gt;
+
+Given a cup of tea with milk, a lady claims she can discriminate as to whether milk or tea was first added to the cup.
+
+&lt;br&gt;
+
+.blockquote[
+&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 448c-110.532 0-200-89.431-200-200 0-110.495 89.472-200 200-200 110.491 0 200 89.471 200 200 0 110.53-89.431 200-200 200zm107.244-255.2c0 67.052-72.421 68.084-72.421 92.863V300c0 6.627-5.373 12-12 12h-45.647c-6.627 0-12-5.373-12-12v-8.659c0-35.745 27.1-50.034 47.579-61.516 17.561-9.845 28.324-16.541 28.324-29.579 0-17.246-21.999-28.693-39.784-28.693-23.189 0-33.894 10.977-48.942 29.969-4.057 5.12-11.46 6.071-16.666 2.124l-27.824-21.098c-5.107-3.872-6.251-11.066-2.644-16.363C184.846 131.491 214.94 112 261.794 112c49.071 0 101.45 38.304 101.45 88.8zM298 368c0 23.159-18.841 42-42 42s-42-18.841-42-42 18.841-42 42-42 42 18.841 42 42z"&gt;&lt;/path&gt;&lt;/svg&gt;
+How could we test this claim? 
+
+What information would we need?
+]
+]
+
+.pull-right[
+&lt;img src="imgs/1200px-Nice_Cup_of_Tea.jpg" width="800" /&gt;
+]
+
+???
+
+Image source: https://commons.wikimedia.org/wiki/File:Nice_Cup_of_Tea.jpg
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 384h192c53 0 96-43 96-96h32c70.6 0 128-57.4 128-128S582.6 32 512 32H120c-13.3 0-24 10.7-24 24v232c0 53 43 96 96 96zM512 96c35.3 0 64 28.7 64 64s-28.7 64-64 64h-32V96h32zm47.7 384H48.3c-47.6 0-61-64-36-64h583.3c25 0 11.8 64-35.9 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Lady tasting tea
+
+.pull-left-2[
+Fisher proposed preparing 8 cups of tea
+
+- 4 cups where tea was added before milk
+- 4 cups where milk was added before tea
+
+The lady would then be randomly given the cups of tea and asked to identify the 4 where tea was added before milk.  
+
+&lt;br&gt;
+
+We would then need to record:
+
+- Which cups had tea or milk added first (**truth**).
+
+- Which cups the lady claimed had tea or milk added first (**predicted**).
+]
+.pull-right-1[
+.center[
+&lt;img src="imgs/Youngronaldfisher2.jpg" width="194" /&gt;
+
+Ronald Fisher (1913)
+]
+]
+
+???
+
+Image source: https://commons.wikimedia.org/wiki/File:Youngronaldfisher2.JPG
+He's about 23 in the photo.
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 384h192c53 0 96-43 96-96h32c70.6 0 128-57.4 128-128S582.6 32 512 32H120c-13.3 0-24 10.7-24 24v232c0 53 43 96 96 96zM512 96c35.3 0 64 28.7 64 64s-28.7 64-64 64h-32V96h32zm47.7 384H48.3c-47.6 0-61-64-36-64h583.3c25 0 11.8 64-35.9 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Lady tasting tea - hypothesis
+
+For Fisher's experiment we were left with two categorical variables.
+
+&gt; `$$\mbox{Truth = {Milk, Tea, Tea, Milk, Tea, Tea, Milk, Milk}}$$`
+
+&gt; `$$\mbox{Prediction = {Milk, Tea, Tea, Milk, Tea, Tea, Milk, Milk}}$$`
+
+&lt;br&gt;
+
+&gt;- And the hypothesis
+      `$$\mbox{Are the predictions independent of the truth?}$$`
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 384h192c53 0 96-43 96-96h32c70.6 0 128-57.4 128-128S582.6 32 512 32H120c-13.3 0-24 10.7-24 24v232c0 53 43 96 96 96zM512 96c35.3 0 64 28.7 64 64s-28.7 64-64 64h-32V96h32zm47.7 384H48.3c-47.6 0-61-64-36-64h583.3c25 0 11.8 64-35.9 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+truth = c("milk", "tea", "tea", "milk", "tea", "tea", "milk", "milk")
+predicted = c("milk", "tea", "tea", "milk", "tea", "tea", "milk", "milk")
+y.mat = table(truth, predicted)
+y.mat
+```
+
+```
+##       predicted
+## truth  milk tea
+##   milk    4   0
+##   tea     0   4
+```
+
+```r
+chisq.test(y.mat, correct = FALSE)
+```
+
+```
+## Warning in chisq.test(y.mat, correct = FALSE): Chi-squared
+## approximation may be incorrect
+```
+
+```
+## 
+## 	Pearson's Chi-squared test
+## 
+## data:  y.mat
+## X-squared = 8, df = 1, p-value = 0.004678
+```
+
+.blockquote[
+&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 448c-110.532 0-200-89.431-200-200 0-110.495 89.472-200 200-200 110.491 0 200 89.471 200 200 0 110.53-89.431 200-200 200zm107.244-255.2c0 67.052-72.421 68.084-72.421 92.863V300c0 6.627-5.373 12-12 12h-45.647c-6.627 0-12-5.373-12-12v-8.659c0-35.745 27.1-50.034 47.579-61.516 17.561-9.845 28.324-16.541 28.324-29.579 0-17.246-21.999-28.693-39.784-28.693-23.189 0-33.894 10.977-48.942 29.969-4.057 5.12-11.46 6.071-16.666 2.124l-27.824-21.098c-5.107-3.872-6.251-11.066-2.644-16.363C184.846 131.491 214.94 112 261.794 112c49.071 0 101.45 38.304 101.45 88.8zM298 368c0 23.159-18.841 42-42 42s-42-18.841-42-42 18.841-42 42-42 42 18.841 42 42z"&gt;&lt;/path&gt;&lt;/svg&gt;
+Why do we get a warning message?
+]
+
+---
+
+## Fisher's exact test
+
+The `\(\chi^2\)` approximation for the test statistic is only reasonable when `\(n\)` is sufficiently large.  I.e. we need the expected cell frequencies to all be 5 or more. However, if this is not the case, then we need to take care and maybe consider **exact** tests, i.e. calculating the exact p-value for the test statistic. 
+
+In R the function `fisher.test()` is available to carry out these calculations both for `\(2\times 2\)` tables and general contingency tables. 
+
+---
+
+## Fisher's exact test and the hypergeometric distrubution
+
+.pull-left[
+The simplest exact test for contingency tables is Fisher's test for  `\(2\times 2\)` tables. Consider the table:
+
+
+|       | `\(A_1\)`    | `\(A_2\)`   | Total
+|-------|----------|---------|------
+| `\(B_1\)` | `\(y_{11}\)` | `\(y_{12}\)` | `\(y_{1 \bullet}\)`
+| `\(B_2\)` | `\(y_{21}\)` | `\(y_{22}\)` | `\(y_{2 \bullet}\)`
+| **Total** | `\(y_{\bullet 1}\)` | `\(y_{\bullet 2}\)` | `\(n\)`
+
+For a `\(2\times 2\)` table, if we know the row and column and `\(y_{11}\)` then the table is completely specified. 
+
+Let `\(\theta\)` be the odds ratio.  A test of 
+`$$H_0\colon\ \theta=1 \quad \text{vs} \quad H_1\colon\ \theta &gt; 1$$` 
+(or `\(H_1 \colon\ \theta &lt; 1\)`) can be based on the observed value of `\(y_{11}\)` given the marginal totals.
+]
+
+--
+
+.pull-right[
+If `\(H_0\)` is true and we know the `\(y_{1\bullet},y_{\bullet 1}\)` and `\(n\)` values we expect `\(y_{\bullet 1}\times\frac{y_{1\bullet}}{n}\)` in the `\((1,1)\)`th cell. 
+
+To obtain the distribution of `\(y_{11}\)` given the marginal values note the situation is like selecting `\(y_{\bullet 1}\)` values from `\(n\)` where `\(y_{1\bullet}\)` are type `\(B_1\)` and `\(y_{2\bullet}\)` are type `\(B_2\)`. Then 
+`$$P(Y_{11} = y_{11}) = \frac{\displaystyle
+{ y_{1 \bullet} \choose y_{11} }
+{ y_{2 \bullet} \choose y_{\bullet 1} - y_{11} } }
+{\displaystyle { n \choose y_{\bullet 1} } },$$`
+which is the hypergeometric distribution.  
+]
+
+---
+
+## The hypergeometric distribution
+
+.pull-left[
+The hypergeometric distribution relates to sampling without replacement from a finite population. 
+
+The following conditions characterise the **hypergeometric distribution**:
+
+- The result of each draw (the elements of the population being sampled) can be classified into one of two mutually exclusive categories (e.g. Pass/Fail or Employed/Unemployed).
+- The probability of a success changes on each draw, as each draw decreases the population (sampling without replacement from a finite population).
+
+]
+.pull-right[
+A random variable `\(X\)` follows the hypergeometric distribution if its probability mass function (pmf) is given by:
+`$$P(X=k)=\frac{{\displaystyle\binom{K}{k}}{\displaystyle\binom{N-K}{n-k}}}{\displaystyle\binom{N}{n}},$$`
+where
+
+- `\(N\)` is the population size,
+- `\(K\)` is the number of success states in the population,
+- `\(n\)` is the number of draws (i.e. quantity drawn in each trial), and
+- `\(k\)` is the number of observed successes.
+]
+
+
+
+&lt;!--
+A population of size `\(N\)` is split into two types `\(y_{1\bullet}\)` of type 1, `\(y_{2\bullet}\)` of type 2. We draw a sample of size `\(n = y_{\bullet 1}\)`. Let `\(X\)` denote the number of type 1 in the sample of size `\(n\)` then
+`$$P(X = x) =
+\frac{\displaystyle{ y_{1 \bullet} \choose x}{y_{2 \bullet} \choose y_{\bullet 1}-x}}{\displaystyle{N \choose y_{\bullet 1}}}.$$`
+
+
+Note that it can be shown that: `\(E(X) = y_{\bullet 1} \left( \frac{y_{1 \bullet}}{N} \right) = y_{\bullet 1} p\)` and 
+`$$\displaystyle \mbox{Var}(X) = y_{\bullet 1} p (1-p) \left( \frac{N-n}{N-1} \right) = \frac{y_{1 \bullet} \ y_{2 \bullet} \ y_{\bullet 1} \ y_{\bullet 2}}{N^2(N-1)},$$`
+where `\(p\)` is the proportion of type 1, i.e. `\(y_{1 \bullet}/N\)`. 
+--&gt;
+
+---
+
+## p-values
+
+To calculate the p-value for a particular table we need to:
+- enumerate all tables, as extreme, or more extreme than the observed table
+**with the same marginal totals**; and
+- sum up the probability of each of these tables.
+
+&lt;!--
+Note for a `\(2 \times 2\)` table the probability an individual table (under `\(H_0\)` ) simplifies to:
+`$$P(a,b,c,d) = \frac{(a + b)!(c + d)!(a+c)!(b+d)!}{n!a!b!c!d!}$$`
+which can (sometimes) be useful when calculating these probabilities by hand.
+
+--&gt;
+
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 384h192c53 0 96-43 96-96h32c70.6 0 128-57.4 128-128S582.6 32 512 32H120c-13.3 0-24 10.7-24 24v232c0 53 43 96 96 96zM512 96c35.3 0 64 28.7 64 64s-28.7 64-64 64h-32V96h32zm47.7 384H48.3c-47.6 0-61-64-36-64h583.3c25 0 11.8 64-35.9 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Lady tasting tea
+
+
+
+```r
+truth = c("milk", "tea", "tea", "milk", "tea", "tea", "milk", "milk")
+predicted = c("milk", "tea", "tea", "milk", "tea", "tea", "milk", "milk")
+y.mat = table(truth, predicted)
+y.mat
+```
+
+```
+##       predicted
+## truth  milk tea
+##   milk    4   0
+##   tea     0   4
+```
+
+.pull-left[
+For Fisher's exact test we:
+
+1. Consider all possible permutations of the `\(2 \times 2\)` contingency table with the same *marginal totals* (in this case `\(y_{i\bullet} = y_{\bullet j} = 4\)`).
+2. Calculate how many of these were equal to or "more extreme" than what we observed.
+
+]
+
+.pull-right[
+`$$\begin{array}{l|cc|c}
+\mbox{Truth \ Predicted} &amp; \mbox{Milk} &amp; \mbox{Tea} &amp;  \\ \hline
+\mbox{Milk} &amp; 4 &amp; 0 &amp; y_{1\bullet} = 4  \\ 
+\mbox{Tea}  &amp; 0 &amp; 4 &amp; y_{2\bullet} = 4 \\ \hline
+ &amp; y_{\bullet 1} = 4 &amp; y_{\bullet 2}=4 &amp; y_{\bullet\bullet} = n = 8 \\ \hline
+\end{array}$$`
+]
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 384h192c53 0 96-43 96-96h32c70.6 0 128-57.4 128-128S582.6 32 512 32H120c-13.3 0-24 10.7-24 24v232c0 53 43 96 96 96zM512 96c35.3 0 64 28.7 64 64s-28.7 64-64 64h-32V96h32zm47.7 384H48.3c-47.6 0-61-64-36-64h583.3c25 0 11.8 64-35.9 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## How do we define more extreme?
+
+Let us define a test statistic
+
+`$$T = \text{number of cups of tea before milk that she got correct}.$$`
+
+This test statistic has 5 outcomes: `\(\{0, 1, 2, 3, 4\}\)`.
+
+Given that there are 8 cups of tea, there are `\(\binom{8}{4} = 70\)` ways that we could predict which cups had tea added before milk.
+
+We can look at all 70 permutations of prediction vs truth and calculate how often we see a test statistic of `\(0, 1, 2, 3\)` or `\(4\)`.
+
+`$$\begin{array}{l|ccccc|c}
+t_i &amp; 0 &amp; 1 &amp; 2 &amp; 3 &amp; 4 &amp;  \\ \hline
+f_i &amp; \binom{4}{0}\binom{4}{4} = 1 &amp; \binom{4}{1}\binom{4}{3} = 16 &amp;  \binom{4}{2}\binom{4}{2} =36 &amp;  \binom{4}{3}\binom{4}{1} = 16 &amp;  \binom{4}{4}\binom{4}{0} = 1 &amp; 70 \\
+p_i &amp; \frac{1}{70} &amp; \frac{16}{70} &amp; \frac{36}{70} &amp;\frac{16}{70} &amp;\frac{1}{70} &amp; 1 \\ \hline
+\end{array}$$`
+
+`\(P(T = 4) = \frac{1}{70} = 0.014\)`
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 384h192c53 0 96-43 96-96h32c70.6 0 128-57.4 128-128S582.6 32 512 32H120c-13.3 0-24 10.7-24 24v232c0 53 43 96 96 96zM512 96c35.3 0 64 28.7 64 64s-28.7 64-64 64h-32V96h32zm47.7 384H48.3c-47.6 0-61-64-36-64h583.3c25 0 11.8 64-35.9 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.small[
+
+```r
+fisher.test(y.mat)
+```
+
+```
+## 
+## 	Fisher's Exact Test for Count Data
+## 
+## data:  y.mat
+## p-value = 0.02857
+## alternative hypothesis: true odds ratio is not equal to 1
+## 95 percent confidence interval:
+##  1.339059      Inf
+## sample estimates:
+## odds ratio 
+##        Inf
+```
+
+```r
+fisher.test(y.mat, alternative = "greater")
+```
+
+```
+## 
+## 	Fisher's Exact Test for Count Data
+## 
+## data:  y.mat
+## p-value = 0.01429
+## alternative hypothesis: true odds ratio is greater than 1
+## 95 percent confidence interval:
+##  2.003768      Inf
+## sample estimates:
+## odds ratio 
+##        Inf
+```
+]
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M528 224H272c-8.8 0-16 7.2-16 16v144H64V144c0-8.8-7.2-16-16-16H16c-8.8 0-16 7.2-16 16v352c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16v-48h512v48c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V336c0-61.9-50.1-112-112-112zM136 96h126.1l27.6 55.2c5.9 11.8 22.7 11.8 28.6 0L368 51.8 390.1 96H512c8.8 0 16-7.2 16-16s-7.2-16-16-16H409.9L382.3 8.8C376.4-3 359.6-3 353.7 8.8L304 108.2l-19.9-39.8c-1.4-2.7-4.1-4.4-7.2-4.4H136c-4.4 0-8 3.6-8 8v16c0 4.4 3.6 8 8 8zm24 256c35.3 0 64-28.7 64-64s-28.7-64-64-64-64 28.7-64 64 28.7 64 64 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Cancer of the larynx
+
+Mendenhall, Million, Sharkey, et al. (1984) report the results of a study comparing radiation therapy with surgery in treating cancer of the larynx.
+
+|   | Cancer controlled | Cancer not controlled | Total
+|---|:-----------------:|:---------------------:|:------:
+| Surgery               | 21 | 2 | 23 
+| Radiation therapy     | 15 | 3 | 18 
+| Total                 | 36 | 5 | 41
+
+Suppose that we wish to test `\(H_0\colon\ \theta = 1\)` (both treatments equally effective) against `\(H_1 \colon\ \theta &gt; 1\)` (surgery more effective).
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M528 224H272c-8.8 0-16 7.2-16 16v144H64V144c0-8.8-7.2-16-16-16H16c-8.8 0-16 7.2-16 16v352c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16v-48h512v48c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V336c0-61.9-50.1-112-112-112zM136 96h126.1l27.6 55.2c5.9 11.8 22.7 11.8 28.6 0L368 51.8 390.1 96H512c8.8 0 16-7.2 16-16s-7.2-16-16-16H409.9L382.3 8.8C376.4-3 359.6-3 353.7 8.8L304 108.2l-19.9-39.8c-1.4-2.7-4.1-4.4-7.2-4.4H136c-4.4 0-8 3.6-8 8v16c0 4.4 3.6 8 8 8zm24 256c35.3 0 64-28.7 64-64s-28.7-64-64-64-64 28.7-64 64 28.7 64 64 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Cancer of the larynx
+
+First we need to enumerate all tables which are .blue[as extreme] or .red[more extreme] than
+the observed table. These are:
+
+.pull-left[
+The original table:
+
+.font80[
+
+|   | Cancer controlled | Cancer not controlled | Total
+|---|:-----------------:|:---------------------:|:------:
+| Surgery               | .blue[21] | 2 | **23** 
+| Radiation therapy     | 15 | 3 | **18** 
+| **Total**                 | **36** | **5** | **41**
+
+]
+
+And the tables where surgery controlled more than .blue[21] (i.e. .red[22] or .red[23]) patients, holding the **margins** constant.
+
+]
+.pull-right[.font80[
+
+
+
+|   | Cancer controlled | Cancer not controlled | Total
+|---|:-----------------:|:---------------------:|:------:
+| Surgery               | .red[22] | 1 | **23** 
+| Radiation therapy     | 14 | 4 | **18** 
+| **Total**                 | **36** | **5** | **41**
+
+&lt;br&gt;
+
+|   | Cancer controlled | Cancer not controlled | Total
+|---|:-----------------:|:---------------------:|:------:
+| Surgery               | .red[23] | 0 | **23** 
+| Radiation therapy     | 13 | 5 | **18** 
+| **Total**                 | **36** | **5** | **41**
+
+]]
+
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M528 224H272c-8.8 0-16 7.2-16 16v144H64V144c0-8.8-7.2-16-16-16H16c-8.8 0-16 7.2-16 16v352c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16v-48h512v48c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V336c0-61.9-50.1-112-112-112zM136 96h126.1l27.6 55.2c5.9 11.8 22.7 11.8 28.6 0L368 51.8 390.1 96H512c8.8 0 16-7.2 16-16s-7.2-16-16-16H409.9L382.3 8.8C376.4-3 359.6-3 353.7 8.8L304 108.2l-19.9-39.8c-1.4-2.7-4.1-4.4-7.2-4.4H136c-4.4 0-8 3.6-8 8v16c0 4.4 3.6 8 8 8zm24 256c35.3 0 64-28.7 64-64s-28.7-64-64-64-64 28.7-64 64 28.7 64 64 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Cancer of the larynx
+
+Let `\(X\)` be the number of surgery cases where cancer is controlled. Applying
+Fisher's approach
+`$$\begin{aligned}
+\text{p-value}  
+&amp;= P (X \geq 21 ~|~ \text{marginal totals} )\\
+&amp;= P (X = 21, 22, 23 ~|~ \text{marginal totals} )\\
+&amp;= P (X = 21 ~|~ \text{marginal totals} ) + P (X = 22 ~|~ \text{marginal totals} ) + P (X = 23 ~|~ \text{marginal totals} )\\
+&amp;= \frac{ \displaystyle {23\choose 21}\displaystyle {18\choose 15} }
+{ \displaystyle {41\choose 36} } +
+\frac{ \displaystyle {23\choose 22}\displaystyle {18\choose 14} }
+{ \displaystyle {41\choose 36} } +
+\frac{ \displaystyle {23\choose 23}\displaystyle {18\choose 13} }
+{ \displaystyle {41\choose 36} } \\
+&amp;=  0.3808.\end{aligned}$$`
+
+&lt;!--
+.pull-left[Pearson's `\(\chi^2\)` test gives
+`$$\begin{aligned}
+X^2 = \frac{41 (3 \times 21 - 2 \times 15)^2}{23 \times 18 \times
+36 \times 5} &amp;= 0.5992. \\
+\text{p-value} \simeq P (\chi_1^2 \geq 0.5992) &amp;= 0.4389.
+\end{aligned}$$`
+]
+.pull-right[
+Yates' test gives
+`$$\begin{aligned}
+Y^2 = \frac{41(|3 \times 21 - 2 \times 15| - 41/2)^2}{23 \times 18 \times
+          36 \times 5} \\
+\text{p-value} \simeq P (\chi_1^2 \geq 0.0860) &amp;= 0.7694
+\end{aligned}$$`
+]
+
+
+.footnote[
+Extensions of Fisher's exact test idea to higher order tables exist and are based on the multivariate version of the hypergeometric distribution.]
+
+--&gt;
+
+.small[
+.pull-left[
+
+```r
+y_mat = matrix(c(21, 15, 2, 3), ncol = 2)
+colnames(y_mat) = c("Controlled", "Not controlled")
+rownames(y_mat) = c("Surgery", "Radiation therapy")
+y_mat
+```
+
+```
+##                   Controlled Not controlled
+## Surgery                   21              2
+## Radiation therapy         15              3
+```
+]
+.pull-right[
+
+```r
+fisher.test(y_mat, alternative = "greater")
+```
+
+```
+## 
+## 	Fisher's Exact Test for Count Data
+## 
+## data:  y_mat
+## p-value = 0.3808
+## alternative hypothesis: true odds ratio is greater than 1
+## 95 percent confidence interval:
+##  0.2864828       Inf
+## sample estimates:
+## odds ratio 
+##   2.061731
+```
+]
+]
+
+
+
+---
+
+## Drawbacks
+
+Why don't we use Fisher's exact test all the time?
+
+- It assumes that row and column margins are fixed.
+
+- Computationally difficult for large samples.
+
+- It can be generalized to `\(r \times c\)` two-way contingency tables but is very difficult to compute. Generally requires use of Monte Carlo (i.e. random permutation).
+
+`$$\begin{array}{l|ccc|c}
+\mbox{X \ Y} &amp; y_1 &amp; y_2 &amp; y_3 &amp; \mbox{Row total}  \\ \hline
+x_1 &amp; a &amp; b &amp; c &amp; a + b +c \\ 
+x_2  &amp; d &amp; e &amp; f &amp; d + e + f \\ \hline
+\mbox{Row total} &amp; a+d &amp; b+e &amp; c+f &amp; n = a + b + c + d + e +f \\ 
+\end{array}$$`
+
+
+---
+class: segue
+
+# Yates' chi-squared test
+
+---
+
+## Yates' Corrected `\(\chi^2\)` Test
+
+Yates (1934) modified the standard chi-squared test with a continuity correction. It is usually more accurate when counts in each cell are small. Yates' statistic for `\(2\times2\)` tables is:
+`$$T = \sum_{i=1}^2\sum_{j=1}^2 \frac{(|Y_{ij} - e_{ij}| - 0.5)^2}{e_{ij}}$$`
+which approximately follows a `\(\chi_1^2\)` distribution under `\(H_0\)`. 
+
+**Logic behind continuity corrections**
+
+In general, if we have an _integer-valued_ random variable `\(X\)` which we would like to approximate with a continuous random variable `\(Y\)` then
+`$$P(X\le x) \approx P(Y\le x+0.5)$$`
+and 
+`$$P(X\ge x) \approx P(Y \ge x-0.5)$$`
+
+---
+
+## Continuity correction
+
+Below is the distribution for a `\(B(n,p)\)`.
+
+&lt;img src="lec09_files/figure-html/unnamed-chunk-8-1.png" width="864" /&gt;
+
+---
+
+## Continuity correction
+
+We can approximate a `\(X \sim B(n,p)\)` with a `\(Y \sim N(np,np(1-p))\)`.
+
+&lt;img src="lec09_files/figure-html/unnamed-chunk-9-1.png" width="864" /&gt;
+
+---
+
+## Continuity correction
+
+We can estimate `\(P(X\le 2)\)` with `\(P(Y\le 2)\)`.
+
+&lt;img src="lec09_files/figure-html/unnamed-chunk-10-1.png" width="864" /&gt;
+
+---
+
+## Continuity correction
+
+But `\(P(Y\le 2.5)\)` is better.
+
+&lt;img src="lec09_files/figure-html/unnamed-chunk-11-1.png" width="864" /&gt;
+
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 384h192c53 0 96-43 96-96h32c70.6 0 128-57.4 128-128S582.6 32 512 32H120c-13.3 0-24 10.7-24 24v232c0 53 43 96 96 96zM512 96c35.3 0 64 28.7 64 64s-28.7 64-64 64h-32V96h32zm47.7 384H48.3c-47.6 0-61-64-36-64h583.3c25 0 11.8 64-35.9 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left[
+
+```r
+(y.mat = table(truth, predicted))
+```
+
+```
+##       predicted
+## truth  milk tea
+##   milk    4   0
+##   tea     0   4
+```
+
+```r
+r = c = 2
+yr = apply(y.mat, 1, sum)  # Or try rowSums()
+yc = apply(y.mat, 2, sum)  # Or try colSums()
+yr.mat = matrix(yr, r, c, byrow = FALSE)
+yc.mat = matrix(yc, r, c, byrow = TRUE)
+# ey.mat = yr%*%t(yc)/n
+(ey.mat = yr.mat * yc.mat/sum(y.mat))
+```
+
+```
+##      [,1] [,2]
+## [1,]    2    2
+## [2,]    2    2
+```
+]
+
+.pull-right[
+
+```r
+(res.yates = (abs(y.mat-ey.mat)-0.5)^2/ey.mat)
+```
+
+```
+##       predicted
+## truth   milk   tea
+##   milk 1.125 1.125
+##   tea  1.125 1.125
+```
+
+```r
+(t0 = sum(res.yates))
+```
+
+```
+## [1] 4.5
+```
+
+```r
+#Calculate p-values
+pchisq(t0, 1, lower.tail = FALSE)
+```
+
+```
+## [1] 0.03389485
+```
+]
+
+---
+class: font110
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M528 224H272c-8.8 0-16 7.2-16 16v144H64V144c0-8.8-7.2-16-16-16H16c-8.8 0-16 7.2-16 16v352c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16v-48h512v48c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V336c0-61.9-50.1-112-112-112zM136 96h126.1l27.6 55.2c5.9 11.8 22.7 11.8 28.6 0L368 51.8 390.1 96H512c8.8 0 16-7.2 16-16s-7.2-16-16-16H409.9L382.3 8.8C376.4-3 359.6-3 353.7 8.8L304 108.2l-19.9-39.8c-1.4-2.7-4.1-4.4-7.2-4.4H136c-4.4 0-8 3.6-8 8v16c0 4.4 3.6 8 8 8zm24 256c35.3 0 64-28.7 64-64s-28.7-64-64-64-64 28.7-64 64 28.7 64 64 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left[
+
+### Traditional chi-squared test
+
+
+```r
+chisq.test(y.mat, correct = FALSE)
+```
+
+```
+## Warning in chisq.test(y.mat, correct = FALSE): Chi-squared
+## approximation may be incorrect
+```
+
+```
+## 
+## 	Pearson's Chi-squared test
+## 
+## data:  y.mat
+## X-squared = 8, df = 1, p-value = 0.004678
+```
+
+### Fisher's exact test
+
+
+```r
+fisher.test(y.mat)
+```
+
+```
+## 
+## 	Fisher's Exact Test for Count Data
+## 
+## data:  y.mat
+## p-value = 0.02857
+## alternative hypothesis: true odds ratio is not equal to 1
+## 95 percent confidence interval:
+##  1.339059      Inf
+## sample estimates:
+## odds ratio 
+##        Inf
+```
+]
+
+.pull-right[
+
+### Yates' continuity correction
+
+
+```r
+chisq.test(y.mat, correct = TRUE)
+```
+
+```
+## Warning in chisq.test(y.mat, correct = TRUE): Chi-squared
+## approximation may be incorrect
+```
+
+```
+## 
+## 	Pearson's Chi-squared test with Yates' continuity
+## 	correction
+## 
+## data:  y.mat
+## X-squared = 4.5, df = 1, p-value = 0.03389
+```
+]
+
+&lt;!--
+
+## Breast cancer and childbirth
+
+A hypothesis has been proposed that breast cancer in women is caused, in part, by events that occur between the age at menarche.fn[1] and the age at first childbirth. An international study was conducted to test this hypothesis (MacMahon, Cole, Lin, et al., 1970). Breast cancer cases where identified among women in selected hospitals in the US, Greece, Brazil, Taiwan and Japan. Controls were chosen from women of comparable age who were in hospital at the same time as the cases but who did not have breast cancer. All women were asked of there age at first birth and the results were summarised in the table on the next slide. 
+
+In the table `\(S=1\)` if the age at first birth is greater than or equal to 30 and 2 otherwise and `\(R=1\)` for the cases and `\(R=2\)` for the controls.
+
+.footnote[[1] Menarche: the age when menstruation begins]
+
+## Breast cancer and childbirth
+
+| | Age at first birth `\(\geq\)` 30 | Age at first birth `\(&lt;\)` 30  | Total |
+|---------------|:-----:|:-----:|-----:|
+| Breast cancer | 15    | 5     | 20 |
+| Control       | 9     | 21    | 30 |
+| Total         | 24    | 26    | 50 |
+
+
+For this example Pearson's `\(X^2\)` statistic is
+`$$X^2 =  \frac{n(ad - bc)^2}{(a + b)(a + c)(b + d)(c + d)} 
+= \frac{50(15\times 21 - 5\times 9)^2}{20\times 30 \times 24 \times 26} = 8.01$$`
+which results in p-value 0.0046 whereas  Yate's statistic is:
+`$$Y^2 = \frac{n(|ad - bc| - n/2)^2}{(a + b)(c + d)(a + c)(b + d)}
+= \frac{50(|15\times 21 - 5\times 9| - 25)^2}{20\times 30 \times 24 \times 26} 
+= 9.74$$`
+which results in p-value 0.0018. In this case the results agree, but this will not always be the case.
+
+--&gt;
+
+---
+class: segue
+
+## Permutation testing
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256.12 245.96c-13.25 0-24 10.74-24 24 1.14 72.25-8.14 141.9-27.7 211.55-2.73 9.72 2.15 30.49 23.12 30.49 10.48 0 20.11-6.92 23.09-17.52 13.53-47.91 31.04-125.41 29.48-224.52.01-13.25-10.73-24-23.99-24zm-.86-81.73C194 164.16 151.25 211.3 152.1 265.32c.75 47.94-3.75 95.91-13.37 142.55-2.69 12.98 5.67 25.69 18.64 28.36 13.05 2.67 25.67-5.66 28.36-18.64 10.34-50.09 15.17-101.58 14.37-153.02-.41-25.95 19.92-52.49 54.45-52.34 31.31.47 57.15 25.34 57.62 55.47.77 48.05-2.81 96.33-10.61 143.55-2.17 13.06 6.69 25.42 19.76 27.58 19.97 3.33 26.81-15.1 27.58-19.77 8.28-50.03 12.06-101.21 11.27-152.11-.88-55.8-47.94-101.88-104.91-102.72zm-110.69-19.78c-10.3-8.34-25.37-6.8-33.76 3.48-25.62 31.5-39.39 71.28-38.75 112 .59 37.58-2.47 75.27-9.11 112.05-2.34 13.05 6.31 25.53 19.36 27.89 20.11 3.5 27.07-14.81 27.89-19.36 7.19-39.84 10.5-80.66 9.86-121.33-.47-29.88 9.2-57.88 28-80.97 8.35-10.28 6.79-25.39-3.49-33.76zm109.47-62.33c-15.41-.41-30.87 1.44-45.78 4.97-12.89 3.06-20.87 15.98-17.83 28.89 3.06 12.89 16 20.83 28.89 17.83 11.05-2.61 22.47-3.77 34-3.69 75.43 1.13 137.73 61.5 138.88 134.58.59 37.88-1.28 76.11-5.58 113.63-1.5 13.17 7.95 25.08 21.11 26.58 16.72 1.95 25.51-11.88 26.58-21.11a929.06 929.06 0 0 0 5.89-119.85c-1.56-98.75-85.07-180.33-186.16-181.83zm252.07 121.45c-2.86-12.92-15.51-21.2-28.61-18.27-12.94 2.86-21.12 15.66-18.26 28.61 4.71 21.41 4.91 37.41 4.7 61.6-.11 13.27 10.55 24.09 23.8 24.2h.2c13.17 0 23.89-10.61 24-23.8.18-22.18.4-44.11-5.83-72.34zm-40.12-90.72C417.29 43.46 337.6 1.29 252.81.02 183.02-.82 118.47 24.91 70.46 72.94 24.09 119.37-.9 181.04.14 246.65l-.12 21.47c-.39 13.25 10.03 24.31 23.28 24.69.23.02.48.02.72.02 12.92 0 23.59-10.3 23.97-23.3l.16-23.64c-.83-52.5 19.16-101.86 56.28-139 38.76-38.8 91.34-59.67 147.68-58.86 69.45 1.03 134.73 35.56 174.62 92.39 7.61 10.86 22.56 13.45 33.42 5.86 10.84-7.62 13.46-22.59 5.84-33.43z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Fingerprints
+
+.pull-left[
+The study of Galton (1892) marked one of the first formal statistical examinations of association for contingency tables. His work involved determining the association of fingerprint characteristics of 105 fraternal (or dizygotic) male twins. One male twin was "earmarked" as twin A and his brother was "earmarked" as twin B. For each twin, the number of Arches, Loops and Whorls was counted and summarised in the `\(3\times3\)` contingency table of Galton (1892, Table XXII, pg. 175). 
+]
+.pull-right[
+&lt;img src="imgs/fingerprints.png" width="755" /&gt;
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256.12 245.96c-13.25 0-24 10.74-24 24 1.14 72.25-8.14 141.9-27.7 211.55-2.73 9.72 2.15 30.49 23.12 30.49 10.48 0 20.11-6.92 23.09-17.52 13.53-47.91 31.04-125.41 29.48-224.52.01-13.25-10.73-24-23.99-24zm-.86-81.73C194 164.16 151.25 211.3 152.1 265.32c.75 47.94-3.75 95.91-13.37 142.55-2.69 12.98 5.67 25.69 18.64 28.36 13.05 2.67 25.67-5.66 28.36-18.64 10.34-50.09 15.17-101.58 14.37-153.02-.41-25.95 19.92-52.49 54.45-52.34 31.31.47 57.15 25.34 57.62 55.47.77 48.05-2.81 96.33-10.61 143.55-2.17 13.06 6.69 25.42 19.76 27.58 19.97 3.33 26.81-15.1 27.58-19.77 8.28-50.03 12.06-101.21 11.27-152.11-.88-55.8-47.94-101.88-104.91-102.72zm-110.69-19.78c-10.3-8.34-25.37-6.8-33.76 3.48-25.62 31.5-39.39 71.28-38.75 112 .59 37.58-2.47 75.27-9.11 112.05-2.34 13.05 6.31 25.53 19.36 27.89 20.11 3.5 27.07-14.81 27.89-19.36 7.19-39.84 10.5-80.66 9.86-121.33-.47-29.88 9.2-57.88 28-80.97 8.35-10.28 6.79-25.39-3.49-33.76zm109.47-62.33c-15.41-.41-30.87 1.44-45.78 4.97-12.89 3.06-20.87 15.98-17.83 28.89 3.06 12.89 16 20.83 28.89 17.83 11.05-2.61 22.47-3.77 34-3.69 75.43 1.13 137.73 61.5 138.88 134.58.59 37.88-1.28 76.11-5.58 113.63-1.5 13.17 7.95 25.08 21.11 26.58 16.72 1.95 25.51-11.88 26.58-21.11a929.06 929.06 0 0 0 5.89-119.85c-1.56-98.75-85.07-180.33-186.16-181.83zm252.07 121.45c-2.86-12.92-15.51-21.2-28.61-18.27-12.94 2.86-21.12 15.66-18.26 28.61 4.71 21.41 4.91 37.41 4.7 61.6-.11 13.27 10.55 24.09 23.8 24.2h.2c13.17 0 23.89-10.61 24-23.8.18-22.18.4-44.11-5.83-72.34zm-40.12-90.72C417.29 43.46 337.6 1.29 252.81.02 183.02-.82 118.47 24.91 70.46 72.94 24.09 119.37-.9 181.04.14 246.65l-.12 21.47c-.39 13.25 10.03 24.31 23.28 24.69.23.02.48.02.72.02 12.92 0 23.59-10.3 23.97-23.3l.16-23.64c-.83-52.5 19.16-101.86 56.28-139 38.76-38.8 91.34-59.67 147.68-58.86 69.45 1.03 134.73 35.56 174.62 92.39 7.61 10.86 22.56 13.45 33.42 5.86 10.84-7.62 13.46-22.59 5.84-33.43z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+galton.dat &lt;- matrix(c(5, 4, 1, 12, 42, 14, 2, 15, 10), 3, 3)
+rownames(galton.dat) = c("Arches-B", "Loops-B", "Whorls-B")
+colnames(galton.dat) = c("Arches-A", "Loops-A", "Whorls-A")
+galton.dat
+```
+
+```
+##          Arches-A Loops-A Whorls-A
+## Arches-B        5      12        2
+## Loops-B         4      42       15
+## Whorls-B        1      14       10
+```
+
+```r
+chisq.test(galton.dat)
+```
+
+```
+## Warning in chisq.test(galton.dat): Chi-squared approximation
+## may be incorrect
+```
+
+```
+## 
+## 	Pearson's Chi-squared test
+## 
+## data:  galton.dat
+## X-squared = 11.17, df = 4, p-value = 0.02472
+```
+
+---
+
+## Monte Carlo simulation
+
+The **Monte Carlo simulation procedure** is as follows:
+
+- Analyse the sample as one would normally do in a hypothesis test (up to, and including, the calculation of the test statistic)
+- From the original sample being analysed, resample it LOTS of times
+- The test statistic of interest is calculated for each of the resamples (so that we have the sampling distribution of the test statistic)
+- This leads to LOTS of test statistics that will be used to calculate p-values for the observed statistic.
+
+Monte Carlo p-values are calculated by determining the proportion of the resampled test statistics as or more extrame than the observed test statistic.
+
+**No assumptions** are made about the underlying distribution of the population. 
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256.12 245.96c-13.25 0-24 10.74-24 24 1.14 72.25-8.14 141.9-27.7 211.55-2.73 9.72 2.15 30.49 23.12 30.49 10.48 0 20.11-6.92 23.09-17.52 13.53-47.91 31.04-125.41 29.48-224.52.01-13.25-10.73-24-23.99-24zm-.86-81.73C194 164.16 151.25 211.3 152.1 265.32c.75 47.94-3.75 95.91-13.37 142.55-2.69 12.98 5.67 25.69 18.64 28.36 13.05 2.67 25.67-5.66 28.36-18.64 10.34-50.09 15.17-101.58 14.37-153.02-.41-25.95 19.92-52.49 54.45-52.34 31.31.47 57.15 25.34 57.62 55.47.77 48.05-2.81 96.33-10.61 143.55-2.17 13.06 6.69 25.42 19.76 27.58 19.97 3.33 26.81-15.1 27.58-19.77 8.28-50.03 12.06-101.21 11.27-152.11-.88-55.8-47.94-101.88-104.91-102.72zm-110.69-19.78c-10.3-8.34-25.37-6.8-33.76 3.48-25.62 31.5-39.39 71.28-38.75 112 .59 37.58-2.47 75.27-9.11 112.05-2.34 13.05 6.31 25.53 19.36 27.89 20.11 3.5 27.07-14.81 27.89-19.36 7.19-39.84 10.5-80.66 9.86-121.33-.47-29.88 9.2-57.88 28-80.97 8.35-10.28 6.79-25.39-3.49-33.76zm109.47-62.33c-15.41-.41-30.87 1.44-45.78 4.97-12.89 3.06-20.87 15.98-17.83 28.89 3.06 12.89 16 20.83 28.89 17.83 11.05-2.61 22.47-3.77 34-3.69 75.43 1.13 137.73 61.5 138.88 134.58.59 37.88-1.28 76.11-5.58 113.63-1.5 13.17 7.95 25.08 21.11 26.58 16.72 1.95 25.51-11.88 26.58-21.11a929.06 929.06 0 0 0 5.89-119.85c-1.56-98.75-85.07-180.33-186.16-181.83zm252.07 121.45c-2.86-12.92-15.51-21.2-28.61-18.27-12.94 2.86-21.12 15.66-18.26 28.61 4.71 21.41 4.91 37.41 4.7 61.6-.11 13.27 10.55 24.09 23.8 24.2h.2c13.17 0 23.89-10.61 24-23.8.18-22.18.4-44.11-5.83-72.34zm-40.12-90.72C417.29 43.46 337.6 1.29 252.81.02 183.02-.82 118.47 24.91 70.46 72.94 24.09 119.37-.9 181.04.14 246.65l-.12 21.47c-.39 13.25 10.03 24.31 23.28 24.69.23.02.48.02.72.02 12.92 0 23.59-10.3 23.97-23.3l.16-23.64c-.83-52.5 19.16-101.86 56.28-139 38.76-38.8 91.34-59.67 147.68-58.86 69.45 1.03 134.73 35.56 174.62 92.39 7.61 10.86 22.56 13.45 33.42 5.86 10.84-7.62 13.46-22.59 5.84-33.43z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Fingerprints
+
+.pull-left[
+Monte Carlo p-values may be obtained by randomly generating contingency tables given that the margins are assumed fixed.
+
+To randomly generate a contingency table with the same margins as the original table we use the `r2dtable` function in R.
+
+
+```r
+rcounts = rowSums(galton.dat)
+ccounts = colSums(galton.dat)
+B = 10000
+set.seed(123)
+x_list = r2dtable(B, rcounts, ccounts)
+```
+`r2dtable()` generates a list of random 2-way tables given marginals.  If we consider the first element in the list we can perform a chi-square test for independence on the first random table.
+]
+
+.pull-right[
+
+
+
+```r
+x_list[[1]]
+```
+
+```
+##      [,1] [,2] [,3]
+## [1,]    2   10    7
+## [2,]    7   43   11
+## [3,]    1   15    9
+```
+
+```r
+chisq.test(x_list[[1]])
+```
+
+```
+## Warning in chisq.test(x_list[[1]]): Chi-squared
+## approximation may be incorrect
+```
+
+```
+## 
+## 	Pearson's Chi-squared test
+## 
+## data:  x_list[[1]]
+## X-squared = 5.2367, df = 4, p-value = 0.2639
+```
+
+Here a test statistic for the first random sample is 5.24.
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256.12 245.96c-13.25 0-24 10.74-24 24 1.14 72.25-8.14 141.9-27.7 211.55-2.73 9.72 2.15 30.49 23.12 30.49 10.48 0 20.11-6.92 23.09-17.52 13.53-47.91 31.04-125.41 29.48-224.52.01-13.25-10.73-24-23.99-24zm-.86-81.73C194 164.16 151.25 211.3 152.1 265.32c.75 47.94-3.75 95.91-13.37 142.55-2.69 12.98 5.67 25.69 18.64 28.36 13.05 2.67 25.67-5.66 28.36-18.64 10.34-50.09 15.17-101.58 14.37-153.02-.41-25.95 19.92-52.49 54.45-52.34 31.31.47 57.15 25.34 57.62 55.47.77 48.05-2.81 96.33-10.61 143.55-2.17 13.06 6.69 25.42 19.76 27.58 19.97 3.33 26.81-15.1 27.58-19.77 8.28-50.03 12.06-101.21 11.27-152.11-.88-55.8-47.94-101.88-104.91-102.72zm-110.69-19.78c-10.3-8.34-25.37-6.8-33.76 3.48-25.62 31.5-39.39 71.28-38.75 112 .59 37.58-2.47 75.27-9.11 112.05-2.34 13.05 6.31 25.53 19.36 27.89 20.11 3.5 27.07-14.81 27.89-19.36 7.19-39.84 10.5-80.66 9.86-121.33-.47-29.88 9.2-57.88 28-80.97 8.35-10.28 6.79-25.39-3.49-33.76zm109.47-62.33c-15.41-.41-30.87 1.44-45.78 4.97-12.89 3.06-20.87 15.98-17.83 28.89 3.06 12.89 16 20.83 28.89 17.83 11.05-2.61 22.47-3.77 34-3.69 75.43 1.13 137.73 61.5 138.88 134.58.59 37.88-1.28 76.11-5.58 113.63-1.5 13.17 7.95 25.08 21.11 26.58 16.72 1.95 25.51-11.88 26.58-21.11a929.06 929.06 0 0 0 5.89-119.85c-1.56-98.75-85.07-180.33-186.16-181.83zm252.07 121.45c-2.86-12.92-15.51-21.2-28.61-18.27-12.94 2.86-21.12 15.66-18.26 28.61 4.71 21.41 4.91 37.41 4.7 61.6-.11 13.27 10.55 24.09 23.8 24.2h.2c13.17 0 23.89-10.61 24-23.8.18-22.18.4-44.11-5.83-72.34zm-40.12-90.72C417.29 43.46 337.6 1.29 252.81.02 183.02-.82 118.47 24.91 70.46 72.94 24.09 119.37-.9 181.04.14 246.65l-.12 21.47c-.39 13.25 10.03 24.31 23.28 24.69.23.02.48.02.72.02 12.92 0 23.59-10.3 23.97-23.3l.16-23.64c-.83-52.5 19.16-101.86 56.28-139 38.76-38.8 91.34-59.67 147.68-58.86 69.45 1.03 134.73 35.56 174.62 92.39 7.61 10.86 22.56 13.45 33.42 5.86 10.84-7.62 13.46-22.59 5.84-33.43z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left[
+For each of the 10,000 randomly generated contingency tables, we can record their test statistic then determine what proportion of them are equal to (or exceed) the observed test statistic.
+
+
+```r
+rnd.chisq = numeric(B)
+for (i in 1:B){
+  rnd.chisq[i] = chisq.test(x_list[[i]])$statistic
+}
+sum(rnd.chisq &gt; 11.1699)/B
+```
+
+```
+## [1] 0.022
+```
+Here, the Monte Carlo p-value is 0.022 (comparable to theoretical p-value of 0.0247).
+]
+
+.pull-right[
+
+```r
+par(cex = 1.8)
+hist(rnd.chisq)
+abline(v = 11.17, col = "purple", lwd = 2)
+axis(1, 11.17, col.axis = "purple")
+```
+
+&lt;img src="lec09_files/figure-html/unnamed-chunk-21-1.png" width="864" /&gt;
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256.12 245.96c-13.25 0-24 10.74-24 24 1.14 72.25-8.14 141.9-27.7 211.55-2.73 9.72 2.15 30.49 23.12 30.49 10.48 0 20.11-6.92 23.09-17.52 13.53-47.91 31.04-125.41 29.48-224.52.01-13.25-10.73-24-23.99-24zm-.86-81.73C194 164.16 151.25 211.3 152.1 265.32c.75 47.94-3.75 95.91-13.37 142.55-2.69 12.98 5.67 25.69 18.64 28.36 13.05 2.67 25.67-5.66 28.36-18.64 10.34-50.09 15.17-101.58 14.37-153.02-.41-25.95 19.92-52.49 54.45-52.34 31.31.47 57.15 25.34 57.62 55.47.77 48.05-2.81 96.33-10.61 143.55-2.17 13.06 6.69 25.42 19.76 27.58 19.97 3.33 26.81-15.1 27.58-19.77 8.28-50.03 12.06-101.21 11.27-152.11-.88-55.8-47.94-101.88-104.91-102.72zm-110.69-19.78c-10.3-8.34-25.37-6.8-33.76 3.48-25.62 31.5-39.39 71.28-38.75 112 .59 37.58-2.47 75.27-9.11 112.05-2.34 13.05 6.31 25.53 19.36 27.89 20.11 3.5 27.07-14.81 27.89-19.36 7.19-39.84 10.5-80.66 9.86-121.33-.47-29.88 9.2-57.88 28-80.97 8.35-10.28 6.79-25.39-3.49-33.76zm109.47-62.33c-15.41-.41-30.87 1.44-45.78 4.97-12.89 3.06-20.87 15.98-17.83 28.89 3.06 12.89 16 20.83 28.89 17.83 11.05-2.61 22.47-3.77 34-3.69 75.43 1.13 137.73 61.5 138.88 134.58.59 37.88-1.28 76.11-5.58 113.63-1.5 13.17 7.95 25.08 21.11 26.58 16.72 1.95 25.51-11.88 26.58-21.11a929.06 929.06 0 0 0 5.89-119.85c-1.56-98.75-85.07-180.33-186.16-181.83zm252.07 121.45c-2.86-12.92-15.51-21.2-28.61-18.27-12.94 2.86-21.12 15.66-18.26 28.61 4.71 21.41 4.91 37.41 4.7 61.6-.11 13.27 10.55 24.09 23.8 24.2h.2c13.17 0 23.89-10.61 24-23.8.18-22.18.4-44.11-5.83-72.34zm-40.12-90.72C417.29 43.46 337.6 1.29 252.81.02 183.02-.82 118.47 24.91 70.46 72.94 24.09 119.37-.9 181.04.14 246.65l-.12 21.47c-.39 13.25 10.03 24.31 23.28 24.69.23.02.48.02.72.02 12.92 0 23.59-10.3 23.97-23.3l.16-23.64c-.83-52.5 19.16-101.86 56.28-139 38.76-38.8 91.34-59.67 147.68-58.86 69.45 1.03 134.73 35.56 174.62 92.39 7.61 10.86 22.56 13.45 33.42 5.86 10.84-7.62 13.46-22.59 5.84-33.43z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+`chisq.test()` can calculate Monte Carlo p-values and does so
+using `r2dtable` internally. You can do this by specifying the parameter `simulate.p.value = TRUE`
+
+
+```r
+chisq.test(galton.dat, simulate.p.value = TRUE)
+```
+
+```
+## 
+## 	Pearson's Chi-squared test with simulated p-value
+## 	(based on 2000 replicates)
+## 
+## data:  galton.dat
+## X-squared = 11.17, df = NA, p-value = 0.01999
+```
+
+By default, R randomly generates 2000 contingency tables and from each calculates the test statistic, thereby producing a Monte Carlo p-value. We can use 10000 resamples by specifying
+
+
+```r
+chisq.test(galton.dat, simulate.p.value = TRUE, B = 10000)
+```
+
+```
+## 
+## 	Pearson's Chi-squared test with simulated p-value
+## 	(based on 10000 replicates)
+## 
+## data:  galton.dat
+## X-squared = 11.17, df = NA, p-value = 0.0232
+```
+
+.pull-right[
+.footnote[
+Notice that the degrees of freedom are `NA` because the test statistic is not being compared against any theoretical distribution rather, the reported p-value is calculated by comparing the test statistics from the simulated samples to the original observed test statistic.
+]
+]
+
+
+---
+
+## References
+
+MacMahon, B., P. Cole, T. M. Lin, C. R. Lowe, A. P.
+Mirra, B. Ravnihar, E. J. Salber, V. G. Valaoras, and
+S. Yuasa (1970). "Age at first birth and breast
+cancer risk". In: _Bulletin of the World Health
+Organization_ 43.2, pp. 209-221. URL:
+[http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2427645/](http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2427645/).
+
+Mendenhall, W. M., R. R. Million, D. E. Sharkey, and
+N. J. Cassisi (1984). "Stage T3 squamous cell
+carcinoma of the glottic larynx treated with surgery
+and/or radiation therapy". In: _International Journal
+of Radiation Oncology *Biology *Physics_ 10.3, pp.
+357-363. DOI:
+[10.1016/0360-3016(84)90054-3](https://doi.org/10.1016%2F0360-3016%2884%2990054-3).
+
+Yates, F. (1934). "Contingency tables involving small
+numbers and the χ&lt;sup&gt;2&lt;/sup&gt; test". In: _Supplement
+to the Journal of the Royal Statistical Society_ 1.2,
+pp. 217-235. DOI:
+[10.2307/2983604](https://doi.org/10.2307%2F2983604).
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="assets/remark-zoom.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>DATA2002</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Garth Tarr" />
+    <script src="lec16_files/header-attrs-2.10/header-attrs.js"></script>
+    <link href="lec16_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } },
+      "HTML-CSS": {
+        styles: {
+          ".MathJax a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+          ".MathJax_Preview a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+        }
+      }
+      });
+    </script>
+    <link rel="stylesheet" href="assets/sydney-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="assets/sydney.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# DATA2002
+## Permutation tests
+### Garth Tarr
+
+---
+
+class: segue
+
+
+
+
+
+.large[
+Lady tasting tea
+
+Permutation tests for population means
+]
+
+
+---
+class: segue
+
+# Lady tasting tea
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 384h192c53 0 96-43 96-96h32c70.6 0 128-57.4 128-128S582.6 32 512 32H120c-13.3 0-24 10.7-24 24v232c0 53 43 96 96 96zM512 96c35.3 0 64 28.7 64 64s-28.7 64-64 64h-32V96h32zm47.7 384H48.3c-47.6 0-61-64-36-64h583.3c25 0 11.8 64-35.9 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Lady tasting tea
+
+.pull-left[
+
+&lt;br&gt;
+
+Given a cup of tea with milk, a lady claims she can discriminate as to whether milk or tea was first added to the cup.
+
+&lt;br&gt;
+
+.blockquote[
+&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 448c-110.532 0-200-89.431-200-200 0-110.495 89.472-200 200-200 110.491 0 200 89.471 200 200 0 110.53-89.431 200-200 200zm107.244-255.2c0 67.052-72.421 68.084-72.421 92.863V300c0 6.627-5.373 12-12 12h-45.647c-6.627 0-12-5.373-12-12v-8.659c0-35.745 27.1-50.034 47.579-61.516 17.561-9.845 28.324-16.541 28.324-29.579 0-17.246-21.999-28.693-39.784-28.693-23.189 0-33.894 10.977-48.942 29.969-4.057 5.12-11.46 6.071-16.666 2.124l-27.824-21.098c-5.107-3.872-6.251-11.066-2.644-16.363C184.846 131.491 214.94 112 261.794 112c49.071 0 101.45 38.304 101.45 88.8zM298 368c0 23.159-18.841 42-42 42s-42-18.841-42-42 18.841-42 42-42 42 18.841 42 42z"&gt;&lt;/path&gt;&lt;/svg&gt;
+How could we test this claim? 
+
+What information would we need?
+]
+]
+
+.pull-right[
+&lt;img src="imgs/1200px-Nice_Cup_of_Tea.jpg" width="800" /&gt;
+]
+
+???
+
+Image source: https://commons.wikimedia.org/wiki/File:Nice_Cup_of_Tea.jpg
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 384h192c53 0 96-43 96-96h32c70.6 0 128-57.4 128-128S582.6 32 512 32H120c-13.3 0-24 10.7-24 24v232c0 53 43 96 96 96zM512 96c35.3 0 64 28.7 64 64s-28.7 64-64 64h-32V96h32zm47.7 384H48.3c-47.6 0-61-64-36-64h583.3c25 0 11.8 64-35.9 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Lady tasting tea
+
+.pull-left-2[
+Fisher proposed a preparing 8 cups of tea
+
+- 4 cups where tea was added before milk
+- 4 cups where milk was added before tea
+
+The lady would then be randomly given the cups of tea and asked to identify the 4 where tea was added before milk.  
+
+&lt;br&gt;
+
+We would then need to record:
+
+- Which cups had tea or milk added first (**truth**).
+
+- Which cups the lady claimed had tea or milk added first (**predicted**).
+]
+.pull-right-1[
+.center[
+&lt;img src="imgs/Youngronaldfisher2.jpg" width="194" /&gt;
+
+Ronald Fisher (1913)
+]
+]
+
+???
+
+Image source: https://commons.wikimedia.org/wiki/File:Youngronaldfisher2.JPG
+He's about 23 in the photo.
+
+---
+
+## Dianne Cook
+
+.pull-left-2[
+
+- World leader in data visualisation.
+
+- Recent work in visual inference
+
+- [&lt;svg viewBox="0 0 576 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"&gt;&lt;/path&gt;&lt;/svg&gt; Myth busting and apophenia in data visualisation: is what you see really there?](https://www.youtube.com/watch?v=coGeZIHCk38)
+
+- Academic supervisor of Hadley Wickham and Yihui Xie.
+
+- [&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"&gt;&lt;/path&gt;&lt;/svg&gt; @visnut](https://twitter.com/visnut)
+
+- Website: http://www.dicook.org/
+
+]
+.pull-right-1[
+.center[
+&lt;img src="imgs/diane_cook.jpg" width="153" /&gt;
+
+Dianne Cook
+]
+]
+
+
+
+---
+
+
+
+```r
+library(nullabor) # you probably need to run: install.packages("nullabor")
+library(ggplot2)
+lineup_df = lineup(null_permute('mpg'), mtcars, pos = 10)
+qplot(mpg, wt, data = lineup_df, geom = 'point') + facet_wrap(~ .sample) + theme_linedraw()
+```
+
+&lt;img src="lec16_files/figure-html/unnamed-chunk-4-1.png" width="864" /&gt;
+
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 384h192c53 0 96-43 96-96h32c70.6 0 128-57.4 128-128S582.6 32 512 32H120c-13.3 0-24 10.7-24 24v232c0 53 43 96 96 96zM512 96c35.3 0 64 28.7 64 64s-28.7 64-64 64h-32V96h32zm47.7 384H48.3c-47.6 0-61-64-36-64h583.3c25 0 11.8 64-35.9 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Lady tasting tea - hypothesis
+
+For Fisher's experiment we were left with two categorical variables.
+
+&gt; `$$\mbox{Truth = {Milk, Tea, Tea, Milk, Tea, Tea, Milk, Milk}}$$`
+
+&gt; `$$\mbox{Prediction = {Milk, Tea, Tea, Milk, Tea, Tea, Milk, Milk}}$$`
+
+&lt;br&gt;
+
+Asking the question: **Are the ladies predictions independent of the truth?** or 
+
+`$$H_0\colon\ \mbox{Lady cannot taste the difference} \ \text{ vs } \ H_1\colon\ \mbox{Lady can taste the difference}$$`
+
+Our **test statistic** is the number of predictions she gets correct,
+`$$T = \text{Number of correctly tea before milk cups correctly identified}$$`
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 384h192c53 0 96-43 96-96h32c70.6 0 128-57.4 128-128S582.6 32 512 32H120c-13.3 0-24 10.7-24 24v232c0 53 43 96 96 96zM512 96c35.3 0 64 28.7 64 64s-28.7 64-64 64h-32V96h32zm47.7 384H48.3c-47.6 0-61-64-36-64h583.3c25 0 11.8 64-35.9 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Calculating significance
+
+The order of the cups was random, therefore there are 
+`$$8! = 8 \times 7 \times 6 \times 5 \times 4  \times 3 \times 2 \times 1 = 40,320$$`
+ways to order 8 cups of tea.
+
+There are `\(\displaystyle{8\choose 4} = 70\)` ways to select which 4 cups of tea had the tea added before milk.
+
+Look at all 70 ways of prediction vs truth and calculate how often we see a test statistic of 0, 1, 2, 3 or 4.
+
+.small[
+`$$\begin{array}{l|ccccc|c}
+\text{Number correct, } t_0 &amp; 0 &amp; 1 &amp; 2 &amp; 3 &amp; 4 &amp;  \\ \hline
+\text{Number of ways to select} &amp; \displaystyle\binom{4}{0}\binom{4}{4} = 1 &amp; \displaystyle\binom{4}{1}\binom{4}{3} = 16 &amp;  \displaystyle\binom{4}{2}\binom{4}{2} =36 &amp;  \displaystyle\binom{4}{3}\binom{4}{1} = 16 &amp;  \displaystyle\binom{4}{4}\binom{4}{0} = 1 &amp; 70 \\
+\text{Probability: }P(T = t_0)  &amp; \dfrac{1}{70} &amp; \dfrac{16}{70} &amp; \dfrac{36}{70} &amp;\dfrac{16}{70} &amp;\dfrac{1}{70} &amp; 1 \\ \hline
+\end{array}$$`
+]
+
+
+`\(P(T = 4) = \frac{1}{70} = 0.014\)` (see Fisher's exact test in Lecture 9).
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 384h192c53 0 96-43 96-96h32c70.6 0 128-57.4 128-128S582.6 32 512 32H120c-13.3 0-24 10.7-24 24v232c0 53 43 96 96 96zM512 96c35.3 0 64 28.7 64 64s-28.7 64-64 64h-32V96h32zm47.7 384H48.3c-47.6 0-61-64-36-64h583.3c25 0 11.8 64-35.9 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Permutations
+
+We could also consider all 40,320 different orderings (permutations) of 8 cups of tea.
+
+
+```r
+# install.packages("arrangements")
+library(arrangements)
+permute_8 = permutations(8)
+```
+
+.pull-left[
+
+```r
+head(permute_8, 10)
+```
+
+```
+##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8]
+##  [1,]    1    2    3    4    5    6    7    8
+##  [2,]    1    2    3    4    5    6    8    7
+##  [3,]    1    2    3    4    5    7    6    8
+##  [4,]    1    2    3    4    5    7    8    6
+##  [5,]    1    2    3    4    5    8    6    7
+##  [6,]    1    2    3    4    5    8    7    6
+##  [7,]    1    2    3    4    6    5    7    8
+##  [8,]    1    2    3    4    6    5    8    7
+##  [9,]    1    2    3    4    6    7    5    8
+## [10,]    1    2    3    4    6    7    8    5
+```
+]
+.pull-right[
+
+```r
+tail(permute_8, 10)
+```
+
+```
+##          [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8]
+## [40311,]    8    7    6    5    3    2    1    4
+## [40312,]    8    7    6    5    3    2    4    1
+## [40313,]    8    7    6    5    3    4    1    2
+## [40314,]    8    7    6    5    3    4    2    1
+## [40315,]    8    7    6    5    4    1    2    3
+## [40316,]    8    7    6    5    4    1    3    2
+## [40317,]    8    7    6    5    4    2    1    3
+## [40318,]    8    7    6    5    4    2    3    1
+## [40319,]    8    7    6    5    4    3    1    2
+## [40320,]    8    7    6    5    4    3    2    1
+```
+]
+
+???
+
+If you wanted to roll your own function to calculate all possible permutations:
+
+
+```r
+permutation_fn = function(n){
+  if(n==1){
+    return(matrix(1))
+  } else {
+    sp &lt;- permutation_fn(n-1)
+    p &lt;- nrow(sp)
+    A &lt;- matrix(nrow = n*p, ncol = n)
+    for(i in 1:n){
+      A[(i-1)*p + 1:p, ] &lt;- cbind(i, sp + (sp &gt;= i))
+    }
+    return(A)
+  }
+}
+```
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 384h192c53 0 96-43 96-96h32c70.6 0 128-57.4 128-128S582.6 32 512 32H120c-13.3 0-24 10.7-24 24v232c0 53 43 96 96 96zM512 96c35.3 0 64 28.7 64 64s-28.7 64-64 64h-32V96h32zm47.7 384H48.3c-47.6 0-61-64-36-64h583.3c25 0 11.8 64-35.9 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Permutations
+
+Use the `permuations()` function on the `truth` vector:
+
+
+```r
+truth = c("milk","tea","tea","milk","tea","tea","milk","milk")
+permute_guess = permutations(truth)
+permute_guess[92,]
+```
+
+```
+## [1] "milk" "tea"  "tea"  "milk" "milk" "milk" "tea"  "tea"
+```
+
+We can check if a particular sequence of tea cups is **identical** to the true sequence:
+
+
+```r
+identical(truth, truth)
+```
+
+```
+## [1] TRUE
+```
+
+```r
+identical(permute_guess[92,], truth)
+```
+
+```
+## [1] FALSE
+```
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 384h192c53 0 96-43 96-96h32c70.6 0 128-57.4 128-128S582.6 32 512 32H120c-13.3 0-24 10.7-24 24v232c0 53 43 96 96 96zM512 96c35.3 0 64 28.7 64 64s-28.7 64-64 64h-32V96h32zm47.7 384H48.3c-47.6 0-61-64-36-64h583.3c25 0 11.8 64-35.9 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Exact p-value
+
+We can calculate the exact p-value by looking across all permutations:
+
+
+```r
+B = nrow(permute_guess)
+check_correct = vector("numeric", length = B)
+for(i in 1:B) {
+  check_correct[i] = identical(permute_guess[i,], truth)
+}
+c(sum(check_correct), mean(check_correct))
+```
+
+```
+## [1] 576.00000000   0.01428571
+```
+
+The p-value is the same as we get using Fisher's exact test!
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 384h192c53 0 96-43 96-96h32c70.6 0 128-57.4 128-128S582.6 32 512 32H120c-13.3 0-24 10.7-24 24v232c0 53 43 96 96 96zM512 96c35.3 0 64 28.7 64 64s-28.7 64-64 64h-32V96h32zm47.7 384H48.3c-47.6 0-61-64-36-64h583.3c25 0 11.8 64-35.9 64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Approximate p-value
+
+Often it's not feasible to consider all `\(n!\)` permutations, so we can `sample()` a selection of them.
+
+
+```r
+set.seed(123)
+truth = c("milk","tea","tea","milk","tea","tea","milk","milk")
+B = 10000
+result = vector(length = B) # initialise outside the loop
+for(i in 1:B){
+  guess = sample(truth, size = 8, replace = FALSE) # does the permutation
+  result[i] = identical(guess, truth)
+}
+mean(result)
+```
+
+```
+## [1] 0.0146
+```
+Pretty close to the exact p-value.
+
+---
+class: segue
+
+# Permutation tests for population means
+
+---
+
+## Plant growth
+
+The `PlantGrowth` data has results from an experiment to compare yields (as measured by dried weight of plants) obtained under a control and two different treatment conditions (Dobson, 1983; Table 7.1).
+
+.pull-left[
+
+```r
+# built into R, load it into the environment
+data("PlantGrowth") 
+library(tidyverse)
+PlantGrowth %&gt;% ggplot() +
+  aes(y = weight, x = group, colour = group) + 
+  geom_boxplot(coef = 10) + 
+  geom_jitter(width = 0.1, size = 5) + 
+  theme(legend.position = "none") +
+  labs(y = "Weight (g)", x = "Group")
+```
+]
+
+.pull-right[
+&lt;img src="lec16_files/figure-html/plantgrowth_boxplot-1.png" width="864" /&gt;
+]
+
+We want to compare the **control** group to the **treatment 2** group.
+
+
+```r
+dat = PlantGrowth %&gt;% filter(group %in% c("ctrl", "trt2"))
+```
+
+---
+
+
+```r
+dat %&gt;% 
+  ggplot() + aes(sample = weight) + 
+  geom_qq() + geom_qq_line() + facet_grid(cols = vars(group), labeller = "label_both") + 
+  labs(y = "Weight (g)", x = "Standard normal quantiles")
+```
+
+&lt;img src="lec16_files/figure-html/unnamed-chunk-11-1.png" width="864" /&gt;
+
+
+---
+
+.pull-left[
+#### Two-sample `\(t\)`-test
+
+
+```r
+t.test(weight ~ group, 
+       data = dat, 
+       var.equal = TRUE)
+```
+
+```
+## 
+## 	Two Sample t-test
+## 
+## data:  weight by group
+## t = -2.134, df = 18, p-value = 0.04685
+## alternative hypothesis: true difference in means between group ctrl and group trt2 is not equal to 0
+## 95 percent confidence interval:
+##  -0.980338117 -0.007661883
+## sample estimates:
+## mean in group ctrl mean in group trt2 
+##              5.032              5.526
+```
+
+]
+
+.pull-right[
+#### Wilcoxon rank-sum test
+
+
+```r
+wilcox.test(weight ~ group, data = dat)
+```
+
+```
+## 
+## 	Wilcoxon rank sum exact test
+## 
+## data:  weight by group
+## W = 25, p-value = 0.06301
+## alternative hypothesis: true location shift is not equal to 0
+```
+
+]
+
+---
+
+## Extracting information from `t.test` objects
+
+
+```r
+tt = t.test(weight ~ group, data = dat, var.equal = TRUE)
+tt
+```
+
+```
+## 
+## 	Two Sample t-test
+## 
+## data:  weight by group
+## t = -2.134, df = 18, p-value = 0.04685
+## alternative hypothesis: true difference in means between group ctrl and group trt2 is not equal to 0
+## 95 percent confidence interval:
+##  -0.980338117 -0.007661883
+## sample estimates:
+## mean in group ctrl mean in group trt2 
+##              5.032              5.526
+```
+
+.pull-left-2[
+
+```r
+names(tt)
+```
+
+```
+##  [1] "statistic"   "parameter"   "p.value"     "conf.int"   
+##  [5] "estimate"    "null.value"  "stderr"      "alternative"
+##  [9] "method"      "data.name"
+```
+]
+.pull-right-1[
+
+```r
+tt$statistic
+```
+
+```
+##        t 
+## -2.13402
+```
+]
+
+---
+
+## Permutation test
+
+Permute the .red[.bold[class labels]] (many times) and see what values we get for the `\(t\)`-test statistic.
+
+
+```r
+B = 10000 # number of permuted samples we will consider
+permuted_dat = dat # make a copy of the data
+t_null = vector("numeric", B) # initialise outside loop
+for(i in 1:B) {
+  permuted_dat$group = sample(dat$group) # this does the permutation
+  t_null[i] = t.test(weight ~ group, data = permuted_dat)$statistic
+}
+```
+
+.pull-left[
+
+```r
+t_null %&gt;% data.frame() %&gt;% 
+  ggplot() + 
+  aes(x = t_null) + 
+  geom_histogram(binwidth = 0.1) + 
+  labs(
+    x = "Test statistics from permuted samples"
+  )
+```
+]
+.pull-right[
+&lt;img src="lec16_files/figure-html/permuted_t_hist-1.png" width="864" /&gt;
+]
+
+---
+
+
+.pull-left[
+
+```r
+data.frame(abs_t_null = abs(t_null)) %&gt;% 
+  ggplot() + 
+  aes(x = abs_t_null) +
+  geom_histogram(binwidth = 0.1,
+                 boundary = 0) + 
+  geom_vline(xintercept = abs(tt$statistic), 
+             col = "red", lwd = 2) + 
+  labs(
+    x = "Absolute value of test statistic"
+  )
+```
+]
+.pull-right[
+&lt;img src="lec16_files/figure-html/permuted_abst_hist-1.png" width="864" /&gt;
+]
+
+What proportion of test statistics from randomly permuted data are more extreme than the test statistic we observed?
+
+
+```r
+mean(abs(t_null) &gt;= abs(tt$statistic))
+```
+
+```
+## [1] 0.0501
+```
+
+This is our permutation test p-value.
+
+---
+
+## Permutation tests
+
+- The two-sample `\(t\)`-test and the permutation test gave similar p-values, but this won't always be the case.
+
+- The two-sample `\(t\)`-test is a .bold[.red[parametric]] test where the test statistic is assumed to follow some distribution (a `\(t_{n_x+n_y-2}\)` distribution).
+
+- The permutation test considers the `\((n_1 + n_2)!\)` permutations of the labels (or a random subset to save computation time) from a single instance of the data (the `\(n_1+n_2\)` observations).
+
+- The permutation test only assumes that the observations `\(X_1,X_2,\ldots,X_{n_x}, Y_1,Y_2,\ldots, Y_{n_y}\)` are _exchangeable_, that is, swapping labels on observations keeps the data just as likely as the original.fn[1]. 
+
+- The permutation test may use the `\(t\)`-test .bold[.blue[test statistic]] but it does not use the `\(t\)` **distribution**.
+
+.footnote[
+Exchangeability means that the joint distribution is invariant to permutations of the values of each variable in the joint distribution, i.e, `\(f_{XYZ}(x=1,y=3,z=2) = f_{XYZ}(x=3,y=2,z=1)\)`.  If this is not the case then counting permutations is not a valid way of testing the null hypothesis, as each permutation will have a different weight (probability/density). Permutation tests depend on each assignment of a given set of numerical values to your variables having the same density/probability. Read more [here](https://www.ohbmbrainmappingblog.com/blog/a-brief-overview-of-permutation-testing-with-examples).
+]
+
+
+---
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 0C79.7 101.3 0 220.9 0 300.5 0 425 79 512 192 512s192-87 192-211.5c0-79.9-80.2-199.6-192-300.5zm0 448c-56.5 0-96-39-96-94.8 0-13.5 4.6-61.5 96-161.2 91.4 99.7 96 147.7 96 161.2 0 55.8-39.5 94.8-96 94.8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Latent heat of fusion 
+
+.pull-left-2[
+Natrella (1963; page 3-23) presents data from two methods that were used in a study of the latent heat latent heat of fusion of ice. Both method A (digital method) and Method B (method of mixtures) were conducted with the specimens cooled to -0.72°C. The data represent the change in total heat from -0.72°C to water at 0°C, in calories per gram of mass. 
+
+&gt; Does the data support the hypothesis that the electrical method (method A) gives larger results? 
+
+
+```r
+A = c(79.98, 80.04, 80.02, 80.04, 80.03, 80.03, 80.04, 
+      79.97, 80.05, 80.03, 80.02, 80.00, 80.02)
+B = c(80.02, 79.94, 79.98, 79.97, 79.97, 80.03, 79.95, 
+      79.97)
+heat = data.frame(
+  energy = c(A,B),
+  method = rep(c("A","B"), c(length(A), length(B)))
+)
+```
+]
+.pull-right-1[
+
+```r
+heat %&gt;% ggplot() + 
+  aes(x = method, y = energy) + 
+  geom_boxplot(coef = 10) + 
+  geom_dotplot(
+    stackdir = "center",
+    binaxis = "y") +
+  labs(
+    y = "Heat of fusion (cal/g)",
+    x = "Method")
+```
+
+&lt;img src="lec16_files/figure-html/unnamed-chunk-17-1.png" width="864" /&gt;
+
+]
+
+.footnote[
+Source: Rice (2006; page 423)
+]
+
+---
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 0C79.7 101.3 0 220.9 0 300.5 0 425 79 512 192 512s192-87 192-211.5c0-79.9-80.2-199.6-192-300.5zm0 448c-56.5 0-96-39-96-94.8 0-13.5 4.6-61.5 96-161.2 91.4 99.7 96 147.7 96 161.2 0 55.8-39.5 94.8-96 94.8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Latent heat of fusion 
+
+
+```r
+t.test(energy ~ method, data = heat, alternative = "greater")
+```
+
+```
+## 
+## 	Welch Two Sample t-test
+## 
+## data:  energy by method
+## t = 3.2499, df = 12.027, p-value = 0.00347
+## alternative hypothesis: true difference in means between group A and group B is greater than 0
+## 95 percent confidence interval:
+##  0.01897943        Inf
+## sample estimates:
+## mean in group A mean in group B 
+##        80.02077        79.97875
+```
+
+```r
+t0_original = t.test(energy ~ method, data = heat, alternative = "greater")$statistic
+t0_original
+```
+
+```
+##        t 
+## 3.249867
+```
+
+---
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 0C79.7 101.3 0 220.9 0 300.5 0 425 79 512 192 512s192-87 192-211.5c0-79.9-80.2-199.6-192-300.5zm0 448c-56.5 0-96-39-96-94.8 0-13.5 4.6-61.5 96-161.2 91.4 99.7 96 147.7 96 161.2 0 55.8-39.5 94.8-96 94.8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Latent heat of fusion 
+
+How many permutations of the class label are there?
+
+
+```r
+n = nrow(heat)
+n
+```
+
+```
+## [1] 21
+```
+
+```r
+factorial(n)
+```
+
+```
+## [1] 5.109094e+19
+```
+
+
+
+```r
+english::words(factorial(n))
+```
+
+fifty-one quintillion ninety quadrillion nine hundred and forty-two trillion one hundred and seventy-one billion seven hundred and nine million four hundred and forty thousand
+
+&lt;!-- 51 quintillion or 51 billion billion. --&gt;
+
+---
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 0C79.7 101.3 0 220.9 0 300.5 0 425 79 512 192 512s192-87 192-211.5c0-79.9-80.2-199.6-192-300.5zm0 448c-56.5 0-96-39-96-94.8 0-13.5 4.6-61.5 96-161.2 91.4 99.7 96 147.7 96 161.2 0 55.8-39.5 94.8-96 94.8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Latent heat of fusion 
+
+Permutation test p-value
+
+
+```r
+B = 10000 # number of permuted samples we will consider
+permuted_heat = heat # make a copy of the data
+t_null = vector("numeric", B) # initialise outside loop
+for(i in 1:B) {
+  permuted_heat$method = sample(heat$method) # this does the permutation
+  t_null[i] = t.test(energy ~ method, data = permuted_heat)$statistic
+}
+mean(t_null&gt;=t0_original)
+```
+
+```
+## [1] 0.0038
+```
+
+.blockquote[
+### &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M144 208c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm112 0c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm112 0c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zM256 32C114.6 32 0 125.1 0 240c0 47.6 19.9 91.2 52.9 126.3C38 405.7 7 439.1 6.5 439.5c-6.6 7-8.4 17.2-4.6 26S14.4 480 24 480c61.5 0 110-25.7 139.1-46.3C192 442.8 223.2 448 256 448c141.4 0 256-93.1 256-208S397.4 32 256 32zm0 368c-26.7 0-53.1-4.1-78.4-12.1l-22.7-7.2-19.5 13.8c-14.3 10.1-33.9 21.4-57.5 29 7.3-12.1 14.4-25.7 19.9-40.2l10.6-28.1-20.6-21.8C69.7 314.1 48 282.2 48 240c0-88.2 93.3-160 208-160s208 71.8 208 160-93.3 160-208 160z"&gt;&lt;/path&gt;&lt;/svg&gt; 
+Why didn't we need to specify `alternative = "greater"` in the `t.test()` function?
+]
+
+---
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 0C79.7 101.3 0 220.9 0 300.5 0 425 79 512 192 512s192-87 192-211.5c0-79.9-80.2-199.6-192-300.5zm0 448c-56.5 0-96-39-96-94.8 0-13.5 4.6-61.5 96-161.2 91.4 99.7 96 147.7 96 161.2 0 55.8-39.5 94.8-96 94.8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left[
+
+```r
+B = 6
+perm_heat = heat
+perm_heat$id = 1
+for(i in 2:6){
+  temp = heat
+  temp$method = sample(temp$method)
+  temp$id = i
+  perm_heat = rbind(perm_heat, temp)
+}
+perm_heat %&gt;% 
+  group_by(id) %&gt;% 
+  summarise(
+    t_stat = t.test(
+      energy[method=="A"], 
+      energy[method=="B"])$statistic
+  )
+```
+
+```
+## # A tibble: 6 × 2
+##      id  t_stat
+##   &lt;dbl&gt;   &lt;dbl&gt;
+## 1     1  3.25  
+## 2     2 -2.74  
+## 3     3 -0.0253
+## 4     4  0.333 
+## 5     5 -0.969 
+## 6     6  0.885
+```
+]
+.pull-right[
+
+```r
+perm_heat %&gt;% ggplot() +
+  aes(x = method, y = energy) + 
+  geom_boxplot(coef = 10) + 
+  scale_y_continuous(n.breaks = 3) + 
+  facet_wrap(vars(id), ncol = 6) + 
+  labs(y = "Heat of fusion (cal/g)",
+       x = "Method")
+```
+
+&lt;img src="lec16_files/figure-html/unnamed-chunk-23-1.png" width="864" /&gt;
+
+]
+
+???
+
+Relates to Di Cook's work on visual inference.
+
+
+---
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 0C79.7 101.3 0 220.9 0 300.5 0 425 79 512 192 512s192-87 192-211.5c0-79.9-80.2-199.6-192-300.5zm0 448c-56.5 0-96-39-96-94.8 0-13.5 4.6-61.5 96-161.2 91.4 99.7 96 147.7 96 161.2 0 55.8-39.5 94.8-96 94.8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Latent heat of fusion 
+
+
+```r
+t_null %&gt;% data.frame() %&gt;% ggplot() + aes(x = t_null) + 
+  geom_histogram(alpha=0.5) + 
+  geom_vline(xintercept = t0_original, colour = "red", linetype = "dashed") + 
+  geom_text(aes(x = t0_original, label = "Original test statistic", y = Inf), 
+            colour = "red", angle = 90, hjust = 1, vjust = -1, size = 7) + 
+  labs(x = "Test statistics from permuted samples", y = "Count")
+```
+
+&lt;img src="lec16_files/figure-html/unnamed-chunk-24-1.png" width="864" /&gt;
+
+
+---
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 0C79.7 101.3 0 220.9 0 300.5 0 425 79 512 192 512s192-87 192-211.5c0-79.9-80.2-199.6-192-300.5zm0 448c-56.5 0-96-39-96-94.8 0-13.5 4.6-61.5 96-161.2 91.4 99.7 96 147.7 96 161.2 0 55.8-39.5 94.8-96 94.8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## What about outliers?
+
+.pull-left[
+What happens if there is an outlier in the data?
+
+
+```r
+# change the first value for the B method
+heat1 = heat
+heat1$energy[14] = 80.20 # instead of 80.02
+```
+]
+.pull-right[
+
+```r
+ggplot(heat1, aes(x = method, y = energy)) + 
+  geom_boxplot() + 
+  geom_dotplot(stackdir = "center",
+               binaxis = "y") +
+  labs(y = "Heat of fusion (cal/g)",
+       x = "Method")
+```
+
+&lt;img src="lec16_files/figure-html/unnamed-chunk-26-1.png" width="864" /&gt;
+]
+
+---
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 0C79.7 101.3 0 220.9 0 300.5 0 425 79 512 192 512s192-87 192-211.5c0-79.9-80.2-199.6-192-300.5zm0 448c-56.5 0-96-39-96-94.8 0-13.5 4.6-61.5 96-161.2 91.4 99.7 96 147.7 96 161.2 0 55.8-39.5 94.8-96 94.8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+wilcox.test(energy ~ method, data = heat1, alternative = "greater", correct = FALSE)
+```
+
+```
+## Warning in wilcox.test.default(x = c(79.98, 80.04, 80.02,
+## 80.04, 80.03, : cannot compute exact p-value with ties
+```
+
+```
+## 
+## 	Wilcoxon rank sum test
+## 
+## data:  energy by method
+## W = 80.5, p-value = 0.01859
+## alternative hypothesis: true location shift is greater than 0
+```
+
+```r
+t.test(energy ~ method, data = heat1, alternative = "greater")
+```
+
+```
+## 
+## 	Welch Two Sample t-test
+## 
+## data:  energy by method
+## t = 0.63712, df = 7.6977, p-value = 0.2713
+## alternative hypothesis: true difference in means between group A and group B is greater than 0
+## 95 percent confidence interval:
+##  -0.03774242         Inf
+## sample estimates:
+## mean in group A mean in group B 
+##        80.02077        80.00125
+```
+
+---
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 0C79.7 101.3 0 220.9 0 300.5 0 425 79 512 192 512s192-87 192-211.5c0-79.9-80.2-199.6-192-300.5zm0 448c-56.5 0-96-39-96-94.8 0-13.5 4.6-61.5 96-161.2 91.4 99.7 96 147.7 96 161.2 0 55.8-39.5 94.8-96 94.8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Permutation test using the Wilcoxon rank-sum test statistic
+
+
+```r
+t0_original = wilcox.test(energy ~ method, data = heat1)$statistic
+set.seed(1234)
+B = 10000
+permuted_heat1 = heat1
+t_null = vector("numeric", B)
+for(i in 1:B){
+  permuted_heat1$method = sample(heat1$method)
+  t_null[i] = wilcox.test(energy ~ method, data = permuted_heat1)$statistic
+}
+mean(t_null &gt;= t0_original)
+```
+
+```
+## [1] 0.0192
+```
+
+---
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 0C79.7 101.3 0 220.9 0 300.5 0 425 79 512 192 512s192-87 192-211.5c0-79.9-80.2-199.6-192-300.5zm0 448c-56.5 0-96-39-96-94.8 0-13.5 4.6-61.5 96-161.2 91.4 99.7 96 147.7 96 161.2 0 55.8-39.5 94.8-96 94.8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Permutation test using the Wilcoxon rank-sum test statistic
+
+
+```r
+t_null %&gt;% data.frame() %&gt;% ggplot() + aes(x = t_null) + 
+  geom_histogram(alpha=0.5) + 
+  geom_vline(xintercept = t0_original, colour = "red", linetype = "dashed") + 
+  geom_text(aes(x = t0_original, label = "Original test statistic", y = Inf), 
+            colour = "red", angle = 90, hjust = 1, vjust = -1, size = 7) + 
+  labs(x = "Test statistics from permuted samples", y = "Count")
+```
+
+&lt;img src="lec16_files/figure-html/unnamed-chunk-29-1.png" width="864" /&gt;
+
+---
+
+## Are there other test statistics we can use?
+
+&lt;br&gt;
+
+.blockquote[
+### &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M144 208c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm112 0c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm112 0c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zM256 32C114.6 32 0 125.1 0 240c0 47.6 19.9 91.2 52.9 126.3C38 405.7 7 439.1 6.5 439.5c-6.6 7-8.4 17.2-4.6 26S14.4 480 24 480c61.5 0 110-25.7 139.1-46.3C192 442.8 223.2 448 256 448c141.4 0 256-93.1 256-208S397.4 32 256 32zm0 368c-26.7 0-53.1-4.1-78.4-12.1l-22.7-7.2-19.5 13.8c-14.3 10.1-33.9 21.4-57.5 29 7.3-12.1 14.4-25.7 19.9-40.2l10.6-28.1-20.6-21.8C69.7 314.1 48 282.2 48 240c0-88.2 93.3-160 208-160s208 71.8 208 160-93.3 160-208 160z"&gt;&lt;/path&gt;&lt;/svg&gt; 
+Can you think of another test statistic that would be robust to outliers?
+]
+
+---
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 0C79.7 101.3 0 220.9 0 300.5 0 425 79 512 192 512s192-87 192-211.5c0-79.9-80.2-199.6-192-300.5zm0 448c-56.5 0-96-39-96-94.8 0-13.5 4.6-61.5 96-161.2 91.4 99.7 96 147.7 96 161.2 0 55.8-39.5 94.8-96 94.8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Difference in medians
+
+`$$T = \widetilde{x} - \widetilde{y}$$`
+
+
+```r
+t0_original = median(heat1$energy[heat1$method=="A"]) - median(heat1$energy[heat1$method=="B"])
+B = 10000
+t_null = vector("numeric", B)
+for(i in 1:B){
+  permuted_heat1$method = sample(heat1$method)
+  median_a =  median(permuted_heat1$energy[permuted_heat1$method=="A"])
+  median_b =  median(permuted_heat1$energy[permuted_heat1$method=="B"])
+  t_null[i] = median_a - median_b
+}
+mean(t_null &gt;= t0_original)
+```
+
+```
+## [1] 0.012
+```
+
+---
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 0C79.7 101.3 0 220.9 0 300.5 0 425 79 512 192 512s192-87 192-211.5c0-79.9-80.2-199.6-192-300.5zm0 448c-56.5 0-96-39-96-94.8 0-13.5 4.6-61.5 96-161.2 91.4 99.7 96 147.7 96 161.2 0 55.8-39.5 94.8-96 94.8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Difference in medians
+
+
+```r
+t_null %&gt;% data.frame() %&gt;% ggplot() + aes(x = t_null) + 
+  geom_histogram(alpha=0.5) + 
+  geom_vline(xintercept = t0_original, colour = "red", linetype = "dashed") + 
+  geom_text(aes(x = t0_original, label = "Original test statistic", y = Inf), 
+            colour = "red", angle = 90, hjust = 1, vjust = -1, size = 7) + 
+  labs(x = "Test statistics from permuted samples", y = "Count")
+```
+
+&lt;img src="lec16_files/figure-html/unnamed-chunk-31-1.png" width="864" /&gt;
+
+---
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 0C79.7 101.3 0 220.9 0 300.5 0 425 79 512 192 512s192-87 192-211.5c0-79.9-80.2-199.6-192-300.5zm0 448c-56.5 0-96-39-96-94.8 0-13.5 4.6-61.5 96-161.2 91.4 99.7 96 147.7 96 161.2 0 55.8-39.5 94.8-96 94.8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Robustly standardised difference in medians
+
+`$$T = \frac{\widetilde{x} - \widetilde{y}}{\operatorname{MAD}(x) + \operatorname{MAD}(y)}$$`
+
+
+```r
+median_a = median(heat1$energy[heat1$method=="A"])
+median_b = median(heat1$energy[heat1$method=="B"])
+mad_a = mad(heat1$energy[heat1$method=="A"])
+mad_b = mad(heat1$energy[heat1$method=="B"])
+t0_original = (median_a - median_b)/(mad_a + mad_b)
+
+B = 10000
+t_null = vector("numeric", B)
+for(i in 1:B){
+  permuted_heat1$method = sample(heat1$method)
+  median_a =  median(permuted_heat1$energy[permuted_heat1$method=="A"])
+  median_b =  median(permuted_heat1$energy[permuted_heat1$method=="B"])
+  mad_a = mad(permuted_heat1$energy[permuted_heat1$method=="A"])
+  mad_b = mad(permuted_heat1$energy[permuted_heat1$method=="B"])
+  t_null[i] = (median_a - median_b)/(mad_a + mad_b)
+}
+mean(t_null &gt;= t0_original)
+```
+
+```
+## [1] 0.0182
+```
+
+---
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M192 0C79.7 101.3 0 220.9 0 300.5 0 425 79 512 192 512s192-87 192-211.5c0-79.9-80.2-199.6-192-300.5zm0 448c-56.5 0-96-39-96-94.8 0-13.5 4.6-61.5 96-161.2 91.4 99.7 96 147.7 96 161.2 0 55.8-39.5 94.8-96 94.8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Robustly standardised difference in medians
+
+
+```r
+t_null %&gt;% data.frame() %&gt;% ggplot() + aes(x = t_null) + 
+  geom_histogram(alpha=0.5) + 
+  geom_vline(xintercept = t0_original, colour = "red", linetype = "dashed") + 
+  geom_text(aes(x = t0_original, label = "Original test statistic", y = Inf), 
+            colour = "red", angle = 90, hjust = 1, vjust = -1, size = 7) + 
+  labs(x = "Test statistics from permuted samples", y = "Count")
+```
+
+&lt;img src="lec16_files/figure-html/unnamed-chunk-33-1.png" width="864" /&gt;
+
+---
+
+## Paired sample tests?
+
+Can we use permutation tests if we are testing for a shift in location by sampling from one population?
+
+&gt;- For paired tests we think about the differences, `\(d_i = x_i - y_i\)`.
+&gt;- For the Wilcoxon signed-rank test we had a test statistic involving
+`$$\sum_{i:\ d_i&gt;0} r_i \times \operatorname{sign}(d_i)$$`
+
+&gt;- We could also think of a statistic where we used the values of the differences,
+`$$\sum_{i = 1}^n |d_i| \times \operatorname{sign}(d_i)$$`
+
+&gt;- For a permutation test permute all possible `\(\operatorname{sign}(d_i)\)`.
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M444.34 181.1c22.38 15.68 35.66 41.16 35.66 68.59V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-43.24-21.01-83.41-56.34-108.06C463.85 125.02 448 99.34 448 70.31V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v66.4c0 43.69 24.56 81.63 60.34 106.7zM194.97 358.98C126.03 370.07 59.69 394.69 0 432c83.65 52.28 180.3 80 278.94 80h88.57L254.79 380.49c-14.74-17.2-37.45-25.11-59.82-21.51zM553.28 87.09c-5.67-3.8-9.28-9.96-9.28-16.78V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v62.31c0 22.02 10.17 43.41 28.64 55.39C550.79 153.04 576 199.54 576 249.69V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-65.44-32.41-126.19-86.72-162.6zM360.89 352.05c-34.4.06-86.81.15-88.21.17l117.8 137.43A63.987 63.987 0 0 0 439.07 512h88.45L409.57 374.4a63.955 63.955 0 0 0-48.68-22.35zM616 352H432l117.99 137.65A63.987 63.987 0 0 0 598.58 512H616c13.25 0 24-10.75 24-24V376c0-13.26-10.75-24-24-24z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Smoking
+
+Blood samples from 11 individuals before and after they smoked a cigarette are used to measure aggregation of blood platelets.  
+
+Is the aggregation affected by smoking?
+
+
+```r
+before = c(25, 25, 27, 44, 30, 67, 53, 53, 52, 60, 28)
+after =  c(27, 29, 37, 36, 46, 82, 57, 80, 61, 59, 43)  
+d = after - before
+t.test(d)
+```
+
+```
+## 
+## 	One Sample t-test
+## 
+## data:  d
+## t = 2.9065, df = 10, p-value = 0.01566
+## alternative hypothesis: true mean is not equal to 0
+## 95 percent confidence interval:
+##   1.97332 14.93577
+## sample estimates:
+## mean of x 
+##  8.454545
+```
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M444.34 181.1c22.38 15.68 35.66 41.16 35.66 68.59V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-43.24-21.01-83.41-56.34-108.06C463.85 125.02 448 99.34 448 70.31V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v66.4c0 43.69 24.56 81.63 60.34 106.7zM194.97 358.98C126.03 370.07 59.69 394.69 0 432c83.65 52.28 180.3 80 278.94 80h88.57L254.79 380.49c-14.74-17.2-37.45-25.11-59.82-21.51zM553.28 87.09c-5.67-3.8-9.28-9.96-9.28-16.78V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v62.31c0 22.02 10.17 43.41 28.64 55.39C550.79 153.04 576 199.54 576 249.69V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-65.44-32.41-126.19-86.72-162.6zM360.89 352.05c-34.4.06-86.81.15-88.21.17l117.8 137.43A63.987 63.987 0 0 0 439.07 512h88.45L409.57 374.4a63.955 63.955 0 0 0-48.68-22.35zM616 352H432l117.99 137.65A63.987 63.987 0 0 0 598.58 512H616c13.25 0 24-10.75 24-24V376c0-13.26-10.75-24-24-24z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+There are `\(2^{11} =\)` 2048 ways to permutations of sign of 11 differences.
+
+
+```r
+sign_permute = permutations(c(-1,1), 11, replace = TRUE)
+dim(sign_permute)
+```
+
+```
+## [1] 2048   11
+```
+
+```r
+head(sign_permute)
+```
+
+```
+##      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11]
+## [1,]   -1   -1   -1   -1   -1   -1   -1   -1   -1    -1    -1
+## [2,]   -1   -1   -1   -1   -1   -1   -1   -1   -1    -1     1
+## [3,]   -1   -1   -1   -1   -1   -1   -1   -1   -1     1    -1
+## [4,]   -1   -1   -1   -1   -1   -1   -1   -1   -1     1     1
+## [5,]   -1   -1   -1   -1   -1   -1   -1   -1    1    -1    -1
+## [6,]   -1   -1   -1   -1   -1   -1   -1   -1    1    -1     1
+```
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M444.34 181.1c22.38 15.68 35.66 41.16 35.66 68.59V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-43.24-21.01-83.41-56.34-108.06C463.85 125.02 448 99.34 448 70.31V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v66.4c0 43.69 24.56 81.63 60.34 106.7zM194.97 358.98C126.03 370.07 59.69 394.69 0 432c83.65 52.28 180.3 80 278.94 80h88.57L254.79 380.49c-14.74-17.2-37.45-25.11-59.82-21.51zM553.28 87.09c-5.67-3.8-9.28-9.96-9.28-16.78V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v62.31c0 22.02 10.17 43.41 28.64 55.39C550.79 153.04 576 199.54 576 249.69V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-65.44-32.41-126.19-86.72-162.6zM360.89 352.05c-34.4.06-86.81.15-88.21.17l117.8 137.43A63.987 63.987 0 0 0 439.07 512h88.45L409.57 374.4a63.955 63.955 0 0 0-48.68-22.35zM616 352H432l117.99 137.65A63.987 63.987 0 0 0 598.58 512H616c13.25 0 24-10.75 24-24V376c0-13.26-10.75-24-24-24z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+(t0_original = mean(d)/sd(d)*sqrt(length(d)))
+```
+
+```
+## [1] 2.906534
+```
+
+```r
+n = length(d)
+B = nrow(sign_permute)
+t_null = vector("numeric", B)
+
+for(i in 1:nrow(sign_permute)){
+  d_permute = d*sign_permute[i,]
+  t_null[i] = mean(d_permute)/sd(d_permute)*sqrt(n)
+}
+
+mean(abs(t_null) &gt;= abs(t0_original))
+```
+
+```
+## [1] 0.01660156
+```
+
+```r
+t.test(d)$p.value
+```
+
+```
+## [1] 0.01565739
+```
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M444.34 181.1c22.38 15.68 35.66 41.16 35.66 68.59V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-43.24-21.01-83.41-56.34-108.06C463.85 125.02 448 99.34 448 70.31V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v66.4c0 43.69 24.56 81.63 60.34 106.7zM194.97 358.98C126.03 370.07 59.69 394.69 0 432c83.65 52.28 180.3 80 278.94 80h88.57L254.79 380.49c-14.74-17.2-37.45-25.11-59.82-21.51zM553.28 87.09c-5.67-3.8-9.28-9.96-9.28-16.78V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v62.31c0 22.02 10.17 43.41 28.64 55.39C550.79 153.04 576 199.54 576 249.69V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-65.44-32.41-126.19-86.72-162.6zM360.89 352.05c-34.4.06-86.81.15-88.21.17l117.8 137.43A63.987 63.987 0 0 0 439.07 512h88.45L409.57 374.4a63.955 63.955 0 0 0-48.68-22.35zM616 352H432l117.99 137.65A63.987 63.987 0 0 0 598.58 512H616c13.25 0 24-10.75 24-24V376c0-13.26-10.75-24-24-24z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+t_null %&gt;% data.frame() %&gt;% ggplot() + aes(x = t_null) + 
+  geom_histogram(alpha=0.5) + 
+  geom_vline(xintercept = t0_original, colour = "red", linetype = "dashed") + 
+  geom_text(aes(x = t0_original, label = "Original test statistic", y = Inf), 
+            colour = "red", angle = 90, hjust = 1, vjust = -1, size = 7) + 
+  labs(x = "Test statistics from permuted samples", y = "Count")
+```
+
+&lt;img src="lec16_files/figure-html/unnamed-chunk-37-1.png" width="864" /&gt;
+
+---
+
+.small[
+#### Further reading
+
+- Holmes and Wolfgang (2018; Chapter 6) has a good recap of many of the topics we've discussed [&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"&gt;&lt;/path&gt;&lt;/svg&gt;](http://web.stanford.edu/class/bios221/book/Chap-Testing.html)
+-  Wilber (2019) [Visual introduction to permutation testing with alpacas](https://www.jwilber.me/permutationtest/)
+
+#### References
+
+Dobson, A. J. (1983). _An introduction to statistical modelling_. London:
+Chapman &amp; Hall.
+
+Holmes, S. and H. Wolfgang (2018). _Modern Statistics for Modern Biology_.
+Stanford University. URL:
+[http://web.stanford.edu/class/bios221/book/](http://web.stanford.edu/class/bios221/book/).
+
+Lai, R. (2020). _arrangements: Fast Generators and Iterators for Permutations,
+Combinations, Integer Partitions and Compositions_. R package version 1.1.9.
+URL:
+[https://CRAN.R-project.org/package=arrangements](https://CRAN.R-project.org/package=arrangements).
+
+Natrella, M. G. (1963). _Experimental Statistics_. Vol. 91. National Bureau of
+Standards Handbook. United States Department of Commerce.
+
+Rice, J. (2006). _Mathematical Statistics and Data Analysis_. Advanced series.
+Cengage Learning. ISBN: 9780534399429.
+
+Wilber, J. (2019). _The Permutation Test: A Visual Explanation of Statistical
+Testing_. Accessed September 27, 2020. URL:
+[https://www.jwilber.me/permutationtest/](https://www.jwilber.me/permutationtest/).
+]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="assets/remark-zoom.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

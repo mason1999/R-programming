@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>DATA2002</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Garth Tarr" />
+    <script src="lec19_files/header-attrs-2.10/header-attrs.js"></script>
+    <link href="lec19_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <script src="lec19_files/kePrint-0.0.1/kePrint.js"></script>
+    <link href="lec19_files/lightable-0.0.1/lightable.css" rel="stylesheet" />
+    <script src="lec19_files/htmlwidgets-1.5.3/htmlwidgets.js"></script>
+    <script src="lec19_files/jquery-3.5.1/jquery.min.js"></script>
+    <link href="lec19_files/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet" />
+    <script src="lec19_files/datatables-binding-0.18/datatables.js"></script>
+    <link href="lec19_files/dt-core-1.10.20/css/jquery.dataTables.min.css" rel="stylesheet" />
+    <link href="lec19_files/dt-core-1.10.20/css/jquery.dataTables.extra.css" rel="stylesheet" />
+    <script src="lec19_files/dt-core-1.10.20/js/jquery.dataTables.min.js"></script>
+    <link href="lec19_files/crosstalk-1.1.1/css/crosstalk.css" rel="stylesheet" />
+    <script src="lec19_files/crosstalk-1.1.1/js/crosstalk.min.js"></script>
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } },
+      "HTML-CSS": {
+        styles: {
+          ".MathJax a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+          ".MathJax_Preview a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+        }
+      }
+      });
+    </script>
+    <link rel="stylesheet" href="assets/sydney-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="assets/sydney.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# DATA2002
+## Multiple testing
+### Garth Tarr
+
+---
+
+class: segue
+
+
+
+
+
+
+.large[
+What is real?
+
+Types of errors
+
+Controlling error rates
+]
+
+
+---
+class: segue
+
+# microRNA and Alzheimer's disease
+
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M.1 494.1c-1.1 9.5 6.3 17.8 15.9 17.8l32.3.1c8.1 0 14.9-5.9 16-13.9.7-4.9 1.8-11.1 3.4-18.1H380c1.6 6.9 2.9 13.2 3.5 18.1 1.1 8 7.9 14 16 13.9l32.3-.1c9.6 0 17.1-8.3 15.9-17.8-4.6-37.9-25.6-129-118.9-207.7-17.6 12.4-37.1 24.2-58.5 35.4 6.2 4.6 11.4 9.4 17 14.2H159.7c21.3-18.1 47-35.6 78.7-51.4C410.5 199.1 442.1 65.8 447.9 17.9 449 8.4 441.6.1 432 .1L399.6 0c-8.1 0-14.9 5.9-16 13.9-.7 4.9-1.8 11.1-3.4 18.1H67.8c-1.6-7-2.7-13.1-3.4-18.1-1.1-8-7.9-14-16-13.9L16.1.1C6.5.1-1 8.4.1 17.9 5.3 60.8 31.4 171.8 160 256 31.5 340.2 5.3 451.2.1 494.1zM224 219.6c-25.1-13.7-46.4-28.4-64.3-43.6h128.5c-17.8 15.2-39.1 30-64.2 43.6zM355.1 96c-5.8 10.4-12.8 21.1-21 32H114c-8.3-10.9-15.3-21.6-21-32h262.1zM92.9 416c5.8-10.4 12.8-21.1 21-32h219.4c8.3 10.9 15.4 21.6 21.2 32H92.9z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## microRNA and Alzheimer's disease
+
+.pull-left[
+MicroRNA are small non-coding RNA molecules that regulate gene expression.
+
+.blockquote[
+&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M144 208c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm112 0c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm112 0c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zM256 32C114.6 32 0 125.1 0 240c0 47.6 19.9 91.2 52.9 126.3C38 405.7 7 439.1 6.5 439.5c-6.6 7-8.4 17.2-4.6 26S14.4 480 24 480c61.5 0 110-25.7 139.1-46.3C192 442.8 223.2 448 256 448c141.4 0 256-93.1 256-208S397.4 32 256 32zm0 368c-26.7 0-53.1-4.1-78.4-12.1l-22.7-7.2-19.5 13.8c-14.3 10.1-33.9 21.4-57.5 29 7.3-12.1 14.4-25.7 19.9-40.2l10.6-28.1-20.6-21.8C69.7 314.1 48 282.2 48 240c0-88.2 93.3-160 208-160s208 71.8 208 160-93.3 160-208 160z"&gt;&lt;/path&gt;&lt;/svg&gt;
+Is there any evidence that microRNA behaviour in the brain might be associated with Alzheimer's disease?  (Patrick, Rajagopal, Wong, et al., 2017)
+]
+
+- Experiment by measuring the amount of 309 microRNAs in 701 subjects.
+
+- Test for significant differences between the means of subjects with and without Alzheimer's disease for each microRNA.
+
+]
+.pull-right[
+&lt;img src="imgs/microRNA.png" width="100%" /&gt;
+]
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M.1 494.1c-1.1 9.5 6.3 17.8 15.9 17.8l32.3.1c8.1 0 14.9-5.9 16-13.9.7-4.9 1.8-11.1 3.4-18.1H380c1.6 6.9 2.9 13.2 3.5 18.1 1.1 8 7.9 14 16 13.9l32.3-.1c9.6 0 17.1-8.3 15.9-17.8-4.6-37.9-25.6-129-118.9-207.7-17.6 12.4-37.1 24.2-58.5 35.4 6.2 4.6 11.4 9.4 17 14.2H159.7c21.3-18.1 47-35.6 78.7-51.4C410.5 199.1 442.1 65.8 447.9 17.9 449 8.4 441.6.1 432 .1L399.6 0c-8.1 0-14.9 5.9-16 13.9-.7 4.9-1.8 11.1-3.4 18.1H67.8c-1.6-7-2.7-13.1-3.4-18.1-1.1-8-7.9-14-16-13.9L16.1.1C6.5.1-1 8.4.1 17.9 5.3 60.8 31.4 171.8 160 256 31.5 340.2 5.3 451.2.1 494.1zM224 219.6c-25.1-13.7-46.4-28.4-64.3-43.6h128.5c-17.8 15.2-39.1 30-64.2 43.6zM355.1 96c-5.8 10.4-12.8 21.1-21 32H114c-8.3-10.9-15.3-21.6-21-32h262.1zM92.9 416c5.8-10.4 12.8-21.1 21-32h219.4c8.3 10.9 15.4 21.6 21.2 32H92.9z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## What does this microRNA data look like?
+
+.pull-left[
+
+```r
+# raw data contains objects: AD; microRNA_Data
+load("data/microRNA_full.RData")
+# disease status in named vector AD
+head(AD, n = 4)
+```
+
+```
+## 20264936 50105725 20730959 11229148 
+##        1        0        1        1
+```
+
+```r
+disease_status = data.frame(AD) %&gt;% 
+  tibble::rownames_to_column("subject")
+# measurements in data frame microRNA_Data
+# columns are subjects, rows are miRNAs
+microRNA_Data[1:5, 1:3]
+```
+
+```
+##            20264936 50105725 20730959
+## hsa-let-7a 11.97670 12.61142 13.34787
+## hsa-let-7b 12.24761 11.77856 11.44760
+## hsa-let-7c 11.07564 11.68883 11.79726
+## hsa-let-7d 11.30709 11.50804 11.37125
+## hsa-let-7e 10.05073  9.80769 10.57078
+```
+
+]
+.pull-right[
+Reshape the microRNA data and merge in the disease status information.
+
+
+```r
+mirna = microRNA_Data %&gt;%
+  rownames_to_column("microRNA") %&gt;% 
+  pivot_longer(cols = -1,
+               names_to = "subject", 
+               values_to = "value") %&gt;% 
+  left_join(disease_status)
+head(mirna)
+```
+
+```
+## # A tibble: 6 × 4
+##   microRNA   subject  value    AD
+##   &lt;chr&gt;      &lt;chr&gt;    &lt;dbl&gt; &lt;int&gt;
+## 1 hsa-let-7a 20264936  12.0     1
+## 2 hsa-let-7a 50105725  12.6     0
+## 3 hsa-let-7a 20730959  13.3     1
+## 4 hsa-let-7a 11229148  12.5     1
+## 5 hsa-let-7a 20151388  12.3     1
+## 6 hsa-let-7a 11259716  12.4     1
+```
+
+]
+
+---
+
+.pull-left[
+
+How many subjects have with Alzheimer's?
+
+
+```r
+mirna %&gt;% select(subject, AD) %&gt;% 
+  distinct() %&gt;% 
+  janitor::tabyl(AD) %&gt;% 
+  janitor::adorn_pct_formatting()
+```
+
+```
+##  AD   n percent
+##   0 273   38.9%
+##   1 428   61.1%
+```
+
+
+```r
+mirna %&gt;% 
+  group_by(microRNA) %&gt;% 
+  nest() %&gt;% 
+  ungroup() %&gt;% 
+  slice(1:15) %&gt;% # extract first 15 groups
+  unnest(cols = everything()) %&gt;% 
+  ggplot() + 
+  aes(y = reorder(microRNA, value), 
+      x = value, colour = factor(AD)) + 
+  geom_boxplot(coef = 10) + 
+  scale_color_brewer(palette = "Set1") + 
+  theme(legend.position = "top") + 
+  labs(colour = "Disease status",
+       y = "MicroRNA")
+```
+
+&lt;img src="lec19_files/figure-html/microRNAboxplot-1.png" width="864" /&gt;
+]
+.pull-right[
+
+&lt;img src="lec19_files/figure-html/microRNAboxplot-1.png" width="864" /&gt;
+
+
+]
+
+???
+
+It's also common to summarise this kind of data and visualise the summary rather than the boxplot.
+
+
+```r
+mirna %&gt;% 
+  group_by(microRNA,AD) %&gt;% 
+  summarise(mean = mean(value),
+            lower_bound = mean - 2*sd(value),
+            upper_bound = mean + 2*sd(value)) %&gt;% 
+  ungroup() %&gt;% 
+  slice(1:20) %&gt;% # extract 10 microRNA
+  ggplot() + 
+  aes(y = reorder(microRNA,mean), x = mean, xmin = lower_bound, xmax = upper_bound, colour = factor(AD)) + 
+  geom_pointrange(position = position_dodge(width = 0.5)) + 
+  scale_color_brewer(palette = "Set1") + 
+  labs(x = "Value", colour = "Diesease status") + 
+  theme(legend.position = "top")
+```
+
+&lt;img src="lec19_files/figure-html/unnamed-chunk-5-1.png" width="864" /&gt;
+
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M.1 494.1c-1.1 9.5 6.3 17.8 15.9 17.8l32.3.1c8.1 0 14.9-5.9 16-13.9.7-4.9 1.8-11.1 3.4-18.1H380c1.6 6.9 2.9 13.2 3.5 18.1 1.1 8 7.9 14 16 13.9l32.3-.1c9.6 0 17.1-8.3 15.9-17.8-4.6-37.9-25.6-129-118.9-207.7-17.6 12.4-37.1 24.2-58.5 35.4 6.2 4.6 11.4 9.4 17 14.2H159.7c21.3-18.1 47-35.6 78.7-51.4C410.5 199.1 442.1 65.8 447.9 17.9 449 8.4 441.6.1 432 .1L399.6 0c-8.1 0-14.9 5.9-16 13.9-.7 4.9-1.8 11.1-3.4 18.1H67.8c-1.6-7-2.7-13.1-3.4-18.1-1.1-8-7.9-14-16-13.9L16.1.1C6.5.1-1 8.4.1 17.9 5.3 60.8 31.4 171.8 160 256 31.5 340.2 5.3 451.2.1 494.1zM224 219.6c-25.1-13.7-46.4-28.4-64.3-43.6h128.5c-17.8 15.2-39.1 30-64.2 43.6zM355.1 96c-5.8 10.4-12.8 21.1-21 32H114c-8.3-10.9-15.3-21.6-21-32h262.1zM92.9 416c5.8-10.4 12.8-21.1 21-32h219.4c8.3 10.9 15.4 21.6 21.2 32H92.9z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left-2[
+Let's visualise the distribution of p-values for all 309 microRNA.
+
+
+```r
+mirna_pval = mirna %&gt;% 
+  group_by(microRNA) %&gt;% 
+  summarise(pvalue = t.test(value ~ AD)$p.value)
+mirna_pval %&gt;% ggplot() + aes(x = pvalue) + 
+  geom_histogram(boundary = 0, binwidth = 0.05, fill = "skyblue", colour = "black")
+```
+
+&lt;img src="lec19_files/figure-html/unnamed-chunk-6-1.png" width="864" /&gt;
+]
+.pull-right-1[
+
+```r
+mirna_pval %&gt;% 
+  summarise(
+    n_sig = sum(pvalue &lt; 0.05)
+  )
+```
+
+```
+## # A tibble: 1 × 1
+##   n_sig
+##   &lt;int&gt;
+## 1    49
+```
+
+- Of the 309 microRNA tested, 49 with p-values less than 0.05.
+
+- Are all of these important?
+]
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M.1 494.1c-1.1 9.5 6.3 17.8 15.9 17.8l32.3.1c8.1 0 14.9-5.9 16-13.9.7-4.9 1.8-11.1 3.4-18.1H380c1.6 6.9 2.9 13.2 3.5 18.1 1.1 8 7.9 14 16 13.9l32.3-.1c9.6 0 17.1-8.3 15.9-17.8-4.6-37.9-25.6-129-118.9-207.7-17.6 12.4-37.1 24.2-58.5 35.4 6.2 4.6 11.4 9.4 17 14.2H159.7c21.3-18.1 47-35.6 78.7-51.4C410.5 199.1 442.1 65.8 447.9 17.9 449 8.4 441.6.1 432 .1L399.6 0c-8.1 0-14.9 5.9-16 13.9-.7 4.9-1.8 11.1-3.4 18.1H67.8c-1.6-7-2.7-13.1-3.4-18.1-1.1-8-7.9-14-16-13.9L16.1.1C6.5.1-1 8.4.1 17.9 5.3 60.8 31.4 171.8 160 256 31.5 340.2 5.3 451.2.1 494.1zM224 219.6c-25.1-13.7-46.4-28.4-64.3-43.6h128.5c-17.8 15.2-39.1 30-64.2 43.6zM355.1 96c-5.8 10.4-12.8 21.1-21 32H114c-8.3-10.9-15.3-21.6-21-32h262.1zM92.9 416c5.8-10.4 12.8-21.1 21-32h219.4c8.3 10.9 15.4 21.6 21.2 32H92.9z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left-2[
+If there was no association between any microRNAs and Alzheimer's disease we would expect our p-values to follow a uniform distribution. We can generate a set of p-values *knowing* that there is no association and visualise this:
+
+
+```r
+set.seed(2021)
+mirna_pval = mirna_pval %&gt;% 
+  mutate(null_pvalue = runif(n = n(), min = 0, max = 1))
+mirna_pval %&gt;% ggplot() + aes(x = null_pvalue) + 
+  geom_histogram(boundary = 0, binwidth = 0.05,
+                 fill = "midnightblue", colour = "black")
+```
+
+&lt;img src="lec19_files/figure-html/unnamed-chunk-8-1.png" width="864" /&gt;
+]
+.pull-right-1[
+
+
+```r
+mirna_pval %&gt;% 
+  summarise(
+    n_sig = sum(null_pvalue &lt; 0.05)
+  )
+```
+
+```
+## # A tibble: 1 × 1
+##   n_sig
+##   &lt;int&gt;
+## 1    22
+```
+
+- When we **know** that there are no truly important microRNAs, we still see 22 "significant" p-values in this simulated example.
+
+]
+
+---
+
+## Deciding what's real
+
+.pull-left-2[
+.blockquote[
+### &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M144 208c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm112 0c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm112 0c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zM256 32C114.6 32 0 125.1 0 240c0 47.6 19.9 91.2 52.9 126.3C38 405.7 7 439.1 6.5 439.5c-6.6 7-8.4 17.2-4.6 26S14.4 480 24 480c61.5 0 110-25.7 139.1-46.3C192 442.8 223.2 448 256 448c141.4 0 256-93.1 256-208S397.4 32 256 32zm0 368c-26.7 0-53.1-4.1-78.4-12.1l-22.7-7.2-19.5 13.8c-14.3 10.1-33.9 21.4-57.5 29 7.3-12.1 14.4-25.7 19.9-40.2l10.6-28.1-20.6-21.8C69.7 314.1 48 282.2 48 240c0-88.2 93.3-160 208-160s208 71.8 208 160-93.3 160-208 160z"&gt;&lt;/path&gt;&lt;/svg&gt; Statistical thinking
+How do you know if a significant association you find is **real** and not just random chance?
+
+1. Because someone else published it
+2. Because p-value is less than 0.05
+3. Because of all the tests I ran, that one had the lowest p-value
+4. Because it makes biological sense
+
+]
+]
+.pull-right-1[
+.center[
+&lt;img src="imgs/morpheus-red-pill-vs-blue-pill_480.jpg" width="320" /&gt;
+]]
+
+???
+
+Image source: https://impacttheory.com/blog/how-to-bend-your-brain-to-your-will/morpheus-red-pill-vs-blue-pill_480/
+
+---
+
+## The reality of the situation
+
+- We never really know what is a *real* association.
+
+- A small p-value provides some evidence against the null bit it could still be a false positive.
+
+- Type 1 error ( `\(\alpha = 0.05\)` )  
+
+&lt;br&gt;
+
+For every model we evaluate at `\(\alpha=0.05\)`, we accept that there is a 5% chance that we .red[reject the null hypothesis] when .blue[the null hypothesis is actually true].
+
+&lt;!-- - Two tests, `\(5\% + 5\% = 10\%\)` --&gt;
+&lt;!-- - Ten tests, `\(5\% \times 10 = 50\%\)` --&gt;
+
+---
+
+&lt;img src="imgs/xkcd1.png" width="90%" /&gt;
+
+.footnote[
+Source: [XKCD - #882 Significant](https://xkcd.com/882/)
+]
+
+---
+
+&lt;img src="imgs/xkcd2.png" width="85%" /&gt;
+
+.footnote[
+Source: [XKCD - #882 Significant](https://xkcd.com/882/)
+]
+
+---
+
+&lt;img src="imgs/xkcd3.png" width="85%" /&gt;
+
+.footnote[
+Source: [XKCD - #882 Significant](https://xkcd.com/882/)
+]
+
+---
+background-image: url(imgs/xkcd4.png)
+background-size: 400px
+background-position: 95% 50%
+
+.pull-left[
+.blockquote[
+### &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M144 208c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm112 0c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm112 0c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zM256 32C114.6 32 0 125.1 0 240c0 47.6 19.9 91.2 52.9 126.3C38 405.7 7 439.1 6.5 439.5c-6.6 7-8.4 17.2-4.6 26S14.4 480 24 480c61.5 0 110-25.7 139.1-46.3C192 442.8 223.2 448 256 448c141.4 0 256-93.1 256-208S397.4 32 256 32zm0 368c-26.7 0-53.1-4.1-78.4-12.1l-22.7-7.2-19.5 13.8c-14.3 10.1-33.9 21.4-57.5 29 7.3-12.1 14.4-25.7 19.9-40.2l10.6-28.1-20.6-21.8C69.7 314.1 48 282.2 48 240c0-88.2 93.3-160 208-160s208 71.8 208 160-93.3 160-208 160z"&gt;&lt;/path&gt;&lt;/svg&gt; Statistical Thinking
+Are jelly beans associated with acne?
+]
+]
+
+.pull-right[
+
+&lt;br&gt;
+
+]
+
+&lt;br&gt;
+
+--
+
+.pull-left[
+.blockquote[
+### &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M144 208c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm112 0c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm112 0c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zM256 32C114.6 32 0 125.1 0 240c0 47.6 19.9 91.2 52.9 126.3C38 405.7 7 439.1 6.5 439.5c-6.6 7-8.4 17.2-4.6 26S14.4 480 24 480c61.5 0 110-25.7 139.1-46.3C192 442.8 223.2 448 256 448c141.4 0 256-93.1 256-208S397.4 32 256 32zm0 368c-26.7 0-53.1-4.1-78.4-12.1l-22.7-7.2-19.5 13.8c-14.3 10.1-33.9 21.4-57.5 29 7.3-12.1 14.4-25.7 19.9-40.2l10.6-28.1-20.6-21.8C69.7 314.1 48 282.2 48 240c0-88.2 93.3-160 208-160s208 71.8 208 160-93.3 160-208 160z"&gt;&lt;/path&gt;&lt;/svg&gt; Statistical Thinking
+If we performed 20 tests with `\(\alpha=0.05\)`, how many tests are likely to be significant by chance alone?
+]
+]
+
+.pull-right[
+
+&lt;br&gt;
+
+]
+
+&lt;br&gt;
+
+--
+
+.pull-left[
+.blockquote[
+### &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M144 208c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm112 0c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm112 0c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zM256 32C114.6 32 0 125.1 0 240c0 47.6 19.9 91.2 52.9 126.3C38 405.7 7 439.1 6.5 439.5c-6.6 7-8.4 17.2-4.6 26S14.4 480 24 480c61.5 0 110-25.7 139.1-46.3C192 442.8 223.2 448 256 448c141.4 0 256-93.1 256-208S397.4 32 256 32zm0 368c-26.7 0-53.1-4.1-78.4-12.1l-22.7-7.2-19.5 13.8c-14.3 10.1-33.9 21.4-57.5 29 7.3-12.1 14.4-25.7 19.9-40.2l10.6-28.1-20.6-21.8C69.7 314.1 48 282.2 48 240c0-88.2 93.3-160 208-160s208 71.8 208 160-93.3 160-208 160z"&gt;&lt;/path&gt;&lt;/svg&gt; Statistical Thinking
+Does this make you question the conclusions from any of the tests you've done in the labs?
+]
+]
+
+.footnote[
+Source: [XKCD - #882 Significant](https://xkcd.com/882/)
+]
+
+---
+
+## Types of errors
+
+.pull-left[
+Suppose you are testing a hypothesis that a parameter `\(\theta\)` equals zero versus the alternative that it does not equal zero.
+
+
+- **Type I error or false positive** ( `\(V\)` ) Conclude that `\(\theta\)` does not equal zero when it does
+
+- **Type II error or false negative** ( `\(T\)` ) Conclude that `\(\theta\)` equals zero when it doesn't 
+]
+
+
+.pull-right[
+Possible outcomes from a series of `\(m\)` hypothesis tests.
+
+Outcomes               | Truth: `\(\theta=0\)`   | Truth: `\(\theta\neq0\)`   | Number of tests
+---------------------|:------------:|:--------------:|:---------:
+**Conclusion:** `\(\theta=0\)`     |      `\(U\)`    |      `\(T\)`       |  `\(m-R\)`
+**Conclusion:** `\(\theta\neq 0\)` |      `\(V\)`    |      `\(S\)`       |  `\(R\)`
+**Number of tests**            |     `\(m_0\)`   |      `\(m-m_0\)`   |  `\(m\)`
+
+]
+
+#### Error rates
+
+[**False positive rate**](https://en.wikipedia.org/wiki/False_positive_rate): the rate at which null results ( `\(\theta = 0\)` ) are called significant: `\(\operatorname{E}\left[\dfrac{V}{m_0}\right]\)`
+
+[**Family wise error rate (FWER)**](https://en.wikipedia.org/wiki/Family-wise_error_rate): the probability of at least one false positive `\(P(V \geq 1)\)`
+
+[**False discovery rate (FDR)**](https://en.wikipedia.org/wiki/False_discovery_rate): the rate at which claims of significance are false: `\(\operatorname{E}\left[\dfrac{V}{R}\right]\)`
+
+.footnote[
+The false positive rate is closely related to the type I error rate [http://en.wikipedia.org/wiki/False_positive_rate](http://en.wikipedia.org/wiki/False_positive_rate)
+]
+
+---
+
+## Accounting for multiple testing
+
+- If p-values are correctly calculated calling all p-values less than `\(\alpha\)` significant will control the false positive rate at level `\(\alpha\)`, on average. 
+
+- Suppose that you perform 10,000 tests and the reality is that `\(\theta = 0\)` for all of them.
+
+.blockquote[
+&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M144 208c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm112 0c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm112 0c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zM256 32C114.6 32 0 125.1 0 240c0 47.6 19.9 91.2 52.9 126.3C38 405.7 7 439.1 6.5 439.5c-6.6 7-8.4 17.2-4.6 26S14.4 480 24 480c61.5 0 110-25.7 139.1-46.3C192 442.8 223.2 448 256 448c141.4 0 256-93.1 256-208S397.4 32 256 32zm0 368c-26.7 0-53.1-4.1-78.4-12.1l-22.7-7.2-19.5 13.8c-14.3 10.1-33.9 21.4-57.5 29 7.3-12.1 14.4-25.7 19.9-40.2l10.6-28.1-20.6-21.8C69.7 314.1 48 282.2 48 240c0-88.2 93.3-160 208-160s208 71.8 208 160-93.3 160-208 160z"&gt;&lt;/path&gt;&lt;/svg&gt;
+In what sort of situation might you be doing 10,000 hypothesis tests?
+]
+
+- Suppose that you call all p-values less than 0.05 significant. 
+
+- The expected number of false positives is: `\(10,000 \times 0.05 = 500\)`  false positives.
+
+- **How do we avoid so many false positives?**
+
+&lt;br&gt;
+
+Consider two approaches:
+
+- Controlling the .bold[.blue[Family-Wise Error Rate (FWER)]]
+
+- Controlling the .bold[.red[False Discovery Rate (FDR)]]
+
+---
+class: segue
+
+# Controlling the family-wise error rate
+
+---
+
+## Family-wise error rate
+
+.pull-left[
+
+[**Family wise error rate (FWER)**](https://en.wikipedia.org/wiki/Family-wise_error_rate): the probability of at least one false positive.
+
+Let `\(T_1, ..., T_m\)` be `\(m\)` test statistics for null hypothesis `\(H_{01}, ..., H_{0m}\)`
+
+`$$\begin{aligned}
+\operatorname{FWER} &amp; = P(\text{falsely rejecting one or more }H_{0i}) \\
+&amp; = P(V \geq 1)
+\end{aligned}$$`
+
+If the **null hypothesis is always true** but we conduct `\(m\)` tests each at significance level `\(\alpha\)` then...
+
+- The probability of at least one false positive is `\(1-(1-\alpha)^m\)`
+
+- e.g. if `\(m=20\)` then the FWER is 64%.
+]
+.pull-right[
+Possible outcomes from a series of `\(m\)` hypothesis tests.
+
+Outcomes               | Truth: `\(\theta=0\)`   | Truth: `\(\theta\neq0\)`   | Number of tests
+---------------------|:------------:|:--------------:|:---------:
+**Conclusion:** `\(\theta=0\)`     |      `\(U\)`    |      `\(T\)`       |  `\(m-R\)`
+**Conclusion:** `\(\theta\neq 0\)` |      `\(V\)`    |      `\(S\)`       |  `\(R\)`
+**Number of tests**            |     `\(m_0\)`   |      `\(m-m_0\)`   |  `\(m\)`
+
+&lt;br&gt;
+
+
+```r
+m = 20
+alpha = 0.05
+1-(1-alpha)^m
+```
+
+```
+## [1] 0.6415141
+```
+]
+
+
+---
+
+## Bonferroni correction
+
+The [Bonferroni correction](http://en.wikipedia.org/wiki/Bonferroni_correction) is the oldest multiple testing correction. 
+
+Given that the number of false positives for `\(m\)` tests is `\(m \alpha\)` then consider defining a new threshold for significance:
+`$$\alpha^* = \frac{\alpha}{m}$$`  
+
+
+- This is conservative but keeps FWER `\(&lt; \alpha\)`.
+
+- e.g. for `\(m=20\)`
+`$$1-(1-\alpha^*)^m = 1-(1-0.05/20)^{20} = 0.0488$$`
+
+
+---
+
+## Bonferroni correction
+
+#### Basic idea
+
+* Suppose you do `\(m\)` tests
+* You want to control FWER at level `\(\alpha\)` so `\(P(V \geq 1) &lt; \alpha\)`
+* Calculate p-values in the usual way
+* Set `\(\alpha^* = \alpha/m\)` (or alternatively calculate adjusted p-values: `\(p^* = \text{p-value}\times m\)`)
+* Call all p-values less than `\(\alpha^*\)` significant (or all adjusted p-values less than `\(\alpha\)` significant)
+
+**Pros**: Easy to calculate, conservative
+
+**Cons**: May be very conservative
+
+&lt;br&gt;
+
+.blockquote[
+&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M144 208c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm112 0c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm112 0c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zM256 32C114.6 32 0 125.1 0 240c0 47.6 19.9 91.2 52.9 126.3C38 405.7 7 439.1 6.5 439.5c-6.6 7-8.4 17.2-4.6 26S14.4 480 24 480c61.5 0 110-25.7 139.1-46.3C192 442.8 223.2 448 256 448c141.4 0 256-93.1 256-208S397.4 32 256 32zm0 368c-26.7 0-53.1-4.1-78.4-12.1l-22.7-7.2-19.5 13.8c-14.3 10.1-33.9 21.4-57.5 29 7.3-12.1 14.4-25.7 19.9-40.2l10.6-28.1-20.6-21.8C69.7 314.1 48 282.2 48 240c0-88.2 93.3-160 208-160s208 71.8 208 160-93.3 160-208 160z"&gt;&lt;/path&gt;&lt;/svg&gt; What does conservative mean in this context?
+]
+
+---
+class: eg
+
+## Controlling family-wise error rate (FWER)
+
+#### Mathematically
+
+Let `\(p_1,p_2,\ldots, p_m\)` be the p-values from `\(m\)` hypothesis tests.
+
+`$$\begin{aligned}
+\text{FWER} &amp; =P(\text{rejecting at least one true null hypothesis}) \\ 
+&amp; = P(V \geq 1) \\
+&amp; = P\left\{\bigcup _{i=1}^{m_{0}}\left(p_{i}\leq {\frac {\alpha }{m}}\right)\right\} \\
+&amp; \leq \sum _{i=1}^{m_{0}}\left\{P\left(p_{i}\leq {\frac {\alpha }{m}}\right)\right\} \\
+&amp; = m_{0}{\frac {\alpha }{m}} \\
+&amp; \leq m{\frac {\alpha }{m}} \\
+&amp; =\alpha .
+\end{aligned}$$`
+
+This is not examinable.
+
+.footnote[
+For the mathematically inclined see [Boole's inequality](https://en.wikipedia.org/wiki/Boole%27s_inequality).
+]
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M.1 494.1c-1.1 9.5 6.3 17.8 15.9 17.8l32.3.1c8.1 0 14.9-5.9 16-13.9.7-4.9 1.8-11.1 3.4-18.1H380c1.6 6.9 2.9 13.2 3.5 18.1 1.1 8 7.9 14 16 13.9l32.3-.1c9.6 0 17.1-8.3 15.9-17.8-4.6-37.9-25.6-129-118.9-207.7-17.6 12.4-37.1 24.2-58.5 35.4 6.2 4.6 11.4 9.4 17 14.2H159.7c21.3-18.1 47-35.6 78.7-51.4C410.5 199.1 442.1 65.8 447.9 17.9 449 8.4 441.6.1 432 .1L399.6 0c-8.1 0-14.9 5.9-16 13.9-.7 4.9-1.8 11.1-3.4 18.1H67.8c-1.6-7-2.7-13.1-3.4-18.1-1.1-8-7.9-14-16-13.9L16.1.1C6.5.1-1 8.4.1 17.9 5.3 60.8 31.4 171.8 160 256 31.5 340.2 5.3 451.2.1 494.1zM224 219.6c-25.1-13.7-46.4-28.4-64.3-43.6h128.5c-17.8 15.2-39.1 30-64.2 43.6zM355.1 96c-5.8 10.4-12.8 21.1-21 32H114c-8.3-10.9-15.3-21.6-21-32h262.1zM92.9 416c5.8-10.4 12.8-21.1 21-32h219.4c8.3 10.9 15.4 21.6 21.2 32H92.9z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## 10 microRNA p-values: Bonferroni method
+
+For the sake of illustration, we're going to control the error rates at `\(\alpha = 0.2\)`. Let's also say that we are only interested in `\(m=10\)` of the microRNA. 
+
+.pull-left[
+
+
+```r
+alpha = 0.2
+m = 10
+M = nrow(mirna_pval)
+set.seed(123, sample.kind = "Rounding")
+sample_rows = sample(1:M, size = m)
+mirna10 = mirna_pval %&gt;% 
+  select(microRNA, pvalue) %&gt;% 
+  slice(sample_rows) %&gt;% 
+  mutate(p_bonferroni = pmin(pvalue*m, 1)) %&gt;% 
+  arrange(pvalue)
+```
+
+We compare the original p-values to `\(0.2/m = 0.02\)` or the adjusted p-values `p_bonferroni` to `\(\alpha=0.2\)`. We get the same conclusion either way.
+
+.footnote[We would typically choose the error rate to be 0.05 or perhaps even smaller, but using a larger error rate of 0.2 makes it a bit easier to outline the concepts.]
+
+
+]
+.pull-right[
+
+
+```r
+mirna10 %&gt;% knitr::kable(digits = 4) %&gt;% 
+  kableExtra::kable_styling(font_size = 16)
+```
+
+&lt;table class="table" style="font-size: 16px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; microRNA &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; pvalue &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; p_bonferroni &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; hsa-miR-874 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0022 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0220 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; hsa-miR-185 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0054 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0544 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; hsa-miR-548a-3p &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0532 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5323 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; hsa-miR-221 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.1730 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.0000 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; hsa-let-7e &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2594 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.0000 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; hsa-miR-345 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.3666 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.0000 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; hsa-miR-27b &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.3766 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.0000 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; hsa-miR-337-3p &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5807 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.0000 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; hsa-miR-639 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.6607 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.0000 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; hsa-miR-640 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.6912 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.0000 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+]
+
+
+
+
+
+---
+class: segue
+
+# Controlling the false discovery rate
+
+
+---
+
+## False Discovery Rate (FDR)
+
+.pull-left[
+&lt;br&gt;
+
+**Aim:** to keep the expected proportion of false positives in your rejected tests (FDR) close to `\(\alpha\)`  
+
+&lt;br&gt;
+
+Let...
+
+- `\(R\)` = total number of `\(H_{0i}\)` rejected
+- `\(V\)` = number of `\(H_{0i}\)` falsely rejected
+- FDR = `\(\operatorname{E}\left(\dfrac{V}{R}\right)\)`
+]
+
+.pull-right[
+Possible outcomes from a series of `\(m\)` hypothesis tests.
+
+Outcomes               | Truth: `\(\theta=0\)`   | Truth: `\(\theta\neq0\)`   | Number of tests
+---------------------|:------------:|:--------------:|:---------:
+**Conclusion:** `\(\theta=0\)`     |      `\(U\)`    |      `\(T\)`       |  `\(m-R\)`
+**Conclusion:** `\(\theta\neq 0\)` |      `\(V\)`    |      `\(S\)`       |  `\(R\)`
+**Number of tests**            |     `\(m_0\)`   |      `\(m-m_0\)`   |  `\(m\)`
+
+]
+
+
+---
+
+## Controlling false discovery rate (FDR)
+
+The [Benjamini–Hochberg procedure](https://en.wikipedia.org/wiki/False_discovery_rate#Benjamini%E2%80%93Hochberg_procedure) is the most popular correction when performing _lots_ of tests say in genomics, imaging, astronomy, or other signal-processing disciplines. 
+
+**Basic idea**: 
+
+- Suppose you do `\(m\)` tests
+- You want to control FDR at level `\(\alpha\)`
+- Calculate p-values normally
+- Order the p-values from smallest to largest `\(p_{(1)}\leq p_{(2)} \leq\ldots \leq p_{(m)}\)`
+- Find `\(j^* = \max j\)` such that `\(p_{(j)} \leq \dfrac{j}{m}\alpha\)`
+- Reject all `\(H_{0i}\)` where `\(p_{(i)} \leq \dfrac{j^*}{m}\alpha\)`
+
+**Pros**: Still pretty easy to calculate, less conservative (maybe much less)
+
+**Cons**: Allows for more false positives, may behave strangely under dependence
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M.1 494.1c-1.1 9.5 6.3 17.8 15.9 17.8l32.3.1c8.1 0 14.9-5.9 16-13.9.7-4.9 1.8-11.1 3.4-18.1H380c1.6 6.9 2.9 13.2 3.5 18.1 1.1 8 7.9 14 16 13.9l32.3-.1c9.6 0 17.1-8.3 15.9-17.8-4.6-37.9-25.6-129-118.9-207.7-17.6 12.4-37.1 24.2-58.5 35.4 6.2 4.6 11.4 9.4 17 14.2H159.7c21.3-18.1 47-35.6 78.7-51.4C410.5 199.1 442.1 65.8 447.9 17.9 449 8.4 441.6.1 432 .1L399.6 0c-8.1 0-14.9 5.9-16 13.9-.7 4.9-1.8 11.1-3.4 18.1H67.8c-1.6-7-2.7-13.1-3.4-18.1-1.1-8-7.9-14-16-13.9L16.1.1C6.5.1-1 8.4.1 17.9 5.3 60.8 31.4 171.8 160 256 31.5 340.2 5.3 451.2.1 494.1zM224 219.6c-25.1-13.7-46.4-28.4-64.3-43.6h128.5c-17.8 15.2-39.1 30-64.2 43.6zM355.1 96c-5.8 10.4-12.8 21.1-21 32H114c-8.3-10.9-15.3-21.6-21-32h262.1zM92.9 416c5.8-10.4 12.8-21.1 21-32h219.4c8.3 10.9 15.4 21.6 21.2 32H92.9z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## 10 microRNA p-values: BH method
+
+.pull-left[
+Controlling the FDR rates at `\(\alpha = 0.2\)`. Take a the same sample of 10 p-values from the microRNA experiment.
+
+
+```r
+alpha = 0.2
+m = 10
+p_vals = sort(mirna10$pvalue)
+# BH procedure
+# j=1: smallest p-value &lt; 1*alpha/m?
+p_vals[1] &lt; 1*alpha/m
+```
+
+```
+## [1] TRUE
+```
+
+```r
+# j=2: second smallest p-value &lt; 2*alpha/m?
+p_vals[2] &lt; 2*alpha/m
+```
+
+```
+## [1] TRUE
+```
+]
+
+.pull-right[
+
+```r
+# j=3: third smallest p-value &lt; 3*alpha/m?
+p_vals[3] &lt; 3*alpha/m
+```
+
+```
+## [1] TRUE
+```
+
+```r
+# j=4: fourth smallest p-value &lt; 4*alpha/m?
+p_vals[4] &lt; 4*alpha/m
+```
+
+```
+## [1] FALSE
+```
+
+```r
+# j=5: fifth smallest p-value &lt; 5*alpha/m?
+p_vals[5] &lt; 5*alpha/m
+```
+
+```
+## [1] FALSE
+```
+
+```r
+# and so on ...
+```
+]
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M.1 494.1c-1.1 9.5 6.3 17.8 15.9 17.8l32.3.1c8.1 0 14.9-5.9 16-13.9.7-4.9 1.8-11.1 3.4-18.1H380c1.6 6.9 2.9 13.2 3.5 18.1 1.1 8 7.9 14 16 13.9l32.3-.1c9.6 0 17.1-8.3 15.9-17.8-4.6-37.9-25.6-129-118.9-207.7-17.6 12.4-37.1 24.2-58.5 35.4 6.2 4.6 11.4 9.4 17 14.2H159.7c21.3-18.1 47-35.6 78.7-51.4C410.5 199.1 442.1 65.8 447.9 17.9 449 8.4 441.6.1 432 .1L399.6 0c-8.1 0-14.9 5.9-16 13.9-.7 4.9-1.8 11.1-3.4 18.1H67.8c-1.6-7-2.7-13.1-3.4-18.1-1.1-8-7.9-14-16-13.9L16.1.1C6.5.1-1 8.4.1 17.9 5.3 60.8 31.4 171.8 160 256 31.5 340.2 5.3 451.2.1 494.1zM224 219.6c-25.1-13.7-46.4-28.4-64.3-43.6h128.5c-17.8 15.2-39.1 30-64.2 43.6zM355.1 96c-5.8 10.4-12.8 21.1-21 32H114c-8.3-10.9-15.3-21.6-21-32h262.1zM92.9 416c5.8-10.4 12.8-21.1 21-32h219.4c8.3 10.9 15.4 21.6 21.2 32H92.9z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## 10 microRNA p-values: BH method
+
+
+```r
+# in general...
+result = vector(length = length(p_vals))
+p_vals = sort(p_vals) # we already did this but just emphasising it
+for(j in seq(p_vals)) { # seq(p_vals) is the same as 1:length(pvals)
+  result[j] = p_vals[j] &lt; j*alpha/m
+}
+result
+```
+
+```
+##  [1]  TRUE  TRUE  TRUE FALSE FALSE FALSE FALSE FALSE FALSE
+## [10] FALSE
+```
+
+```r
+largest_true = max(which(result == TRUE))
+largest_true
+```
+
+```
+## [1] 3
+```
+
+```r
+significant_pvals = p_vals[1:largest_true]
+significant_pvals
+```
+
+```
+## [1] 0.002196115 0.005442173 0.053227665
+```
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M.1 494.1c-1.1 9.5 6.3 17.8 15.9 17.8l32.3.1c8.1 0 14.9-5.9 16-13.9.7-4.9 1.8-11.1 3.4-18.1H380c1.6 6.9 2.9 13.2 3.5 18.1 1.1 8 7.9 14 16 13.9l32.3-.1c9.6 0 17.1-8.3 15.9-17.8-4.6-37.9-25.6-129-118.9-207.7-17.6 12.4-37.1 24.2-58.5 35.4 6.2 4.6 11.4 9.4 17 14.2H159.7c21.3-18.1 47-35.6 78.7-51.4C410.5 199.1 442.1 65.8 447.9 17.9 449 8.4 441.6.1 432 .1L399.6 0c-8.1 0-14.9 5.9-16 13.9-.7 4.9-1.8 11.1-3.4 18.1H67.8c-1.6-7-2.7-13.1-3.4-18.1-1.1-8-7.9-14-16-13.9L16.1.1C6.5.1-1 8.4.1 17.9 5.3 60.8 31.4 171.8 160 256 31.5 340.2 5.3 451.2.1 494.1zM224 219.6c-25.1-13.7-46.4-28.4-64.3-43.6h128.5c-17.8 15.2-39.1 30-64.2 43.6zM355.1 96c-5.8 10.4-12.8 21.1-21 32H114c-8.3-10.9-15.3-21.6-21-32h262.1zM92.9 416c5.8-10.4 12.8-21.1 21-32h219.4c8.3 10.9 15.4 21.6 21.2 32H92.9z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## 10 microRNA p-values: BH vs Bonferonni
+
+.pull-left[
+Controlling all error rates at `\(\alpha = 0.20\)` and using our sample of 10 microRNAs.
+
+
+```r
+alpha = 0.2
+m = 10
+par(cex = 2.6, mar = c(4,4,1,1))
+plot(p_vals,
+     ylim = c(0,1), pch=19)
+abline(h = alpha, col = "blue", lwd = 3)
+abline(h = alpha/m, col = "red", lwd = 3)
+abline(a = 0, b=alpha*1/m, col = "orange", 
+       lwd = 3)
+legend("topleft", 
+       legend = c("No correction", 
+                  "Bonferroni (FWER)", 
+                  "Benjamini–Hochberg (FDR)"),
+       lty = 1, lwd = 3,
+       col = c("blue","red","orange"))
+```
+]
+
+
+.pull-right[
+
+The lines are the significance thresholds for the three methods.  If a point is below the line, the method would consider it "significant".
+
+&lt;img src="lec19_files/figure-html/pval2-1.png" width="864" /&gt;
+]
+
+---
+class: segue
+
+# Simulation experiments
+
+---
+
+## Case study I: no true positives
+
+.pull-left[
+
+```r
+set.seed(1234)
+p_vals = rep(NA, 1000)
+B = 10000
+case1 = tibble(experiment = 1:B) %&gt;% 
+  group_by(experiment) %&gt;% 
+  summarise(x_sample = rnorm(20),
+            y_sample = rnorm(20)) %&gt;% 
+  nest() %&gt;% 
+  mutate(
+    test = map(data, 
+               ~t.test(.$x_sample, 
+                       .$y_sample,
+                       var.equal = TRUE) %&gt;% 
+                 broom::tidy())) %&gt;% 
+  unnest(test) %&gt;% 
+  ungroup()
+mean(case1$p.value &lt; 0.05)
+```
+
+```
+## [1] 0.0505
+```
+]
+.pull-right[
+
+
+```r
+case1 %&gt;% 
+  ggplot() + aes(x = p.value) + 
+  geom_histogram(boundary = 0, 
+                 binwidth = 0.05,
+                 fill = "midnightblue", 
+                 colour = "black")
+```
+
+&lt;img src="lec19_files/figure-html/unnamed-chunk-18-1.png" width="864" /&gt;
+
+
+]
+
+???
+
+The old fashioned way
+
+
+```r
+set.seed(1234)
+for(i in 1:B){
+  # generate two independent samples
+  y = rnorm(20)
+  x = rnorm(20)
+  # perform a two sample t-test and extract the p-value
+  p_vals[i] = t.test(x,y)$p.value
+}
+
+# Controls false positive rate
+sum(p_vals &lt; 0.05)
+mean(p_vals &lt; 0.05)
+```
+
+
+---
+
+## Case study I: no true positives
+
+.pull-left[
+
+Get R to do the corrections for us using the `p.adjust()` function:
+
+
+```r
+case1 = case1 %&gt;% 
+  mutate(
+    p_bonf = p.adjust(p.value, "bonferroni"),
+    p_bh = p.adjust(p.value, "BH")
+  )
+case1 %&gt;% select(experiment, p.value,
+                 p_bonf, p_bh) %&gt;% 
+  head()
+```
+
+```
+## # A tibble: 6 × 4
+##   experiment p.value p_bonf  p_bh
+##        &lt;int&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;
+## 1          1  0.703       1 0.995
+## 2          2  0.0319      1 0.962
+## 3          3  0.0539      1 0.962
+## 4          4  0.778       1 0.995
+## 5          5  0.480       1 0.995
+## 6          6  0.990       1 0.999
+```
+
+]
+.pull-right[
+
+Proportion of "significant" results
+
+
+```r
+case1 %&gt;% ungroup() %&gt;% 
+  summarise(
+    original = mean(p.value &lt; 0.05),
+    bonferroni = mean(p_bonf &lt; 0.05),
+    bh = mean(p_bh &lt; 0.05)
+  )
+```
+
+```
+## # A tibble: 1 × 3
+##   original bonferroni    bh
+##      &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt;
+## 1   0.0505          0     0
+```
+
+]
+
+
+???
+
+The old fashioned way
+
+
+```r
+alpha = 0.05
+p_vals = case1$p.value
+# Controls FWER (the following are all equivalent)
+sum(p_vals &lt; alpha/B)
+sum(p_vals*B &lt; alpha)
+sum(p.adjust(p_vals, method="bonferroni") &lt; 0.05)
+# Controls FDR 
+sum(p.adjust(p_vals, method = "BH") &lt; 0.05)
+```
+
+---
+
+## Case study II: 50% true positives
+
+
+```r
+set.seed(1234)
+B = 10000
+case2 = tibble(experiment = 1:B) %&gt;% 
+  group_by(experiment) %&gt;% 
+  summarise(x_sample = rnorm(20),
+            y_sample = rnorm(20)) %&gt;% 
+  rowwise() %&gt;% 
+  mutate(truth = if_else(experiment&lt;=B/2, "mu1 - mu2 = 0", "mu1 - mu2 = 2"),
+         y_sample = if_else(truth == "mu1 - mu2 = 2", y_sample + 2, y_sample)) %&gt;% 
+  ungroup() %&gt;% 
+  nest(data = c(x_sample, y_sample)) %&gt;% 
+  mutate(test = map(data, ~t.test(.$x_sample, .$y_sample, var.equal = TRUE) %&gt;% broom::tidy())) %&gt;% 
+  unnest(test) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(
+    prediction = if_else(p.value &lt; 0.05, "reject H0", "don't reject H0"),
+    p_bonf = p.adjust(p.value, method = "bonferroni"),
+    p_bh = p.adjust(p.value, method = "BH"),
+    pred_bonf = if_else(p_bonf &lt; 0.05, "reject H0", "don't reject H0"),
+    pred_bh = if_else(p_bh &lt; 0.05, "reject H0", "don't reject H0")
+  )
+```
+
+
+???
+
+Old fashioned way
+
+
+```r
+set.seed(1234)
+B = 1000
+p_vals = rep(NA,B)
+for(i in 1:B){
+  x = rnorm(20)
+  if(i &lt;= B/2){ # First 500: mu_1 - mu_2 = 0
+    y = rnorm(20, mean = 0)
+  } else { # Last 500: mu_1 - mu_2 = -2
+    y = rnorm(20, mean = 2)
+  }
+  p_vals[i] = t.test(x,y)$p.value
+}
+true_status &lt;- rep(c("zero","not zero"), each = B/2)
+table(p_vals &lt; 0.05, true_status)
+```
+
+
+---
+
+## Case study II: 50% true positives
+
+.pull-left[
+
+
+```r
+# no adjustment
+case2 %&gt;% janitor::tabyl(prediction, truth)
+```
+
+```
+##       prediction mu1 - mu2 = 0 mu1 - mu2 = 2
+##  don't reject H0          4742             0
+##        reject H0           258          5000
+```
+
+```r
+# Bonferroni: controls FWER 
+case2 %&gt;% janitor::tabyl(pred_bonf, truth)
+```
+
+```
+##        pred_bonf mu1 - mu2 = 0 mu1 - mu2 = 2
+##  don't reject H0          5000           979
+##        reject H0             0          4021
+```
+
+```r
+# BH: controls FDR 
+case2 %&gt;% janitor::tabyl(pred_bh, truth)
+```
+
+```
+##          pred_bh mu1 - mu2 = 0 mu1 - mu2 = 2
+##  don't reject H0          4883             0
+##        reject H0           117          5000
+```
+
+]
+.pull-right[
+
+Outcomes               | Truth: `\(\theta=0\)`   | Truth: `\(\theta\neq0\)`   | Number of tests
+---------------------|:------------:|:--------------:|:---------:
+**Conclusion:** `\(\theta=0\)`     |      `\(U\)`    |      `\(T\)`       |  `\(m-R\)`
+**Conclusion:** `\(\theta\neq 0\)` |      `\(V\)`    |      `\(S\)`       |  `\(R\)`
+**Number of tests**            |     `\(m_0\)`   |      `\(m-m_0\)`   |  `\(m\)`
+
+- Bonferroni is controlling FWER
+
+`$$\begin{aligned}
+\operatorname{FWER} &amp; = P(\text{falsely rejecting one or more }H_{0i}) \\
+&amp; = P(V \geq 1)
+\end{aligned}$$`
+
+- BH is controlling FDR = `\(E\left(\dfrac{V}{R}\right)\)`
+
+]
+
+---
+
+## Case study II: 50% true positives
+
+
+```r
+pval2 = case2 %&gt;% select(experiment, p.value, p_bonf, p_bh) %&gt;% 
+  pivot_longer(cols = c(p.value, p_bonf, p_bh), names_to = "method", values_to = "p_value") %&gt;% 
+  mutate(method = recode(method, "p.value" = "Original", "p_bh" = "BH", "p_bonf" = "Bonferroni"))
+pval2 %&gt;% ggplot() + aes(x = p_value, fill = method) + 
+  geom_histogram(boundary = 0, binwidth = 0.05, colour = "black") + 
+  facet_grid(~method) + scale_fill_brewer(palette = "Set1") + scale_x_continuous(breaks = c(0,1)) + 
+  theme(legend.position = "none")
+```
+
+&lt;img src="lec19_files/figure-html/unnamed-chunk-26-1.png" width="864" /&gt;
+
+
+
+---
+class: segue
+
+# MicroRNA revisited
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M.1 494.1c-1.1 9.5 6.3 17.8 15.9 17.8l32.3.1c8.1 0 14.9-5.9 16-13.9.7-4.9 1.8-11.1 3.4-18.1H380c1.6 6.9 2.9 13.2 3.5 18.1 1.1 8 7.9 14 16 13.9l32.3-.1c9.6 0 17.1-8.3 15.9-17.8-4.6-37.9-25.6-129-118.9-207.7-17.6 12.4-37.1 24.2-58.5 35.4 6.2 4.6 11.4 9.4 17 14.2H159.7c21.3-18.1 47-35.6 78.7-51.4C410.5 199.1 442.1 65.8 447.9 17.9 449 8.4 441.6.1 432 .1L399.6 0c-8.1 0-14.9 5.9-16 13.9-.7 4.9-1.8 11.1-3.4 18.1H67.8c-1.6-7-2.7-13.1-3.4-18.1-1.1-8-7.9-14-16-13.9L16.1.1C6.5.1-1 8.4.1 17.9 5.3 60.8 31.4 171.8 160 256 31.5 340.2 5.3 451.2.1 494.1zM224 219.6c-25.1-13.7-46.4-28.4-64.3-43.6h128.5c-17.8 15.2-39.1 30-64.2 43.6zM355.1 96c-5.8 10.4-12.8 21.1-21 32H114c-8.3-10.9-15.3-21.6-21-32h262.1zM92.9 416c5.8-10.4 12.8-21.1 21-32h219.4c8.3 10.9 15.4 21.6 21.2 32H92.9z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## All microRNA p-values
+
+
+```r
+mirna_pval = mirna_pval %&gt;% 
+  mutate(
+    p_bonf = p.adjust(pvalue, method = "bonferroni"),
+    p_bh = p.adjust(pvalue, method = "BH")
+  )
+mirna_pval %&gt;% 
+  summarise(original_n_sig = sum(pvalue &lt; 0.05),
+            bonf_n_sig = sum(p_bonf &lt; 0.05),
+            bh_n_sig = sum(p_bh &lt; 0.05))
+```
+
+```
+## # A tibble: 1 × 3
+##   original_n_sig bonf_n_sig bh_n_sig
+##            &lt;int&gt;      &lt;int&gt;    &lt;int&gt;
+## 1             49          4        7
+```
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M.1 494.1c-1.1 9.5 6.3 17.8 15.9 17.8l32.3.1c8.1 0 14.9-5.9 16-13.9.7-4.9 1.8-11.1 3.4-18.1H380c1.6 6.9 2.9 13.2 3.5 18.1 1.1 8 7.9 14 16 13.9l32.3-.1c9.6 0 17.1-8.3 15.9-17.8-4.6-37.9-25.6-129-118.9-207.7-17.6 12.4-37.1 24.2-58.5 35.4 6.2 4.6 11.4 9.4 17 14.2H159.7c21.3-18.1 47-35.6 78.7-51.4C410.5 199.1 442.1 65.8 447.9 17.9 449 8.4 441.6.1 432 .1L399.6 0c-8.1 0-14.9 5.9-16 13.9-.7 4.9-1.8 11.1-3.4 18.1H67.8c-1.6-7-2.7-13.1-3.4-18.1-1.1-8-7.9-14-16-13.9L16.1.1C6.5.1-1 8.4.1 17.9 5.3 60.8 31.4 171.8 160 256 31.5 340.2 5.3 451.2.1 494.1zM224 219.6c-25.1-13.7-46.4-28.4-64.3-43.6h128.5c-17.8 15.2-39.1 30-64.2 43.6zM355.1 96c-5.8 10.4-12.8 21.1-21 32H114c-8.3-10.9-15.3-21.6-21-32h262.1zM92.9 416c5.8-10.4 12.8-21.1 21-32h219.4c8.3 10.9 15.4 21.6 21.2 32H92.9z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## All microRNA p-values
+
+
+```r
+mirna_pval %&gt;%  arrange(pvalue) %&gt;% 
+  select(-null_pvalue, `Original p-value` = pvalue, `Bonferroni p-value` = p_bonf,  `BH p-value` = p_bh) %&gt;% 
+  DT::datatable(rownames = FALSE, options = list(dom = 'tp', pageLength = 7)) %&gt;% 
+  DT::formatSignif(2:4, digits = 2)
+```
+
+<div id="htmlwidget-ca6532b6e0ab4ba10ced" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-ca6532b6e0ab4ba10ced">{"x":{"filter":"none","data":[["hsa-miR-132","hsa-miR-129-5p","hsa-miR-1260","hsa-miR-200a","hsa-miR-34c-5p","hsa-miR-744","hsa-miR-129-3p","hsa-miR-504","ebv-miR-BART8","hsa-miR-874","hsa-miR-99b","hsa-miR-1275","hsa-miR-431","hsa-miR-133b","hsa-miR-193b","ebv-miR-BART5","hsa-miR-30e","hsa-miR-1912","hsa-miR-185","hsa-miR-517c_hsa-miR-519a","hsa-miR-656","hsa-miR-96","hsa-miR-633","hsa-miR-149","hsa-miR-23b","hsa-miR-100","hsa-miR-199a-5p","hsa-miR-433","hsa-miR-376a","hsa-miR-376c","hsa-miR-216a","hsa-miR-29b","hsa-miR-424","hsa-miR-381","hsa-miR-195","hsa-miR-34a","hsa-miR-335","hsa-miR-873","hsa-miR-137","hsa-miR-194","hsa-miR-25","hsa-miR-410","hsa-miR-497","hsa-let-7i","hsa-miR-19b","hsa-miR-127-3p","hsa-miR-484","hsa-miR-320a","hsa-miR-379","hsa-miR-548g","hsa-miR-548a-3p","hsa-miR-485-5p","hsa-miR-1180","hsa-miR-450b-5p","hsa-let-7d","hsa-miR-192","hsa-miR-454","hsv1-miR-H3","hsa-miR-126","hsa-miR-181b_hsa-miR-181d","hsa-miR-186","hsa-miR-145","hsa-miR-2117","hsa-miR-518f","hsa-miR-92a","hsa-miR-520e","hsa-miR-142-5p","hsa-miR-29a","hsa-miR-203","hsa-miR-218","hsa-miR-432","hsa-miR-425","hsa-miR-99a","hsa-miR-301a","hsa-miR-16","hsa-miR-130b","hsa-miR-766","hsa-miR-375","hsa-let-7c","hsa-miR-106b","hsa-miR-592","hsa-miR-584","hsa-miR-598","hsa-miR-342-3p","hsa-miR-24","hsa-miR-590-5p","hsa-miR-330-3p","hsa-miR-346","hsa-miR-376b","hsa-miR-1206","hsa-miR-1537","hsa-miR-494","hsa-miR-2114","hsa-miR-1297","hsa-miR-138","hsa-miR-101","hsa-miR-1299","hsa-miR-885-5p","hsa-miR-206","hsa-miR-1246","ebv-miR-BART14","hsa-miR-221","hsa-miR-93","hsa-miR-509-3p","hsa-miR-579","hsa-miR-582-5p","hsa-miR-193a-3p","hsa-miR-187","hsa-miR-595","hsa-miR-664","hsa-miR-33a","hsa-miR-423-3p","hsa-miR-23a","mcv-miR-M1-5p","hsv2-miR-H4-5p","hsa-miR-339-3p","hsa-miR-106a_hsa-miR-17","hsa-miR-26b","hsa-miR-485-3p","hsa-miR-365","hsa-miR-10a","hsa-miR-324-5p","hsa-miR-891b","hsv1-miR-H8","hsa-miR-152","hsa-miR-451","hsa-miR-374b","hsa-miR-1266","hsa-miR-151-5p","hsa-miR-26a","hsa-miR-219-2-3p","hsa-miR-140-5p","hsa-miR-548h","hsa-miR-421","hsa-miR-500_hsa-miR-501-5p","hsa-miR-1225-3p","hsa-miR-423-5p","hsa-miR-154","hsa-miR-518e","hsa-let-7e","hsa-miR-219-5p","hsa-miR-196a","hsa-miR-191","hsa-miR-382","hsa-let-7b","hsa-miR-151-3p","hsa-miR-488","hsa-miR-1305","hsa-miR-140-3p","hsa-miR-30c","hsa-miR-7","hsa-miR-181c","hsa-miR-224","hsa-miR-1977","hsa-miR-377","hsa-miR-31","hsa-miR-523","hsa-miR-615-5p","hsa-miR-603","hsa-miR-551b","hsa-miR-29c","hsa-miR-548d-5p","hsa-miR-125b","hsa-miR-143","hsa-miR-453","hsa-miR-146a","hsa-miR-144","hsa-miR-345","hsa-miR-548j","hsa-miR-27b","hsa-miR-9","hsa-miR-208a","hsa-miR-361-5p","hsa-miR-520d-3p","hsa-miR-708","hsa-miR-1185","hsa-miR-542-3p","hsa-miR-515-3p","hsa-miR-98","hsa-miR-197","hsa-miR-331-3p","hsa-miR-934","hsa-miR-153","hsv1-miR-H1","hsa-miR-563","hsa-miR-220a","hsa-miR-328","hsa-miR-525-5p","hsa-miR-183","hsa-miR-491-3p","hsa-miR-135b","hsa-miR-222","hsa-miR-15a","hsa-miR-574-3p","hsa-miR-378","hsa-miR-362-5p","hsa-miR-190b","ebv-miR-BART2-5p","hsa-miR-566","hsa-miR-409-5p","hsa-miR-181a","kshv-miR-K12-4-5p","hsa-miR-125a-5p","hsa-miR-199a-3p_hsa-miR-199b-3p","hsa-miR-20a_hsa-miR-20b","hsa-miR-548b-3p","hsa-miR-520d-5p_hsa-miR-527_hsa-miR-518a-5p","hsa-miR-363","hsa-miR-452","hsa-miR-135a","hsa-miR-15b","ebv-miR-BART16","hsa-let-7g","hsa-let-7a","hsa-miR-627","hsa-miR-548a-5p","hsa-miR-27a","hsa-miR-889","hsa-miR-30a","hsa-miR-876-3p","hsa-miR-660","hsa-miR-487b","hsa-miR-370","hsa-miR-548f","hsa-miR-450a","hsa-miR-543","hsa-miR-770-5p","hsa-miR-337-3p","kshv-miR-K12-9","hsa-miR-30b","hsa-miR-491-5p","hsa-miR-767-5p","hsa-miR-299-5p","hsa-miR-107","hsa-miR-769-3p","hsa-miR-199b-5p","hsa-miR-326","hsa-miR-639","hsa-miR-320c","hsa-miR-496","ebv-miR-BART9","hsa-miR-148a","hsa-miR-522","hsa-miR-1283","hsa-miR-374a","hsa-miR-296-5p","hsa-miR-361-3p","hsa-miR-640","hsa-miR-499-5p","hcmv-miR-UL70-3p","hsa-miR-1308","hsa-miR-329","hsa-miR-526a_hsa-miR-518d-5p_hsa-miR-520c-5p","hsa-let-7f","hsa-miR-10b","hsa-miR-122","hsa-miR-490-5p","hsa-miR-148b","hsa-miR-495","hsa-miR-142-3p","ebv-miR-BART6-5p","hsa-miR-600","hsa-miR-21","hsa-miR-34b","hsa-miR-92b","hsa-miR-455-3p","hsa-miR-103","hsa-miR-124","hsa-miR-95","hsa-miR-1979","hsa-miR-544","hsa-miR-188-5p","hsa-miR-125a-3p","hsa-miR-136","hsa-miR-204","hsa-miR-651","hsa-miR-1248","hsa-miR-448","hsa-miR-340","hsa-miR-22","hsa-miR-383","hsa-miR-514","kshv-miR-K12-2","hsa-miR-146b-5p","hsa-miR-369-3p","hsa-miR-150","hsa-miR-324-3p","hsa-miR-539","hsa-miR-1","hsa-miR-223","hsa-miR-577","hsa-miR-758","hsa-miR-655","hsa-miR-487a","hsa-miR-769-5p","hsa-miR-1286","hsa-miR-133a","hsa-miR-200b","hsa-miR-626","hsa-miR-300","hsa-miR-155","hsa-miR-2054","hsa-miR-139-5p","hsa-miR-362-3p","hsa-miR-580","hsa-miR-30d","hsa-miR-128","hcmv-miR-US5-2","hsa-miR-516a-3p"],[1.27854733794384e-12,3.31325458775054e-07,6.32929688270435e-05,0.000131086335746585,0.000653817321308088,0.000865286484045235,0.000912586239703816,0.00159675907327248,0.00161938501743805,0.00219611480002561,0.00224269127724522,0.00231880079390808,0.00267081991018234,0.00304381475323571,0.0031595095552356,0.00363179939810954,0.00394219530805864,0.00476625370316656,0.00544217264462627,0.00642211531871152,0.00656913842606154,0.00677818260860454,0.00698278210843363,0.00823816341618034,0.00884441707815726,0.00993737121925288,0.0104549438223972,0.0111496087375377,0.0121128313294697,0.0143045132708545,0.0168193217817845,0.0175982540319265,0.0192216329481645,0.0218072832861137,0.0231239386402911,0.0249019933564808,0.0251433965178213,0.0254442348029412,0.0269637559076343,0.0278127826181373,0.0279144933412342,0.0284791793081324,0.0295174234513793,0.0312685333284243,0.0329123834659668,0.0366615002283401,0.041177221704823,0.0493962556437176,0.049484169533713,0.0510519754918485,0.0532276648200278,0.0568905825999198,0.0578425415065272,0.0676473061294207,0.0689441588745958,0.0695001678497219,0.0718781976473034,0.078509470660466,0.0787693403660929,0.0808618315510039,0.0811806794822087,0.0816465427631877,0.0837414770498143,0.086552878492978,0.0866132514605389,0.0878461325412637,0.0884857184671682,0.0896837847681685,0.0909579139752601,0.0934816864093873,0.095893055457459,0.107231923025752,0.107986271771554,0.111795812142877,0.114156543819888,0.116288985488649,0.116672076413177,0.117350507115447,0.117506185194135,0.11806230467215,0.118178065533252,0.120518762474254,0.121040023237163,0.129761969169223,0.134070759998122,0.137460058912076,0.139719355411522,0.14103802153758,0.143124355125462,0.143140528473358,0.145301906436909,0.14716847871799,0.147466606421152,0.148712945084908,0.149616659718691,0.152078071230199,0.15555133887911,0.156636357515065,0.164418568871626,0.165127970077846,0.167861411249552,0.172971373928237,0.174115928770509,0.17523399566354,0.175634617533058,0.179333779976345,0.181160885387655,0.182649973776822,0.188502859362241,0.189716435976584,0.189839657059171,0.19048524280046,0.192331674960222,0.200716540210241,0.200982274736457,0.201707978947646,0.202989709063443,0.203356593621403,0.207814534664043,0.213161365796795,0.217781753040298,0.218514488160328,0.221940262567069,0.225100056947917,0.229179039675047,0.230793279806244,0.235012826080045,0.235167964002467,0.236188991913018,0.237932489003418,0.246191429714611,0.247177158234069,0.249530807183667,0.249580285911293,0.251143298218467,0.253200661743905,0.253334832161367,0.255899919464812,0.259032481215254,0.259449516738526,0.259987798070615,0.264203401236235,0.268727995844054,0.271349406369399,0.271809908094517,0.272571742521015,0.27753401751902,0.278265573063354,0.278833969934281,0.284167131581296,0.284568201376703,0.29017491162435,0.295986255153846,0.296780552326841,0.305610261355404,0.306899602757501,0.316091384012615,0.322221272094979,0.324014797961851,0.324921482011628,0.326206478608337,0.332463006431945,0.333154832119757,0.333937229431598,0.335697365464683,0.338278284674025,0.340898481246372,0.366554243367647,0.374850011437934,0.376581466287374,0.377685801212895,0.390478202882314,0.390531056489612,0.393667285142865,0.400172059092673,0.406055982820673,0.408427550216842,0.424257474325666,0.426920771075106,0.431866907092305,0.432657822826979,0.441578734878029,0.45207087921159,0.45238947611163,0.463958135338714,0.465403695608254,0.470058403284242,0.475578675323065,0.477502478190853,0.478636346087119,0.486047137979712,0.486347833222294,0.490711053919023,0.492761564766031,0.49758158483307,0.502233566196905,0.509113604173205,0.514198523133713,0.516784296525312,0.521121938060016,0.523567983786367,0.524768317773525,0.527328349151962,0.528221444505295,0.529172430092331,0.529518849670269,0.531477365892827,0.533918233694001,0.534011990822802,0.536009259370238,0.537339108730928,0.550520434181762,0.551234961790426,0.553765449874736,0.555611209647713,0.559897948813244,0.560285813983563,0.560788352881774,0.565618593692771,0.566133169405237,0.570027168966516,0.570590501009577,0.573838738976809,0.573991629587619,0.575921746891711,0.576408047671331,0.579812678170138,0.580686253922912,0.581480453922138,0.582206933539777,0.587346099482961,0.600791090096029,0.609354012637481,0.629199575687437,0.632524809497048,0.635452613346665,0.643304263087922,0.660736264984437,0.662751920861274,0.669241763449176,0.669272532880936,0.669418856962479,0.681717022915691,0.683059833290648,0.686532727494397,0.687409103537978,0.690427372419142,0.691189086163631,0.695227828713786,0.701062869233609,0.701651041551462,0.704155233389405,0.705774663023141,0.708559632794592,0.71182162695915,0.713813920554135,0.72576048202457,0.727544427428441,0.743424882454883,0.752191383100977,0.754947957265663,0.755924917236296,0.759832623912248,0.765040351317273,0.767218382689111,0.768032416861257,0.769499717507506,0.769766441027821,0.771509314206341,0.774987728245653,0.776030060923904,0.780227402632709,0.783302060801515,0.788947747621661,0.789007853109889,0.791279747571922,0.792116360629524,0.799348522639377,0.807753252344461,0.808241525998859,0.816579459549542,0.819150120977112,0.820457078527281,0.827673330565985,0.832768224888268,0.848497278508135,0.851031120069571,0.863689491786741,0.876132827884841,0.878265077231689,0.883533317365055,0.888843816843053,0.922480962253894,0.926471871116771,0.936583242387701,0.937391826039197,0.958674799834391,0.971686267686021,0.972609673627354,0.972614412125553,0.973411476174063,0.976642452322656,0.977382950006764,0.986558024515903,0.987690301074172,0.990490594339944,0.995653708178159,0.997287696326826,0.998040770846199],[3.95071127424648e-10,0.000102379566761492,0.0195575273675564,0.0405056777456946,0.202029552284199,0.267373523569978,0.281989148068479,0.493398553641196,0.500389970388357,0.678599473207914,0.692991604668774,0.716509445317597,0.825283352246343,0.940538758749836,0.9762884525678,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[3.95071127424648e-10,5.11897833807459e-05,0.00651917578918548,0.0101264194364237,0.0402841640097827,0.0402841640097827,0.0402841640097827,0.0555988855987064,0.0555988855987064,0.059709120443133,0.059709120443133,0.059709120443133,0.0634833347881803,0.0650858968378533,0.0650858968378533,0.0701391258759904,0.071655197070007,0.081820688571026,0.0885069130099746,0.0938121596306952,0.0938121596306952,0.0938121596306952,0.0938121596306952,0.106066353983322,0.109316995086024,0.118101834874967,0.119651023745212,0.12304389642497,0.129064306234694,0.147336486689801,0.167650659050691,0.16993314049579,0.179984381241904,0.19818972162968,0.204151343995713,0.206901804055495,0.206901804055495,0.206901804055495,0.209525390624117,0.209525390624117,0.209525390624117,0.209525390624117,0.212113577825028,0.219590381783707,0.225998366466305,0.246269642838197,0.270718329931708,0.31205323236566,0.31205323236566,0.315501208539624,0.322497028027227,0.33723293067013,0.33723293067013,0.383491997599358,0.383491997599358,0.383491997599358,0.389655492509066,0.406915834093951,0.406915834093951,0.406915834093951,0.406915834093951,0.406915834093951,0.407333266932686,0.407333266932686,0.407333266932686,0.407333266932686,0.407333266932686,0.407333266932686,0.407333266932686,0.412654872864295,0.417337382202181,0.450618881690161,0.450618881690161,0.450618881690161,0.450618881690161,0.450618881690161,0.450618881690161,0.450618881690161,0.450618881690161,0.450618881690161,0.450618881690161,0.450618881690161,0.450618881690161,0.477338672301071,0.486647872137637,0.486647872137637,0.486647872137637,0.486647872137637,0.486647872137637,0.486647872137637,0.486647872137637,0.486647872137637,0.486647872137637,0.486647872137637,0.486647872137637,0.489501291772203,0.493884025226073,0.493884025226073,0.510245427540544,0.510245427540544,0.513556198773383,0.516867588740143,0.516867588740143,0.516867588740143,0.516867588740143,0.522581869417019,0.522581869417019,0.522581869417019,0.525535178797697,0.525535178797697,0.525535178797697,0.525535178797697,0.525933518254059,0.532518537534014,0.532518537534014,0.532518537534014,0.532518537534014,0.532518537534014,0.53961925387554,0.548890516926748,0.553450629848699,0.553450629848699,0.557557244985563,0.560934819329891,0.56554722386197,0.56554722386197,0.56554722386197,0.56554722386197,0.56554722386197,0.56554722386197,0.569760493644114,0.569760493644114,0.569760493644114,0.569760493644114,0.569760493644114,0.569760493644114,0.569760493644114,0.569760493644114,0.569760493644114,0.569760493644114,0.569760493644114,0.574921485788709,0.576881290678038,0.576881290678038,0.576881290678038,0.576881290678038,0.578252998051631,0.578252998051631,0.578252998051631,0.582328306128484,0.582328306128484,0.589895050604764,0.595488251097364,0.595488251097364,0.607897290077358,0.607897290077358,0.622116163438841,0.626073303664449,0.626073303664449,0.626073303664449,0.626073303664449,0.628669611688407,0.628669611688407,0.628669611688407,0.628669611688407,0.62968668653177,0.630764255719335,0.674197983336922,0.682484868858389,0.682484868858389,0.682484868858389,0.697538129799364,0.697538129799364,0.699098799477846,0.706589521483635,0.712905106202204,0.713017587666691,0.736491907677701,0.736974962358702,0.738625785931141,0.738625785931141,0.749713346578632,0.759719283252683,0.759719283252683,0.77317065560726,0.77317065560726,0.776727522004442,0.778413847057472,0.778413847057472,0.778413847057472,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.782182358538222,0.785670756451234,0.800191581205487,0.80811326139477,0.830866106356487,0.831702834615267,0.832012108153049,0.838738469595646,0.854753829757877,0.854753829757877,0.854753829757877,0.854753829757877,0.854753829757877,0.86119930493775,0.86119930493775,0.86119930493775,0.86119930493775,0.86119930493775,0.86119930493775,0.861595708793858,0.861595708793858,0.861595708793858,0.861595708793858,0.861595708793858,0.861595708793858,0.861595708793858,0.861595708793858,0.871361349129411,0.871361349129411,0.883624387850264,0.883624387850264,0.883624387850264,0.883624387850264,0.883624387850264,0.883624387850264,0.883624387850264,0.883624387850264,0.883624387850264,0.883624387850264,0.883624387850264,0.883624387850264,0.883624387850264,0.883624387850264,0.883624387850264,0.883624387850264,0.883624387850264,0.883624387850264,0.883624387850264,0.888484508976862,0.891952255477313,0.891952255477313,0.895834760653462,0.895834760653462,0.895834760653462,0.900531898397498,0.902896075405174,0.916266955057483,0.916266955057483,0.926666850562857,0.935806582291696,0.935806582291696,0.938184862769079,0.940591573303094,0.972855349271171,0.973740844132933,0.97856106164227,0.97856106164227,0.99673706782868,0.99673706782868,0.99673706782868,0.99673706782868,0.99673706782868,0.99673706782868,0.99673706782868,0.998040770846199,0.998040770846199,0.998040770846199,0.998040770846199,0.998040770846199,0.998040770846199]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>microRNA<\/th>\n      <th>Original p-value<\/th>\n      <th>Bonferroni p-value<\/th>\n      <th>BH p-value<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"dom":"tp","pageLength":7,"columnDefs":[{"targets":1,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatSignif(data, 2, 3, \",\", \".\");\n  }"},{"targets":2,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatSignif(data, 2, 3, \",\", \".\");\n  }"},{"targets":3,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatSignif(data, 2, 3, \",\", \".\");\n  }"},{"className":"dt-right","targets":[1,2,3]}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[7,10,25,50,100]}},"evals":["options.columnDefs.0.render","options.columnDefs.1.render","options.columnDefs.2.render"],"jsHooks":[]}</script>
+
+---
+
+## Final comments
+
+- Multiple testing is an entire subfield of statistics
+- A basic Bonferroni/BH correction is usually enough
+- If there is strong dependence between tests there may be problems
+
+---
+
+## Further reading
+
+* [Statistical significance for genome-wide studies](http://www.pnas.org/content/100/16/9440.full)
+* [Introduction to multiple testing](http://ies.ed.gov/ncee/pubs/20084018/app_b.asp)
+
+
+## References
+
+Patrick, E., S. Rajagopal, H. A. Wong, C. McCabe, J.
+Xu, A. Tang, S. H. Imboywa, J. A. Schneider, N.
+Pochet, A. M. Krichevsky, L. B. Chibnik, D. A.
+Bennett, and P. L. De Jager (2017). "Dissecting the
+role of non-coding RNAs in the accumulation of
+amyloid and tau neuropathologies in Alzheimer's
+disease". In: _Molecular Neurodegeneration_ 12.51,
+pp. 1-13. DOI:
+[10.1186/s13024-017-0191-y](https://doi.org/10.1186%2Fs13024-017-0191-y).
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="assets/remark-zoom.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

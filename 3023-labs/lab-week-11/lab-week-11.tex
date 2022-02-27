@@ -1,0 +1,194 @@
+\documentclass[12pt, a4paper]{article}\usepackage[]{graphicx}\usepackage[]{color}
+% maxwidth is the original width if it is less than linewidth
+% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\usepackage{Sweavel}
+
+
+\input{./everything/everything.tex}
+\input{./everything/preamble.tex}
+
+\begin{document}
+% refer to https://yihui.org/knitr/options/#code-decoration for more options
+
+
+% (1) Remember that we want the default page style
+% (2) but for this page we want an empty page style for the title 
+% (3) we input our title 
+% (4) we call a new page and reset the page counter to 1
+\pagestyle{default}
+\thispagestyle{empty}
+\input{./title_page.tex}
+\newpage
+\setcounter{page}{1}
+\begin{enumerate}[label={\bfseries\arabic*}]
+\item 
+
+  \begin{enumerate}[label=(\alph*)]
+  \item We write a function that computes the MLE based interval
+\begin{Schunk}
+\begin{Sinput}
+mle.int = function(x, C) {
+    # x is a random sample:
+    thetaML = 1/mean(x)
+    # C is half with width of the intervals
+    d1 = max(thetaML, C)
+    c(d1 - C, d1 + C)
+}
+\end{Sinput}
+\end{Schunk}
+  \item We test it by generating a random sample:
+\begin{Schunk}
+\begin{Sinput}
+n = 4
+C = 1.5
+th0 = 2
+x = rexp(n, rate = th0)
+mle_interval = mle.int(x, C)
+mle_interval
+\end{Sinput}
+\begin{Soutput}
+[1] 1.742083 4.742083
+\end{Soutput}
+\end{Schunk}
+  \end{enumerate}
+
+\item 
+  \begin{enumerate}[label=(\alph*)]
+  \item We now write a function called \verb+bayes.int()+ which computes the Bayes interval based on the flat prior.
+\begin{Schunk}
+\begin{Sinput}
+bayes.int = function(x, C) {
+    d2 = C * (exp(2 * mean(x) * C) + 1)/(exp(2 * mean(x) * C) - 1)
+    c(d2 - C, d2 + C)
+}
+\end{Sinput}
+\end{Schunk}
+  \item Again we test it by testing the same sample
+\begin{Schunk}
+\begin{Sinput}
+n = 4
+C = 1.5
+th0 = 2
+x = rexp(n, rate = th0)
+bayes_interval = bayes.int(x, C)
+bayes_interval
+\end{Sinput}
+\begin{Soutput}
+[1] 1.204336 4.204336
+\end{Soutput}
+\end{Schunk}
+  \item We visualize the interval by plotting the posterior curve and interval on the same plot. 
+\begin{Schunk}
+\begin{Sinput}
+m = mean(x)
+# label the Origin
+plot(0, 0, xlim = c(0, 3/m), ylim = c(0, 0.4), xlab = expression(theta), ylab = "probability")
+curve(dgamma(x, shape = n + 1, rate = n * m), from = 0, to = 3/m, add = TRUE)
+abline(v = mle_interval, col = "blue", lty = 2)
+abline(v = bayes_interval, col = "red", lty = 2)
+abline(h = dgamma(bayes_interval[1], shape = n + 1, rate = n * m), lty = 3)
+legend("topright", legend = c("posterior density", "mle interval", "bayes interval"), col = c("black",
+    "blue", "red"), lty = c(1, 2, 2))
+\end{Sinput}
+
+
+{\centering \includegraphics[width=\maxwidth]{figure/unnamed-chunk-6-1} 
+
+}
+
+\end{Schunk}
+  \end{enumerate}
+\item We plot the non-coverage probabilities of $\theta$ values for the MLE based interval vs the Bayes interval. 
+\begin{Schunk}
+\begin{Sinput}
+th = (1:500)/50
+L = length(th)
+B = 1000
+noncoverage.mle = noncoverage.bayes = 0
+c = 1.5
+
+# we fix the theta value
+for (i in 1:L) {
+    mle.mat = matrix(0, B, 2)
+    bayes.mat = matrix(0, B, 2)
+
+    # we fix the row in our matrix.
+    for (j in 1:B) {
+        x = rexp(4, rate = th[i])  # draw 4 random numbers from the exp distn. 
+        mle.mat[j, ] = mle.int(x, c)  # constructing intervals
+        bayes.mat[j, ] = bayes.int(x, c)
+    }
+
+    # count the number of intervals not containing theta
+    noncoverage.mle[i] = sum(th[i] < mle.mat[, 1]) + sum(th[i] > mle.mat[, 2])
+    noncoverage.bayes[i] = sum(th[i] < bayes.mat[, 1]) + sum(th[i] > bayes.mat[, 2])
+}
+plot(th, noncoverage.mle/B, type = "l", col = "blue", main = "Simulated proportions of non-coverage for different interval methods",
+    xlab = expression(theta), ylab = "Empirical noncoverage proportion", cex.main = 0.85, cex.axis = 0.8)
+
+lines(th, noncoverage.bayes/B, type = "l", col = "red")
+legend("topleft", legend = c("mle", "Bayes flat prior"), col = c("blue", "red"), lty = c(1, 1))
+\end{Sinput}
+
+
+{\centering \includegraphics[width=\maxwidth]{figure/unnamed-chunk-7-1} 
+
+}
+
+\end{Schunk}
+\item We compute the risk for the MLE based interval for each value of $\theta$ from our vector \verb+th+ and we save it in a vector called \verb+m.risk+. 
+
+\begin{Schunk}
+\begin{Sinput}
+risk.overest = pgamma(q = 1/(th + c), shape = n, rate = n * th)  # this applies to all values in th
+big = (th >= (2 * C))  # find the theta values >= 2C
+risk.underest = 0 * risk.overest  # Start with a vector of zeroes
+risk.underest[big] = pgamma(q = 1/(th[big] + c), shape = n, rate = n * th[big]) + pgamma(q = 1/(th[big] +
+    c), shape = n, rate = n * th[big], lower.tail = FALSE)
+m.risk = risk.overest + risk.underest
+\end{Sinput}
+\end{Schunk}
+\item We compute the risk for the Bayes interval for each values of $\theta$ from our vector \verb+th+ and we save it in a vector called \verb+m.risk+. 
+\begin{Schunk}
+\begin{Sinput}
+risk.overest = pgamma(q = 1/(2 * c) * log(1 + 2 * c/th), shape = n, rate = n * th)
+risk.underest = 0 * risk.overest  # Start with a vector of zeroes
+big = th >= 2 * c
+risk.underest[big] = pgamma(q = 1/(2 * c) * log(1 + 2 * c/th[big]), shape = n, rate = n * th[big]) +
+    pgamma(q = 1/(2 * c) * log(th[big]/(th[big] - 2 * c)), shape = n, rate = n * th[big], lower.tail = FALSE)
+b.risk = risk.overest + risk.underest
+\end{Sinput}
+\end{Schunk}
+We now plot our curves:
+\begin{Schunk}
+\begin{Sinput}
+plot(th, m.risk, col = "blue", lwd = 0.2, main = "risk of mle interval and bayes interval for different theta values",
+    cex.main = 0.85, cex.axis = 0.8, xlab = expression(theta), ylab = "risk")
+lines(th, b.risk, col = "red", lwd = 2)
+legend("bottomright", legend = c("mle", "Bayes flat prior"), col = c("blue", "red"), lty = c(1, 1))
+\end{Sinput}
+
+
+{\centering \includegraphics[width=\maxwidth]{figure/unnamed-chunk-10-1} 
+
+}
+
+\end{Schunk}
+The values of $\theta$ for which the mle interval does better are the $\theta$ values \tbf{less than} 3. The interval in which the bayes interval does better are the $\theta$ values \tbf{greater than} 3. 
+
+The two intervals have somewhat similar performances for $\theta < 3$ but the bayes interval is noticably better for $\theta > 3$. 
+
+Near the value of $\theta = 3$ there is a discontinuity for both the mle and the bayes intervals. This is because of the fact that the intervals are different depending on if you're in the region of $0 < \theta < 2C$ or the region $\theta > 2C$. In our example, $C = 1.5$ and hence the intervals are drastically different on the boundary of $2C = 2(1.5) = 3$
+\end{enumerate}
+
+\end{document}

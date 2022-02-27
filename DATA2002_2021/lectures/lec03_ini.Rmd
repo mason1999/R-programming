@@ -1,0 +1,191 @@
+---
+title: "Chi-squared tests"
+author: "Garth Tarr"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## No linkage model
+
+```{r}
+# observed counts
+y = c(128, 86, 74, 112) 
+n = sum(y)
+# hypothesised proportions
+p = c(1/4, 1/4, 1/4, 1/4) 
+# expected counts
+e = p*n
+```
+
+
+```{r}
+names = c("AB", "Ab", "aB", "ab")
+# set up a graphics device with 1 row and 2 columns
+par(mfrow = c(1, 2), cex = 1.5) 
+barplot(y, names.arg = names, main = "Observed counts")
+barplot(e, names.arg = names, main = "Expected counts")
+```
+
+
+```{r}
+df = tibble(names, y, p, e)
+df %>% ggplot() + 
+  aes(x = names, y = y) + 
+  geom_bar(stat = "identity") + 
+  geom_hline(yintercept = 100, colour = "blue") + 
+  theme_minimal(base_size = 32) + 
+  labs(x = "", y = "Count")
+```
+
+
+
+```{r}
+d = y-e
+d
+mean(d)
+```
+
+
+```{r}
+(y-e)^2
+(y-e)^2/e
+t0 = sum((y-e)^2/e)
+t0
+```
+
+Generating one simulated sample assuming that the null hypothesis is true.
+
+```{r}
+n = 400
+set.seed(1)
+sim1 = sample(x = names, 
+              size = n, 
+              replace = TRUE, 
+              prob = c(0.25,0.25,0.25,0.25))
+table(sim1)
+par(cex=2)
+barplot(table(sim1), main = "Simulated counts")
+```
+
+Calculate the observed test statistic:
+$$t_0 = \sum_{i=1}^{k} \frac{(y_i-e_i)^2}{e_i}.$$
+
+```{r}
+sim_y = table(sim1)
+sum((sim_y - e)^2/e)
+t0
+```
+
+Simulate test statistics from data generated when the null hypothesis is true.
+
+```{r}
+B = 3000
+sim_test_stats = vector(mode = "numeric", length = B)
+for(i in 1:B){
+  sim = sample(x = names,  size = n, replace = TRUE, 
+               prob = c(0.25,0.25,0.25,0.25))
+  sim_y = table(sim)
+  sim_test_stats[i] = sum((sim_y - e)^2/e)
+}
+par(cex = 2, mar = c(4,4,0.5,0.5))
+hist(sim_test_stats, main = "", breaks = 20)
+mean(sim_test_stats >= t0)
+```
+
+Using `pchisq()` to calculate the p-value and then checking the assumptions.
+
+```{r}
+1 - pchisq(t0, df = 3)
+(ey=n*p) # expected counts
+ey>=5 # test e_i >= 5
+```
+
+Using `chisq.test()` to perform the whole goodness of fit test for us.
+
+```{r}
+chisq.test(y, p = p)
+```
+
+
+## Linkage model
+
+```{r}
+y = c(128, 86, 74, 112)
+p = c(0.3, 0.2, 0.2, 0.3)
+names = c("AB", "Ab", "aB", "ab")
+par(mfrow = c(1, 2), cex = 1.5) # set up a graphics device with 1 row and 2 columns
+barplot(y, names.arg = names, main = 'Observed frequencies')
+barplot(p * sum(y), names.arg = names, main = 'Expected frequencies')
+```
+
+Simulate outcomes
+
+```{r}
+n = 400
+hyp_probs = c(0.3, 0.2, 0.2, 0.3)
+B = 3000
+sim_test_stats = vector(mode = "numeric", 
+                        length = B)
+for(i in 1:B){
+  sim = sample(x = names, 
+               size = n, 
+               replace = TRUE, 
+               prob = hyp_probs)
+  sim_y = table(sim)
+  # estimated probability
+  p_e = sum(table(sim)[2:3])/n
+  # expected values using estimated probabilities
+  e = 400*c(1 - p_e, p_e, p_e, 1 - p_e)/2
+  sim_test_stats[i] = sum((sim_y - e)^2/e)
+}
+hist(sim_test_stats, main = "", breaks = 20)
+```
+
+Calculate test statistic
+
+```{r}
+n = 400
+hyp_probs = c(0.3, 0.2, 0.2, 0.3)
+expected_counts  = hyp_probs * n
+t0 = sum((y-expected_counts)^2/expected_counts)
+t0
+```
+
+Compare observed test statistic to the simulated test statistics to see how often the simulated test statistics were more extreme than the one we observed.
+
+```{r}
+mean(sim_test_stats >= t0)
+```
+
+Visualise this:
+
+```{r}
+hist(sim_test_stats, main = "", breaks = 20)
+abline(v = t0, col = "blue", lwd = 2)
+```
+
+Use `chisq.test()`, noting the incorrect degrees of freedom because R doesn't know that estimated the proportion from the data.
+
+```{r}
+chisq.test(y, p = p)
+```
+
+Check assumptions and calculate the p-value manually (using the correct degrees of freedom).
+
+```{r}
+n = sum(y)
+k = length(y)
+(ey = n*p)
+ey >= 5 # check e_i >= 5
+(t0=sum((y-ey)^2/ey))
+(pval=1 - pchisq(t0, df = k - 1 - 1))
+```
+
+
+
+
+

@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>DATA2002</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Garth Tarr" />
+    <script src="lec12_files/header-attrs-2.10/header-attrs.js"></script>
+    <link href="lec12_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } },
+      "HTML-CSS": {
+        styles: {
+          ".MathJax a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+          ".MathJax_Preview a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+        }
+      }
+      });
+    </script>
+    <link rel="stylesheet" href="assets/sydney-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="assets/sydney.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# DATA2002
+## Sample size calculations and power
+### Garth Tarr
+
+---
+
+class: segue
+
+
+
+
+
+.large[
+# Power and sample size
+]
+
+---
+
+## Errors in hypothesis testing
+
+
+
+|        | `\(H_0\)` true (innocent)   | `\(H_0\)` false (guilty)  |
+| ------------------ |:-------------------:| :--------:|
+| Don't reject `\(H_0\)` (acquit)  | Correct decision   | Type II error ( `\(\beta\)` ) |
+| Reject `\(H_0\)` (guilty)   | Type I error ( `\(\alpha\)` )  | Correct decision ( `\(1-\beta\)` ) |
+
+&lt;br&gt;
+
+- Type I errors: level of significance, `\(\alpha = P(\text{reject }H_0 \ | \ H_0 \text{ true})\)`
+- Type II errors: call it `\(\beta\)`
+- Power: `\(1-\beta = P(\text{reject }H_0 \ | \ H_1 \text{ true})\)`
+
+---
+
+## General testing setup
+
+- Suppose we are interesting in inference concerning an unknown population mean `\(\mu\)`.
+- We are considering a fixed value `\(\color{blue}{\color{blue}{\color{blue}{\mu_0}}}\)` (".blue[.bold[hypothesised value]]").
+- We then observe the data `\(x_1,\ldots,x_n\)`, obtaining
+- the sample mean `\(\bar x\)`
+- the sample sd `\(s\)` and thus the _estimated standard error_ (se) `\(s/\sqrt{n}\)`.
+- We decide to perform a (say, two-sided) `\(t\)`-test, that is to say if the _observed discrepancy_ `\(\bar x-\color{blue}{\color{blue}{\color{blue}{\mu_0}}}\)` is _large_ compared to the se, we will "reject" the value `\(\color{blue}{\color{blue}{\color{blue}{\mu_0}}}\)` as "implausible":
+`$$\text{Reject if } |\bar x-\color{blue}{\color{blue}{\color{blue}{\mu_0}}}|&gt;c \frac{s}{\sqrt{n}}\,,$$`
+where `\(c\)` is chosen so that the .purple[.bold[false alarm rate]] is some fixed, small value `\(\alpha\)` (e.g. 0.05, 0.01).
+
+---
+
+## Model assumptions
+
+- The .purple[.bold[false alarm rate]] determination can only be made if a suitable statistical model is assumed for the data.
+- If we model the data `\(x_1,\ldots,x_n\)` as values taken by iid `\(N \left( \mu,\sigma^2 \right)\)` random variables `\(X_1,\ldots,X_n\)` (with `\(\mu\)` and `\(\sigma^2\)` _both unknown_), then whatever be the true value `\(\mu\)`, the ratio
+`$$\frac{\bar X-\mu}{S/\sqrt{n}}\sim t_{n-1}\,.$$`
+- The .purple[.bold[false alarm rate]] is 
+`$$P_{\color{blue}{\color{blue}{\color{blue}{\mu_0}}}} \left( \left| \bar X-\color{blue}{\color{blue}{\color{blue}{\mu_0}}} \right| &gt;c\frac{S}{\sqrt{n}} \right)=
+P_{\color{blue}{\color{blue}{\color{blue}{\mu_0}}}} \left( \frac{\left| \bar X-\color{blue}{\color{blue}{\color{blue}{\mu_0}}} \right|}{S/\sqrt{n}}&gt;c \right)= P(|t_{n-1}|&gt;c)
+=2 P(t_{n-1}&gt;c)$$`
+by symmetry.
+- The `\(P_{\color{blue}{\color{blue}{\color{blue}{\mu_0}}}}(\cdot)\)` indicates probability when the true value is `\(\color{blue}{\color{blue}{\color{blue}{\mu_0}}}\)`, i.e. the value we specified in the null hypothesis.
+
+---
+
+## Beer example
+
+.pull-left[
+- Suppose we have `\(n=6\)` and choose a .purple[.bold[false alarm rate]] of `\(\alpha=0.05\)`.
+- Then the constant `\(c\)` needs to satisfy
+`$$2P(t_5&gt;c)=\alpha$$`
+so
+`$$P(t_5&gt;c)=\alpha/2=0.025$$`
+and thus
+`$$P(t_5\leq c)=0.975\,.$$`
+
+```r
+c_05 = qt(0.975,5)
+c_05
+```
+
+```
+## [1] 2.570582
+```
+]
+
+--
+
+.pull-right[
+
+The total area in the tails is 0.05, so the area in each tail is 0.05/2 = 0.025.
+
+&lt;img src="lec12_files/figure-html/unnamed-chunk-2-1.png" width="864" /&gt;
+]
+
+---
+
+## Why allow false alarms at all?
+
+- A fair question is: _why would you set things up to have 5% .purple[.bold[false alarm rate]]?_
+- Why not make it *really small*, like `\(10^{-6}\)`?
+- *Answer:* because then you would never reject anything, even if you should!
+- The technical reason: because then the test would have **no power**.
+
+--
+
+
+.blockquote[
+The power of a test is the probability that the test rejects the null hypothesis, `\(H_0\)` when a **specific** alternative hypothesis `\(H_1\)` is true.
+
+`$$\textrm{Power} = P(\textrm{reject }H_0 \, | \, H_1 \text{ is true}).$$`
+]
+
+---
+
+## Statistical power in one sample `\(t\)`-test
+
+- Consider the probability of "rejecting" as a function of the true population mean `\(\color{red}{\mu}\)`:
+`$$\begin{align*}
+P_{\color{red}{\mu}} \left(\text{reject }H_0\right)=
+P_{\color{red}{\mu}} \left( \left| \bar X-\color{blue}{\color{blue}{\color{blue}{\mu_0}}} \right| &gt;c\frac{S}{\sqrt{n}} \right)=
+P_{\color{red}{\mu}} \left( \frac{\left| \bar X-\color{blue}{\color{blue}{\color{blue}{\mu_0}}} \right|}{S/\sqrt{n}}&gt;c \right)\,.
+\end{align*}$$`
+- This is the **statistical power function** of the test.
+- To determine this we need to know the _distribution_ of the `\(t\)`-statistic for testing `\(\color{blue}{\color{blue}{\color{blue}{\mu_0}}}\)`:
+`$$\frac{ \bar X-\color{blue}{\color{blue}{\mu_0}} }{S/\sqrt{n}}$$`
+when the **true population mean** `\(\color{red}{\mu}\)` is _not necessarily equal to `\(\color{blue}{\color{blue}{\color{blue}{\mu_0}}}\)`_ (the hypothesised population mean)!
+
+.footnote[
+We won't go into details, with the HTML slides, press p if you'd like to see the details.
+]
+
+???
+
+## Non-central `\(t\)`-distribution
+
+- Suppose `\(Z\sim N(0,1)\)` independently of a `\(\chi^2_d\)` random variable.
+- Then the ratio
+`$$\frac{Z+\color{red}{\nu}}{\sqrt{\chi^2_d/d}}\sim t_d(\color{red}{\nu})$$`
+i.e. has a **non-central `\(t\)`-distribution** with `\(d\)` degrees of freedom and _non-centrality parameter_ `\(\color{red}{\nu}\)`.
+- The ordinary "central" `\(t\)`-distribution corresponds to `\(\color{red}{\nu}=0\)`.
+- Probabilities etc. for this distribution can be computed using e.g. `pt(..., df=..., ncp=` `\(\color{red}{\nu}\)` `)`.
+- This is the basis for determining power and sample size for `\(t\)`-tests.
+
+
+- For our `\(t\)`-test model we have `\(\bar X\sim N \left( \color{red}{\mu},\frac{\sigma^2}{n} \right)\)` _independently of_ the sample variance `\(S^2\)`. 
+- The quantity `\(S/\sigma\sim \sqrt{\chi^2_{n-1}/(n-1)}\)`.
+- Thus the test statistic for testing the (hypothesised) value `\(\color{blue}{\color{blue}{\mu_0}}\)`, given by
+`$$\begin{align*}
+\frac{\bar X-\color{blue}{\color{blue}{\mu_0}}}{S/\sqrt{n}} 
+= \frac{\sqrt{n}(\bar X-\color{blue}{\color{blue}{\mu_0}})/\sigma}{S/\sigma}
+= \frac{\sqrt{n}(\bar X-\color{red}{\mu}+\color{red}{\mu}-\color{blue}{\color{blue}{\mu_0}})/\sigma}{S/\sigma}
+&amp;= \frac{\frac{\bar X-\color{red}{\mu}}{\sigma/\sqrt{n}} +\frac{\color{red}{\mu}-\color{blue}{\color{blue}{\mu_0}}}{\sigma/\sqrt{n}}}{S/\sigma}\\
+&amp;\stackrel{d}=\frac{Z +\frac{\color{red}{\mu}-\color{blue}{\color{blue}{\mu_0}}}{\sigma/\sqrt{n}}}{\sqrt{\chi^2_{n-1}/(n-1)}}\,,
+\end{align*}$$`
+and so has a non-central `\(t\)`-distribution with **non-centrality parameter**
+.Large[
+`$$\color{red}{\nu} = \frac{\color{red}{\mu}-\color{blue}{\color{blue}{\mu_0}}}{\sigma/\sqrt{n}}=\frac{\text{difference}}{\text{true SE}}\,.$$`
+]
+
+---
+
+## Beer example: power calculations
+
+- Suppose the sample sd is _indicative_ of the "true" population sd. We want to plot the power function of the test as a function of `\(\color{red}{\mu}\)`.
+- First let us assume the "true" `\(\sigma\)` is equal to the sample value
+
+
+```r
+x = c(374.8, 375.0, 375.3, 374.8, 374.4, 374.9)
+sig = sd(x)  
+sig
+```
+
+```
+## [1] 0.294392
+```
+
+???
+
+- Next, we note that the power is given by 
+
+`$$\begin{align*}
+P_{\color{red}{\mu}} \left( \frac{|\bar X-\color{blue}{\color{blue}{\mu_0}}|}{S/\sqrt{n}}&gt;c \right)&amp;=
+P_{\color{red}{\mu}} \left( \frac{\bar X-\color{blue}{\color{blue}{\mu_0}}}{S/\sqrt{n}}&gt;c \right)+
+P_{\color{red}{\mu}} \left( \frac{\bar X-\color{blue}{\color{blue}{\mu_0}}}{S/\sqrt{n}}&lt;-c \right)\\
+&amp;= P(t_{n-1}(\color{red}{\nu}) &gt; c) + P(t_{n-1}(\color{red}{\nu}) &lt; -c)\,.
+\end{align*}$$`
+
+- Note that the statistic no longer has a symmetric disribution about zero so these two probabilities are in general different.
+
+- The code below creates a vector of possible `mu` values and computes the power
+
+
+```r
+c_05
+```
+
+```
+## [1] 2.570582
+```
+
+```r
+mu = seq(374, 376, by = 0.01)
+nu = (mu-375)/(sig/sqrt(6))
+power_mu = pt(c_05, df = 5, ncp = nu, lower.tail = FALSE) + pt(-c_05, df = 5, ncp = nu)
+power_df = data.frame(mu, nu, power = power_mu)
+```
+
+---
+
+## Power as a function of `\(\color{red}{\mu}\)`
+
+.pull-left-2[
+&lt;img src="lec12_files/figure-html/unnamed-chunk-5-1.png" width="864" /&gt;
+
+]
+.pull-right-1[
+*Note*: this _supposes_ the "true" `\(\sigma\)` is equal to the estimate 0.294; it is all a guess, but is still useful as an "estimated" power function.
+]
+
+???
+
+## An example application
+
+.pull-left[
+- Supposing the population sd `\(\sigma=0.294\)`, with a sample size of `\(n=6\)` how much lower than 375 does `\(\color{red}{\mu}\)` need to be for us to be 80% sure of "detecting" that `\(\color{red}{\mu}\neq 375\)` with a _two-sided_ test which has .purple[.bold[false alarm rate]] 0.05?
+- *Solution*: let us look at the vector of power values and zoom in on it:
+
+
+```r
+power_df %&gt;% filter(power &gt; 0.78, power &lt; 0.83)
+```
+
+```
+##       mu        nu     power
+## 1 374.56 -3.661021 0.8299888
+## 2 374.57 -3.577816 0.8134111
+## 3 374.58 -3.494611 0.7958373
+## 4 375.42  3.494611 0.7958373
+## 5 375.43  3.577816 0.8134111
+## 6 375.44  3.661021 0.8299888
+```
+
+
+
+]
+.pull-right[
+
+- The `mu` value with power nearest 80% is 374.58.
+- The value of `nu` giving this is about -3.49.
+
+
+```r
+p + geom_hline(yintercept = 0.8, 
+               colour = "red") + 
+  theme_linedraw(base_size = 36)
+```
+
+&lt;img src="lec12_files/figure-html/unnamed-chunk-7-1.png" width="864" /&gt;
+]
+
+---
+
+## Power as a function of `\(n\)`
+
+- Now let us suppose that _both_ the sample mean and sample sd are indicative of the "true" values `\(\color{red}{\mu}\)` and `\(\sigma\)`:
+
+
+```r
+xbar = mean(x)
+c(xbar, sig)
+```
+
+```
+## [1] 374.866667   0.294392
+```
+
+- Can we see how the power ought to behave as a function of `\(n\)`?
+
+- *Note* the degrees of freedom, and thus the critical value, change with `\(n\)`.
+
+???
+
+
+```r
+power_n = data.frame(
+  n = 6:100
+) %&gt;% mutate(
+  nu = (xbar-375)/(sig/sqrt(n)),
+  c_05_n = qt(0.975, df = n-1),
+  power = pt(c_05_n, df = n-1, ncp = nu, lower.tail = FALSE) + 
+    pt(-c_05_n, df = n-1, ncp = nu) 
+)
+```
+
+---
+
+&lt;img src="lec12_files/figure-html/unnamed-chunk-10-1.png" width="864" /&gt;
+
+Again, this is assuming the "true" values `\(\color{red}{\mu}\)` and `\(\sigma\)` equal the sample values `\(\bar x\)` and `\(s\)`. But it is still useful!
+
+???
+
+## An example application
+
+- Suppose that `\(\color{red}{\mu}=374.87\)` and `\(\sigma=0.294\)`, what sample size `\(n\)` would be needed to be 80% sure of detecting that `\(\mu\neq 375\)` with a two-sided test which has .purple[.bold[false alarm rate]] 0.05?
+
+```r
+power_n %&gt;% filter(power &lt; 0.82, power &gt; 0.78)
+```
+
+```
+##    n        nu   c_05_n     power
+## 1 39 -2.828427 2.024394 0.7870841
+## 2 40 -2.864459 2.022691 0.7976690
+## 3 41 -2.900044 2.021075 0.8078007
+## 4 42 -2.935198 2.019541 0.8174927
+```
+- A sample size of `\(n=40\)` gives close to 80% power.
+- Note that a _less dramatic_ non-centrality parameter value is needed to get 80% power here;
+- this is because the degrees of freedom are higher, the tails are shorter, less "non-centrality" is needed.
+
+---
+
+## Comparing to false alarm rate of `\(10^{-6}\)`.
+
+- For a test with `\(n=6\)` and a .purple[.bold[false alarm rate]] of `\(\alpha=10^{-6}\)`, we need a critical value of
+
+```r
+c.million = qt(1-(1e-6)/2, df = 5)
+c.million
+```
+
+```
+## [1] 28.47847
+```
+
+So we would need a discrepancy equal to more than 28 standard errors before we would reject 375!
+
+???
+
+
+```r
+pwr_ts = function(mu,  mu0, n, sigma, alpha = 0.05){
+  nu = (mu - mu0)/(sigma/sqrt(n))
+  c = qt((1-alpha/2), n-1)
+  power.mu=pt(c, df = n-1, ncp = nu, lower.tail = FALSE) + pt(-c, df = n-1, ncp = nu)
+}
+df_mu = data.frame(mu = seq(368, 382, by = 0.01)) %&gt;% 
+  mutate(
+    power_million = pwr_ts(mu,  mu0 = 375,n = 6, sigma = sig, alpha = 1e-6),
+    power_05 = pwr_ts(mu,  mu0 = 375,n = 6, sigma = sig)
+  )
+```
+
+---
+
+&lt;img src="lec12_files/figure-html/unnamed-chunk-14-1.png" width="864" /&gt;
+
+Power of about 80% would require a true `\(\mu\)` lower than 371 or more than 379!
+
+???
+
+## Comparing power function of one- and two-sided tests
+
+- The corresponding _one-sided_ (to the left) `\(t\)`-test at level
+(.purple[.bold[false alarm rate]]) `\(\alpha\)` rejects for `\(\bar{x} - \color{blue}{\mu_0} &lt; -c \frac{s}{\sqrt{n}}\)` where 
+`$$P(t_{n-1}&lt;-c)=P(t_{n-1}&gt;c)=1-P(t_{n-1}\leq c)=\alpha$$`
+and so in general the power function is given by
+`$$P_{\color{red}{\mu}} \left( \frac{\bar X-\color{blue}{\color{blue}{\mu_0}}}{S/\sqrt{n}}&lt;-c  \right)=P(t_{n-1}(\color{red}{\nu})&lt;-c)$$`
+where as before the non-centrality is `\(\color{red}{\nu}=\frac{\color{red}{\mu}-\color{blue}{\mu_0}}{\sigma/\sqrt{n}}\)`.
+- For `\(n=6\)` the appropriate value of `\(c\)` given by
+
+```r
+c_05_1s=qt(0.95,df=5)
+c_05_1s
+```
+
+```
+## [1] 2.015048
+```
+
+
+- For that test the power is given by
+
+
+```r
+pwr_1s_lt = function(mu, mu0, n, sigma, alpha = 0.05){
+  nu = (mu - mu0)/(sigma/sqrt(n))
+  c = qt(1-alpha, n-1)
+  power = pt(-c, df = n-1, ncp = nu)
+}
+df_mu = data.frame(mu = seq(374, 376, by = 0.01)) %&gt;% 
+  mutate(
+    power_1s = pwr_1s_lt(mu, mu0 = 375, n = 6, sigma = sig),
+    power_ts = pwr_ts(mu, mu0 = 375, n = 6, sigma = sig)
+  )
+```
+
+
+
+
+```r
+df_mu %&gt;% ggplot(aes(x = mu)) + 
+  geom_hline(yintercept = 0.8, colour = "gray", linetype = 2) + 
+  geom_line(aes(y = power_1s, colour = "One sided"), size = 2) + 
+  geom_line(aes(y = power_ts, colour = "Two sided"), size = 2) + 
+  theme_linedraw(base_size = 28) + labs(y = "Power", x = expression(mu)) + 
+  scale_colour_manual(name = "Alternative", 
+                      values = c("One sided" = "blue", "Two sided" = "red")) + 
+  scale_x_continuous(breaks = c(374,375,376))
+```
+
+&lt;img src="lec12_files/figure-html/unnamed-chunk-17-1.png" width="864" /&gt;
+
+*Note*: power is higher for `\(\mu&lt;375\)`, lower for `\(\mu&gt;375\)`; it is more "focused" on values `\(\mu&lt;375\)`.
+
+
+---
+class: segue
+
+# Just tell me how to do it easily in R
+
+---
+
+## There's a package for that
+
+The [**pwr**](https://cran.r-project.org/web/packages/pwr/vignettes/pwr-vignette.html) package.
+
+
+```r
+# install.packages("pwr")
+library(pwr)
+```
+
+The key functions:
+
+- `pwr.t.test()`	t-tests (one sample, 2 sample, paired)
+- `pwr.t2n.test()`	t-test (two samples with unequal n)
+
+```
+pwr.t.test(n = NULL, d = NULL, sig.level = 0.05, power = NULL, 
+type = c("two.sample", "one.sample", "paired"),
+alternative = c("two.sided", "less", "greater"))
+
+
+pwr.t2n.test(n1 = NULL, n2= NULL, d = NULL, sig.level = 0.05, power = NULL,
+alternative = c("two.sided", 
+"less","greater"))
+```
+
+---
+
+## Cohen's d
+
+Rather than specifying a null mean and an alternative mean and standard deviation, the **pwr** functions take as an input "Cohen's d":
+
+`$$d = \frac{|\mu_1 - \mu_2|}{\sigma}$$`
+
+Cohen suggests that `\(d\)` values of 0.2, 0.5, and 0.8 represent small, medium, and large effect sizes respectively.
+
+---
+
+## Beer example
+
+- Supposing the population sd `\(\sigma=0.294\)`, with a sample size of `\(n=6\)` how much lower than 375 does `\(\color{red}{\mu}\)` need to be for us to be 80% sure of "detecting" that `\(\color{red}{\mu}\neq 375\)` with a _two-sided_ test which has .purple[.bold[false alarm rate]] 0.05?
+
+
+```r
+res = pwr.t.test(n = 6, d = NULL, sig.level = 0.05, power = 0.8, 
+                 type = "one.sample", alternative = "two.sided")
+res
+```
+
+```
+## 
+##      One-sample t test power calculation 
+## 
+##               n = 6
+##               d = 1.434538
+##       sig.level = 0.05
+##           power = 0.8
+##     alternative = two.sided
+```
+
+```r
+res$d*0.294 # d * sigma gives the difference between means
+```
+
+```
+## [1] 0.4217541
+```
+
+---
+
+## Beer example
+
+Suppose that `\(\color{red}{\mu}=374.87\)` and `\(\sigma=0.294\)`, what sample size `\(n\)` would be needed to be 80% sure of detecting that `\(\mu\neq 375\)` with a two-sided test which has .purple[.bold[false alarm rate]] 0.05?
+
+
+```r
+res = pwr.t.test(n = NULL, d = (374.87-375)/0.294, sig.level = 0.05, power = 0.8, 
+                 type = "one.sample", alternative = "two.sided")
+res
+```
+
+```
+## 
+##      One-sample t test power calculation 
+## 
+##               n = 42.10456
+##               d = 0.4421769
+##       sig.level = 0.05
+##           power = 0.8
+##     alternative = two.sided
+```
+
+
+---
+
+## Further reading
+
+See [chapter 11](https://psyteachr.github.io/quant-fun-v2/power-and-error.html) of Nordmann and McAleer (2021), explore this [web app](https://rpsychologist.com/d3/nhst/) and read section 6.4 of Larsen and Marx (2012)
+
+&lt;br&gt;
+
+Champely, S. (2020). _pwr: Basic Functions for Power
+Analysis_. R package version 1.3-0. URL:
+[https://CRAN.R-project.org/package=pwr](https://CRAN.R-project.org/package=pwr).
+
+Larsen, R. J. and M. L. Marx (2012). _An Introduction
+to Mathematical Statistics and its Applications_. 5th
+ed. Boston, MA: Prentice Hall. ISBN:
+978-0-321-69394-5.
+
+Nordmann, E. and P. McAleer (2021). _Fundamentals of
+Quantitative Analysis_. URL:
+[https://psyteachr.github.io/quant-fun-v2/power-and-error.html](https://psyteachr.github.io/quant-fun-v2/power-and-error.html).
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="assets/remark-zoom.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

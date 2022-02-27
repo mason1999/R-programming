@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>DATA2002</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Garth Tarr" />
+    <script src="lec17_files/header-attrs-2.10/header-attrs.js"></script>
+    <link href="lec17_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } },
+      "HTML-CSS": {
+        styles: {
+          ".MathJax a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+          ".MathJax_Preview a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+        }
+      }
+      });
+    </script>
+    <link rel="stylesheet" href="assets/sydney-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="assets/sydney.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# DATA2002
+## Bootstrap
+### Garth Tarr
+
+---
+
+class: segue
+
+
+
+
+
+
+.large[
+Speed of light
+
+Confidence intervals
+
+Bootstrap
+
+Flight delays
+]
+
+---
+class: segue
+
+# Speed of light
+
+---
+
+## Speed of light
+
+.pull-left-2[
+
+- Simon Newcomb measured the time required for light to travel from his laboratory on the Potomac River to a mirror at the base of the Washington Monument and back, a total distance of about 7400 meters. 
+
+- He performed this experiment 66 times.
+
+- These measurements were used to estimate the speed of light. 
+
+]
+.pull-right-1[
+&lt;img src="imgs/374px-Simon_Newcomb_01.jpg" width="249" /&gt;
+
+Simon Newcomb
+]
+
+???
+
+Image source: https://en.wikipedia.org/wiki/Simon_Newcomb#/media/File:Simon_Newcomb_01.jpg
+
+---
+
+## Emi Tanaka
+
+
+.pull-left-2[
+
+- Was a lecturer here at the University of Sydney, now at Monash.
+
+- Statistics for food security - designing and analysing experiments looking at improving the genetics of crops.
+
+- [&lt;svg viewBox="0 0 576 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"&gt;&lt;/path&gt;&lt;/svg&gt; Sydney Data Stories - Masterclass Series - Dr Emi Tanaka](https://www.youtube.com/watch?v=LWXEDEbAEV0)
+
+- Creates fun R packages and makes super nice presentations.
+
+- [&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"&gt;&lt;/path&gt;&lt;/svg&gt; @statsgen](https://twitter.com/statsgen)
+
+- Website: https://emitanaka.github.io/
+
+- Her data science showcase: https://emitanaka.github.io/showcase/ (Absolutely worth a look!)
+
+]
+.pull-right-1[
+.center[
+&lt;img src="imgs/ydBXeaVZ_400x400.jpg" width="148" /&gt;
+
+
+
+Emi Tanaka
+
+
+&lt;img src="imgs/IMG_0127.JPG" width="533" /&gt;
+
+.footnotesize[
+About 40,000 grain research plots at Narrabri.  
+]
+
+]
+]
+
+???
+
+Image source: Guy Roth (University of Sydney Yammer post).
+
+---
+&lt;svg viewBox="0 0 352 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M176 80c-52.94 0-96 43.06-96 96 0 8.84 7.16 16 16 16s16-7.16 16-16c0-35.3 28.72-64 64-64 8.84 0 16-7.16 16-16s-7.16-16-16-16zM96.06 459.17c0 3.15.93 6.22 2.68 8.84l24.51 36.84c2.97 4.46 7.97 7.14 13.32 7.14h78.85c5.36 0 10.36-2.68 13.32-7.14l24.51-36.84c1.74-2.62 2.67-5.7 2.68-8.84l.05-43.18H96.02l.04 43.18zM176 0C73.72 0 0 82.97 0 176c0 44.37 16.45 84.85 43.56 115.78 16.64 18.99 42.74 58.8 52.42 92.16v.06h48v-.12c-.01-4.77-.72-9.51-2.15-14.07-5.59-17.81-22.82-64.77-62.17-109.67-20.54-23.43-31.52-53.15-31.61-84.14-.2-73.64 59.67-128 127.95-128 70.58 0 128 57.42 128 128 0 30.97-11.24 60.85-31.65 84.14-39.11 44.61-56.42 91.47-62.1 109.46a47.507 47.507 0 0 0-2.22 14.3v.1h48v-.05c9.68-33.37 35.78-73.18 52.42-92.16C335.55 260.85 352 220.37 352 176 352 78.8 273.2 0 176 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Speed of light
+
+Newcomb's measurements of the passage time of light, made July 24 1882 to September 5 1882.  The values `\(\times 10^{-3} + 24.8\)` are Newcomb's measurements recorded in millionths of a second for observations of light passing over a distance of 3721 m and back, from Fort Myer on the west bank of the Potomac to a fixed mirror at the base of the Washington monument.  The "true" value is 33.02. (Stigler, 1977; Table 5)
+
+
+```r
+library(readr)
+speed_file = read_csv("https://raw.githubusercontent.com/DATA2002/data/master/speed_of_light.txt")
+speed = speed_file$Speed_of_Light
+```
+
+
+```r
+mean(speed)
+```
+
+```
+## [1] 26.21212
+```
+
+```r
+median(speed)
+```
+
+```
+## [1] 27
+```
+
+---
+&lt;svg viewBox="0 0 352 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M176 80c-52.94 0-96 43.06-96 96 0 8.84 7.16 16 16 16s16-7.16 16-16c0-35.3 28.72-64 64-64 8.84 0 16-7.16 16-16s-7.16-16-16-16zM96.06 459.17c0 3.15.93 6.22 2.68 8.84l24.51 36.84c2.97 4.46 7.97 7.14 13.32 7.14h78.85c5.36 0 10.36-2.68 13.32-7.14l24.51-36.84c1.74-2.62 2.67-5.7 2.68-8.84l.05-43.18H96.02l.04 43.18zM176 0C73.72 0 0 82.97 0 176c0 44.37 16.45 84.85 43.56 115.78 16.64 18.99 42.74 58.8 52.42 92.16v.06h48v-.12c-.01-4.77-.72-9.51-2.15-14.07-5.59-17.81-22.82-64.77-62.17-109.67-20.54-23.43-31.52-53.15-31.61-84.14-.2-73.64 59.67-128 127.95-128 70.58 0 128 57.42 128 128 0 30.97-11.24 60.85-31.65 84.14-39.11 44.61-56.42 91.47-62.1 109.46a47.507 47.507 0 0 0-2.22 14.3v.1h48v-.05c9.68-33.37 35.78-73.18 52.42-92.16C335.55 260.85 352 220.37 352 176 352 78.8 273.2 0 176 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+library(ggplot2)
+ggplot(speed_file, aes(x="", y = Speed_of_Light)) + 
+  geom_boxplot(colour = "red", outlier.size = 4) + 
+  theme_classic(base_size = 24) + 
+  labs(x = "", y = "Speed") + coord_flip()
+ggplot(speed_file, aes(x = Speed_of_Light)) + 
+  geom_histogram(colour = "red") + 
+  theme_classic(base_size = 24) + 
+  labs(x = "Speed")
+```
+
+&lt;img src="lec17_files/figure-html/unnamed-chunk-5-1.png" width="864" /&gt;&lt;img src="lec17_files/figure-html/unnamed-chunk-5-2.png" width="864" /&gt;
+
+---
+class:segue
+
+# Confidence intervals
+
+---
+
+## Estimation vs hypothesis testing
+
+**Estimation**
+
+- A population parameter is unknown.
+- Use the sample statistics to generate estimates of the population parameter.  
+
+&lt;br&gt;
+
+**Hypothesis testing**
+
+- Explicit statement (or hypothesis) regarding the population parameter.  
+- Test statistics are generated which will either support or reject the null hypothesis. 
+
+---
+
+## Confidence intervals
+
+- We should avoid reporting just a point estimate for a sample.
+
+- We should always include a measure of variability:
+
+`$$\hat{\theta} \pm \text{margin of error}$$`
+where `\(\hat{\theta}\)` is the point estimate (e.g. sample mean, `\(\bar{X}\)` ).
+
+The margin of error usually takes the form 
+`$$\text{margin of error} = \text{critical value} \times \operatorname{SE}(\hat{\theta})$$`
+where the critical value is some quantile from an appropriate distribution (e.g. `\(z_{\alpha/2}\)` or `\(t_\nu(\alpha/2)\)` ) and `\(\operatorname{SE}(\theta)\)` is the standard error of the point estimate (e.g. `\(\operatorname{SE}(\bar{X}) = \sigma/\sqrt{n}\)` ).
+
+---
+
+## Confidence intervals
+
+- The *point* estimate `\(\hat \theta\)` (say `\(\bar x\)`) of a parameter `\(\theta\)` (say `\(\mu\)`) does not show its variability across samples. 
+
+- To show such estimation precision, we should find an *interval* estimate.  
+
+&lt;br&gt;
+
+**Definition:** Let `\(\hat \theta_L\)` and `\(\hat\theta_R\)` be two statistics. If
+$$
+P(\hat \theta_L\le \theta\le \hat\theta_R)=1-\alpha,
+$$
+then the random interval `\([\hat \theta_L,\hat\theta_R]\)` is called a `\(100(1-\alpha)\%\)` *confidence interval* (CI) for `\(\theta\)`, and `\(100(1-\alpha)\%\)` is called the *confidence level* of the interval.
+
+
+- In general, the `\(\alpha\)` may be chosen to be 0.01, 0.05, 0.10, etc, and then we get 99%, 95%, 90% confidence interval accordingly. 
+
+---
+
+## Confidence intervals for the mean
+
+Let `\(X_1, X_2, ..., X_n\)` be a  random sample from normal population and `\(X_i \sim {\mathcal N}(\mu,\sigma^2)\)`, where `\(\sigma^2\)` is unknown.  
+
+.pull-left-2[
+Then `$$\displaystyle{\frac{\bar X-\mu}{S/\sqrt{n}}\sim t_{n-1}}$$` and
+
+`$$\begin{aligned}
+P \left(-c &lt; \frac{\bar X-\mu}{S/\sqrt{n}} &lt; c \right) &amp; = 1-\alpha \\
+P\left(-cS/\sqrt{n} &lt; \mu-\bar X &lt; cS/\sqrt{n} \right) &amp; = 1-\alpha \\
+P\left(\bar X-cS/\sqrt n &lt; \mu &lt; \bar X+cS/\sqrt n \right) &amp; = 1-\alpha
+\end{aligned}$$`
+
+In the plots on the right, `\(\alpha = 0.05\)`.
+]
+.pull-right-1[
+
+&lt;img src="lec17_files/figure-html/tn1dist-1.png" width="864" /&gt;
+
+&lt;img src="lec17_files/figure-html/originalscale-1.png" width="864" /&gt;
+]
+
+???
+
+
+```r
+library(ggplot2)
+library(grid)
+library(gridExtra)
+t &lt;- seq(-4,4, by = .01)
+Density &lt;- dt(t,df=11)
+
+criteria &lt;- factor(rep("retain", length(t)), levels=c("retain", "reject"))
+criteria[which(abs(t) &gt; qt(.975,df=11))] &lt;- "reject"
+df = data.frame(t = t,Density = Density,criteria=criteria)
+p3 = ggplot(df, aes(x = t,y = Density)) +
+  geom_path() +
+  theme_void(base_size = 30) + 
+  geom_linerange(data=df,
+                 aes(t, ymin=0, ymax=Density),
+                 colour="gray95")+geom_path()+
+  geom_linerange(data=df[df$criteria=='reject',],
+                 aes(t, ymin=0, ymax=Density),
+                 colour="salmon")+geom_path()+
+  #  annotate("text", x = qt(.975,df=11), y= -0.02, label = round(qt(.975,df=11),2))+
+  annotate("segment", x = qt(.975,df=11),xend=qt(.975,df=11), y = -0.01, yend = dt(qt(.975,df=11),df=11),
+           colour = "black")+
+  
+  #annotate("text", x = qt(.025,df=11), y= -0.02, label = round(qt(.025,df=11),2))+
+  
+  annotate("segment", x = qt(.025,df=11), 
+           xend=qt(.025,df=11), 
+           y = -0.01, 
+           yend = dt(qt(.025,df=6), df=6),
+           colour = "black")+
+  
+  annotate("text", x = 2, y= 0.25,
+           label = "0.95", size = 10) + 
+  
+  annotate("segment", x = 0.5, xend=1.9, 
+           y = 0.15, yend = 0.23, colour = "black")+
+  
+  annotate("text", x = 2.75, y= 0.1, 
+           label = "0.025", size = 10) + 
+  
+  annotate("segment", x = 2.75,xend=2.75, y = 0.09, 
+           yend = dt(3,df=11)/2,colour = "black")+
+  
+  annotate("text", x = -2.75, y= 0.1, 
+           label = "0.025", size = 10)+
+  
+  annotate("segment", x = -2.75, xend=-2.75, 
+           y = 0.09, yend = dt(3,df=11)/2,
+           colour = "black")+
+  
+  annotate("text", x = 2.2, y= -0.05, 
+           label = "c",
+           parse=TRUE, size = 10)+
+  
+  annotate("text", x = -2.2, y= -0.05, 
+           label = "-c",
+           parse=TRUE, size = 10) +
+  
+  annotate("segment", x = 0 ,xend=0, 
+           y = 0.01, yend = 0, colour = "black")+
+  
+  annotate("text", x = 0, y= -0.05, label = "0",
+           parse=TRUE, size = 10) +
+  
+  ggtitle(expression(italic(t)[n-1] ~ 'distribution')) +
+  
+  ylim(c(-0.1, 0.4)) +
+  
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+p3
+```
+
+
+```r
+library(ggplot2)
+library(grid)
+library(gridExtra)
+t &lt;- seq(-4,4, by = .01)
+Density &lt;- dt(t,df=11)
+
+criteria &lt;- factor(rep("retain", length(t)), levels=c("retain", "reject"))
+criteria[which(abs(t) &gt; qt(.975,df=11))] &lt;- "reject"
+df = data.frame(t = t,Density = Density,criteria=criteria)
+p3 = ggplot(df, aes(x = t,y = Density)) +
+  geom_path() +
+  theme_void(base_size = 30) + 
+  geom_linerange(data=df,
+                 aes(t, ymin=0, ymax=Density),
+                 colour="gray95")+geom_path()+
+  geom_linerange(data=df[df$criteria=='reject',],
+                 aes(t, ymin=0, ymax=Density),
+                 colour="salmon")+geom_path()+
+  #  annotate("text", x = qt(.975,df=11), y= -0.02, label = round(qt(.975,df=11),2))+
+  annotate("segment", x = qt(.975,df=11),xend=qt(.975,df=11), y = -0.01, yend = dt(qt(.975,df=11),df=11),
+           colour = "black")+
+  
+  #annotate("text", x = qt(.025,df=11), y= -0.02, label = round(qt(.025,df=11),2))+
+  
+  annotate("segment", x = qt(.025,df=11), 
+           xend=qt(.025,df=11), 
+           y = -0.01, 
+           yend = dt(qt(.025,df=6), df=6),
+           colour = "black")+
+  
+  annotate("text", x = 2, y= 0.25,
+           label = "0.95", size = 10) + 
+  
+  annotate("segment", x = 0.5, xend=1.9, 
+           y = 0.15, yend = 0.23, colour = "black")+
+  
+  annotate("text", x = 2.75, y= 0.1, 
+           label = "0.025", size = 10) + 
+  
+  annotate("segment", x = 2.75,xend=2.75, y = 0.09, 
+           yend = dt(3,df=11)/2,colour = "black")+
+  
+  annotate("text", x = -2.75, y= 0.1, 
+           label = "0.025", size = 10)+
+  
+  annotate("segment", x = -2.75, xend=-2.75, 
+           y = 0.09, yend = dt(3,df=11)/2,
+           colour = "black")+
+  
+  annotate("text", x = 2.2, y= -0.05, 
+           label = "bar(x) + c ~ frac(S^2,sqrt(n))",
+           parse=TRUE, size = 10)+
+  
+  annotate("text", x = -2.2, y= -0.05, 
+           label = "bar(x) - c ~ frac(S^2,sqrt(n))",
+           parse=TRUE, size = 10) +
+  
+  annotate("segment", x = 0 ,xend=0, 
+           y = 0.01, yend = 0,colour = "black")+
+  
+  annotate("text", x = 0, y= -0.05, label = "bar(x)",
+           parse=TRUE, size = 10)+
+  ggtitle("Original data scale") +
+  
+  ylim(c(-0.1,0.4))+
+  
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+p3
+```
+
+---
+
+## Meaning of the confidence interval
+
+Suppose a 95% confidence interval for the mean `\(\mu\)` is `\((a,b)\)`.  
+
+- This does **not** mean that 95% of the means `\(\mu\)` are in `\((a,b)\)`, that is `\(P(a &lt; \mu &lt; b) = 0.95\)` since `\(\mu\)` is a **fixed** but unknown parameter. 
+
+- It also does **not** mean `\(P(a &lt; {\bar X} &lt; b) = 0.95\)`, where `\(\bar X\)` is the sample mean since the CI is for the true mean `\(\mu\)` not the sample mean `\({\bar X}\)`.  
+
+&lt;br&gt;
+
+It **does** mean that if we draw a large number of random samples and compute for each sample a 95% CI, about 95% of these CIs will contain `\(\mu\)`. 
+
+It **can** be described as a .red[.bold[range of plausible values]] for the population parameter.
+
+
+---
+
+## Try for yourself
+
+.pull-left[
+http://statstar.io 
+
+Inference &gt; CI for a mean 
+]
+
+.pull-right[
+&lt;img src="imgs/statstar.png" width="100%"&gt;
+]
+
+---
+
+## Confidence intervals
+
+A confidence interval is a statement about the underlying population parameter. 
+
+- Formally, for a 95% confidence interval, 95% of all possible random samples will contain the population mean, leading to 95% .bold[.red[confidence]] that a single interval contains the true mean.  
+
+- In reality, a specific interval either contains the mean or it doesn't.  We just do not know which one is true; but we have 95% .bold[.red[confidence]] that it does. 
+
+In this context .bold[.red[confidence]] isn't the same as .bold[.blue[probability]].
+
+---
+
+## Distributional assumptions
+
+.blockquote[
+### &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M144 208c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm112 0c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm112 0c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zM256 32C114.6 32 0 125.1 0 240c0 47.6 19.9 91.2 52.9 126.3C38 405.7 7 439.1 6.5 439.5c-6.6 7-8.4 17.2-4.6 26S14.4 480 24 480c61.5 0 110-25.7 139.1-46.3C192 442.8 223.2 448 256 448c141.4 0 256-93.1 256-208S397.4 32 256 32zm0 368c-26.7 0-53.1-4.1-78.4-12.1l-22.7-7.2-19.5 13.8c-14.3 10.1-33.9 21.4-57.5 29 7.3-12.1 14.4-25.7 19.9-40.2l10.6-28.1-20.6-21.8C69.7 314.1 48 282.2 48 240c0-88.2 93.3-160 208-160s208 71.8 208 160-93.3 160-208 160z"&gt;&lt;/path&gt;&lt;/svg&gt; 
+What happens if your data does not follow a normal distribution?
+]
+
+--
+
+1. Guess the distribution of the data and use this distribution to calculate critical values for confidence levels.  .bold[.red[Risky.]]
+
+2. Use .bold[.blue[bootstrap resampling]] to empirically model the distribution of the data.
+
+---
+class: segue
+
+# Bootstrapping
+
+---
+
+## Bootstrap resampling
+
+Bootstrapping is a computational process that allows us to as make inferences about the population where no information is available about the population.
+
+Bootstrap methods take their name from the idea of "lifting yourself up by your bootstraps" - moving up without any additional outside help.  The name was introduced by Efron (1979).
+
+.blockquote[
+"in the absence of any other knowledge about a population, the distribution of values found in a sample of size n from the population is the best guide to the distribution in the population. Therefore, to approximate what would happen if the population was resampled it is sensible to resample the sample." .right[Manly (2007, p. 41)]
+]
+
+The classic approach to bootstrapping is to .blue[.bold[repeatedly resample]] from the sample (with replacement).
+
+
+---
+&lt;svg viewBox="0 0 352 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M176 80c-52.94 0-96 43.06-96 96 0 8.84 7.16 16 16 16s16-7.16 16-16c0-35.3 28.72-64 64-64 8.84 0 16-7.16 16-16s-7.16-16-16-16zM96.06 459.17c0 3.15.93 6.22 2.68 8.84l24.51 36.84c2.97 4.46 7.97 7.14 13.32 7.14h78.85c5.36 0 10.36-2.68 13.32-7.14l24.51-36.84c1.74-2.62 2.67-5.7 2.68-8.84l.05-43.18H96.02l.04 43.18zM176 0C73.72 0 0 82.97 0 176c0 44.37 16.45 84.85 43.56 115.78 16.64 18.99 42.74 58.8 52.42 92.16v.06h48v-.12c-.01-4.77-.72-9.51-2.15-14.07-5.59-17.81-22.82-64.77-62.17-109.67-20.54-23.43-31.52-53.15-31.61-84.14-.2-73.64 59.67-128 127.95-128 70.58 0 128 57.42 128 128 0 30.97-11.24 60.85-31.65 84.14-39.11 44.61-56.42 91.47-62.1 109.46a47.507 47.507 0 0 0-2.22 14.3v.1h48v-.05c9.68-33.37 35.78-73.18 52.42-92.16C335.55 260.85 352 220.37 352 176 352 78.8 273.2 0 176 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Speed of light
+
+&lt;br&gt;
+
+- Simon Newcomb measured the time required for light to travel from his laboratory on the Potomac River to a mirror at the base of the Washington Monument and back, a total distance of about 7400 meters. 
+
+- He performed this experiment 66 times (66 observations).
+
+- These measurements were used to estimate the speed of light. 
+
+- What if we approximated **sampling from the population** by **sampling from this sample**?
+
+---
+&lt;svg viewBox="0 0 352 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M176 80c-52.94 0-96 43.06-96 96 0 8.84 7.16 16 16 16s16-7.16 16-16c0-35.3 28.72-64 64-64 8.84 0 16-7.16 16-16s-7.16-16-16-16zM96.06 459.17c0 3.15.93 6.22 2.68 8.84l24.51 36.84c2.97 4.46 7.97 7.14 13.32 7.14h78.85c5.36 0 10.36-2.68 13.32-7.14l24.51-36.84c1.74-2.62 2.67-5.7 2.68-8.84l.05-43.18H96.02l.04 43.18zM176 0C73.72 0 0 82.97 0 176c0 44.37 16.45 84.85 43.56 115.78 16.64 18.99 42.74 58.8 52.42 92.16v.06h48v-.12c-.01-4.77-.72-9.51-2.15-14.07-5.59-17.81-22.82-64.77-62.17-109.67-20.54-23.43-31.52-53.15-31.61-84.14-.2-73.64 59.67-128 127.95-128 70.58 0 128 57.42 128 128 0 30.97-11.24 60.85-31.65 84.14-39.11 44.61-56.42 91.47-62.1 109.46a47.507 47.507 0 0 0-2.22 14.3v.1h48v-.05c9.68-33.37 35.78-73.18 52.42-92.16C335.55 260.85 352 220.37 352 176 352 78.8 273.2 0 176 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Bootstrapping speed of light measurements
+
+.pull-left[
+
+```r
+mean(speed)
+```
+
+```
+## [1] 26.21212
+```
+
+```r
+set.seed(123)
+B = 10000
+result = vector("numeric", length = B)
+for(i in 1:B){
+  newData = sample(speed, replace = TRUE)
+  result[i] = mean(newData)
+}
+round(head(result), 2)
+```
+
+```
+## [1] 24.17 26.92 25.38 25.41 24.85 26.24
+```
+]
+.pull-right[
+
+```r
+hist(result, col = "lightblue")
+```
+
+&lt;img src="lec17_files/figure-html/unnamed-chunk-7-1.png" width="864" /&gt;
+]
+
+---
+
+## Bootstrap confidence intervals
+
+Efron (1979) proposed that the bootstrap confidence interval be the quantiles from the bootstrap distribution. 
+
+In general, `\((\theta^*_L, \theta^*_U)\)` are the bounds of the `\(100(1 – \alpha)%\)` bootstrap CI where `\(\theta^*_L\)` is the `\(\alpha/2\)` quantile from the bootstrap distribution and `\(\theta^*_U\)` is the `\(1-\alpha/2\)` quantile from the bootstrap distribution.
+
+If `result` has our bootstrap estimates then we can get a 95% confidence interval using:
+
+
+```r
+quantile(result, c(0.025, 0.975))
+```
+
+.footnote[
+There are other ways of constructing bootstrap, e.g. the centred percentile method of Hall (1989) which can be used when the bootstrap distribution isn't symmetric. 
+]
+
+
+---
+&lt;svg viewBox="0 0 352 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M176 80c-52.94 0-96 43.06-96 96 0 8.84 7.16 16 16 16s16-7.16 16-16c0-35.3 28.72-64 64-64 8.84 0 16-7.16 16-16s-7.16-16-16-16zM96.06 459.17c0 3.15.93 6.22 2.68 8.84l24.51 36.84c2.97 4.46 7.97 7.14 13.32 7.14h78.85c5.36 0 10.36-2.68 13.32-7.14l24.51-36.84c1.74-2.62 2.67-5.7 2.68-8.84l.05-43.18H96.02l.04 43.18zM176 0C73.72 0 0 82.97 0 176c0 44.37 16.45 84.85 43.56 115.78 16.64 18.99 42.74 58.8 52.42 92.16v.06h48v-.12c-.01-4.77-.72-9.51-2.15-14.07-5.59-17.81-22.82-64.77-62.17-109.67-20.54-23.43-31.52-53.15-31.61-84.14-.2-73.64 59.67-128 127.95-128 70.58 0 128 57.42 128 128 0 30.97-11.24 60.85-31.65 84.14-39.11 44.61-56.42 91.47-62.1 109.46a47.507 47.507 0 0 0-2.22 14.3v.1h48v-.05c9.68-33.37 35.78-73.18 52.42-92.16C335.55 260.85 352 220.37 352 176 352 78.8 273.2 0 176 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left[
+
+```r
+CI = quantile(result, c(0.025, 0.975))
+CI
+```
+
+```
+##     2.5%    97.5% 
+## 23.25720 28.40909
+```
+
+```r
+CI - mean(speed)
+```
+
+```
+##      2.5%     97.5% 
+## -2.954924  2.196970
+```
+
+The bootstrap confidence interval is not symmetric about the mean!
+
+]
+.pull-right[
+
+```r
+hist(result, breaks = 50,
+     col = "lightblue")
+abline(v = CI, col = "red", lwd = 3)
+```
+
+&lt;img src="lec17_files/figure-html/unnamed-chunk-10-1.png" width="864" /&gt;
+]
+
+---
+&lt;svg viewBox="0 0 352 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M176 80c-52.94 0-96 43.06-96 96 0 8.84 7.16 16 16 16s16-7.16 16-16c0-35.3 28.72-64 64-64 8.84 0 16-7.16 16-16s-7.16-16-16-16zM96.06 459.17c0 3.15.93 6.22 2.68 8.84l24.51 36.84c2.97 4.46 7.97 7.14 13.32 7.14h78.85c5.36 0 10.36-2.68 13.32-7.14l24.51-36.84c1.74-2.62 2.67-5.7 2.68-8.84l.05-43.18H96.02l.04 43.18zM176 0C73.72 0 0 82.97 0 176c0 44.37 16.45 84.85 43.56 115.78 16.64 18.99 42.74 58.8 52.42 92.16v.06h48v-.12c-.01-4.77-.72-9.51-2.15-14.07-5.59-17.81-22.82-64.77-62.17-109.67-20.54-23.43-31.52-53.15-31.61-84.14-.2-73.64 59.67-128 127.95-128 70.58 0 128 57.42 128 128 0 30.97-11.24 60.85-31.65 84.14-39.11 44.61-56.42 91.47-62.1 109.46a47.507 47.507 0 0 0-2.22 14.3v.1h48v-.05c9.68-33.37 35.78-73.18 52.42-92.16C335.55 260.85 352 220.37 352 176 352 78.8 273.2 0 176 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left[
+Compare with the confidence interval using the `\(t\)` distribution.
+
+```r
+xbar = mean(speed)
+n = length(speed)
+se = sd(speed)/sqrt(n)
+c(xbar, n, se)
+```
+
+```
+## [1] 26.212121 66.000000  1.322658
+```
+
+```r
+critical_values = qt(c(0.025,0.975), df = n-1)
+critical_values
+```
+
+```
+## [1] -1.997138  1.997138
+```
+
+```r
+CI_t = xbar + critical_values*se
+CI_t
+```
+
+```
+## [1] 23.57059 28.85365
+```
+]
+.pull-right[
+
+```r
+hist(result, breaks = 50,
+     col = "lightblue")
+abline(v = CI, col = "red", lwd = 3)
+abline(v = CI_t, col = "blue", 
+       lwd = 3, lty = 2)
+```
+
+&lt;img src="lec17_files/figure-html/unnamed-chunk-12-1.png" width="864" /&gt;
+]
+
+
+---
+&lt;svg viewBox="0 0 352 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M176 80c-52.94 0-96 43.06-96 96 0 8.84 7.16 16 16 16s16-7.16 16-16c0-35.3 28.72-64 64-64 8.84 0 16-7.16 16-16s-7.16-16-16-16zM96.06 459.17c0 3.15.93 6.22 2.68 8.84l24.51 36.84c2.97 4.46 7.97 7.14 13.32 7.14h78.85c5.36 0 10.36-2.68 13.32-7.14l24.51-36.84c1.74-2.62 2.67-5.7 2.68-8.84l.05-43.18H96.02l.04 43.18zM176 0C73.72 0 0 82.97 0 176c0 44.37 16.45 84.85 43.56 115.78 16.64 18.99 42.74 58.8 52.42 92.16v.06h48v-.12c-.01-4.77-.72-9.51-2.15-14.07-5.59-17.81-22.82-64.77-62.17-109.67-20.54-23.43-31.52-53.15-31.61-84.14-.2-73.64 59.67-128 127.95-128 70.58 0 128 57.42 128 128 0 30.97-11.24 60.85-31.65 84.14-39.11 44.61-56.42 91.47-62.1 109.46a47.507 47.507 0 0 0-2.22 14.3v.1h48v-.05c9.68-33.37 35.78-73.18 52.42-92.16C335.55 260.85 352 220.37 352 176 352 78.8 273.2 0 176 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## What if we trimmed the data?
+
+.pull-left[
+
+```r
+hist(speed, col = "lightblue", 
+     breaks = 15)
+```
+
+&lt;img src="lec17_files/figure-html/unnamed-chunk-13-1.png" width="864" /&gt;
+]
+.pull-right[
+Keep only the positive speeds.
+
+```r
+speed1 = speed[speed&gt;0]
+mean(speed)
+```
+
+```
+## [1] 26.21212
+```
+
+```r
+mean(speed1)
+```
+
+```
+## [1] 27.75
+```
+]
+
+---
+&lt;svg viewBox="0 0 352 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M176 80c-52.94 0-96 43.06-96 96 0 8.84 7.16 16 16 16s16-7.16 16-16c0-35.3 28.72-64 64-64 8.84 0 16-7.16 16-16s-7.16-16-16-16zM96.06 459.17c0 3.15.93 6.22 2.68 8.84l24.51 36.84c2.97 4.46 7.97 7.14 13.32 7.14h78.85c5.36 0 10.36-2.68 13.32-7.14l24.51-36.84c1.74-2.62 2.67-5.7 2.68-8.84l.05-43.18H96.02l.04 43.18zM176 0C73.72 0 0 82.97 0 176c0 44.37 16.45 84.85 43.56 115.78 16.64 18.99 42.74 58.8 52.42 92.16v.06h48v-.12c-.01-4.77-.72-9.51-2.15-14.07-5.59-17.81-22.82-64.77-62.17-109.67-20.54-23.43-31.52-53.15-31.61-84.14-.2-73.64 59.67-128 127.95-128 70.58 0 128 57.42 128 128 0 30.97-11.24 60.85-31.65 84.14-39.11 44.61-56.42 91.47-62.1 109.46a47.507 47.507 0 0 0-2.22 14.3v.1h48v-.05c9.68-33.37 35.78-73.18 52.42-92.16C335.55 260.85 352 220.37 352 176 352 78.8 273.2 0 176 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left[
+
+```r
+B = 10000
+result = vector("numeric", length = B)
+for(i in 1:B){
+  newData = sample(speed1, replace = TRUE)
+  result[i] = mean(newData)
+}
+CI = quantile(result, c(0.025, 0.975))
+CI
+```
+
+```
+##     2.5%    97.5% 
+## 26.54688 28.98438
+```
+
+```r
+CI - mean(speed1)
+```
+
+```
+##      2.5%     97.5% 
+## -1.203125  1.234375
+```
+
+Much more symmetric.
+
+]
+.pull-right[
+
+```r
+hist(result, breaks = 50, col = "lightblue")
+abline(v = CI, col = "red", lwd = 3)
+```
+
+&lt;img src="lec17_files/figure-html/unnamed-chunk-16-1.png" width="864" /&gt;
+]
+
+---
+&lt;svg viewBox="0 0 352 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M176 80c-52.94 0-96 43.06-96 96 0 8.84 7.16 16 16 16s16-7.16 16-16c0-35.3 28.72-64 64-64 8.84 0 16-7.16 16-16s-7.16-16-16-16zM96.06 459.17c0 3.15.93 6.22 2.68 8.84l24.51 36.84c2.97 4.46 7.97 7.14 13.32 7.14h78.85c5.36 0 10.36-2.68 13.32-7.14l24.51-36.84c1.74-2.62 2.67-5.7 2.68-8.84l.05-43.18H96.02l.04 43.18zM176 0C73.72 0 0 82.97 0 176c0 44.37 16.45 84.85 43.56 115.78 16.64 18.99 42.74 58.8 52.42 92.16v.06h48v-.12c-.01-4.77-.72-9.51-2.15-14.07-5.59-17.81-22.82-64.77-62.17-109.67-20.54-23.43-31.52-53.15-31.61-84.14-.2-73.64 59.67-128 127.95-128 70.58 0 128 57.42 128 128 0 30.97-11.24 60.85-31.65 84.14-39.11 44.61-56.42 91.47-62.1 109.46a47.507 47.507 0 0 0-2.22 14.3v.1h48v-.05c9.68-33.37 35.78-73.18 52.42-92.16C335.55 260.85 352 220.37 352 176 352 78.8 273.2 0 176 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left[
+Compare with the confidence interval using the `\(t\)` distribution.
+
+```r
+xbar = mean(speed1)
+n = length(speed1)
+se = sd(speed1)/sqrt(n)
+c(xbar, n, se)
+```
+
+```
+## [1] 27.7500000 64.0000000  0.6354289
+```
+
+```r
+critical_values = qt(c(0.025,0.975), df = n-1)
+critical_values
+```
+
+```
+## [1] -1.998341  1.998341
+```
+
+```r
+CI_t = xbar + critical_values*se
+CI_t
+```
+
+```
+## [1] 26.4802 29.0198
+```
+
+The bootstrap and the `\(t\)` confidence intervals are now very similar.
+
+]
+.pull-right[
+
+```r
+hist(result, breaks = 50,
+     col = "lightblue")
+abline(v = CI, col = "red", lwd = 3)
+abline(v = CI_t, col = "blue", 
+       lwd = 3, lty = 2)
+```
+
+&lt;img src="lec17_files/figure-html/unnamed-chunk-18-1.png" width="864" /&gt;
+]
+
+---
+class: segue
+
+## Flight departure delays
+
+---
+&lt;svg viewBox="0 0 576 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M480 192H365.71L260.61 8.06A16.014 16.014 0 0 0 246.71 0h-65.5c-10.63 0-18.3 10.17-15.38 20.39L214.86 192H112l-43.2-57.6c-3.02-4.03-7.77-6.4-12.8-6.4H16.01C5.6 128-2.04 137.78.49 147.88L32 256 .49 364.12C-2.04 374.22 5.6 384 16.01 384H56c5.04 0 9.78-2.37 12.8-6.4L112 320h102.86l-49.03 171.6c-2.92 10.22 4.75 20.4 15.38 20.4h65.5c5.74 0 11.04-3.08 13.89-8.06L365.71 320H480c35.35 0 96-28.65 96-64s-60.65-64-96-64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Flights data set
+
+
+```r
+# install.packages("nycflights13")
+library(nycflights13)
+glimpse(flights)
+```
+
+```
+## Rows: 336,776
+## Columns: 19
+## $ year           &lt;int&gt; 2013, 2013, 2013, 2013, 2013, 2013,…
+## $ month          &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,…
+## $ day            &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,…
+## $ dep_time       &lt;int&gt; 517, 533, 542, 544, 554, 554, 555, …
+## $ sched_dep_time &lt;int&gt; 515, 529, 540, 545, 600, 558, 600, …
+## $ dep_delay      &lt;dbl&gt; 2, 4, 2, -1, -6, -4, -5, -3, -3, -2…
+## $ arr_time       &lt;int&gt; 830, 850, 923, 1004, 812, 740, 913,…
+## $ sched_arr_time &lt;int&gt; 819, 830, 850, 1022, 837, 728, 854,…
+## $ arr_delay      &lt;dbl&gt; 11, 20, 33, -18, -25, 12, 19, -14, …
+## $ carrier        &lt;chr&gt; "UA", "UA", "AA", "B6", "DL", "UA",…
+## $ flight         &lt;int&gt; 1545, 1714, 1141, 725, 461, 1696, 5…
+## $ tailnum        &lt;chr&gt; "N14228", "N24211", "N619AA", "N804…
+## $ origin         &lt;chr&gt; "EWR", "LGA", "JFK", "JFK", "LGA", …
+## $ dest           &lt;chr&gt; "IAH", "IAH", "MIA", "BQN", "ATL", …
+## $ air_time       &lt;dbl&gt; 227, 227, 160, 183, 116, 150, 158, …
+## $ distance       &lt;dbl&gt; 1400, 1416, 1089, 1576, 762, 719, 1…
+## $ hour           &lt;dbl&gt; 5, 5, 5, 5, 6, 5, 6, 6, 6, 6, 6, 6,…
+## $ minute         &lt;dbl&gt; 15, 29, 40, 45, 0, 58, 0, 0, 0, 0, …
+## $ time_hour      &lt;dttm&gt; 2013-01-01 05:00:00, 2013-01-01 05…
+```
+
+---
+&lt;svg viewBox="0 0 576 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M480 192H365.71L260.61 8.06A16.014 16.014 0 0 0 246.71 0h-65.5c-10.63 0-18.3 10.17-15.38 20.39L214.86 192H112l-43.2-57.6c-3.02-4.03-7.77-6.4-12.8-6.4H16.01C5.6 128-2.04 137.78.49 147.88L32 256 .49 364.12C-2.04 374.22 5.6 384 16.01 384H56c5.04 0 9.78-2.37 12.8-6.4L112 320h102.86l-49.03 171.6c-2.92 10.22 4.75 20.4 15.38 20.4h65.5c5.74 0 11.04-3.08 13.89-8.06L365.71 320H480c35.35 0 96-28.65 96-64s-60.65-64-96-64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## New York City to San Fransisco
+
+Let's restrict attention to flights between NYC and San Francisco (SFO).
+
+
+```r
+sfo = flights %&gt;% filter(dest == "SFO")
+```
+
+This is the **population** of flights in 2013.  Let's look at the distribution of arrival delays:
+
+
+```r
+sfo %&gt;% ggplot(aes(x = arr_delay/60)) + geom_histogram() + labs(x = "Arrival delay (hours)")
+```
+
+&lt;img src="lec17_files/figure-html/unnamed-chunk-21-1.png" width="864" /&gt;
+
+---
+&lt;svg viewBox="0 0 576 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M480 192H365.71L260.61 8.06A16.014 16.014 0 0 0 246.71 0h-65.5c-10.63 0-18.3 10.17-15.38 20.39L214.86 192H112l-43.2-57.6c-3.02-4.03-7.77-6.4-12.8-6.4H16.01C5.6 128-2.04 137.78.49 147.88L32 256 .49 364.12C-2.04 374.22 5.6 384 16.01 384H56c5.04 0 9.78-2.37 12.8-6.4L112 320h102.86l-49.03 171.6c-2.92 10.22 4.75 20.4 15.38 20.4h65.5c5.74 0 11.04-3.08 13.89-8.06L365.71 320H480c35.35 0 96-28.65 96-64s-60.65-64-96-64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Travel policy
+
+An organisation regularly flies staff from NYC to SFO.  It decides that it is acceptable for staff to be late 2% of the time.  How early should they book their flights to ensure that staff arrive on time?
+
+
+```r
+quantile(sfo$arr_delay, p = 0.98, na.rm = TRUE)
+```
+
+```
+## 98% 
+## 153
+```
+
+The 98th percentile of the arrival delay distribution is about 2.5 hours, so we should send them on a flight about 2.5 hours early.
+
+&gt; What if we didn't have the population data?
+
+---
+&lt;svg viewBox="0 0 576 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M480 192H365.71L260.61 8.06A16.014 16.014 0 0 0 246.71 0h-65.5c-10.63 0-18.3 10.17-15.38 20.39L214.86 192H112l-43.2-57.6c-3.02-4.03-7.77-6.4-12.8-6.4H16.01C5.6 128-2.04 137.78.49 147.88L32 256 .49 364.12C-2.04 374.22 5.6 384 16.01 384H56c5.04 0 9.78-2.37 12.8-6.4L112 320h102.86l-49.03 171.6c-2.92 10.22 4.75 20.4 15.38 20.4h65.5c5.74 0 11.04-3.08 13.89-8.06L365.71 320H480c35.35 0 96-28.65 96-64s-60.65-64-96-64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Sample of flights
+
+If all we had access to was a sample of 100 flights from 2013, this is our point estimate of the 98th percentile.
+
+
+```r
+set.seed(2)
+sfo_sample = sfo %&gt;% filter(!is.na(arr_delay)) %&gt;% sample_n(size = 100, replace = FALSE)
+quantile(sfo_sample$arr_delay, p = 0.98)
+```
+
+```
+##   98% 
+## 154.2
+```
+
+How reliable is that point estimate?
+
+---
+&lt;svg viewBox="0 0 576 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M480 192H365.71L260.61 8.06A16.014 16.014 0 0 0 246.71 0h-65.5c-10.63 0-18.3 10.17-15.38 20.39L214.86 192H112l-43.2-57.6c-3.02-4.03-7.77-6.4-12.8-6.4H16.01C5.6 128-2.04 137.78.49 147.88L32 256 .49 364.12C-2.04 374.22 5.6 384 16.01 384H56c5.04 0 9.78-2.37 12.8-6.4L112 320h102.86l-49.03 171.6c-2.92 10.22 4.75 20.4 15.38 20.4h65.5c5.74 0 11.04-3.08 13.89-8.06L365.71 320H480c35.35 0 96-28.65 96-64s-60.65-64-96-64z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Bootstrap CI for quantiles
+
+.pull-left[
+
+```r
+B = 10000
+q98 = vector("numeric", length = B)
+for(i in 1:B) {
+  resample = sample(sfo_sample$arr_delay, 
+                    replace = TRUE)
+  q98[i] = quantile(resample, probs = 0.98)
+}
+par(cex = 2)
+hist(q98, col = "lightblue")
+```
+
+&lt;img src="lec17_files/figure-html/unnamed-chunk-24-1.png" width="864" /&gt;
+]
+.pull-right[
+A 95% confidence interval for this quantile:
+
+
+```r
+quantile(q98, c(0.025,0.975))
+```
+
+```
+##    2.5%   97.5% 
+##  61.451 182.000
+```
+
+Based on our sample our (bootstrap) 95% confidence interval is between 1 hour and 3 hours.
+]
+
+---
+
+## Final remarks
+
+Bootstrapping is useful when
+
+- the theoretical distribution of a statistic is complicated or unknown (e.g. coefficient of variation, quantile regression parameter estimates, etc.)
+- the sample size is too small to make any sensible parametric inferences about the parameter
+
+#### Advantages
+
+- Bootstrapping frees us from making parametric assumptions to carry out inferences
+- Provides answers to problems for which analytic solutions are impossible
+- Can be used to verify, or check the stability of results
+- Asymptotically consistent
+
+---
+
+## References
+
+Efron, B. (1979). "Bootstrap Methods: Another Look at
+the Jackknife". In: _The Annals of Statistics_ 7.1,
+pp. 1-26. DOI:
+[10.1214/aos/1176344552](https://doi.org/10.1214%2Faos%2F1176344552).
+
+Hall, P. (1989). "On efficient bootstrap simulation".
+In: _Biometrika_ 76.3, pp. 613-617. DOI:
+[10.1093/biomet/76.3.613](https://doi.org/10.1093%2Fbiomet%2F76.3.613).
+
+Manly, B. (2007). _Randomization, bootstrap and Monte
+Carlo methods in biology_. Boca Raton, FL: Chapman &amp;
+Hall/CRC. ISBN: 9781584885412.
+
+Stigler, S. M. (1977). "Do Robust Estimators Work
+with Real Data?". In: _The Annals of Statistics_ 5.6,
+pp. 1055-1098. DOI:
+[10.1214/aos/1176343997](https://doi.org/10.1214%2Faos%2F1176343997).
+
+Wickham, H. (2018a). _nycflights13: Flights that
+Departed NYC in 2013_. R package version 1.0.0. URL:
+[https://CRAN.R-project.org/package=nycflights13](https://CRAN.R-project.org/package=nycflights13).
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="assets/remark-zoom.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

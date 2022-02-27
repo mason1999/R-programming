@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>DATA2002</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Garth Tarr" />
+    <script src="lec20_files/header-attrs-2.10/header-attrs.js"></script>
+    <link href="lec20_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } },
+      "HTML-CSS": {
+        styles: {
+          ".MathJax a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+          ".MathJax_Preview a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+        }
+      }
+      });
+    </script>
+    <link rel="stylesheet" href="assets/sydney-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="assets/sydney.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# DATA2002
+## ANOVA
+### Garth Tarr
+
+---
+
+class: segue
+
+
+
+
+
+
+.large[
+What is ANOVA?
+
+`\(t\)`-test revision
+
+The general ANOVA decomposition
+]
+
+
+---
+class: segue
+
+# What is ANOVA?
+
+---
+
+## What does ANOVA stand for?
+
+-   The term **ANOVA** is an acronym/abbreviation for/of the term "**Analysis of Variance**".
+-   The term "variance", as well as the ANOVA procedure, is mainly due
+to Fisher from the 1920's, in particular the book "Statistical
+Methods for Research Workers" (something of a classic text, Fisher (1925)).
+
+--
+
+## Yeah, but what is "Analysis of Variance"?
+
+-   In its (perhaps) "simplest" form, Analysis of Variance is a
+generalisation of a *two-sided* two-sample `\(t\)`-test to 3 or more
+samples.
+-   Which two-sample `\(t\)`-test though?
+
+---
+class: segue
+
+# `\(t\)`-test revision
+
+---
+
+## Two-sample `\(t\)`-tests
+
+-   There are (at least) 3 different procedures which might be referred to as a "two-sample `\(t\)`-test":
+-   the *Paired* (two-sample) `\(t\)`-test;
+-   the *Welch* test (unequal variances two-independent-sample `\(t\)`-test).
+-   the *Classical* or *Pooled* two-(independent)-sample (equal variances) `\(t\)`-test;
+-   They all take the form
+`$$\frac{\bar{X}-\bar{Y}}{\text{SE}(\bar{X}-\bar{Y})}\,.$$`
+-   They only differ in how the standard error is computed.
+-   We briefly review these.
+
+
+---
+
+## Paired (two-sample) `\(t\)`-test
+
+-   For the **paired** (two-sample) `\(t\)`-test, it is assumed the differences `\(D_1=X_1-Y_1,\ldots,D_n=X_n-Y_n\)` are iid normal with variance `\(\sigma^2_D\)`.
+-   Under these conditions `\(\bar{D}=\bar{X}-\bar{Y}\)` is normal with variance `\(\dfrac{\sigma^2_D}{n}\)` where `\(n\)` is the common sample size.
+-   `\(\sigma^2_D\)` is estimated using `\(S_D^2\)`, the *sample variance of the differences*, giving a standard error of
+`$$\text{SE}(\bar{X}-\bar{Y})=\frac{S_D}{\sqrt{n}}\,.$$`
+-   The test statistic is **exactly** distributed as `\(t_{n-1}\)` under `\(H_0\)`.
+-   This is just a **one-sample `\(t\)`-test** applied to the differences.
+
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M176 256c44.11 0 80-35.89 80-80s-35.89-80-80-80-80 35.89-80 80 35.89 80 80 80zm352-128H304c-8.84 0-16 7.16-16 16v144H64V80c0-8.84-7.16-16-16-16H16C7.16 64 0 71.16 0 80v352c0 8.84 7.16 16 16 16h32c8.84 0 16-7.16 16-16v-48h512v48c0 8.84 7.16 16 16 16h32c8.84 0 16-7.16 16-16V240c0-61.86-50.14-112-112-112z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Sleep data
+
+.pull-left-2[
+- The "classic" example where the `\(t\)`-test was "invented",
+from "Student's" 1908 *Biometrika* paper "The probable error of a
+mean":
+
+![img](imgs/student-sleep-data.png)
+
+- It is available in R as the object `sleep`
+
+&lt;br&gt;
+
+]
+
+
+```r
+sleep
+```
+
+```
+##    extra group ID
+## 1    0.7     1  1
+## 2   -1.6     1  2
+## 3   -0.2     1  3
+## 4   -1.2     1  4
+## 5   -0.1     1  5
+## 6    3.4     1  6
+## 7    3.7     1  7
+## 8    0.8     1  8
+## 9    0.0     1  9
+## 10   2.0     1 10
+## 11   1.9     2  1
+## 12   0.8     2  2
+## 13   1.1     2  3
+## 14   0.1     2  4
+## 15  -0.1     2  5
+## 16   4.4     2  6
+## 17   5.5     2  7
+## 18   1.6     2  8
+## 19   4.6     2  9
+## 20   3.4     2 10
+```
+
+.footnote[
+.right[Source: Student (1908). Can you see the typo in the original paper?]
+]
+
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M176 256c44.11 0 80-35.89 80-80s-35.89-80-80-80-80 35.89-80 80 35.89 80 80 80zm352-128H304c-8.84 0-16 7.16-16 16v144H64V80c0-8.84-7.16-16-16-16H16C7.16 64 0 71.16 0 80v352c0 8.84 7.16 16 16 16h32c8.84 0 16-7.16 16-16v-48h512v48c0 8.84 7.16 16 16 16h32c8.84 0 16-7.16 16-16V240c0-61.86-50.14-112-112-112z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+-   Let's try the "default" `\(t\)`-test command:
+
+
+```r
+t.test(extra ~ group, data = sleep)
+```
+
+```
+## 
+## 	Welch Two Sample t-test
+## 
+## data:  extra by group
+## t = -1.8608, df = 17.776, p-value = 0.07939
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  -3.3654832  0.2054832
+## sample estimates:
+## mean in group 1 mean in group 2 
+##            0.75            2.33
+```
+
+-   What? Welch test?
+
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M176 256c44.11 0 80-35.89 80-80s-35.89-80-80-80-80 35.89-80 80 35.89 80 80 80zm352-128H304c-8.84 0-16 7.16-16 16v144H64V80c0-8.84-7.16-16-16-16H16C7.16 64 0 71.16 0 80v352c0 8.84 7.16 16 16 16h32c8.84 0 16-7.16 16-16v-48h512v48c0 8.84 7.16 16 16 16h32c8.84 0 16-7.16 16-16V240c0-61.86-50.14-112-112-112z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left[
+
+```r
+library(tidyverse)
+sleep_recode = sleep %&gt;% dplyr::mutate(
+  group = forcats::fct_recode(group,
+                              Dextro = "1",
+                              Laevo = "2"
+  ) 
+)
+head(sleep_recode, n = 3)
+```
+
+```
+##   extra  group ID
+## 1   0.7 Dextro  1
+## 2  -1.6 Dextro  2
+## 3  -0.2 Dextro  3
+```
+
+```r
+sleep_wide = tidyr::spread(sleep_recode, 
+                           key = group, 
+                           value = extra)
+head(sleep_wide, n = 3)
+```
+
+```
+##   ID Dextro Laevo
+## 1  1    0.7   1.9
+## 2  2   -1.6   0.8
+## 3  3   -0.2   1.1
+```
+]
+
+.pull-right[
+
+```r
+ggplot(sleep_wide, 
+       aes(x = Dextro, y = Laevo)) + 
+  geom_point(size = 5) + 
+  geom_abline(slope = 1, intercept = 0) + 
+  theme_classic(base_size = 32)
+```
+
+&lt;img src="lec20_files/figure-html/unnamed-chunk-4-1.png" width="864" /&gt;
+
+-   There is a clear trend: *samples are not independent*
+-   Most points "above" the `\(y=x\)` line: suggests the `\(y\)`'s are bigger
+than the `\(x\)`'s.
+]
+
+
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M176 256c44.11 0 80-35.89 80-80s-35.89-80-80-80-80 35.89-80 80 35.89 80 80 80zm352-128H304c-8.84 0-16 7.16-16 16v144H64V80c0-8.84-7.16-16-16-16H16C7.16 64 0 71.16 0 80v352c0 8.84 7.16 16 16 16h32c8.84 0 16-7.16 16-16v-48h512v48c0 8.84 7.16 16 16 16h32c8.84 0 16-7.16 16-16V240c0-61.86-50.14-112-112-112z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+-   The **paired** `\(t\)`-test (two-sided, unless a direction was
+anticipated beforehand) gives:
+
+
+```r
+t.test(extra ~ group, data = sleep, paired = TRUE)
+```
+
+```
+## 
+## 	Paired t-test
+## 
+## data:  extra by group
+## t = -4.0621, df = 9, p-value = 0.002833
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  -2.4598858 -0.7001142
+## sample estimates:
+## mean of the differences 
+##                   -1.58
+```
+
+-   Note the much smaller p-value!
+
+
+???
+
+https://stats.stackexchange.com/questions/139872/paired-difference-t-test-vs-independent-two-sample-t-test-to-assess-means-differ
+
+---
+
+## Welch (unequal variances two-independent-sample) `\(t\)`-test
+
+-   For the Welch test it is only assumed that each sample is normal,
+with possibly different variances `\(\sigma_X^2\)` and `\(\sigma_Y^2\)` and
+different means, and all random variables are independent.
+-   Under these conditions `\(\bar{X}-\bar{Y}\)` is normal with variance 
+`$$\frac{\sigma^2_X}{m}+\frac{\sigma^2_Y}{n}\,.$$`
+    -   The standard error is obtained by simply plugging in sample
+variances as estimators of population variances:
+`$$\text{SE}(\bar{X}-\bar{Y})=\sqrt{\frac{S_X^2}{m}+\frac{S_Y^2}{n}}\,.$$`
+    -   The test statistic is **approximately**
+`\(t_{d^{*}(m,n,\sigma_X,\sigma_Y)}\)` under `\(H_0\)`, for a known
+function `\(d^{*}(...)\)`.
+    -   p-value is computed by plugging sample sd's into `\(d^{*}(...)\)`.
+
+
+---
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M384 312.7c-55.1 136.7-187.1 54-187.1 54-40.5 81.8-107.4 134.4-184.6 134.7-16.1 0-16.6-24.4 0-24.4 64.4-.3 120.5-42.7 157.2-110.1-41.1 15.9-118.6 27.9-161.6-82.2 109-44.9 159.1 11.2 178.3 45.5 9.9-24.4 17-50.9 21.6-79.7 0 0-139.7 21.9-149.5-98.1 119.1-47.9 152.6 76.7 152.6 76.7 1.6-16.7 3.3-52.6 3.3-53.4 0 0-106.3-73.7-38.1-165.2 124.6 43 61.4 162.4 61.4 162.4.5 1.6.5 23.8 0 33.4 0 0 45.2-89 136.4-57.5-4.2 134-141.9 106.4-141.9 106.4-4.4 27.4-11.2 53.4-20 77.5 0 0 83-91.8 172-20z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Lengths of New Zealand rivers
+
+-   The file [`nzrivers.txt`](http://www.statsci.org/data/oz/nzrivers.txt) has lengths (in km) of rivers on the South
+Island of New Zealand
+
+
+```r
+nzrivers = read_tsv("http://www.statsci.org/data/oz/nzrivers.txt")
+glimpse(nzrivers)
+```
+
+```
+## Rows: 41
+## Columns: 3
+## $ River     &lt;chr&gt; "Clarence", "Conway", "Waiau", "Hurunui"…
+## $ Length    &lt;dbl&gt; 209, 48, 169, 138, 64, 97, 161, 95, 145,…
+## $ FlowsInto &lt;chr&gt; "Pacific", "Pacific", "Pacific", "Pacifi…
+```
+
+
+```r
+nzrivers %&gt;% 
+  group_by(FlowsInto) %&gt;% 
+  summarise(xbar = mean(Length),
+            med = median(Length))
+```
+
+```
+## # A tibble: 2 × 3
+##   FlowsInto  xbar   med
+##   &lt;chr&gt;     &lt;dbl&gt; &lt;dbl&gt;
+## 1 Pacific   131.     97
+## 2 Tasman     67.7    64
+```
+
+???
+
+In case the original site ever dies, the data is also available here:
+
+https://raw.githubusercontent.com/DATA2002/data/master/nzrivers.txt 
+
+---
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M384 312.7c-55.1 136.7-187.1 54-187.1 54-40.5 81.8-107.4 134.4-184.6 134.7-16.1 0-16.6-24.4 0-24.4 64.4-.3 120.5-42.7 157.2-110.1-41.1 15.9-118.6 27.9-161.6-82.2 109-44.9 159.1 11.2 178.3 45.5 9.9-24.4 17-50.9 21.6-79.7 0 0-139.7 21.9-149.5-98.1 119.1-47.9 152.6 76.7 152.6 76.7 1.6-16.7 3.3-52.6 3.3-53.4 0 0-106.3-73.7-38.1-165.2 124.6 43 61.4 162.4 61.4 162.4.5 1.6.5 23.8 0 33.4 0 0 45.2-89 136.4-57.5-4.2 134-141.9 106.4-141.9 106.4-4.4 27.4-11.2 53.4-20 77.5 0 0 83-91.8 172-20z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left[
+-   If we wanted to test that the mean difference here was signficant,
+we see there is a big difference in variability between the two
+(and possibly skewness!)
+]
+.pull-right[
+
+```r
+ggplot(nzrivers, 
+       aes(x = FlowsInto, y = Length)) + 
+  geom_boxplot() + 
+  theme_classic(base_size = 32)
+```
+
+&lt;img src="lec20_files/figure-html/unnamed-chunk-8-1.png" width="864" /&gt;
+]
+
+---
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M384 312.7c-55.1 136.7-187.1 54-187.1 54-40.5 81.8-107.4 134.4-184.6 134.7-16.1 0-16.6-24.4 0-24.4 64.4-.3 120.5-42.7 157.2-110.1-41.1 15.9-118.6 27.9-161.6-82.2 109-44.9 159.1 11.2 178.3 45.5 9.9-24.4 17-50.9 21.6-79.7 0 0-139.7 21.9-149.5-98.1 119.1-47.9 152.6 76.7 152.6 76.7 1.6-16.7 3.3-52.6 3.3-53.4 0 0-106.3-73.7-38.1-165.2 124.6 43 61.4 162.4 61.4 162.4.5 1.6.5 23.8 0 33.4 0 0 45.2-89 136.4-57.5-4.2 134-141.9 106.4-141.9 106.4-4.4 27.4-11.2 53.4-20 77.5 0 0 83-91.8 172-20z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+welch = t.test(Length ~ FlowsInto, data = nzrivers)
+welch
+```
+
+```
+## 
+## 	Welch Two Sample t-test
+## 
+## data:  Length by FlowsInto
+## t = 3.2632, df = 23.477, p-value = 0.003358
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##   23.28176 103.67039
+## sample estimates:
+## mean in group Pacific  mean in group Tasman 
+##             131.15789              67.68182
+```
+
+-   Ths is the default two-sample `\(t\)`-test in R.
+-   **Note** the "degrees of freedom", here, roughly 23.5.
+
+---
+
+## Classical two-(independent)-sample (equal variances) `\(t\)`-test
+
+-   The "Classical" two-sample `\(t\)`-test assumes the same as the Welch
+test with the *extra* assumption that the two population variances
+`\(\sigma^2_X = \sigma^2_Y=\sigma^2\)` **are equal**.
+
+-   Under these conditions `\(\bar{X}-\bar{Y}\)` is normal with variance 
+`\(\sigma^2 \left( \frac{1}{m}+\frac{1}{n} \right)\)` (for possibly
+different sample sizes `\(m\)` and `\(n\)`).
+-   `\(\sigma^2\)` is estimated using the **pooled variance estimator**
+`$$S_p^2= \frac{(m-1)S_X^2+(n-1)S_Y^2}{m+n-2}$$`
+(a .blue[.bold[weighted average]] of the two sample variances) giving  a standard error of 
+`$$\text{SE}(\bar{X}-\bar{Y})=S_p \sqrt{\frac{1}{m}+\frac{1}{n}}\,.$$`
+-   The test statistic is **exactly** distributed as `\(t_{m+n-2}\)` under `\(H_0\)`.
+
+
+---
+&lt;svg viewBox="0 0 384 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M384 312.7c-55.1 136.7-187.1 54-187.1 54-40.5 81.8-107.4 134.4-184.6 134.7-16.1 0-16.6-24.4 0-24.4 64.4-.3 120.5-42.7 157.2-110.1-41.1 15.9-118.6 27.9-161.6-82.2 109-44.9 159.1 11.2 178.3 45.5 9.9-24.4 17-50.9 21.6-79.7 0 0-139.7 21.9-149.5-98.1 119.1-47.9 152.6 76.7 152.6 76.7 1.6-16.7 3.3-52.6 3.3-53.4 0 0-106.3-73.7-38.1-165.2 124.6 43 61.4 162.4 61.4 162.4.5 1.6.5 23.8 0 33.4 0 0 45.2-89 136.4-57.5-4.2 134-141.9 106.4-141.9 106.4-4.4 27.4-11.2 53.4-20 77.5 0 0 83-91.8 172-20z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+classical = t.test(Length ~ FlowsInto, data = nzrivers, var.equal = TRUE)
+classical
+```
+
+```
+## 
+## 	Two Sample t-test
+## 
+## data:  Length by FlowsInto
+## t = 3.4391, df = 39, p-value = 0.001403
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##   26.14338 100.80878
+## sample estimates:
+## mean in group Pacific  mean in group Tasman 
+##             131.15789              67.68182
+```
+
+-   Gives similar results, but look at the **degrees of freedom**; much
+bigger than the Welch test, and gives a bigger statistic,
+smaller p-value and narrower confidence interval
+    -   **underestimates the standard error of the mean difference**.
+
+---
+
+## How serious is the equal variance assumption?
+
+-   The assumption of equal variance is quite crucial for the validity
+of the Classical test.
+-   In particular, quite strange things can happen if
+    -   the population variances are different;
+    -   the sample sizes are very different;
+-   Consider the simulation on the next slide where the **smaller sample**
+has a **bigger variance**
+
+
+---
+
+## Simulation
+
+
+```r
+B = 10000
+pval.Classical = pval.Welch = vector(length = B)
+set.seed(123)
+for(i in 1:B){
+  x = rnorm(100, sd = 1)          # both samples have the same mean
+  y = rnorm(20, sd = 3)           # smaller sample has bigger variance      
+  pval.Welch[i] = t.test(x, y)$p.val
+  pval.Classical[i] = t.test(x, y, var.equal = TRUE)$p.val
+}
+mean(pval.Welch &lt; .05)        # Rejects about 5% of the time.
+```
+
+```
+## [1] 0.0487
+```
+
+```r
+mean(pval.Classical &lt; .05)    # Rejects far too often!!
+```
+
+```
+## [1] 0.2887
+```
+
+---
+
+## Some comments
+
+-   Of the 3 different two-sample `\(t\)`-tests, the Classical test is the
+one that requires the *most assumptions*:
+-   One could almost "do away" with it:
+    -   a Welch test could always be used instead (Welch test is the
+default in R);
+    -   the paired test can also be used if the sample sizes are equal!
+        -   In that case the differences are still iid normal!
+        -   The paired test suffers a *minor* loss of power (due to the
+lower degrees of freedom only) but is robust against positive
+correlation.
+-   **But** the Classical test is the one that generalises to ANOVA.
+-   We must always be aware of these key *assumptions*:
+    -   independence between samples;
+    -   equal variance.
+
+
+
+---
+class: segue
+
+# The general ANOVA decomposition
+
+---
+
+## ANOVA (in the case of `\(g\)` groups)
+
+.blockquote[
+1. **Hypotheses:** `\(H_0\colon\ \mu_1 = \mu_2 =\ldots = \mu_g\)` vs `\(H_1\colon\)` at least one `\(\mu_i\neq\mu_j\)`.
+
+1. **Assumptions:**  Observations are independent within each of the `\(g\)` samples.  Each of the `\(g\)` populations have the same variance, `\(\sigma_1^2 = \sigma_2^2 = \ldots = \sigma_g^2 = \sigma\)`.  Each of the `\(g\)` populations are normally distributed (or the sample sizes are large enough such that you can rely on the central limit theorem).
+
+1. **Test statistic:**  `\(T = \frac{\text{Treatment Mean Sq}}{\text{Residual Mean Sq}}\)`.  Under `\(H_0\)`, `\(T \sim F_{g-1,\ N-g}\)` where `\(g\)` is the number of groups.
+
+1. **Observed test statistic:**  `\(t_0\)`.
+
+1. **p-value:**  `\(P(T \geq t_0) = P(F_{g-1,\ N-g} \geq t_0)\)`. Note: always looking in the upper tail.
+
+1. **Decision:** If the p-value is less than `\(\alpha\)` we reject the null hypothesis and conclude that the population mean of at least one group is significantly different to the others.  If the p-value is larger than `\(\alpha\)` we do not reject the null hypothesis and conclude that there is no significant difference between the population means.
+]
+
+
+## Double subscript notation
+
+-   We shall now introduce some new notational conventions to enable
+analysis of multi-sample problems.
+-   We shall denote the data with two subscripts:
+    -   `\(i\)` to index the samples ("groups")
+    -   `\(j\)` to index observations within samples/groups.
+-   The samples may have possibly different sizes across groups.
+-   We let `\(g\)` denote the number of groups.
+-   We thus let `\(y_{ij}\)` denote the observation on individual `\(j\)` in the
+sample for group `\(i\)`, `\(j=1,2,\ldots,n_i\)`, `\(i=1,2,\ldots,g\)`.
+
+---
+
+## The normal model
+
+-   We model `\(y_{ij}\)` (for  each `\(j=1,2,\ldots,n_i\)` and `\(i=1,2,\ldots,g\)`) as the value taken by a random variable
+$$ Y_{ij}\sim N(\mu_i,\sigma^2)\,,$$
+and that all random variables are independent.
+-   Thus we have `\(g\)` different iid samples, the sample for group `\(i\)` (of size `\(n_i\)`) being iid `\(N(\mu_i,\sigma^2)\)`. 
+    -   In other words, for each `\(i=1,2,\ldots,g\)`, `\(Y_{i1},\ldots,Y_{in_i}\)` are iid `\(N(\mu_i,\sigma^2)\)` random variables.
+
+---
+
+## The dreaded "dot" notation
+
+-   When working with double subscripts it is convenient to introduce the **dot** notation:
+    -   replacing either (or both) subscript(s) with a dot means **adding** over that/those subscript(s);
+    -   replacing either (or both) subscript(s) with a dot **and writing a bar over the letter** means **averaging** over that/those subscript(s).
+-   For example:
+    -   total for sample `\(i\)` is `\(\sum_{j=1}^{n_i}y_{ij}=y_{i\bullet}\)`
+    -   average for sample `\(i\)` is `\(\dfrac{1}{n_i}\sum_{j=1}^{n_i}y_{ij}=\bar y_{i\bullet}\)`
+    -   grand total of all observations is `\(\sum_{i=1}^g\sum_{j=1}^{n_i}y_{ij} = y_{\bullet\bullet}\)`
+    -   overall average of all observations is `\(\dfrac{1}{N}\sum_{i=1}^g\sum_{j=1}^{n_i}y_{ij} = \bar y_{\bullet\bullet}\)`
+        -   here `\(N=n_1+\ldots+n_g\)` is the total number of observations.
+    -   Also, `\(s_i^2=\dfrac{1}{n_i-1}\sum_{j=1}^{n_i}(y_{ij}-\bar y_{i\bullet})^2\)` is the `\(i\)`-th group's sample variance.
+
+
+---
+
+## The general ANOVA decomposition
+
+-   The "weighted average" decomposition introduced earlier for the
+two-sample `\(t\)`-test is a special case of a more general
+decomposition.
+-   It is most easily explained by considering the so-called **Total Sum
+of Squares**:
+`$$\sum_{i=1}^g\sum_{j=1}^{n_i} (y_{ij}- \bar y_{\bullet\bullet})^2$$`
+which is precisely `\((N-1)\)` times the *combined* sample variance of all
+the observations,
+`$$\hat{\sigma}^2_0 = \frac{\text{Total SS}}{N-1} = \frac{\sum_{i=1}^g\sum_{j=1}^{n_i} (y_{ij}- \bar y_{\bullet\bullet})^2}{N-1}$$`
+
+
+---
+
+-   We start by adding and subtracting the group means inside the
+square, grouping and expanding:
+
+`\begin{align*}
+\sum_{i=1}^g\sum_{j=1}^{n_i} (y_{ij}- \bar y_{\bullet\bullet})^2
+&amp;=\sum_{i=1}^g\sum_{j=1}^{n_i}
+\left[ (y_{ij}-\bar y_{i\bullet})+(\bar y_{i\bullet}- \bar y_{\bullet\bullet})\right]^2\\
+&amp;=\sum_{i=1}^g\sum_{j=1}^{n_i}
+\left[ (y_{ij}-\bar y_{i\bullet})^2+2(y_{ij}-\bar y_{i\bullet})(\bar y_{i\bullet}- \bar y_{\bullet\bullet}) + (\bar y_{i\bullet}-\bar y_{\bullet\bullet})^{2}\right]\\
+&amp;=\sum_{i=1}^g\sum_{j=1}^{n_i}
+(y_{ij}-\bar y_{i\bullet})^2+
+2
+\sum_{i=1}^g
+(\bar y_{i\bullet}- \bar y_{\bullet\bullet}) 
+\underbrace{\sum_{j=1}^{n_i}
+(y_{ij}-\bar y_{i\bullet})}_{=0}
++
+\sum_{i=1}^g (\bar y_{i\bullet}-\bar y_{\bullet\bullet})^{2} \underbrace{\sum_{j=1}^{n_i}1}_{=n_i}\\ 
+&amp;=\underbrace{\sum_{i=1}^g\underbrace{\sum_{j=1}^{n_i} (y_{ij}-\bar y_{i\bullet})^2}_{=(n_i-1)s_i^2}}_{\text{sample variances}}
++
+\underbrace{\sum_{i=1}^g n_i (\bar y_{i\bullet}-\bar y_{\bullet\bullet})^{2}}_{\text{sample means}} \\ 
+&amp; = \text{Residual SS} + \text{Treatment SS}
+\end{align*}`
+
+.footnote[
+The steps are not examinable.
+]
+
+---
+
+&lt;img src="imgs/ANOVAplot.png" width="1200" /&gt;
+
+---
+
+## Residual Sum of Squares; Residual Mean Square
+
+-   The first term, viewed as a random variable under the normal model,
+can be written as
+`$$\sum_{i=1}^g\sum_{j=1}^{n_i}(Y_{ij}-\bar Y_{i\bullet})^2 = \sum_{i=1}^g\underbrace{(n_i-1)S_i^2}_{\sim\sigma^2\chi^2_{n_i-1}}\sim \sigma^2\chi^2_{N-g}$$`
+    noting that `\(\sum_{i=1}^g(n_i-1)=N-g\)`. This is called the **Residual Sum of Squares**.
+
+-   Dividing by `\(N-g\)` we obtain an unbiased estimator of `\(\sigma^2\)`, the generalisation of the pooled estimate of the variance, known as the **Residual Mean Square**:
+`$$\hat{\sigma}^2 = \frac{\sum_{i=1}^g\sum_{j=1}^{n_i}(Y_{ij}-\bar Y_{i\bullet})^2}{N-g}\sim \left( \frac{\sigma^{2}}{N-g}\right)\chi^2_{N-g}\,.$$`
+
+
+---
+
+## Treatment Sum of Squares
+
+-   The full "random variable" version of the decomposition looks like
+
+`\begin{align*}
+\underbrace{\sum_{i=1}^g\sum_{j=1}^{n_i} (Y_{ij}- \bar Y_{\bullet\bullet})^2}_{\sim \sigma^2\chi^2_{N-1}\ \text{ under }H_0} = \underbrace{\sum_{i=1}^g\sum_{j=1}^{n_i}(Y_{ij}-\bar Y_{i\bullet})^2}_{\sim \sigma^2\chi^2_{N-g}\ \text{ always}} + \underbrace{\sum_{i=1}^g n_i (\bar Y_{i\bullet}-\bar Y_{\bullet\bullet})^{2}}_{\sim\ ????}
+\end{align*}`
+
+-   When `\(H_0\)` is true, the final term **must** have a `\(\sigma^2\chi^2_{g-1}\)` distribution;
+    -   when the sample sizes `\(n_1=\ldots=n_g=n\)` are equal this is just `\((g-1)\)` times the sample variance of the iid normals `\(\sqrt n \bar Y_{1\bullet},\ldots,\sqrt n \bar Y_{g\bullet}\)` with variance `\(\sigma^2\)`, so this is correct in that case; in general this is a bit more complicated though.
+-   If the true group means are not all equal, this will tend to get bigger.
+-   This is the **Treatment Sum of Squares**.
+-   The ratio `\(\dfrac{\sum_{i=1}^g n_i (\bar Y_{i\bullet}-\bar Y_{\bullet\bullet})^2}{g-1}\)` is the **Treatment Mean Square**.
+
+---
+
+## Treatment? Huh?
+
+-   The term "Treatment" dates back to the beginnings of Analysis of Variance, where R.A. Fisher applied these techniques to agricultural trials, notably concerning fertiliser treatments.
+-   The **Treatment Sum of Squares** is the generalisation of the term `\(\left(\frac{\bar X-\bar Y}{\sqrt{\frac{1}{m}+\frac{1}{n}}}\right)^2\)` in the analysis of the two-combined-sample variance.
+    -   It measures the variability of the sample means in a certain sense.
+`$$\text{Treatment Mean Square} = \frac{\text{Treatment Sum of Squares}}{g-1} = \dfrac{\sum_{i=1}^g n_i (\bar Y_{i\bullet}-\bar Y_{\bullet\bullet})^2}{g-1}$$`
+
+---
+
+## The "ratio of variances" test
+
+-   Continuing the analogy to the two-sample `\(t\)`-test, we can consider the ratio of variance estimates as a test statistic to test the null hypothesis 
+    `$$H_0\colon\mu_1=\mu_2=\ldots=\mu_g\,$$`
+    against the alternative that they are not all equal.
+-   The estimate under the null hypothesis is just the "combined" sample variance
+`$$\hat{\sigma}^2_0 = \frac{1}{N-1}\sum_{i=1}^g\sum_{j=1}^{n_i}(Y_{ij}-\bar
+Y_{\bullet\bullet})^2\,.$$`
+-   The estimate under the alternative or "full model" is just the **Residual Mean Square**:
+`$$\hat\sigma^2=\frac{\sum_{i=1}^g\sum_{j=1}^{n_i}(Y_{ij}-\bar Y_{i\bullet})^2}{N-g}\,.$$`
+
+---
+
+## The `\(F\)` statistic
+
+-  It turns out that, a sensible test statistic considers the ratio of these two ways of estimating `\(\sigma^2\)`:
+`\begin{align*}
+\frac{\text{Treatment Mean Square}}{\text{Residual Mean Square}} &amp;= \frac{\sum_{i=1}^gn_i(\bar Y_{i\bullet}-\bar Y_{\bullet\bullet})^2/(g-1)}{\hat{\sigma}^2}\\ 
+&amp; =  \frac{\sum_{i=1}^gn_i(\bar Y_{i\bullet}-\bar Y_{\bullet\bullet})^2/(g-1)}{\sum_{i=1}^g\sum_{j=1}^{n_i}(Y_{ij}-\bar Y_{i\bullet})^2/(N-g)}\\
+&amp; \sim \frac{\chi^2_{g-1}/(g-1)}{\chi^2_{N-g}/(N-g)} \ \text{ (both independent)}\\
+&amp; \sim F_{g-1,N-g} \ \text{ under }H_0.
+\end{align*}`
+
+- the denominator is **always** an unbiased estimator of `\(\sigma^2\)` regardless of whether `\(H_0\)` is true or not
+- the numerator is only an unbiased estimator of `\(\sigma^2\)` if `\(H_0\)` is true, otherwise **it tends to get bigger**.
+
+
+---
+&lt;svg viewBox="0 0 576 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M568.25 192c-29.04.13-135.01 6.16-213.84 83-33.12 29.63-53.36 63.3-66.41 94.86-13.05-31.56-33.29-65.23-66.41-94.86-78.83-76.84-184.8-82.87-213.84-83-4.41-.02-7.79 3.4-7.75 7.82.23 27.92 7.14 126.14 88.77 199.3C172.79 480.94 256 480 288 480s115.19.95 199.23-80.88c81.64-73.17 88.54-171.38 88.77-199.3.04-4.42-3.34-7.84-7.75-7.82zM287.98 302.6c12.82-18.85 27.6-35.78 44.09-50.52 19.09-18.61 39.58-33.3 60.26-45.18-16.44-70.5-51.72-133.05-96.73-172.22-4.11-3.58-11.02-3.58-15.14 0-44.99 39.14-80.27 101.63-96.74 172.07 20.37 11.7 40.5 26.14 59.22 44.39a282.768 282.768 0 0 1 45.04 51.46z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+The `PlantGrowth` data has results from an experiment to compare yields (as measured by dried weight of plants) obtained under a control and two different treatment conditions Dobson (1983; Table 7.1).
+
+.pull-left[
+
+```r
+# built into R, load it into the environment
+data("PlantGrowth")
+library(ggplot2)
+ggplot(PlantGrowth, 
+       aes(y = weight, x = group, 
+           colour = group)) +
+  geom_boxplot(coef = 10) + 
+  geom_jitter(width=0.1, size = 5) + 
+  theme_bw(base_size = 36) + 
+  theme(legend.position = "none") +
+  labs(y = "Weight (g)",
+       x = "Group")
+```
+]
+
+.pull-right[
+&lt;img src="lec20_files/figure-html/plantgrowth_boxplot-1.png" width="864" /&gt;
+]
+
+We want to compare the means of the **three** groups.
+
+---
+&lt;svg viewBox="0 0 576 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M568.25 192c-29.04.13-135.01 6.16-213.84 83-33.12 29.63-53.36 63.3-66.41 94.86-13.05-31.56-33.29-65.23-66.41-94.86-78.83-76.84-184.8-82.87-213.84-83-4.41-.02-7.79 3.4-7.75 7.82.23 27.92 7.14 126.14 88.77 199.3C172.79 480.94 256 480 288 480s115.19.95 199.23-80.88c81.64-73.17 88.54-171.38 88.77-199.3.04-4.42-3.34-7.84-7.75-7.82zM287.98 302.6c12.82-18.85 27.6-35.78 44.09-50.52 19.09-18.61 39.58-33.3 60.26-45.18-16.44-70.5-51.72-133.05-96.73-172.22-4.11-3.58-11.02-3.58-15.14 0-44.99 39.14-80.27 101.63-96.74 172.07 20.37 11.7 40.5 26.14 59.22 44.39a282.768 282.768 0 0 1 45.04 51.46z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+p0 = ggplot(PlantGrowth, aes(y = weight, x = "")) + 
+  geom_point(alpha = 0.5, size = 4) + 
+  geom_hline(yintercept = mean(PlantGrowth$weight), lwd = 2) + 
+  theme_classic(base_size = 28) + theme(legend.position = "none") + 
+  coord_cartesian(ylim = c(3.5,6.5)) + labs(title = "Combined", x="")
+
+p1 = ggplot(PlantGrowth, aes(y = weight, x = group, colour = group)) + 
+  geom_point(alpha = 0.5, size = 4) +
+  stat_summary(aes(colour = group), fun = mean, geom = "point", 
+               size = 30, pch="-") +
+  theme_classic(base_size = 28) + theme(legend.position = "none") + 
+  coord_cartesian(ylim = c(3.5,6.5)) + labs(title = "Residual SS", x = "")
+
+p2 = ggplot(PlantGrowth, aes(y = weight, x = "")) + 
+  stat_summary(aes(colour = group), fun = mean, geom = "point", 
+               size = 8) +
+  geom_hline(yintercept = mean(PlantGrowth$weight), lwd = 2) + 
+  theme_classic(base_size = 28) + theme(legend.position = "none") + 
+  coord_cartesian(ylim = c(3.5,6.5)) + labs(title = "Treatment SS", x = "")
+
+gridExtra::grid.arrange(p0, p1, p2, nrow = 1)
+```
+
+---
+&lt;svg viewBox="0 0 576 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M568.25 192c-29.04.13-135.01 6.16-213.84 83-33.12 29.63-53.36 63.3-66.41 94.86-13.05-31.56-33.29-65.23-66.41-94.86-78.83-76.84-184.8-82.87-213.84-83-4.41-.02-7.79 3.4-7.75 7.82.23 27.92 7.14 126.14 88.77 199.3C172.79 480.94 256 480 288 480s115.19.95 199.23-80.88c81.64-73.17 88.54-171.38 88.77-199.3.04-4.42-3.34-7.84-7.75-7.82zM287.98 302.6c12.82-18.85 27.6-35.78 44.09-50.52 19.09-18.61 39.58-33.3 60.26-45.18-16.44-70.5-51.72-133.05-96.73-172.22-4.11-3.58-11.02-3.58-15.14 0-44.99 39.14-80.27 101.63-96.74 172.07 20.37 11.7 40.5 26.14 59.22 44.39a282.768 282.768 0 0 1 45.04 51.46z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+&lt;img src="lec20_files/figure-html/plantgrowthdecomp-1.png" width="1008" /&gt;
+
+Combined sample variance (estimate under the null hypothesis): `\(\hat{\sigma}^2_0 = \dfrac{1}{N-1}\sum_{i=1}^g\sum_{j=1}^{n_i}(Y_{ij}-\bar Y_{\bullet\bullet})^2\)`
+
+Residual mean square (estimate under the alternative hypothesis): `\(\hat\sigma^2=\dfrac{\sum_{i=1}^g\sum_{j=1}^{n_i}(Y_{ij}-\bar Y_{i\bullet})^2}{N-g}\)`
+
+Treatment mean square: `\(\dfrac{\sum_{i=1}^g n_i (\bar Y_{i\bullet}-\bar Y_{\bullet\bullet})^2}{g-1}\)`
+
+---
+&lt;svg viewBox="0 0 576 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M568.25 192c-29.04.13-135.01 6.16-213.84 83-33.12 29.63-53.36 63.3-66.41 94.86-13.05-31.56-33.29-65.23-66.41-94.86-78.83-76.84-184.8-82.87-213.84-83-4.41-.02-7.79 3.4-7.75 7.82.23 27.92 7.14 126.14 88.77 199.3C172.79 480.94 256 480 288 480s115.19.95 199.23-80.88c81.64-73.17 88.54-171.38 88.77-199.3.04-4.42-3.34-7.84-7.75-7.82zM287.98 302.6c12.82-18.85 27.6-35.78 44.09-50.52 19.09-18.61 39.58-33.3 60.26-45.18-16.44-70.5-51.72-133.05-96.73-172.22-4.11-3.58-11.02-3.58-15.14 0-44.99 39.14-80.27 101.63-96.74 172.07 20.37 11.7 40.5 26.14 59.22 44.39a282.768 282.768 0 0 1 45.04 51.46z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Decomposition
+
+.pull-left[
+
+```r
+PlantGrowth = PlantGrowth %&gt;% 
+  mutate(overall_mean = mean(weight)) %&gt;% 
+  group_by(group) %&gt;% 
+  mutate(group_mean = mean(weight))
+PlantGrowth %&gt;% slice(1:2)
+```
+
+```
+## # A tibble: 6 × 4
+## # Groups:   group [3]
+##   weight group overall_mean group_mean
+##    &lt;dbl&gt; &lt;fct&gt;        &lt;dbl&gt;      &lt;dbl&gt;
+## 1   4.17 ctrl          5.07       5.03
+## 2   5.58 ctrl          5.07       5.03
+## 3   4.81 trt1          5.07       4.66
+## 4   4.17 trt1          5.07       4.66
+## 5   6.31 trt2          5.07       5.53
+## 6   5.12 trt2          5.07       5.53
+```
+
+```r
+N = nrow(PlantGrowth)
+g = 3
+```
+]
+.pull-right[
+**Treatment mean square**
+
+group means vs overall mean
+
+
+```r
+treat_ss = sum((PlantGrowth$group_mean - 
+                 PlantGrowth$overall_mean)^2)
+treat_ms = treat_ss/(g-1)
+c(treat_ss, treat_ms)
+```
+
+```
+## [1] 3.76634 1.88317
+```
+
+**Residual mean square**
+
+observations vs their group means
+
+
+```r
+resid_ss = sum((PlantGrowth$weight - 
+                 PlantGrowth$group_mean)^2)
+resid_ms = resid_ss/(N-g)
+c(resid_ss, resid_ms)
+```
+
+```
+## [1] 10.4920900  0.3885959
+```
+]
+
+---
+&lt;svg viewBox="0 0 576 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M568.25 192c-29.04.13-135.01 6.16-213.84 83-33.12 29.63-53.36 63.3-66.41 94.86-13.05-31.56-33.29-65.23-66.41-94.86-78.83-76.84-184.8-82.87-213.84-83-4.41-.02-7.79 3.4-7.75 7.82.23 27.92 7.14 126.14 88.77 199.3C172.79 480.94 256 480 288 480s115.19.95 199.23-80.88c81.64-73.17 88.54-171.38 88.77-199.3.04-4.42-3.34-7.84-7.75-7.82zM287.98 302.6c12.82-18.85 27.6-35.78 44.09-50.52 19.09-18.61 39.58-33.3 60.26-45.18-16.44-70.5-51.72-133.05-96.73-172.22-4.11-3.58-11.02-3.58-15.14 0-44.99 39.14-80.27 101.63-96.74 172.07 20.37 11.7 40.5 26.14 59.22 44.39a282.768 282.768 0 0 1 45.04 51.46z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+plant_anova = aov(weight ~ group, data = PlantGrowth)
+plant_anova
+```
+
+```
+## Call:
+##    aov(formula = weight ~ group, data = PlantGrowth)
+## 
+## Terms:
+##                    group Residuals
+## Sum of Squares   3.76634  10.49209
+## Deg. of Freedom        2        27
+## 
+## Residual standard error: 0.6233746
+## Estimated effects may be unbalanced
+```
+
+```r
+summary(plant_anova)
+```
+
+```
+##             Df Sum Sq Mean Sq F value Pr(&gt;F)  
+## group        2  3.766  1.8832   4.846 0.0159 *
+## Residuals   27 10.492  0.3886                 
+## ---
+## Signif. codes:  
+## 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+---
+&lt;svg viewBox="0 0 576 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M568.25 192c-29.04.13-135.01 6.16-213.84 83-33.12 29.63-53.36 63.3-66.41 94.86-13.05-31.56-33.29-65.23-66.41-94.86-78.83-76.84-184.8-82.87-213.84-83-4.41-.02-7.79 3.4-7.75 7.82.23 27.92 7.14 126.14 88.77 199.3C172.79 480.94 256 480 288 480s115.19.95 199.23-80.88c81.64-73.17 88.54-171.38 88.77-199.3.04-4.42-3.34-7.84-7.75-7.82zM287.98 302.6c12.82-18.85 27.6-35.78 44.09-50.52 19.09-18.61 39.58-33.3 60.26-45.18-16.44-70.5-51.72-133.05-96.73-172.22-4.11-3.58-11.02-3.58-15.14 0-44.99 39.14-80.27 101.63-96.74 172.07 20.37 11.7 40.5 26.14 59.22 44.39a282.768 282.768 0 0 1 45.04 51.46z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.blockquote[
+1. **Hypotheses:** `\(H_0\colon\ \mu_1 = \mu_2 = \mu_3\)` vs `\(H_1\colon\)` at least one `\(\mu_i\neq\mu_j\)` for `\(i\neq j\)`.
+
+1. **Assumptions:**  Observations are independent within each of the 3 samples.  Each of the 3 populations are normally distributed with the common variance `\(\sigma\)`.
+
+1. **Test statistic:**  `\(T = \frac{\text{Treatment Mean Sq}}{\text{Residual Mean Sq}}\)`.  Under `\(H_0\)`, `\(T \sim F_{g-1,\ N-g}\)` where `\(g=3\)` is the number of groups.
+
+1. **Observed test statistic:**  `\(t_0 = \frac{1.88}{0.39} = 4.8\)`.
+
+1. **p-value:**  `\(P(T \geq 4.8) = P(F_{2,\ 27} \geq 4.8) = 0.0159\)`. Manually in R: `1-pf(4.8, 2, 27)`
+
+1. **Decision:** As the p-value is less than `\(\alpha\)` we reject the null hypothesis and conclude that the population mean of at least one group is significantly different to the others.
+]
+
+&lt;br&gt;
+.blockquote[
+&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M144 208c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm112 0c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm112 0c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zM256 32C114.6 32 0 125.1 0 240c0 47.6 19.9 91.2 52.9 126.3C38 405.7 7 439.1 6.5 439.5c-6.6 7-8.4 17.2-4.6 26S14.4 480 24 480c61.5 0 110-25.7 139.1-46.3C192 442.8 223.2 448 256 448c141.4 0 256-93.1 256-208S397.4 32 256 32zm0 368c-26.7 0-53.1-4.1-78.4-12.1l-22.7-7.2-19.5 13.8c-14.3 10.1-33.9 21.4-57.5 29 7.3-12.1 14.4-25.7 19.9-40.2l10.6-28.1-20.6-21.8C69.7 314.1 48 282.2 48 240c0-88.2 93.3-160 208-160s208 71.8 208 160-93.3 160-208 160z"&gt;&lt;/path&gt;&lt;/svg&gt; Which are different? Ctrl vs Trt1? Ctrl vs Trt2? Trt1 vs Trt2?
+]
+
+
+---
+
+## Further reading
+
+Larsen and Marx (2012) sections 12.1 and 12.2.
+
+## References
+
+Dobson, A. J. (1983). _An introduction to statistical
+modelling_. London: Chapman &amp; Hall.
+
+Fisher, R. (1925). _Statistical methods for research
+workers_. Edinburgh Oliver &amp; Boyd.
+
+Larsen, R. J. and M. L. Marx (2012). _An Introduction
+to Mathematical Statistics and its Applications_. 5th
+ed. Boston, MA: Prentice Hall. ISBN:
+978-0-321-69394-5.
+
+Student (1908). "The probable error of a mean". In:
+_Biometrika_ 6.1, pp. 1-25. DOI:
+[10.1093/biomet/6.1.1](https://doi.org/10.1093%2Fbiomet%2F6.1.1).
+URL:
+[http://biomet.oxfordjournals.org/content/6/1/1.short](http://biomet.oxfordjournals.org/content/6/1/1.short).
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="assets/remark-zoom.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

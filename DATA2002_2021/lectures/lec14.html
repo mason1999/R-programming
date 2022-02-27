@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>DATA2002</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Garth Tarr" />
+    <script src="lec14_files/header-attrs-2.10/header-attrs.js"></script>
+    <link href="lec14_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } },
+      "HTML-CSS": {
+        styles: {
+          ".MathJax a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+          ".MathJax_Preview a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+        }
+      }
+      });
+    </script>
+    <link rel="stylesheet" href="assets/sydney-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="assets/sydney.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# DATA2002
+## Wilcoxon signed-rank test
+### Garth Tarr
+
+---
+
+class: segue
+
+
+
+
+
+.large[
+Wilcoxon signed-rank test
+
+Normal approximation to the Wilcoxon signed-rank test statistic
+]
+
+---
+class: segue
+
+# Wilcoxon signed-rank test
+
+---
+
+## What was wrong with the sign test?
+
+- The sign test ignores a lot of information (inefficient use of data; low power).
+
+- How can we use more information than just the sign for data with a symmetric, but possibly non-normal, distribution?
+
+--
+
+### Put another way
+
+- Suppose the sample `\(X_1, X_2, ..., X_n\)` are drawn from a population symmetric with respect to mean `\(\mu\)` (or median).  
+
+- We test the hypotheses: `\(H_0\colon\  \mu = \mu_0\)` vs `\(H_1\colon\  \mu &gt; \mu_0, \ \mu &lt; \mu_0, \ \mu \ne \mu_0\)`.
+
+- The `\(t\)`-test and `\(Z\)`-test assume a normal distribution without a long tail (outliers).
+
+- They use all magnitude information from the normal curve.
+
+- On the other hand, the sign test discards all data information on magnitude and hence it has low power.
+
+---
+
+## Ranks to the rescue
+
+Many non-parametric tests are based not on the data, but on their .blue[ranks]. 
+
+To find the ranks for a set of data:
+
+- Arrange the data in ascending order
+- Assign a rank of 1 to the smallest observation, 2 to the second smallest, etc.
+- For tied observations (in .blue[blue] or .red[red] in the table below), assign each the average of the corresponding ranks
+
+Sample           | .red[8] | .blue[5]   | 10   | 2 | .blue[5] | .red[8] | .red[8] | 6 
+-----------------|---------|------------|------|---|----------|---------|---------|---  
+Ordered sample   | 2 | .blue[5]   | .blue[5]   | 6 | .red[8] | .red[8] | .red[8] | 10
+Successive ranks | 1 | .blue[2]   | .blue[3]   | 4 | .red[5] | .red[6] | .red[7] | 8 
+Assigned ranks   | 1 | .blue[2.5] | .blue[2.5] | 4 | .red[6] | .red[6] | .red[6] | 8 
+
+
+---
+
+## Thinking about magnitude
+
+- Under the symmetric distribution assumption with mean `\(\mu_0\)` from `\(H_0\)`, half of the `\(d_i = x_i - \mu_0\)` should be negative and half positive and the expected counts are both `\(n/2\)`.
+
+- Under the null hypothesis, the positive and negative `\(d_i\)` should be of similar magnitude and occur with equal probability (on average). 
+
+- If we rank the absolute values of `\(d_i\)` in ascending order, the expected rank sums for the negative and positive `\(d_i\)` should be nearly equal.
+
+---
+
+## Wilcoxon signed-rank test
+
+We need to define the following quantities:
+
+- `\(D_i = X_i - \mu_0\)` for `\(i=1,2,\ldots,n\)`
+- `\(R_1,\ldots,R_n\)` be the ranks of `\(|D_1|,|D_2|,\ldots,|D_n|\)`
+- `\(W^+\)` be the sum of the ranks `\(R_i\)` corresponding to positive `\(D_i\)`
+- `\(W^-\)` be the sum of the ranks `\(R_i\)` corresponding to negative `\(D_i\)` 
+- Let `\(W=\min(W^+,W^-)\)`
+
+---
+
+## Calculations of `\(w^+\)` and  `\(w\)`
+
+When we observe the data we have `\(d_i = x_i - \mu_0\)` with ranks (of the absolute values),  `\(r_1,\ldots,r_n\)` for `\(|d_1|,\ldots,|d_n|\)`.
+
+`$$w^+=\sum_{i:\, d_i&gt;0}r_i\qquad\text{and}\qquad w^-=\sum_{i:\, d_i&lt;0}r_i.$$`
+
+
+We should 
+- reject `\(H_0\colon\ \mu = \mu_0\)` in favour of `\(H_1\colon\ \mu&gt;\mu_0\)` if `\(w^+\)` is large enough
+- reject `\(H_0\colon\ \mu = \mu_0\)` in favour of `\(H_1\colon\ \mu&lt;\mu_0\)` if `\(w^+\)` is small enough
+- reject `\(H_0\colon\ \mu = \mu_0\)` in favour of `\(H_1\colon\  \mu \ne \mu_0\)` if `\(w=\min(w^+,w^-)\)` is small enough
+
+---
+
+## Workflow
+
+Suppose `\(X_i, \dots,X_n\)` are drawn from some population that follows a symmetric distribution. Given a significance level `\(\alpha\)`, we want to test on the population mean, `\(\mu\)`.
+
+.blockquote[
+- **Hypothesis:** `\(H_0\colon\ \mu=\mu_0\)` vs `\(H_1\colon\ \mu&gt;\mu_0, \ \mu &lt; \mu_0, \ \mu \neq \mu_0\)` 
+
+-  **Assumptions:** `\(X_i\)` are independently sampled from a symmetric distribution.
+
+- **Test statistic:**  `\(W^+ = \sum_{i:\, D_i&gt;0}R_i\)` for one-sided or `\(W=\min(W^+,W^-)\)` for two-sided 
+
+- **Observed test statistic:**  `\(w^+\)` for one-sided or `\(w=\min(w^+,w^-)\)` for two-sided 
+
+-  **p-value:** 
+  - `\(P(W^+ \ge w^+) \ \mbox{ for } \ H_1\colon\  \mu&gt;\mu_0\)` 
+  - `\(P(W^+ \le w^+) \ \mbox{ for } \ H_1\colon\  \mu&lt;\mu_0\)`
+  - `\(2 P(W^+\le w) \ \mbox{ for } \ H_1\colon\  \mu\neq\mu_0\)` 
+
+- **Decision:**  If the p-value is less than `\(\alpha\)`, there is evidence against `\(H_0\)`.  If p-value is greater than `\(\alpha\)`, the data are consistent with `\(H_0\)`.
+]
+
+
+---
+
+## Calculation of p-value: no ties
+
+- Calculate the difference sample `\(|d_1|,\ldots,|d_n|\)` where `\(d_i = x_i - \mu_0\)`.  
+- Calculate the observed sum of the positive ranks:
+`$$w^+=\sum_{i:\, d_i&gt;0}r_i$$`
+
+- The _exact_ p-value `\(P(W^+\ge w^+)\)` for `\(w^+\)` is
+`$$P(W^+ \ge w^+) = P(W^+ \le n(n+1)/2-w^+)$$`
+
+
+Notes:
+
+- `\(W^+ + W^- = 1+ 2 + \ldots + n = n(n+1) \frac{1}{2} \Rightarrow W^- =  n(1+n) \frac{1}{2} - W^+\)`
+
+- Hence, under the null hypothesis, `\(\operatorname{E}(W^+) = n(1+n) \frac{1}{4}\)`  
+
+- Can also show.fn[2] (if there are no ties) that `\(\operatorname{Var}(W^+) = n(n+1)(2n+1)/24\)` 
+
+.footnote[
+.fn[1] [&lt;svg viewBox="0 0 640 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M640 51.2l-.3 12.2c-28.1.8-45 15.8-55.8 40.3-25 57.8-103.3 240-155.3 358.6H415l-81.9-193.1c-32.5 63.6-68.3 130-99.2 193.1-.3.3-15 0-15-.3C172 352.3 122.8 243.4 75.8 133.4 64.4 106.7 26.4 63.4.2 63.7c0-3.1-.3-10-.3-14.2h161.9v13.9c-19.2 1.1-52.8 13.3-43.3 34.2 21.9 49.7 103.6 240.3 125.6 288.6 15-29.7 57.8-109.2 75.3-142.8-13.9-28.3-58.6-133.9-72.8-160-9.7-17.8-36.1-19.4-55.8-19.7V49.8l142.5.3v13.1c-19.4.6-38.1 7.8-29.4 26.1 18.9 40 30.6 68.1 48.1 104.7 5.6-10.8 34.7-69.4 48.1-100.8 8.9-20.6-3.9-28.6-38.6-29.4.3-3.6 0-10.3.3-13.6 44.4-.3 111.1-.3 123.1-.6v13.6c-22.5.8-45.8 12.8-58.1 31.7l-59.2 122.8c6.4 16.1 63.3 142.8 69.2 156.7L559.2 91.8c-8.6-23.1-36.4-28.1-47.2-28.3V49.6l127.8 1.1.2.5z"&gt;&lt;/path&gt;&lt;/svg&gt; Summing consecutive integers](https://en.wikipedia.org/wiki/1_%2B_2_%2B_3_%2B_4_%2B_%E2%8B%AF)
+
+.fn[2] See Larsen and Marx (2012; Theorem 14.3.2)
+]
+
+---
+
+## Calculating the p-value
+
+We can use the `dsignrank()` function to inspect the distribution of the test statistic the Wilcoxon signed-rank test.
+
+.pull-left[
+
+```r
+n = 5 # sample size
+# possible values for the sum of 
+# the positive ranks
+q = 0:(n * (n + 1)/2)
+probs = dsignrank(q, n)
+names(probs) = q
+mu = n * (n + 1)/4
+s2 = n * (n + 1) * (2 * n + 1)/24
+```
+
+
+```r
+library(plotrix) 
+plotrix::barp(dsignrank(q,n), names.arg = q, 
+              ylim=c(0,0.11))
+lines(dnorm(q, mu, sqrt(s2)), 
+      col = "red", lwd = 2)
+```
+
+The .red[.bold[red line]] is a normal distribution curve using the mean and variance from the previous slide.
+
+]
+.pull-right[
+&lt;img src="lec14_files/figure-html/unnamed-chunk-3-1.png" width="864" /&gt;
+]
+
+
+
+
+---
+
+## Calculating the p-value
+
+In a sample of size `\(n=5\)` we observe `\(w^+ = 12\)`.
+
+.pull-left[
+`$$P(W^+ \geq 12)$$`
+
+```r
+c(psignrank(12 - 1, n, lower.tail = FALSE),
+  1 - psignrank(12 - 1, n), 
+  sum(dsignrank(12:15, n)))
+```
+
+```
+## [1] 0.15625 0.15625 0.15625
+```
+
+&lt;img src="lec14_files/figure-html/unnamed-chunk-5-1.png" width="864" /&gt;
+
+]
+.pull-right[
+`$$P(W^+ \geq 12) = P(W^+ \leq 15-12) = P(W^+ \leq 3)$$`
+
+```r
+dsignrank(0:3, n)
+c(psignrank(3, n), sum(dsignrank(0:3, n)))
+```
+
+```
+## [1] 0.03125 0.03125 0.03125 0.06250
+## [1] 0.15625 0.15625
+```
+
+&lt;img src="lec14_files/figure-html/unnamed-chunk-7-1.png" width="864" /&gt;
+]
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 336h-.02c0-16.18 1.34-8.73-85.05-181.51-17.65-35.29-68.19-35.36-85.87 0C-2.06 328.75.02 320.33.02 336H0c0 44.18 57.31 80 128 80s128-35.82 128-80zM128 176l72 144H56l72-144zm511.98 160c0-16.18 1.34-8.73-85.05-181.51-17.65-35.29-68.19-35.36-85.87 0-87.12 174.26-85.04 165.84-85.04 181.51H384c0 44.18 57.31 80 128 80s128-35.82 128-80h-.02zM440 320l72-144 72 144H440zm88 128H352V153.25c23.51-10.29 41.16-31.48 46.39-57.25H528c8.84 0 16-7.16 16-16V48c0-8.84-7.16-16-16-16H383.64C369.04 12.68 346.09 0 320 0s-49.04 12.68-63.64 32H112c-8.84 0-16 7.16-16 16v32c0 8.84 7.16 16 16 16h129.61c5.23 25.76 22.87 46.96 46.39 57.25V448H112c-8.84 0-16 7.16-16 16v32c0 8.84 7.16 16 16 16h416c8.84 0 16-7.16 16-16v-32c0-8.84-7.16-16-16-16z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Weight gain
+
+Weights of six pairs of twins on diets Y and X are
+
+
+```r
+y = c(85, 69, 81, 112, 77, 86)
+x = c(83, 78, 70, 72, 67, 68)
+d = y-x
+d
+```
+
+```
+## [1]  2 -9 11 40 10 18
+```
+
+Is there a weight gain in taking diet Y as compared with diet X?
+
+
+```r
+boxplot(d, xlab = "Weight difference (kg)", horizontal = TRUE)
+points(d, rep(1, length(d)), col = 2, cex = 2)
+```
+
+&lt;img src="lec14_files/figure-html/unnamed-chunk-9-1.png" width="864" /&gt;
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 336h-.02c0-16.18 1.34-8.73-85.05-181.51-17.65-35.29-68.19-35.36-85.87 0C-2.06 328.75.02 320.33.02 336H0c0 44.18 57.31 80 128 80s128-35.82 128-80zM128 176l72 144H56l72-144zm511.98 160c0-16.18 1.34-8.73-85.05-181.51-17.65-35.29-68.19-35.36-85.87 0-87.12 174.26-85.04 165.84-85.04 181.51H384c0 44.18 57.31 80 128 80s128-35.82 128-80h-.02zM440 320l72-144 72 144H440zm88 128H352V153.25c23.51-10.29 41.16-31.48 46.39-57.25H528c8.84 0 16-7.16 16-16V48c0-8.84-7.16-16-16-16H383.64C369.04 12.68 346.09 0 320 0s-49.04 12.68-63.64 32H112c-8.84 0-16 7.16-16 16v32c0 8.84 7.16 16 16 16h129.61c5.23 25.76 22.87 46.96 46.39 57.25V448H112c-8.84 0-16 7.16-16 16v32c0 8.84 7.16 16 16 16h416c8.84 0 16-7.16 16-16v-32c0-8.84-7.16-16-16-16z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left[
+The **tidy** way
+
+```r
+w_calc = data.frame(
+  dif = d,
+  absDif = abs(d),
+  rankAbsDif = rank(abs(d)),
+  signrank = sign(d)*rank(abs(d)) 
+  )
+w_calc
+```
+
+```
+##   dif absDif rankAbsDif signrank
+## 1   2      2          1        1
+## 2  -9      9          2       -2
+## 3  11     11          4        4
+## 4  40     40          6        6
+## 5  10     10          3        3
+## 6  18     18          5        5
+```
+
+```r
+w_calc %&gt;% 
+  filter(signrank&gt;0) %&gt;% 
+  summarise(sum(signrank)) %&gt;% 
+  pull()
+```
+
+```
+## [1] 19
+```
+]
+.pull-right[
+The **base** way
+
+
+```r
+rbind(
+  dif = d,
+  absDif = abs(d),
+  rankAbsDif = rank(abs(d)),
+  signrank = sign(d)*rank(abs(d)) 
+  )
+```
+
+```
+##            [,1] [,2] [,3] [,4] [,5] [,6]
+## dif           2   -9   11   40   10   18
+## absDif        2    9   11   40   10   18
+## rankAbsDif    1    2    4    6    3    5
+## signrank      1   -2    4    6    3    5
+```
+
+```r
+signrank = sign(d)*rank(abs(d)) 
+sum(signrank[signrank&gt;0])
+```
+
+```
+## [1] 19
+```
+
+]
+
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 336h-.02c0-16.18 1.34-8.73-85.05-181.51-17.65-35.29-68.19-35.36-85.87 0C-2.06 328.75.02 320.33.02 336H0c0 44.18 57.31 80 128 80s128-35.82 128-80zM128 176l72 144H56l72-144zm511.98 160c0-16.18 1.34-8.73-85.05-181.51-17.65-35.29-68.19-35.36-85.87 0-87.12 174.26-85.04 165.84-85.04 181.51H384c0 44.18 57.31 80 128 80s128-35.82 128-80h-.02zM440 320l72-144 72 144H440zm88 128H352V153.25c23.51-10.29 41.16-31.48 46.39-57.25H528c8.84 0 16-7.16 16-16V48c0-8.84-7.16-16-16-16H383.64C369.04 12.68 346.09 0 320 0s-49.04 12.68-63.64 32H112c-8.84 0-16 7.16-16 16v32c0 8.84 7.16 16 16 16h129.61c5.23 25.76 22.87 46.96 46.39 57.25V448H112c-8.84 0-16 7.16-16 16v32c0 8.84 7.16 16 16 16h416c8.84 0 16-7.16 16-16v-32c0-8.84-7.16-16-16-16z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.blockquote[
+- **Hypothesis:** `\(H_0\colon\ \mu_d=0\)` vs `\(H_1\colon\ \mu_d&gt;0\)` 
+
+-  **Assumptions:** `\(D_i\)` are independently sampled from a symmetric distribution.
+
+- **Test statistic:** `\(W^+ = \sum_{i:D_i&gt;0}R_i\)` where `\(R_i\)` are the ranks of `\(|D_1|,|D_2|,\ldots,|D_n|\)`.  Under `\(H_0\)`, `\(W \sim \operatorname{WSR}(n)\)`.
+
+- **Observed test statistic:** `\(w^+ = 1+4+6+3+5 = 19\)` 
+
+-  **p-value:**
+`\begin{align*}
+P(W^+ \ge w^+) &amp; = P(W^+ \ge 19) \\
+  &amp; = P(W^+ \le 6(6 + 1)/2 - 19) \\
+  &amp; = P(W^+ \le 2) = \texttt{psignrank(2, 6)} \\
+  &amp; = 0.047. 
+\end{align*}`
+
+- **Decision:** The p-value is (just) less than 0.05, therefore there is some evidence against the null hypothesis that the diets are are equally effective and we conclude that diet Y does appear to be associated with higher weight gain than diet X.
+]
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 336h-.02c0-16.18 1.34-8.73-85.05-181.51-17.65-35.29-68.19-35.36-85.87 0C-2.06 328.75.02 320.33.02 336H0c0 44.18 57.31 80 128 80s128-35.82 128-80zM128 176l72 144H56l72-144zm511.98 160c0-16.18 1.34-8.73-85.05-181.51-17.65-35.29-68.19-35.36-85.87 0-87.12 174.26-85.04 165.84-85.04 181.51H384c0 44.18 57.31 80 128 80s128-35.82 128-80h-.02zM440 320l72-144 72 144H440zm88 128H352V153.25c23.51-10.29 41.16-31.48 46.39-57.25H528c8.84 0 16-7.16 16-16V48c0-8.84-7.16-16-16-16H383.64C369.04 12.68 346.09 0 320 0s-49.04 12.68-63.64 32H112c-8.84 0-16 7.16-16 16v32c0 8.84 7.16 16 16 16h129.61c5.23 25.76 22.87 46.96 46.39 57.25V448H112c-8.84 0-16 7.16-16 16v32c0 8.84 7.16 16 16 16h416c8.84 0 16-7.16 16-16v-32c0-8.84-7.16-16-16-16z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+psignrank(2,6)
+```
+
+```
+## [1] 0.046875
+```
+
+```r
+wilcox.test(d, alternative = "greater")
+```
+
+```
+## 
+## 	Wilcoxon signed rank exact test
+## 
+## data:  d
+## V = 19, p-value = 0.04688
+## alternative hypothesis: true location is greater than 0
+```
+
+```r
+wilcox.test(y, x, alternative = "greater", paired = TRUE)
+```
+
+```
+## 
+## 	Wilcoxon signed rank exact test
+## 
+## data:  y and x
+## V = 19, p-value = 0.04688
+## alternative hypothesis: true location shift is greater than 0
+```
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 336h-.02c0-16.18 1.34-8.73-85.05-181.51-17.65-35.29-68.19-35.36-85.87 0C-2.06 328.75.02 320.33.02 336H0c0 44.18 57.31 80 128 80s128-35.82 128-80zM128 176l72 144H56l72-144zm511.98 160c0-16.18 1.34-8.73-85.05-181.51-17.65-35.29-68.19-35.36-85.87 0-87.12 174.26-85.04 165.84-85.04 181.51H384c0 44.18 57.31 80 128 80s128-35.82 128-80h-.02zM440 320l72-144 72 144H440zm88 128H352V153.25c23.51-10.29 41.16-31.48 46.39-57.25H528c8.84 0 16-7.16 16-16V48c0-8.84-7.16-16-16-16H383.64C369.04 12.68 346.09 0 320 0s-49.04 12.68-63.64 32H112c-8.84 0-16 7.16-16 16v32c0 8.84 7.16 16 16 16h129.61c5.23 25.76 22.87 46.96 46.39 57.25V448H112c-8.84 0-16 7.16-16 16v32c0 8.84 7.16 16 16 16h416c8.84 0 16-7.16 16-16v-32c0-8.84-7.16-16-16-16z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Compare with the alternative approaches
+
+.pull-left[
+#### Paired `\(t\)`-test
+
+
+```r
+t.test(d, alternative = "greater")
+```
+
+```
+## 
+## 	One Sample t-test
+## 
+## data:  d
+## t = 1.7783, df = 5, p-value = 0.06774
+## alternative hypothesis: true mean is greater than 0
+## 95 percent confidence interval:
+##  -1.597222       Inf
+## sample estimates:
+## mean of x 
+##        12
+```
+]
+.pull-right[
+#### Sign test
+
+
+```r
+c(sum(d &gt; 0), sum(d != 0))
+```
+
+```
+## [1] 5 6
+```
+
+```r
+binom.test(c(5,1), p = 0.5, 
+           alternative = "greater")
+```
+
+```
+## 
+## 	Exact binomial test
+## 
+## data:  c(5, 1)
+## number of successes = 5, number of trials = 6,
+## p-value = 0.1094
+## alternative hypothesis: true probability of success is greater than 0.5
+## 95 percent confidence interval:
+##  0.4181966 1.0000000
+## sample estimates:
+## probability of success 
+##              0.8333333
+```
+]
+
+---
+class: segue
+
+# Normal approximation to the Wilcoxon signed-rank test statistic
+
+
+---
+
+## Normal approximation `\(n=5\)`
+
+
+```r
+n = 5
+mu = n*(n+1)/4; s2 = n*(n+1)*(2*n+1)/24; q = 0:(n*(n+1)/2)
+c(mu, s2, max(q))
+```
+
+```
+## [1]  7.50 13.75 15.00
+```
+
+```r
+plotrix::barp(dsignrank(q,n),names.arg = q,ylim=c(0,max(dnorm(q,mu,sqrt(s2)))+.0001), cex = 2)
+points(dnorm(q,mu,sqrt(s2)),col = 2,type = 'l')
+```
+
+&lt;img src="lec14_files/figure-html/unnamed-chunk-15-1.png" width="864" /&gt;
+
+
+---
+
+## Normal approximation `\(n=10\)`
+
+
+```r
+n = 10
+mu = n*(n+1)/4; s2 = n*(n+1)*(2*n+1)/24; q = 0:(n*(n+1)/2)
+c(mu, s2, max(q))
+```
+
+```
+## [1] 27.50 96.25 55.00
+```
+
+```r
+plotrix::barp(dsignrank(q,n),names.arg = q,ylim=c(0,max(dnorm(q,mu,sqrt(s2)))+.0001), cex = 2)
+points(dnorm(q,mu,sqrt(s2)),col = 2,type = 'l')
+```
+
+&lt;img src="lec14_files/figure-html/unnamed-chunk-16-1.png" width="864" /&gt;
+
+---
+
+## Normal approximation `\(n=20\)`
+
+
+```r
+n = 20
+mu = n*(n+1)/4; s2 = n*(n+1)*(2*n+1)/24; q = 0:(n*(n+1)/2)
+c(mu, s2, max(q))
+```
+
+```
+## [1] 105.0 717.5 210.0
+```
+
+```r
+plotrix::barp(dsignrank(q,n),names.arg = q,ylim=c(0,max(dnorm(q,mu,sqrt(s2)))+.0001), cex = 2)
+points(dnorm(q,mu,sqrt(s2)),col = 2,type = 'l')
+```
+
+&lt;img src="lec14_files/figure-html/unnamed-chunk-17-1.png" width="864" /&gt;
+
+---
+
+## Normal approximation
+
+For .bold[.red[large enough]] `\(n\)`, we can use a normal distribution to approximate the distribution of the Wilcoxon sign rank test statistic.
+
+I.e. in large samples (without ties),
+`$$W^+ \sim N\left( \frac{n(n+1)}{4}, \frac{n(n+1)(2n+1)}{24}\right),\quad \text{approximately}.$$`
+
+Hence the large sample test statistic is,
+`$$T = \frac{W^+ - \operatorname{E}(W^+)}{\sqrt{\operatorname{Var}(W^+)}} \sim N(0,1),$$`
+where `\(\operatorname{E}(W^+) = \dfrac{n(n+1)}{4}\)` and `\(\operatorname{Var}(W^+) = \dfrac{n(n+1)(2n+1)}{24}\)`.
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M488 128h-8V80c0-44.8-99.2-80-224-80S32 35.2 32 80v48h-8c-13.25 0-24 10.74-24 24v80c0 13.25 10.75 24 24 24h8v160c0 17.67 14.33 32 32 32v32c0 17.67 14.33 32 32 32h32c17.67 0 32-14.33 32-32v-32h192v32c0 17.67 14.33 32 32 32h32c17.67 0 32-14.33 32-32v-32h6.4c16 0 25.6-12.8 25.6-25.6V256h8c13.25 0 24-10.75 24-24v-80c0-13.26-10.75-24-24-24zM112 400c-17.67 0-32-14.33-32-32s14.33-32 32-32 32 14.33 32 32-14.33 32-32 32zm16-112c-17.67 0-32-14.33-32-32V128c0-17.67 14.33-32 32-32h256c17.67 0 32 14.33 32 32v128c0 17.67-14.33 32-32 32H128zm272 112c-17.67 0-32-14.33-32-32s14.33-32 32-32 32 14.33 32 32-14.33 32-32 32z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Bus waiting times
+
+The following data are waiting times for the 370 bus in minutes for 10 randomly selected passengers:
+
+```r
+bus = c(25, 19, 9, 27, 8, 7, 26, 12, 29, 20)
+```
+The bus authority claims a typical wait time of 15 minutes. Do these data suggest a different typical wait time?
+
+The standard approach is a one-sample `\(t\)`-test to test `\(H_0\colon\  \mu = 15\)`. 
+.pull-left[
+
+```r
+boxplot(bus, horizontal = TRUE, 
+        xlab = "Waiting time (mins)")
+```
+
+&lt;img src="lec14_files/figure-html/unnamed-chunk-19-1.png" width="864" /&gt;
+]
+.pull-right[
+
+```r
+qqnorm(bus); qqline(bus)
+```
+
+&lt;img src="lec14_files/figure-html/unnamed-chunk-20-1.png" width="864" /&gt;
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M488 128h-8V80c0-44.8-99.2-80-224-80S32 35.2 32 80v48h-8c-13.25 0-24 10.74-24 24v80c0 13.25 10.75 24 24 24h8v160c0 17.67 14.33 32 32 32v32c0 17.67 14.33 32 32 32h32c17.67 0 32-14.33 32-32v-32h192v32c0 17.67 14.33 32 32 32h32c17.67 0 32-14.33 32-32v-32h6.4c16 0 25.6-12.8 25.6-25.6V256h8c13.25 0 24-10.75 24-24v-80c0-13.26-10.75-24-24-24zM112 400c-17.67 0-32-14.33-32-32s14.33-32 32-32 32 14.33 32 32-14.33 32-32 32zm16-112c-17.67 0-32-14.33-32-32V128c0-17.67 14.33-32 32-32h256c17.67 0 32 14.33 32 32v128c0 17.67-14.33 32-32 32H128zm272 112c-17.67 0-32-14.33-32-32s14.33-32 32-32 32 14.33 32 32-14.33 32-32 32z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.blockquote[
+- **Hypothesis:** `\(H_0\colon\ \mu=15\)` vs `\(H_1\colon\ \mu \neq 15\)` 
+
+- **Assumptions:** `\(X_i\)` are independently sampled from a symmetric distribution.
+
+- **Test statistic:**  `\(W = \min(W^+, W^-)\)` where `\(W^+ = \sum_{i:D_i&gt;0}R_i\)`, `\(W^- = \sum_{i:D_i&lt;0}R_i\)`, `\(D_i = X_i - 15\)` and `\(R_i\)` are the ranks of `\(|D_1|,|D_2|,\ldots,|D_n|\)`.  Under `\(H_0\)`, `\(W^+\sim \operatorname{WSR}(10)\)`, a symmetric distribution with mean `\(\operatorname{E}(W^+) = \dfrac{n(n+1)}{4} = 27.5\)` and `\(\operatorname{Var}(W^+) = \dfrac{n(n+1)(2n+1)}{24}= 96.25\)`.
+
+- **Observed test statistic:** found by
+    - Determine difference sample `\(D_i = X_i - \mu_0\)` 
+    - Assign the signed ranks of `\(D_i\)`
+    - Calculate `\(w^+\)`, the sum of the positive ranks and `\(w^-\)`, the sum of the negative ranks.
+    - We have a two sided alternative, so the observed test statistic is `\(w = \min(w^+, w^-)\)`
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M488 128h-8V80c0-44.8-99.2-80-224-80S32 35.2 32 80v48h-8c-13.25 0-24 10.74-24 24v80c0 13.25 10.75 24 24 24h8v160c0 17.67 14.33 32 32 32v32c0 17.67 14.33 32 32 32h32c17.67 0 32-14.33 32-32v-32h192v32c0 17.67 14.33 32 32 32h32c17.67 0 32-14.33 32-32v-32h6.4c16 0 25.6-12.8 25.6-25.6V256h8c13.25 0 24-10.75 24-24v-80c0-13.26-10.75-24-24-24zM112 400c-17.67 0-32-14.33-32-32s14.33-32 32-32 32 14.33 32 32-14.33 32-32 32zm16-112c-17.67 0-32-14.33-32-32V128c0-17.67 14.33-32 32-32h256c17.67 0 32 14.33 32 32v128c0 17.67-14.33 32-32 32H128zm272 112c-17.67 0-32-14.33-32-32s14.33-32 32-32 32 14.33 32 32-14.33 32-32 32z"&gt;&lt;/path&gt;&lt;/svg&gt;
+## Test statistic 
+
+.pull-left[
+
+  `\(X_i\)` | `\(D_i = X_i - 15\)` | Sign |  `\(\vert D\vert\)`  | Rank | Signed rank
+-------:|:----------------:|:----:|:-----:|:----:|:----------:
+  25  | 10   | +  | 10  | 7   | 7 
+  19  | 4    | +  | 4   | 2   | 2 
+  9   | -6   | -  | 6   | 4   | -4 
+  27  | 12   | +  | 12  | 9   | 9
+  8   | -7   | -  | 7   | 5   | -5 
+  7   | -8   | -  | 8   | 6   | -6 
+  26  | 11   | +  | 11  | 8   | 8 
+  12  | -3   | -  | 3   | 1   | -1 
+  29  | 14   | +  | 14  | 10  | 10 
+  20  | 5    | +  | 5   | 3   | 3 
+
+]
+
+.pull-right[
+`\(w_+ = 7 + 2 + 8 + 9 + 10 + 3 = 39\)` 
+`\(w_- = |-4 + -5 + -6 + -1| = 16\)` 
+
+Test statistic: `\(w = \min(w^+,w^-) = 16\)` 
+
+If `\(H_0\)` is true, `\(W^+\)` comes from a symmetric distribution with mean,
+`$$\operatorname{E}(W^+) = \dfrac{n(n+1)}{4} = \dfrac{10 \times 11}{4} = 27.5$$`
+and variance,
+`$$\operatorname{Var}(W^+) = \dfrac{n(n+1)(2n+1)}{24}=96.25$$`
+Observed test statistic:
+`$$t_0 =\frac{w - \operatorname{E}(W^+)}{\sqrt{\operatorname{Var}(W^+)}} = \frac{16-27.5}{\sqrt{96.25}} = -1.172$$`
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M488 128h-8V80c0-44.8-99.2-80-224-80S32 35.2 32 80v48h-8c-13.25 0-24 10.74-24 24v80c0 13.25 10.75 24 24 24h8v160c0 17.67 14.33 32 32 32v32c0 17.67 14.33 32 32 32h32c17.67 0 32-14.33 32-32v-32h192v32c0 17.67 14.33 32 32 32h32c17.67 0 32-14.33 32-32v-32h6.4c16 0 25.6-12.8 25.6-25.6V256h8c13.25 0 24-10.75 24-24v-80c0-13.26-10.75-24-24-24zM112 400c-17.67 0-32-14.33-32-32s14.33-32 32-32 32 14.33 32 32-14.33 32-32 32zm16-112c-17.67 0-32-14.33-32-32V128c0-17.67 14.33-32 32-32h256c17.67 0 32 14.33 32 32v128c0 17.67-14.33 32-32 32H128zm272 112c-17.67 0-32-14.33-32-32s14.33-32 32-32 32 14.33 32 32-14.33 32-32 32z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left[
+We have a test statistic `\(t_0 = -1.172\)` so the approximate p-value is
+
+`\begin{align*}
+2P(W^+ \leq 16) &amp; \approx 2P\left(Z\leq\frac{16 - \operatorname{E}(W^+)}{\sqrt{\operatorname{Var}(W^+)}}\right)\\
+&amp; = 2P\left(Z\leq \frac{16-27.5}{\sqrt{96.25}} \right)\\
+&amp; = 2P(Z \leq -1.172) \\
+&amp; = \texttt{2*pnorm(-1.172)}\\
+&amp; = 0.241
+\end{align*}`
+
+Because the p-value is large, there is no evidence to reject `\(H_0\)`. Therefore there is no evidence to dispute the bus authority's claim of a typical wait time of 15 minutes.
+]
+.pull-right[
+Compare to the exact p-value:
+
+
+```r
+2*psignrank(16, 10)
+```
+
+```
+## [1] 0.2753906
+```
+
+```r
+wilcox.test(bus - 15)
+```
+
+```
+## 
+## 	Wilcoxon signed rank exact test
+## 
+## data:  bus - 15
+## V = 39, p-value = 0.2754
+## alternative hypothesis: true location is not equal to 0
+```
+
+We have a similarly large p-value using the exact distribution.  I.e. the approximation is working well even when `\(n=10\)`.
+]
+
+
+---
+
+## Normal approximation with ties
+
+As we've seen, we can approximate `\(W^+\)` by a normal distribution, _NOT the data `\(X_i\)`_. 
+
+The p-value is approximately given by
+`$$\text{p-value} \approx  P\left(Z \ge \frac{w^+ - \operatorname{E}(W^+)}{\sqrt{\operatorname{Var}(W^+)}} \right)
+\quad \mbox{for } H_1\colon\  \mu&gt;\mu_0\\
+\\
+\text{p-value} \approx  P\left(Z \le \frac{w^+ - \operatorname{E}(W^+)}{\sqrt{\operatorname{Var}(W^+)}} \right)
+\quad \mbox{for } H_1\colon\  \mu&lt;\mu_0\\
+\\
+\text{p-value} \approx  2P\left(Z \ge \left|\frac{w^+ -\operatorname{E}(W^+)}{\sqrt{\operatorname{Var}(W^+)}} \right| \right)
+\quad \mbox{for } H_1\colon\  \mu\not =\mu_0.$$`
+where .bold[.red[in general]], 
+`$$\operatorname{E}(W^+) = \frac{1}{2}\sum_{i: \, d_i\not= 0}r_i \ \mbox{ and } \ \operatorname{Var}(W^+) = \frac{1}{4} \sum_{i:\, d_i\not= 0}r_i^2$$`
+
+.footnote[
+When there are no ties and zeros this simplifies to the expression we saw earlier: `\(\operatorname{E}(W^+) = n(n+1)/4 \ \mbox{ and } \ \operatorname{Var}(W^+) = n(n+1)(2n+1)/24\)`
+]
+
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M444.34 181.1c22.38 15.68 35.66 41.16 35.66 68.59V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-43.24-21.01-83.41-56.34-108.06C463.85 125.02 448 99.34 448 70.31V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v66.4c0 43.69 24.56 81.63 60.34 106.7zM194.97 358.98C126.03 370.07 59.69 394.69 0 432c83.65 52.28 180.3 80 278.94 80h88.57L254.79 380.49c-14.74-17.2-37.45-25.11-59.82-21.51zM553.28 87.09c-5.67-3.8-9.28-9.96-9.28-16.78V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v62.31c0 22.02 10.17 43.41 28.64 55.39C550.79 153.04 576 199.54 576 249.69V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-65.44-32.41-126.19-86.72-162.6zM360.89 352.05c-34.4.06-86.81.15-88.21.17l117.8 137.43A63.987 63.987 0 0 0 439.07 512h88.45L409.57 374.4a63.955 63.955 0 0 0-48.68-22.35zM616 352H432l117.99 137.65A63.987 63.987 0 0 0 598.58 512H616c13.25 0 24-10.75 24-24V376c0-13.26-10.75-24-24-24z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Smoking
+
+Blood samples from 11 individuals before and after they smoked a cigarette are used to measure aggregation of blood platelets.  
+
+.pull-left[
+
+```r
+before = c(25, 25, 27, 44, 30, 67, 53, 53, 52, 60, 28)
+after =  c(27, 29, 37, 36, 46, 82, 57, 80, 61, 59, 43)
+df = data.frame(before, after,
+  difference = after-before)
+df
+```
+
+```
+##    before after difference
+## 1      25    27          2
+## 2      25    29          4
+## 3      27    37         10
+## 4      44    36         -8
+## 5      30    46         16
+## 6      67    82         15
+## 7      53    57          4
+## 8      53    80         27
+## 9      52    61          9
+## 10     60    59         -1
+## 11     28    43         15
+```
+]
+
+
+.pull-right[
+
+&lt;br&gt;
+
+.blockquote[
+### &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M144 208c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm112 0c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm112 0c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zM256 32C114.6 32 0 125.1 0 240c0 47.6 19.9 91.2 52.9 126.3C38 405.7 7 439.1 6.5 439.5c-6.6 7-8.4 17.2-4.6 26S14.4 480 24 480c61.5 0 110-25.7 139.1-46.3C192 442.8 223.2 448 256 448c141.4 0 256-93.1 256-208S397.4 32 256 32zm0 368c-26.7 0-53.1-4.1-78.4-12.1l-22.7-7.2-19.5 13.8c-14.3 10.1-33.9 21.4-57.5 29 7.3-12.1 14.4-25.7 19.9-40.2l10.6-28.1-20.6-21.8C69.7 314.1 48 282.2 48 240c0-88.2 93.3-160 208-160s208 71.8 208 160-93.3 160-208 160z"&gt;&lt;/path&gt;&lt;/svg&gt;
+Is the aggregation affected by smoking?
+]
+
+
+]
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M444.34 181.1c22.38 15.68 35.66 41.16 35.66 68.59V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-43.24-21.01-83.41-56.34-108.06C463.85 125.02 448 99.34 448 70.31V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v66.4c0 43.69 24.56 81.63 60.34 106.7zM194.97 358.98C126.03 370.07 59.69 394.69 0 432c83.65 52.28 180.3 80 278.94 80h88.57L254.79 380.49c-14.74-17.2-37.45-25.11-59.82-21.51zM553.28 87.09c-5.67-3.8-9.28-9.96-9.28-16.78V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v62.31c0 22.02 10.17 43.41 28.64 55.39C550.79 153.04 576 199.54 576 249.69V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-65.44-32.41-126.19-86.72-162.6zM360.89 352.05c-34.4.06-86.81.15-88.21.17l117.8 137.43A63.987 63.987 0 0 0 439.07 512h88.45L409.57 374.4a63.955 63.955 0 0 0-48.68-22.35zM616 352H432l117.99 137.65A63.987 63.987 0 0 0 598.58 512H616c13.25 0 24-10.75 24-24V376c0-13.26-10.75-24-24-24z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left-2[
+
+```r
+library(ggplot2)
+p = ggplot(df, aes(x="", y=difference)) +
+  geom_boxplot() +
+  geom_dotplot(binaxis = "y", stackdir = "center") +
+  theme_classic(base_size = 24) +
+  geom_hline(yintercept = 0, linetype='dashed') +
+  labs(y = 'Difference in blood platelet levels')+
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+```
+]
+.pull-right-1[
+
+```r
+p
+```
+
+&lt;img src="lec14_files/figure-html/unnamed-chunk-24-1.png" width="288" /&gt;
+]
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M444.34 181.1c22.38 15.68 35.66 41.16 35.66 68.59V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-43.24-21.01-83.41-56.34-108.06C463.85 125.02 448 99.34 448 70.31V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v66.4c0 43.69 24.56 81.63 60.34 106.7zM194.97 358.98C126.03 370.07 59.69 394.69 0 432c83.65 52.28 180.3 80 278.94 80h88.57L254.79 380.49c-14.74-17.2-37.45-25.11-59.82-21.51zM553.28 87.09c-5.67-3.8-9.28-9.96-9.28-16.78V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v62.31c0 22.02 10.17 43.41 28.64 55.39C550.79 153.04 576 199.54 576 249.69V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-65.44-32.41-126.19-86.72-162.6zM360.89 352.05c-34.4.06-86.81.15-88.21.17l117.8 137.43A63.987 63.987 0 0 0 439.07 512h88.45L409.57 374.4a63.955 63.955 0 0 0-48.68-22.35zM616 352H432l117.99 137.65A63.987 63.987 0 0 0 598.58 512H616c13.25 0 24-10.75 24-24V376c0-13.26-10.75-24-24-24z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left-2[
+
+
+```r
+library(dplyr)
+names(df)
+```
+
+```
+## [1] "before"     "after"      "difference"
+```
+
+```r
+df = df %&gt;% dplyr::mutate(
+  absDif = abs(difference),
+  rankAbsDif = rank(absDif),
+  srank = sign(difference)*rank(abs(difference))
+)
+df
+```
+
+```
+##    before after difference absDif rankAbsDif srank
+## 1      25    27          2      2        2.0   2.0
+## 2      25    29          4      4        3.5   3.5
+## 3      27    37         10     10        7.0   7.0
+## 4      44    36         -8      8        5.0  -5.0
+## 5      30    46         16     16       10.0  10.0
+## 6      67    82         15     15        8.5   8.5
+## 7      53    57          4      4        3.5   3.5
+## 8      53    80         27     27       11.0  11.0
+## 9      52    61          9      9        6.0   6.0
+## 10     60    59         -1      1        1.0  -1.0
+## 11     28    43         15     15        8.5   8.5
+```
+
+]
+
+.pull-right-1[
+
+
+```r
+w_p = sum(df$srank[df$srank &gt; 0])
+w_p
+```
+
+```
+## [1] 60
+```
+
+```r
+w_m = sum(-df$srank[df$srank &lt; 0])
+w_m
+```
+
+```
+## [1] 6
+```
+
+```r
+w = min(w_p, w_m)
+w
+```
+
+```
+## [1] 6
+```
+
+]
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M444.34 181.1c22.38 15.68 35.66 41.16 35.66 68.59V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-43.24-21.01-83.41-56.34-108.06C463.85 125.02 448 99.34 448 70.31V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v66.4c0 43.69 24.56 81.63 60.34 106.7zM194.97 358.98C126.03 370.07 59.69 394.69 0 432c83.65 52.28 180.3 80 278.94 80h88.57L254.79 380.49c-14.74-17.2-37.45-25.11-59.82-21.51zM553.28 87.09c-5.67-3.8-9.28-9.96-9.28-16.78V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v62.31c0 22.02 10.17 43.41 28.64 55.39C550.79 153.04 576 199.54 576 249.69V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-65.44-32.41-126.19-86.72-162.6zM360.89 352.05c-34.4.06-86.81.15-88.21.17l117.8 137.43A63.987 63.987 0 0 0 439.07 512h88.45L409.57 374.4a63.955 63.955 0 0 0-48.68-22.35zM616 352H432l117.99 137.65A63.987 63.987 0 0 0 598.58 512H616c13.25 0 24-10.75 24-24V376c0-13.26-10.75-24-24-24z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.blockquote[
+- **Hypothesis:** `\(H_0\colon\ \mu_d=0\)` vs `\(H_1\colon\ \mu_d \ne 0\)` 
+
+-  **Assumptions:** `\(D_i\)` are independently sampled from a symmetric distribution. 
+
+- **Test statistic:** `\(W^+ = \sum_{i:D_i&gt;0}R_i\)` where `\(R_i\)` are the ranks of `\(|D_1|,|D_2|,\ldots,|D_n|\)`. Under `\(H_0\)`, `\(W^+ \sim {\rm WSR}'(11)\)`, the WSR dist. with `\(n=11\)` and the set of ties as given.
+
+- **Observed test statistic:** `\(w = \min(w^+,w^-) = 6\)` because `\(w^+ = 60\)`, `\(w^- = 6\)`
+
+-  **p-value:** Since the `\({\rm WSR}'(11)\)` distribution is unknown, it is approximated by normal with `\(\operatorname{E}(W^+)=\displaystyle{\frac{n(n+1)}{4}=\frac{11(11+1)}{4}=33}\)` and `\(\operatorname{Var}(W^+) = \displaystyle{\frac{1}{4} \sum\limits_{i=1}^{11} r_i^2 = \frac{1}{4} [(-2)^2+\dots+(-8.5)^2]=\frac{506}{4}=126.25}\)`.
+`\(\text{p-value} =  2 \ P(W^+ \le 6) \simeq 2P\left(Z \le \frac{6-33}{\sqrt{126.25}} \right) =\)`
+`\(2P(Z \le -2.403)=2\times 0.008 =0.016\)`
+
+- **Decision:** the p-value is less than 0.05, hence there is evidence against `\(H_0\)`.
+]
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M444.34 181.1c22.38 15.68 35.66 41.16 35.66 68.59V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-43.24-21.01-83.41-56.34-108.06C463.85 125.02 448 99.34 448 70.31V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v66.4c0 43.69 24.56 81.63 60.34 106.7zM194.97 358.98C126.03 370.07 59.69 394.69 0 432c83.65 52.28 180.3 80 278.94 80h88.57L254.79 380.49c-14.74-17.2-37.45-25.11-59.82-21.51zM553.28 87.09c-5.67-3.8-9.28-9.96-9.28-16.78V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v62.31c0 22.02 10.17 43.41 28.64 55.39C550.79 153.04 576 199.54 576 249.69V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-65.44-32.41-126.19-86.72-162.6zM360.89 352.05c-34.4.06-86.81.15-88.21.17l117.8 137.43A63.987 63.987 0 0 0 439.07 512h88.45L409.57 374.4a63.955 63.955 0 0 0-48.68-22.35zM616 352H432l117.99 137.65A63.987 63.987 0 0 0 598.58 512H616c13.25 0 24-10.75 24-24V376c0-13.26-10.75-24-24-24z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left-1[
+
+```r
+ew = sum(df$rankAbsDif)/2
+varw = sum((df$rankAbsDif)^2)/4
+c(w, ew, varw)
+```
+
+```
+## [1]   6.00  33.00 126.25
+```
+
+```r
+t0 = (w - ew)/sqrt(varw)
+p_value = 2 * pnorm(t0)
+c(t0, p_value)
+```
+
+```
+## [1] -2.40296846  0.01626259
+```
+]
+.pull-right-2[
+
+```r
+wilcox.test(df$difference)
+```
+
+```
+## Warning in wilcox.test.default(df$difference): cannot
+## compute exact p-value with ties
+```
+
+```
+## 
+## 	Wilcoxon signed rank test with continuity correction
+## 
+## data:  df$difference
+## V = 60, p-value = 0.01835
+## alternative hypothesis: true location is not equal to 0
+```
+
+```r
+wilcox.test(df$difference, correct = FALSE)
+```
+
+```
+## Warning in wilcox.test.default(df$difference, correct =
+## FALSE): cannot compute exact p-value with ties
+```
+
+```
+## 
+## 	Wilcoxon signed rank test
+## 
+## data:  df$difference
+## V = 60, p-value = 0.01626
+## alternative hypothesis: true location is not equal to 0
+```
+
+
+]
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M444.34 181.1c22.38 15.68 35.66 41.16 35.66 68.59V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-43.24-21.01-83.41-56.34-108.06C463.85 125.02 448 99.34 448 70.31V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v66.4c0 43.69 24.56 81.63 60.34 106.7zM194.97 358.98C126.03 370.07 59.69 394.69 0 432c83.65 52.28 180.3 80 278.94 80h88.57L254.79 380.49c-14.74-17.2-37.45-25.11-59.82-21.51zM553.28 87.09c-5.67-3.8-9.28-9.96-9.28-16.78V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v62.31c0 22.02 10.17 43.41 28.64 55.39C550.79 153.04 576 199.54 576 249.69V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-65.44-32.41-126.19-86.72-162.6zM360.89 352.05c-34.4.06-86.81.15-88.21.17l117.8 137.43A63.987 63.987 0 0 0 439.07 512h88.45L409.57 374.4a63.955 63.955 0 0 0-48.68-22.35zM616 352H432l117.99 137.65A63.987 63.987 0 0 0 598.58 512H616c13.25 0 24-10.75 24-24V376c0-13.26-10.75-24-24-24z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left-2[
+
+```r
+t.test(df$difference, alternative = "two.sided")
+```
+
+```
+## 
+## 	One Sample t-test
+## 
+## data:  df$difference
+## t = 2.9065, df = 10, p-value = 0.01566
+## alternative hypothesis: true mean is not equal to 0
+## 95 percent confidence interval:
+##   1.97332 14.93577
+## sample estimates:
+## mean of x 
+##  8.454545
+```
+
+```r
+binom.test(c(2,9), 0.5)
+```
+
+```
+## 
+## 	Exact binomial test
+## 
+## data:  c(2, 9)
+## number of successes = 2, number of trials = 11,
+## p-value = 0.06543
+## alternative hypothesis: true probability of success is not equal to 0.5
+## 95 percent confidence interval:
+##  0.0228312 0.5177559
+## sample estimates:
+## probability of success 
+##              0.1818182
+```
+]
+.pull-right-1[
+
+We could also manually calculate the p-value for the sign test:
+
+```r
+2 * pbinom(2, 11, 0.5)
+```
+
+```
+## [1] 0.06542969
+```
+
+See end of Lecture 13 for full details on the `\(t\)`-test and sign test for the smoking data.
+]
+
+
+---
+
+## Final notes
+
+A few extra notes about the Wilcoxon signed-rank test:
+
+- Since we assume that the distribution is symmetric, the hypotheses can also be stated in terms of the .red[.bold[median]] (rather than the mean).
+- The p-value from a Wilcoxon signed-rank test will typically be smaller than the p-value of a sign test on the same data. Using the information in the ranks, the test becomes much more .blue[.bold[powerful]] in detecting differences from `\(\mu_0\)`, and almost as powerful as the one sample `\(t\)`-test.
+
+---
+
+## Further reading
+
+Larsen and Marx (2012; section 14.3).
+
+&lt;br&gt;
+
+Larsen, R. J. and M. L. Marx (2012). _An Introduction
+to Mathematical Statistics and its Applications_. 5th
+ed. Boston, MA: Prentice Hall. ISBN:
+978-0-321-69394-5.
+
+Wickham, H., M. Averick, J. Bryan, W. Chang, L. D.
+McGowan, R. François, G. Grolemund, A. Hayes, L.
+Henry, J. Hester, et al. (2019). "Welcome to the
+tidyverse". In: _Journal of Open Source Software_
+4.43, p. 1686. DOI:
+[10.21105/joss.01686](https://doi.org/10.21105%2Fjoss.01686).
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="assets/remark-zoom.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

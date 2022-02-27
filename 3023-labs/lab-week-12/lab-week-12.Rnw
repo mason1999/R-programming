@@ -1,0 +1,122 @@
+\documentclass[12pt, a4paper]{article}
+\input{./everything/everything.tex}
+\input{./everything/preamble.tex}
+
+\begin{document}
+% refer to https://yihui.org/knitr/options/#code-decoration for more options
+<<include = FALSE>>=
+knitr::opts_chunk$set(echo = TRUE, 
+                      include = TRUE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      tidy = TRUE, 
+                      tidy.opts = list(width.cutoff=100), 
+                      fig.width = 6, 
+                      fig.height = 4, 
+                      fig.align = "center", 
+                      size = "footnotesize"
+)
+render_listings()
+@
+
+% (1) Remember that we want the default page style
+% (2) but for this page we want an empty page style for the title 
+% (3) we input our title 
+% (4) we call a new page and reset the page counter to 1
+\pagestyle{default}
+\thispagestyle{empty}
+\input{./title_page.tex}
+\newpage
+\setcounter{page}{1}
+\begin{enumerate}[label={\bfseries\arabic*.}]
+  \item We perform out setup code here. 
+<<>>=
+# Define a vector of 100 theta values from 0.1 to 10
+th = 1:100/10
+# the length of th which is 100 in this case
+L.th = length(th)
+# sample size of 5 so far
+n = 5
+# n times the mean squared error for the MLE and the conjugate. these are vectors
+nMSE.mle = nMSE.conj = 0
+# the number of simulation iterations for each theta value
+B = 10000
+@
+  \item Compute the mean squared errors for for each $\theta$ value
+<<>>=
+# We iterate through all the theta values (what the outer loop is for)
+for (j in 1:L.th) {
+  # intialise the vectors
+  mle = conj = 0
+  # For each sample...
+  for (i in 1:B) {
+    # We draw a size of "n" from the poisson distribution with mean th[j]
+    observations = rpois(n, th[j])
+    # We compute the estimators and store them in the ith position of the
+    # vectors mle and conj
+    mle[i] = mean(observations)
+    conj[i] = (n * mean(observations) + 1)/(n + 1)
+  }
+  # compute n times the average mean squared error and store it in 
+  # the jth position of our mse vectors
+  nMSE.mle[j] = mean((mle - th[j])^2)
+  nMSE.conj[j] = mean((conj - th[j])^2)
+}
+@
+  \item We now plot $n$ times the mean squared error for the conjugate estimator in \blue{blue} and we $n$ times the mean squared error for the mle estimator in \red{red}. We plot them both against our $\theta$ values. 
+<<>>=
+plot(th, nMSE.conj, col = "blue", 
+     ylab = "Empirical risk", 
+     xlab = expression(theta), 
+     main = "comparing risk of mse estimator and conjugate estimator (n = 5)",
+     cex.main = 0.85 , 
+     cex.axis = 0.8,
+     lwd = 0.5)
+lines(th, nMSE.mle, col = "red")
+legend("topleft", 
+       legend = c("mle", "conjugate"), 
+       col = c("red", "blue"), 
+       lty = c(1, 1))
+@
+  \item $d_{\text{conj}}$ seems to do better than $d_{\text{MLE}}$ for some $\theta$ values (that is, in $\theta$ values in the lower region) because for the expression $$\frac{n\overline{X} + 1}{n + 1} = \frac{n}{n+1}\overline{X} + \frac{1}{n+1}$$ it is closer to the true $\theta$ values for smaller values of $\theta$
+  \item 
+<<>>=
+# change the size of n
+n = 50
+# We iterate through all the theta values (what the outer loop is for)
+for (j in 1:L.th) {
+  # intialise the vectors
+  mle = conj = 0
+  # For each sample...
+  for (i in 1:B) {
+    # We draw a size of "n" from the poisson distribution with mean th[j]
+    observations = rpois(n, th[j])
+    # We compute the estimators and store them in the ith position of the
+    # vectors mle and conj
+    mle[i] = mean(observations)
+    conj[i] = (n * mean(observations) + 1)/(n + 1)
+  }
+  # compute n times the average mean squared error and store it in 
+  # the jth position of our mse vectors
+  nMSE.mle[j] = mean((mle - th[j])^2)
+  nMSE.conj[j] = mean((conj - th[j])^2)
+}
+plot(th, nMSE.conj, col = "blue", 
+     ylab = "Empirical risk", 
+     xlab = expression(theta), 
+     main = "comparing risk of mse estimator and conjugate estimator (n = 50)",
+     cex.main = 0.85 , 
+     cex.axis = 0.8,
+     lwd = 0.5)
+lines(th, nMSE.mle, col = "red")
+legend("topleft", 
+       legend = c("mle", "conjugate"), 
+       col = c("red", "blue"), 
+       lty = c(1, 1))
+@
+
+  \item What we see is that:
+  $$d_{\text{conj}} = \frac{n\overline{X} + 1}{n + 1} = \frac{\overline{X} + \frac{1}{n}}{1 + \frac{1}{n}} \rightarrow \overline{X}$$As $n\rightarrow \infty$
+\end{enumerate}
+
+\end{document}

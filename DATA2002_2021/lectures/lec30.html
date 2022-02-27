@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>DATA2002</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Garth Tarr" />
+    <script src="lec30_files/header-attrs-2.11/header-attrs.js"></script>
+    <link href="lec30_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } },
+      "HTML-CSS": {
+        styles: {
+          ".MathJax a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+          ".MathJax_Preview a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+        }
+      }
+      });
+    </script>
+    <link rel="stylesheet" href="assets/sydney-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="assets/sydney.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# DATA2002
+## Decision trees and random forests
+### Garth Tarr
+
+---
+
+class: segue
+
+
+
+
+
+.large[
+Decision trees
+
+Random forests
+]
+
+
+---
+class: segue
+
+# Decision trees
+
+.pull-left[
+&lt;img src="imgs/tree.jpg", width="90%"&gt;
+]
+
+.pull-right[
+A decision tree determines the predicted outcome based on series of questions and conditions.
+
+&lt;br&gt;
+
+When making Decision Trees, there are several factors we take into consideration.
+
+- What features do we make our decisions on? 
+- What is the threshold for classifying each question into a .orange[**yes**] or .orange[**no**] answer?
+]
+
+.footnote[
+Image Source: [Egor Dezhic](https://becominghuman.ai)
+]
+
+---
+
+## Consider the `iris` dataset
+
+.pull-left[
+
+
+```r
+library(tidyverse)
+glimpse(iris)
+```
+
+```
+## Rows: 150
+## Columns: 5
+## $ Sepal.Length &lt;dbl&gt; 5.1, 4.9, 4.7, 4.6, 5.0, 5.4, 4.6, 5.…
+## $ Sepal.Width  &lt;dbl&gt; 3.5, 3.0, 3.2, 3.1, 3.6, 3.9, 3.4, 3.…
+## $ Petal.Length &lt;dbl&gt; 1.4, 1.4, 1.3, 1.5, 1.4, 1.7, 1.4, 1.…
+## $ Petal.Width  &lt;dbl&gt; 0.2, 0.2, 0.2, 0.2, 0.2, 0.4, 0.3, 0.…
+## $ Species      &lt;fct&gt; setosa, setosa, setosa, setosa, setos…
+```
+
+&gt; How can we construct a **decision tree** to determine the `Species` of `iris` given petal and sepal measurements?
+
+]
+.pull-right[
+
+```r
+library(GGally)
+ggpairs(iris, mapping = aes(col = Species)) + theme_bw(base_size = 20)
+```
+
+&lt;img src="lec30_files/figure-html/unnamed-chunk-2-1.png" width="864" /&gt;
+]
+
+---
+
+.center[
+&lt;img src="imgs/iris.jpg", width="50%"&gt;
+]
+
+
+---
+&lt;svg viewBox="0 0 581 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M581 226.6C581 119.1 450.9 32 290.5 32S0 119.1 0 226.6C0 322.4 103.3 402 239.4 418.1V480h99.1v-61.5c24.3-2.7 47.6-7.4 69.4-13.9L448 480h112l-67.4-113.7c54.5-35.4 88.4-84.9 88.4-139.7zm-466.8 14.5c0-73.5 98.9-133 220.8-133s211.9 40.7 211.9 133c0 50.1-26.5 85-70.3 106.4-2.4-1.6-4.7-2.9-6.4-3.7-10.2-5.2-27.8-10.5-27.8-10.5s86.6-6.4 86.6-92.7-90.6-87.9-90.6-87.9h-199V361c-74.1-21.5-125.2-67.1-125.2-119.9zm225.1 38.3v-55.6c57.8 0 87.8-6.8 87.8 27.3 0 36.5-38.2 28.3-87.8 28.3zm-.9 72.5H365c10.8 0 18.9 11.7 24 19.2-16.1 1.9-33 2.8-50.6 2.9v-22.1z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Trees in R
+
+-   We can use the **rpart** package (recursive partitioning) to build our decision tree.
+
+-   It uses a formula structure, much like `lm()` and `glm()` to identify the dependent variable (what we're trying to predict) and the explanatory variables (what information do we have available to help prediction).
+
+.large[
+
+```r
+library(rpart)
+*tree = rpart(Species ~ ., data = iris, method = "class")
+```
+]
+
+-   The formula `Species ~ .` in the code above says we want to predict `Species` using all the variables in the data frame `iris`.
+-   Specifying `method = "class"` means we want to build a classification (decision) tree.
+
+---
+
+
+.scroll-output[
+
+```r
+tree
+```
+
+```
+## n= 150 
+## 
+## node), split, n, loss, yval, (yprob)
+##       * denotes terminal node
+## 
+## 1) root 150 100 setosa (0.33333333 0.33333333 0.33333333)  
+##   2) Petal.Length&lt; 2.45 50   0 setosa (1.00000000 0.00000000 0.00000000) *
+##   3) Petal.Length&gt;=2.45 100  50 versicolor (0.00000000 0.50000000 0.50000000)  
+##     6) Petal.Width&lt; 1.75 54   5 versicolor (0.00000000 0.90740741 0.09259259) *
+##     7) Petal.Width&gt;=1.75 46   1 virginica (0.00000000 0.02173913 0.97826087) *
+```
+
+```r
+summary(tree)
+```
+
+```
+## Call:
+## rpart(formula = Species ~ ., data = iris, method = "class")
+##   n= 150 
+## 
+##     CP nsplit rel error xerror       xstd
+## 1 0.50      0      1.00   1.16 0.05127703
+## 2 0.44      1      0.50   0.72 0.06118823
+## 3 0.01      2      0.06   0.08 0.02751969
+## 
+## Variable importance
+##  Petal.Width Petal.Length Sepal.Length  Sepal.Width 
+##           34           31           21           14 
+## 
+## Node number 1: 150 observations,    complexity param=0.5
+##   predicted class=setosa      expected loss=0.6666667  P(node) =1
+##     class counts:    50    50    50
+##    probabilities: 0.333 0.333 0.333 
+##   left son=2 (50 obs) right son=3 (100 obs)
+##   Primary splits:
+##       Petal.Length &lt; 2.45 to the left,  improve=50.00000, (0 missing)
+##       Petal.Width  &lt; 0.8  to the left,  improve=50.00000, (0 missing)
+##       Sepal.Length &lt; 5.45 to the left,  improve=34.16405, (0 missing)
+##       Sepal.Width  &lt; 3.35 to the right, improve=19.03851, (0 missing)
+##   Surrogate splits:
+##       Petal.Width  &lt; 0.8  to the left,  agree=1.000, adj=1.00, (0 split)
+##       Sepal.Length &lt; 5.45 to the left,  agree=0.920, adj=0.76, (0 split)
+##       Sepal.Width  &lt; 3.35 to the right, agree=0.833, adj=0.50, (0 split)
+## 
+## Node number 2: 50 observations
+##   predicted class=setosa      expected loss=0  P(node) =0.3333333
+##     class counts:    50     0     0
+##    probabilities: 1.000 0.000 0.000 
+## 
+## Node number 3: 100 observations,    complexity param=0.44
+##   predicted class=versicolor  expected loss=0.5  P(node) =0.6666667
+##     class counts:     0    50    50
+##    probabilities: 0.000 0.500 0.500 
+##   left son=6 (54 obs) right son=7 (46 obs)
+##   Primary splits:
+##       Petal.Width  &lt; 1.75 to the left,  improve=38.969400, (0 missing)
+##       Petal.Length &lt; 4.75 to the left,  improve=37.353540, (0 missing)
+##       Sepal.Length &lt; 6.15 to the left,  improve=10.686870, (0 missing)
+##       Sepal.Width  &lt; 2.45 to the left,  improve= 3.555556, (0 missing)
+##   Surrogate splits:
+##       Petal.Length &lt; 4.75 to the left,  agree=0.91, adj=0.804, (0 split)
+##       Sepal.Length &lt; 6.15 to the left,  agree=0.73, adj=0.413, (0 split)
+##       Sepal.Width  &lt; 2.95 to the left,  agree=0.67, adj=0.283, (0 split)
+## 
+## Node number 6: 54 observations
+##   predicted class=versicolor  expected loss=0.09259259  P(node) =0.36
+##     class counts:     0    49     5
+##    probabilities: 0.000 0.907 0.093 
+## 
+## Node number 7: 46 observations
+##   predicted class=virginica   expected loss=0.02173913  P(node) =0.3066667
+##     class counts:     0     1    45
+##    probabilities: 0.000 0.022 0.978
+```
+
+]
+
+---
+&lt;svg viewBox="0 0 581 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M581 226.6C581 119.1 450.9 32 290.5 32S0 119.1 0 226.6C0 322.4 103.3 402 239.4 418.1V480h99.1v-61.5c24.3-2.7 47.6-7.4 69.4-13.9L448 480h112l-67.4-113.7c54.5-35.4 88.4-84.9 88.4-139.7zm-466.8 14.5c0-73.5 98.9-133 220.8-133s211.9 40.7 211.9 133c0 50.1-26.5 85-70.3 106.4-2.4-1.6-4.7-2.9-6.4-3.7-10.2-5.2-27.8-10.5-27.8-10.5s86.6-6.4 86.6-92.7-90.6-87.9-90.6-87.9h-199V361c-74.1-21.5-125.2-67.1-125.2-119.9zm225.1 38.3v-55.6c57.8 0 87.8-6.8 87.8 27.3 0 36.5-38.2 28.3-87.8 28.3zm-.9 72.5H365c10.8 0 18.9 11.7 24 19.2-16.1 1.9-33 2.8-50.6 2.9v-22.1z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Trees in R
+
+.pull-left[
+.large[
+
+```r
+library(rpart)
+tree = rpart(
+  Species ~ .,
+  data = iris,
+  method = "class") 
+
+*library(rpart.plot)
+*rpart.plot(tree)
+```
+]
+
+
+-   Using the `rpart.plot()` function from the **rpart.plot** library, we can visualise the results of our classification tree. 
+
+-   Each node shows the predicted class, the predicted probability of each class, and the percentage of observations in each node.
+
+]
+.pull-right[
+&lt;img src="lec30_files/figure-html/unnamed-chunk-6-1.png" width="720" /&gt;
+]
+
+---
+
+## Is it magic?
+
+.pull-left-1[
+
+How does it work?  In this tree, we only need to consider two variables.
+.pull-down[
+
+```r
+p1 = iris %&gt;% ggplot() +
+  aes(x = Petal.Length, 
+      y = Petal.Width, 
+      colour = Species) + 
+  geom_point(size = 4) +
+  theme_classic(base_size = 30)
+```
+]
+]
+.pull-right-2[
+
+```r
+p1
+```
+
+&lt;img src="lec30_files/figure-html/unnamed-chunk-8-1.png" width="864" /&gt;
+]
+
+
+---
+
+## Is it magic?
+
+.pull-left-1[
+The first branch is done to "best" split the data to create the most "pure"  (homogenous) partitions.
+
+`Petal.Length &lt; 2.45`
+
+.pull-down[
+
+```r
+p2 = p1 + 
+  geom_vline(
+    aes(xintercept=2.45),
+    size = 2
+  )
+```
+]
+]
+.pull-right-2[
+
+```r
+p2
+```
+
+&lt;img src="lec30_files/figure-html/unnamed-chunk-10-1.png" width="864" /&gt;
+]
+
+
+
+---
+
+## Is it magic?
+
+.pull-left-1[
+The next branch applies to observations that have `Petal.Length &gt; 2.45` and it tries to find the next best split of the data.
+
+`Petal.width &lt; 1.75`
+
+.pull-down[
+
+```r
+p3 = p2 + 
+  geom_segment(
+    aes(x = 2.45, y = 1.75, 
+        xend = 6.9, yend = 1.75),
+    size = 2,
+    colour = "black"
+  )
+```
+]
+]
+.pull-right-2[
+
+```r
+p3
+```
+
+&lt;img src="lec30_files/figure-html/unnamed-chunk-12-1.png" width="864" /&gt;
+]
+
+---
+
+## Alternative visualisation with partykit
+
+
+```r
+# install.packages("partykit") # A Toolkit for Recursive Partytioning
+library(partykit)
+plot(as.party(tree))
+```
+
+&lt;img src="lec30_files/figure-html/unnamed-chunk-13-1.png" width="864" /&gt;
+
+---
+
+## Making a prediction
+
+.pull-left[
+How would we predict the species of a flower with 
+
+-   Sepal.Length = 5.0
+-   Sepal.Width = 3.9
+-   Petal.Length = 1.4
+-   Petal.Width = 0.3
+
+How about:
+
+-   Sepal.Length = 5.0
+-   Sepal.Width = 3.9
+-   Petal.Length = 3.4
+-   Petal.Width = 0.3
+]
+.pull-right[
+&lt;img src="lec30_files/figure-html/unnamed-chunk-14-1.png" width="720" /&gt;
+]
+
+---
+
+## Making a prediction
+
+This was our fitted model:
+
+
+```r
+tree &lt;- rpart(Species ~ ., data = iris, method = "class") 
+```
+
+Using `predict()`, we can predict the class of a new data point, much like for `lm()` and `glm()` objects.
+
+
+```r
+new_data = data.frame(Sepal.Length = c(5.0, 5.0), 
+                      Sepal.Width = c(3.9, 3.9),
+                      Petal.Length = c(1.4, 3.4), 
+                      Petal.Width = c(0.3,0.3))
+new_data
+```
+
+```
+##   Sepal.Length Sepal.Width Petal.Length Petal.Width
+## 1            5         3.9          1.4         0.3
+## 2            5         3.9          3.4         0.3
+```
+
+```r
+*predict(tree, new_data, type = "class")
+```
+
+```
+##          1          2 
+##     setosa versicolor 
+## Levels: setosa versicolor virginica
+```
+
+---
+
+## Assessing in sample performance in the iris data
+
+.scroll-output[
+
+```r
+library(caret)
+predicted_species = predict(tree, type = "class")
+confusionMatrix(
+  data = predicted_species,
+  reference = iris$Species)
+```
+
+```
+## Confusion Matrix and Statistics
+## 
+##             Reference
+## Prediction   setosa versicolor virginica
+##   setosa         50          0         0
+##   versicolor      0         49         5
+##   virginica       0          1        45
+## 
+## Overall Statistics
+##                                          
+##                Accuracy : 0.96           
+##                  95% CI : (0.915, 0.9852)
+##     No Information Rate : 0.3333         
+##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16      
+##                                          
+##                   Kappa : 0.94           
+##                                          
+##  Mcnemar's Test P-Value : NA             
+## 
+## Statistics by Class:
+## 
+##                      Class: setosa Class: versicolor
+## Sensitivity                 1.0000            0.9800
+## Specificity                 1.0000            0.9500
+## Pos Pred Value              1.0000            0.9074
+## Neg Pred Value              1.0000            0.9896
+## Prevalence                  0.3333            0.3333
+## Detection Rate              0.3333            0.3267
+## Detection Prevalence        0.3333            0.3600
+## Balanced Accuracy           1.0000            0.9650
+##                      Class: virginica
+## Sensitivity                    0.9000
+## Specificity                    0.9900
+## Pos Pred Value                 0.9783
+## Neg Pred Value                 0.9519
+## Prevalence                     0.3333
+## Detection Rate                 0.3000
+## Detection Prevalence           0.3067
+## Balanced Accuracy              0.9450
+```
+]
+
+---
+
+## Model selection
+
+-   How did our tree know to know to only use two splits?
+
+-   There is a **complexity parameter** that can be used to determine if a proposed new split _sufficiently_ improves the predictive power or not.
+
+-   A choice is made whether to keep or "prune" a proposed new branch.
+
+-   Default is that a branch should decrease the error by 1%.
+
+-   This helps to avoid **overfitting**.
+
+---
+
+## Titanic tree
+
+
+```r
+data("Titanicp", package = "vcdExtra")
+titanic_tree = rpart(survived ~ sex + age + pclass, data = Titanicp, method = "class")
+titanic_tree
+```
+
+```
+## n= 1309 
+## 
+## node), split, n, loss, yval, (yprob)
+##       * denotes terminal node
+## 
+##  1) root 1309 500 died (0.6180290 0.3819710)  
+##    2) sex=male 843 161 died (0.8090154 0.1909846)  
+##      4) age&gt;=9.5 800 136 died (0.8300000 0.1700000) *
+##      5) age&lt; 9.5 43  18 survived (0.4186047 0.5813953)  
+##       10) pclass=3rd 29  11 died (0.6206897 0.3793103) *
+##       11) pclass=1st,2nd 14   0 survived (0.0000000 1.0000000) *
+##    3) sex=female 466 127 survived (0.2725322 0.7274678) *
+```
+
+---
+
+
+```r
+plot(as.party(titanic_tree))
+```
+
+&lt;img src="lec30_files/figure-html/unnamed-chunk-19-1.png" width="864" /&gt;
+
+
+---
+
+What if we in lower the complexity parameter threshold, so that each new branch only needs to decrease the error by 0.9%?
+
+
+```r
+titanic_tree0.9 = rpart(survived ~ sex + age + pclass, data = Titanicp, method = "class", 
+                      control = rpart.control(cp = 0.009))
+plot(as.party(titanic_tree0.9))
+```
+
+&lt;img src="lec30_files/figure-html/unnamed-chunk-20-1.png" width="864" /&gt;
+
+---
+
+What if we in increase the complexity parameter threshold, so that each new branch needs to decrease the error by 2%?
+
+
+```r
+titanic_tree2 = rpart(survived ~ sex + age + pclass, data = Titanicp, method = "class", 
+                      control = rpart.control(cp = 0.02))
+plot(as.party(titanic_tree2))
+```
+
+&lt;img src="lec30_files/figure-html/unnamed-chunk-21-1.png" width="864" /&gt;
+
+---
+
+## Evaluating (in-sample) performance
+
+#### 1% (default)
+
+
+```r
+titanic_1_pred = predict(titanic_tree, type = "class")
+confusionMatrix(data=titanic_1_pred, reference = Titanicp$survived)$table
+```
+
+```
+##           Reference
+## Prediction died survived
+##   died      682      147
+##   survived  127      353
+```
+
+```r
+confusionMatrix(data=titanic_1_pred, reference = Titanicp$survived)$overall[1]
+```
+
+```
+##  Accuracy 
+## 0.7906799
+```
+
+---
+
+## Evaluating (in-sample) performance
+
+#### 0.9%
+
+
+```r
+titanic_0.9_pred = predict(titanic_tree0.9, type = "class")
+confusionMatrix(data=titanic_0.9_pred, 
+                reference = Titanicp$survived)$table
+```
+
+```
+##           Reference
+## Prediction died survived
+##   died      718      164
+##   survived   91      336
+```
+
+```r
+confusionMatrix(data=titanic_0.9_pred,
+                reference = Titanicp$survived)$overall[1]
+```
+
+```
+##  Accuracy 
+## 0.8051948
+```
+
+---
+
+## Evaluating (in-sample) performance
+
+#### 2%
+
+
+```r
+titanic_2_pred = predict(titanic_tree2, type = "class")
+confusionMatrix(data=titanic_2_pred, 
+                reference = Titanicp$survived)$table
+```
+
+```
+##           Reference
+## Prediction died survived
+##   died      682      161
+##   survived  127      339
+```
+
+```r
+confusionMatrix(data=titanic_2_pred,
+                reference = Titanicp$survived)$overall[1]
+```
+
+```
+##  Accuracy 
+## 0.7799847
+```
+
+---
+
+## Performance benchmarking
+
+
+
+```r
+table(Titanicp$survived)
+```
+
+```
+## 
+##     died survived 
+##      809      500
+```
+
+What if our prediction model was just that everyone died?  The accuracy would be:
+
+
+```r
+809/(809+500)
+```
+
+```
+## [1] 0.618029
+```
+
+When considering performance, we should take into account that a "null" model might appear to give quite good performance when we have unbalanced group sizes.
+
+---
+
+## Evaluating (out-of-sample) performance
+
+
+```r
+titanic_complete = Titanicp %&gt;% select(survived, sex, age, pclass) %&gt;% drop_na()
+train(survived ~ sex + age + pclass, data = titanic_complete,
+      method = "rpart", trControl = trainControl(method = "cv", number = 10))
+```
+
+```
+## CART 
+## 
+## 1046 samples
+##    3 predictor
+##    2 classes: 'died', 'survived' 
+## 
+## No pre-processing
+## Resampling: Cross-Validated (10 fold) 
+## Summary of sample sizes: 942, 941, 942, 941, 941, 941, ... 
+## Resampling results across tuning parameters:
+## 
+##   cp          Accuracy   Kappa    
+##   0.01639344  0.7696021  0.5002840
+##   0.01873536  0.7648311  0.4910097
+##   0.45901639  0.6748002  0.2449885
+## 
+## Accuracy was used to select the optimal model using
+##  the largest value.
+## The final value used for the model was cp = 0.01639344.
+```
+
+---
+
+## Final model
+
+The CV procedure suggested 1.6% for the complexity parameter.
+
+
+```r
+titanic_final = rpart(survived ~ sex + age + pclass, data = titanic_complete, 
+                      control = rpart.control(cp = 0.016))
+plot(as.party(titanic_final))
+```
+
+&lt;img src="lec30_files/figure-html/unnamed-chunk-28-1.png" width="864" /&gt;
+
+---
+
+## Decision tree weaknesses
+
+-   Decision trees can become very complex very quickly - without a complexity penalty, it will happily continue until perfect classification (likely massively overfitting the data).
+
+-   The selected tree might be very sensitive to the complexity penalty
+
+-   Can only make decisions parallel to axes:
+
+&lt;center&gt;
+
+&lt;img src="imgs/tree_parallel.png", width="85%"&gt;
+
+&lt;/center&gt;
+
+.footnote[
+Image source: https://campus.datacamp.com/courses/supervised-learning-in-r-classification/chapter-4-classification-trees?ex=5
+]
+
+---
+
+## A single tree is prone to overfitting
+
+
+&lt;center&gt;
+
+&lt;img src="imgs/overfit.jpg", width="70%"&gt;
+
+&lt;/center&gt;
+
+&gt; When you **overfit** you're modelling noise rather than signal.
+
+
+---
+class: segue
+
+## Random forests
+
+---
+
+## Random forests
+
+
+&gt; In a **random forest** we grow many trees. Each one learns from different (sub)samples of observations and different combinations of variables.
+
+A random forest is constructed by:
+
+1.  Choosing the number of decision trees to grow and the number of variables to consider in each tree.
+
+2.  Randomly selecting the rows of the data frame **with replacement**.
+
+3.  Randomly selecting the appropriate number of variables from the data frame.
+
+4.  Building a decision tree on the resulting data set.
+
+5.  Repeating this procedure a large number of times.
+
+6.  A prediction is be made by **majority rule**, i.e. running your new observation through all the trees in the forest and seeing which class is predicted most often.
+
+-   The `randomForest::randomForest()` function in R defaults to 500 trees each trained on `sqrt(p)` variables where `p` is the number of predictors in the full data set.
+
+&gt; Why do we randomly select the features?
+
+-   If one or a few features are very strong predictors for the response variable, then these features will be selected in many of the trees, causing them to become correlated. .red[This can reduce the accuracy of the ensemble.]
+
+---
+
+## Ensemble learning: bagging (bootstrap aggregating)
+
+&lt;img src="imgs/bagging.png", width="90%"&gt;
+
+
+---
+
+## Ensemble decision making
+
+&lt;img src="imgs/randomforest.png", width="85%"&gt;
+
+.footnote[
+Source: [GSS](http://www.globalsoftwaresupport.com/random-forest-classifier-bagging-machine-learning/)
+]
+
+---
+&lt;svg viewBox="0 0 581 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M581 226.6C581 119.1 450.9 32 290.5 32S0 119.1 0 226.6C0 322.4 103.3 402 239.4 418.1V480h99.1v-61.5c24.3-2.7 47.6-7.4 69.4-13.9L448 480h112l-67.4-113.7c54.5-35.4 88.4-84.9 88.4-139.7zm-466.8 14.5c0-73.5 98.9-133 220.8-133s211.9 40.7 211.9 133c0 50.1-26.5 85-70.3 106.4-2.4-1.6-4.7-2.9-6.4-3.7-10.2-5.2-27.8-10.5-27.8-10.5s86.6-6.4 86.6-92.7-90.6-87.9-90.6-87.9h-199V361c-74.1-21.5-125.2-67.1-125.2-119.9zm225.1 38.3v-55.6c57.8 0 87.8-6.8 87.8 27.3 0 36.5-38.2 28.3-87.8 28.3zm-.9 72.5H365c10.8 0 18.9 11.7 24 19.2-16.1 1.9-33 2.8-50.6 2.9v-22.1z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## `randomForest` in R
+
+
+```r
+library(randomForest)
+*iris_rf &lt;- randomForest(Species ~ ., iris)
+iris_rf
+```
+
+```
+## 
+## Call:
+##  randomForest(formula = Species ~ ., data = iris) 
+##                Type of random forest: classification
+##                      Number of trees: 500
+## No. of variables tried at each split: 2
+## 
+##         OOB estimate of  error rate: 5.33%
+## Confusion matrix:
+##            setosa versicolor virginica class.error
+## setosa         50          0         0        0.00
+## versicolor      0         47         3        0.06
+## virginica       0          5        45        0.10
+```
+
+Using the `randomForest()` function, we can train our ensemble learning using the same formula we passed to `rpart`.
+
+---
+&lt;svg viewBox="0 0 581 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M581 226.6C581 119.1 450.9 32 290.5 32S0 119.1 0 226.6C0 322.4 103.3 402 239.4 418.1V480h99.1v-61.5c24.3-2.7 47.6-7.4 69.4-13.9L448 480h112l-67.4-113.7c54.5-35.4 88.4-84.9 88.4-139.7zm-466.8 14.5c0-73.5 98.9-133 220.8-133s211.9 40.7 211.9 133c0 50.1-26.5 85-70.3 106.4-2.4-1.6-4.7-2.9-6.4-3.7-10.2-5.2-27.8-10.5-27.8-10.5s86.6-6.4 86.6-92.7-90.6-87.9-90.6-87.9h-199V361c-74.1-21.5-125.2-67.1-125.2-119.9zm225.1 38.3v-55.6c57.8 0 87.8-6.8 87.8 27.3 0 36.5-38.2 28.3-87.8 28.3zm-.9 72.5H365c10.8 0 18.9 11.7 24 19.2-16.1 1.9-33 2.8-50.6 2.9v-22.1z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## `randomForest` in R
+
+
+```r
+*predict(iris_rf, new_data)
+```
+
+```
+##      1      2 
+## setosa setosa 
+## Levels: setosa versicolor virginica
+```
+
+Again, we can use the same `new_data` values in the `predict` function as before to reach the same prediction we did with `rpart`.
+
+---
+
+## Titanic random forest
+
+
+```r
+*titanic_rf = randomForest(survived ~ sex + age + pclass, titanic_complete)
+titanic_rf
+```
+
+```
+## 
+## Call:
+##  randomForest(formula = survived ~ sex + age + pclass, data = titanic_complete) 
+##                Type of random forest: classification
+##                      Number of trees: 500
+## No. of variables tried at each split: 1
+## 
+##         OOB estimate of  error rate: 20.75%
+## Confusion matrix:
+##          died survived class.error
+## died      567       52  0.08400646
+## survived  165      262  0.38641686
+```
+
+```r
+importance(titanic_rf)
+```
+
+```
+##        MeanDecreaseGini
+## sex           122.29587
+## age            21.97414
+## pclass         40.82804
+```
+
+
+.footnote[
+Note: OOB is short for: [Out-of-bag](https://en.wikipedia.org/wiki/Out-of-bag_error)
+]
+
+---
+class: columns-2
+
+For more details on decision trees see Hastie, Tibshirani, and Friedman (2009; section 9.2) and James, Witten, Hastie, et al. (2017; chapter 8).
+
+## References
+
+.small[
+Hastie, T., R. Tibshirani, and J. Friedman (2009).
+_The Elements of Statistical Learning_. 2nd ed.
+Springer Series in Statistics. New York, NY, USA:
+Springer. URL:
+[https://web.stanford.edu/~hastie/ElemStatLearn/](https://web.stanford.edu/~hastie/ElemStatLearn/).
+
+James, G., D. Witten, T. Hastie, and R. Tibshirani
+(2017). _An Introduction to Statistical Learning:
+With Applications in R_. New York: Springer. URL:
+[https://www-bcf.usc.edu/~gareth/ISL/](https://www-bcf.usc.edu/~gareth/ISL/).
+
+Jed Wing, M. K. C. from, S. Weston, A. Williams, C.
+Keefer, A. Engelhardt, T. Cooper, Z. Mayer, B.
+Kenkel, the R Core Team, M. Benesty, et al. (2018).
+_caret: Classification and Regression Training_. R
+package version 6.0-80. URL:
+[https://CRAN.R-project.org/package=caret](https://CRAN.R-project.org/package=caret).
+
+Liaw, A. and M. Wiener (2002). "Classification and
+Regression by randomForest". In: _R News_ 2.3, pp.
+18-22. URL:
+[https://CRAN.R-project.org/doc/Rnews/](https://CRAN.R-project.org/doc/Rnews/).
+
+Therneau, T. and B. Atkinson (2018). _rpart:
+Recursive Partitioning and Regression Trees_. R
+package version 4.1-13. URL:
+[https://CRAN.R-project.org/package=rpart](https://CRAN.R-project.org/package=rpart).
+]
+
+
+## Acknowledgements
+
+Special thanks to [Sarah Romanes &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"&gt;&lt;/path&gt;&lt;/svg&gt;](https://twitter.com/sarah_romanes) for providing content inspiration from her R Ladies talks on machine learning:
+
+-   [sarahromanes.github.io/r-ladies-ML-1](https://sarahromanes.github.io/r-ladies-ML-1/) 
+-   [sarahromanes.github.io/r-ladies-ML-2](https://sarahromanes.github.io/r-ladies-ML-2/)
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="assets/remark-zoom.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

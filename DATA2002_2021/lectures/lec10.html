@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>DATA2002</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Garth Tarr" />
+    <script src="lec10_files/header-attrs-2.10/header-attrs.js"></script>
+    <link href="lec10_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } },
+      "HTML-CSS": {
+        styles: {
+          ".MathJax a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+          ".MathJax_Preview a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+        }
+      }
+      });
+    </script>
+    <link rel="stylesheet" href="assets/sydney-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="assets/sydney.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# DATA2002
+## Testing means
+### Garth Tarr
+
+---
+
+class: segue
+
+
+
+
+
+.large[
+One sample `\(t\)`-test
+
+Two-sample `\(t\)`-test
+
+Paired samples `\(t\)`-test
+]
+
+---
+class:segue
+
+# General `\(t\)`-test background
+
+---
+
+## The `\(t\)`-distribution: what is it?
+
+- Some basic probability facts about samples from *normal populations* will prove useful.
+1. The sample mean from a normal sample is itself normally distributed.
+2. The sample variance from a normal sample has a *scaled* `\(\chi^2\)` (chi-squared) distribution.
+3. The sample mean and sample variance from a normal sample are *statistically independent*.
+- If `\(Z\sim N(0,1)\)` is independent of a `\(\chi^2_d\)` random variable, the quantity
+$$ \frac{Z}{\sqrt{\chi^2_d/d}}\sim t_d\,, $$
+a `\(t\)`-distribution with `\(d\)` degrees of freedom.
+
+---
+
+## The t-statistic
+
+- Combining these facts means that if the population mean is `\(\mu\)`, the sample mean and variance are `\(\bar X\)` and `\(S^2\)`, the ratio
+$$ 
+\frac{\bar X-\mu}{S/\sqrt{n}}
+=\frac{\sqrt n(\bar X-\mu)/\sigma}{S/\sigma}
+\sim t_{n-1}\,. $$
+  - the numerator is `\(N(0,1)\)`;
+  - the denominator is `\(\sqrt{\chi^2_{n-1}/(n-1)}\)`, independently of the numerator.
+- Indeed, in many statistical applications we have a model whereby a certain statistic has this general form:
+  - some estimator of some parameter is normally distributed;
+  - a standard error based on the data has a distribution like `\(\sqrt{\chi^2_d/d}\)` times the true SD of the estimator (for some `\(d\)`) and is *independent* of the estimator; 
+  - then the ratio 
+`\(\frac{\text{estimator}-\text{true value}}{\text{standard error}} \sim t_d\)`.
+
+---
+class: segue
+
+# One sample `\(t\)`-test
+
+---
+
+&lt;div align="center"&gt;
+&lt;img src="imgs/food2.png" width="75%"&gt;
+&lt;/div&gt;
+
+---
+
+&lt;div align="center"&gt;
+&lt;img src="imgs/food1.png" width="80%"&gt;
+&lt;/div&gt;
+
+---
+
+&lt;div align="center"&gt;
+&lt;img src="imgs/food3.png" width="100%" height="100%"&gt;
+&lt;/div&gt;
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M368 96h-48V56c0-13.255-10.745-24-24-24H24C10.745 32 0 42.745 0 56v400c0 13.255 10.745 24 24 24h272c13.255 0 24-10.745 24-24v-42.11l80.606-35.977C429.396 365.063 448 336.388 448 304.86V176c0-44.112-35.888-80-80-80zm16 208.86a16.018 16.018 0 0 1-9.479 14.611L320 343.805V160h48c8.822 0 16 7.178 16 16v128.86zM208 384c-8.836 0-16-7.164-16-16V144c0-8.836 7.164-16 16-16s16 7.164 16 16v224c0 8.836-7.164 16-16 16zm-96 0c-8.836 0-16-7.164-16-16V144c0-8.836 7.164-16 16-16s16 7.164 16 16v224c0 8.836-7.164 16-16 16z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Beer contents
+
+Beer contents in a pack of six bottles (in millilitres) are:
+
+
+```r
+y = c(374.8, 375.0, 375.3, 374.8, 374.4, 374.9)
+```
+
+Is the mean beer content less than the 375 ml claimed on the label?
+
+.pull-left[
+
+```r
+library("ggplot2")
+df = data.frame(y)
+set.seed(124)
+p1 = ggplot(df, aes(x = "", y = y)) +
+  geom_boxplot(alpha = 0.5, coef = 10) + 
+  geom_dotplot(binaxis = 'y', 
+               stackdir = 'center') + 
+  geom_hline(yintercept = 375, 
+             colour = "blue",
+             linetype = "dashed") + 
+  labs(y = "Beer volume (ml)", x = "") +
+  theme_bw(base_size = 24) + 
+  theme(axis.ticks.x = element_blank(),
+        axis.text.x = element_blank())
+```
+]
+
+.footnote[
+Note `geom_boxplot()` requires something for the x-axis, this is usually a factor variable used to compare groups, but in this case, we only have one group.  We can provide anything, here we just specified a blank group on the x axis with `x = ""`.
+]
+
+.pull-right[
+
+```r
+p1
+```
+
+&lt;img src="lec10_files/figure-html/unnamed-chunk-3-1.png" width="288" /&gt;
+]
+
+
+---
+
+##	Hypothesis testing 
+
+
+.blockquote[
+- **Hypotheses:** `\(H_0\colon\ \theta=\theta_0\)`  vs  `\(H_1\colon\ \theta&gt;\theta_0\)` or `\(\theta&lt;\theta_0\)` or `\(\theta\neq\theta_0\)`
+- **Assumptions:** `\(X_1, X_2, ..., X_n \sim F_{\theta}\)`
+- **Test statistic:** `\(T=f(X_1, X_2,..., X_n)\)`.
+- **Observed test statistic:** `\(t_0 = f(x_1, x_2,..., x_n)\)`.
+- **Significance:** p-value `\(= P(T\geq t_0)\)` or `\(P(T\leq t_0)\)` or `\(2P(T\geq |t_0|)\)`
+- **Decision:** If the p-value is less than `\(\alpha\)`, there is evidence against `\(H_0\)`.
+]
+
+???
+
+Explain each point in detail.
+
+---
+
+##	Hypothesis
+
+- The statement against which you search for evidence is called the
+null hypothesis, and is denoted by `\(H_0\)`. It is generally a "no difference" statement.
+- The statement you claim is called the alternative hypothesis, and
+is denoted by `\(H_1\)`.
+
+
+.blockquote[
+### &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M444.52 3.52L28.74 195.42c-47.97 22.39-31.98 92.75 19.19 92.75h175.91v175.91c0 51.17 70.36 67.17 92.75 19.19l191.9-415.78c15.99-38.39-25.59-79.97-63.97-63.97z"&gt;&lt;/path&gt;&lt;/svg&gt;  Typical Hypotheses:
+
+`\(H_0\colon\ \theta = \theta_0\)`
+
+VS
+
+`\(H_1\colon\ \theta &gt; \theta_0\)` (upper-side alternative) 
+
+`\(H_1\colon\ \theta &lt; \theta_0\)` (lower-side alternative)
+
+`\(H_1\colon\ \theta \ne \theta_0\)` (two-sided alternative)
+]
+
+---
+
+## Assumptions
+
+- Each observation `\(X_1, X_2, ..., X_n\)` is chosen at random from a population.
+- We say that such random variables are _iid_ (independently and identically distributed).
+- Each test we consider will have its own assumptions.
+
+--
+
+## Test statistic
+
+- Since observations `\(X_i\)` vary from sample to sample we can never be sure whether `\(H_0\)` is true or not. 
+- We use a test statistic `\(T = f(X_1, ..., X_n)\)` to test if the data are consistent with `\(H_0\)` such that the distribution of `\(T\)` is known assuming `\(H_0\)` is true.
+
+The **observed test statistic**, `\(t_0\)`, is where we plug our observed data into the formula for the test statistic.
+
+Large (positive or negative depending on `\(H_1\)`) observed test statistic values is taken as evidence of poor agreement with `\(H_0\)`.
+
+---
+
+## Significance
+
+The p-value is defined as the probability of getting a test statistic, `\(T\)`, _as or more extreme_ than the value we observed, `\(t_0\)`, _assuming_ that `\(H_0\)` is true.
+
+.blockquote[
+### &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M444.52 3.52L28.74 195.42c-47.97 22.39-31.98 92.75 19.19 92.75h175.91v175.91c0 51.17 70.36 67.17 92.75 19.19l191.9-415.78c15.99-38.39-25.59-79.97-63.97-63.97z"&gt;&lt;/path&gt;&lt;/svg&gt; Typical p-value statements:
+
+For `\(H_1\colon\ \theta &gt; \theta_0\)`, p-value = `\(P(T \ge t_0)\)`
+
+For `\(H_1\colon\ \theta &lt; \theta_0\)`, p-value = `\((T \le -t_0)\)`
+
+For `\(H_1\colon\ \theta \ne \theta_0\)`, p-value = `\(2P(T \ge |t_0|)\)`
+]
+
+
+
+&lt;img src="lec10_files/figure-html/unnamed-chunk-4-1.png" width="864" /&gt;
+
+---
+
+## Decision
+
+An observed _large_ positive or negative value of `\(t_0\)` and hence small p-value is taken as evidence of poor agreement with `\(H_0\)`.
+
+- If the p-value is small, then either `\(H_0\)` is true and the poor agreement is due to an unlikely event, or `\(H_0\)` is false. Therefore..
+- the smaller the p-value, the stronger the evidence against `\(H_0\)` in favour of `\(H_1\)`.
+
+- A large p-value does not mean that there is evidence that `\(H_0\)` is true
+
+- The level of significance, `\(\alpha\)`, is the strength of evidence needed to reject `\(H_0\)` (often `\(\alpha = 0.05\)`).
+
+---
+
+## One sample `\(t\)`-test 
+
+Suppose we have a sample `\(X_1, X_2, \ldots, X_n\)` of the size `\(n\)` drawn from a normal population with an unknown variance `\(\sigma^2\)`. Let `\(x_1, x_2, ..., x_n\)` be the observed values. We want to test the population mean `\(\mu\)`.
+
+.blockquote[
+- __Hypothesis:__ `\(H_0\colon\ \mu = \mu_0\)` vs `\(H_1\colon\ \mu &gt; \mu_0, \ \mu &lt; \mu_0\)` or `\(\mu \ne \mu_0\)`
+- **Assumptions:** `\(X_i\)` are iid rv and follow `\(N(\mu, \sigma^2)\)`.
+- **Test statistic:** `\(T = \dfrac{\bar{X} - \mu_0}{S /\sqrt{n}}\)`.  Under `\(H_0\)`, `\(T \sim t_{n-1}\)`.
+- **Observed test statistic:** `\(t_0 = \dfrac{\bar{x} - \mu_0}{s /\sqrt{n}}\)`
+- **p-value:** `\(P(t_{n-1} \ge t_0)\)`, `\(P(t_{n-1} \le t_0)\)` or `\(2P(t_{n-1} \ge |t_0|)\)`
+- **Decision:** Reject `\(H_0\)` in favour of `\(H_1\)` if the p-value is less than `\(\alpha\)`.
+]
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M368 96h-48V56c0-13.255-10.745-24-24-24H24C10.745 32 0 42.745 0 56v400c0 13.255 10.745 24 24 24h272c13.255 0 24-10.745 24-24v-42.11l80.606-35.977C429.396 365.063 448 336.388 448 304.86V176c0-44.112-35.888-80-80-80zm16 208.86a16.018 16.018 0 0 1-9.479 14.611L320 343.805V160h48c8.822 0 16 7.178 16 16v128.86zM208 384c-8.836 0-16-7.164-16-16V144c0-8.836 7.164-16 16-16s16 7.164 16 16v224c0 8.836-7.164 16-16 16zm-96 0c-8.836 0-16-7.164-16-16V144c0-8.836 7.164-16 16-16s16 7.164 16 16v224c0 8.836-7.164 16-16 16z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Beer contents
+
+&lt;br&gt;
+Beer contents in a pack of six bottles (in millilitres) are:
+
+&lt;center&gt;
+374.8, 375.0, 375.3, 374.8, 374.4, 374.9
+&lt;/center&gt;
+&lt;br&gt;
+
+Is the mean beer content less than the 375 ml claimed on the label?
+
+
+```r
+x = c(374.8, 375.0, 375.3, 374.8, 374.4, 374.9)
+mean(x)
+```
+
+```
+## [1] 374.8667
+```
+
+```r
+sd(x)
+```
+
+```
+## [1] 0.294392
+```
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M368 96h-48V56c0-13.255-10.745-24-24-24H24C10.745 32 0 42.745 0 56v400c0 13.255 10.745 24 24 24h272c13.255 0 24-10.745 24-24v-42.11l80.606-35.977C429.396 365.063 448 336.388 448 304.86V176c0-44.112-35.888-80-80-80zm16 208.86a16.018 16.018 0 0 1-9.479 14.611L320 343.805V160h48c8.822 0 16 7.178 16 16v128.86zM208 384c-8.836 0-16-7.164-16-16V144c0-8.836 7.164-16 16-16s16 7.164 16 16v224c0 8.836-7.164 16-16 16zm-96 0c-8.836 0-16-7.164-16-16V144c0-8.836 7.164-16 16-16s16 7.164 16 16v224c0 8.836-7.164 16-16 16z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Beer contents
+
+Workflow for a one sample `\(t\)`-test.  Let `\(\mu\)` be the population mean beer content (in millilitres).
+
+.pull-left[
+.blockquote[
+- **Hypothesis:** `\(H_0\colon\ \mu = 375\)` vs `\(H_1\colon\ \mu &lt; 375\)`
+- **Assumptions:** `\(X_i\)` are _iid_ rv and follow `\(N(\mu, \sigma^2)\)`.
+- **Test statistic:** `\(T = \dfrac{\bar{X} - \mu_0}{S /\sqrt{n}}\)`.  Under `\(H_0\)`, `\(T \sim t_{n-1}\)`.
+- **Observed test statistic:** `\(t_0 = \dfrac{374.87 - 375}{0.29 /\sqrt{6}} = -1.11\)`
+- **p-value:** `\(P(t_{5} \le -1.11) = 0.16\)`.
+- **Decision:** The data is consistent with the null hypothesis `\(H_0\)`.
+]
+]
+.pull-right[
+&lt;img src="lec10_files/figure-html/unnamed-chunk-6-1.png" width="864" /&gt;
+]
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M368 96h-48V56c0-13.255-10.745-24-24-24H24C10.745 32 0 42.745 0 56v400c0 13.255 10.745 24 24 24h272c13.255 0 24-10.745 24-24v-42.11l80.606-35.977C429.396 365.063 448 336.388 448 304.86V176c0-44.112-35.888-80-80-80zm16 208.86a16.018 16.018 0 0 1-9.479 14.611L320 343.805V160h48c8.822 0 16 7.178 16 16v128.86zM208 384c-8.836 0-16-7.164-16-16V144c0-8.836 7.164-16 16-16s16 7.164 16 16v224c0 8.836-7.164 16-16 16zm-96 0c-8.836 0-16-7.164-16-16V144c0-8.836 7.164-16 16-16s16 7.164 16 16v224c0 8.836-7.164 16-16 16z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left[
+
+```r
+t.test(x, mu = 375, alternative = "less")
+```
+
+```
+## 
+## 	One Sample t-test
+## 
+## data:  x
+## t = -1.1094, df = 5, p-value = 0.1589
+## alternative hypothesis: true mean is less than 375
+## 95 percent confidence interval:
+##      -Inf 375.1088
+## sample estimates:
+## mean of x 
+##  374.8667
+```
+
+]
+
+.pull-right[
+
+```r
+n = length(x)
+t0 = (mean(x) - 375)/(sd(x)/sqrt(n))
+t0
+```
+
+```
+## [1] -1.1094
+```
+
+```r
+pval = pt(t0, n - 1)
+pval
+```
+
+```
+## [1] 0.1588721
+```
+]
+
+---
+class: segue
+
+# Two-sample `\(t\)`-test
+
+---
+
+## What if you have two samples?
+
+There are times that we want to test if the population means of two samples are different.  
+
+Here we are left with two possible scenarios
+
+- Two independent samples
+- Two related samples (dependent samples or repeated measures)
+
+.blockquote[
+Blood samples are taken from 11 smokers and 11 non-smokers to measure aggregation of blood platelets. Are these **dependent** or **independent** samples?
+
+]
+
+
+
+---
+
+&lt;div align="center"&gt;
+&lt;img src="imgs/smoking.png" width="75%"&gt;
+&lt;/div&gt;
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M632 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8zM553.3 87.1c-5.7-3.8-9.3-10-9.3-16.8V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v62.3c0 22 10.2 43.4 28.6 55.4 42.2 27.3 67.4 73.8 67.4 124V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-65.5-32.4-126.2-86.7-162.6zM432 352H48c-26.5 0-48 21.5-48 48v64c0 26.5 21.5 48 48 48h384c8.8 0 16-7.2 16-16V368c0-8.8-7.2-16-16-16zm-32 112H224v-64h176v64zm87.7-322.4C463.8 125 448 99.3 448 70.3V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v66.4c0 43.7 24.6 81.6 60.3 106.7 22.4 15.7 35.7 41.2 35.7 68.6V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-43.3-21-83.4-56.3-108.1zM536 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Smokers and blood platelet aggregation
+
+Blood samples are taken from 11 smokers and 11 non-smokers to measure aggregation of blood platelets.  
+
+.pull-left[
+
+```r
+non_smokers = c(25, 25, 27, 44, 30, 67, 
+                53, 53, 52, 60, 28)
+smokers =  c(27, 29, 37, 36, 46, 82, 
+             57, 80, 61, 59, 43)
+dat = data.frame(
+  platelets = c(non_smokers, smokers),
+  status = c(rep("Non smokers", 
+                 length(non_smokers)),
+             rep("Smokers", 
+                 length(smokers)))
+)
+library(dplyr)
+sum = dat %&gt;% 
+  group_by(status) %&gt;% 
+  summarise(Mean = mean(platelets),
+            SD = sd(platelets), 
+            n = n())
+```
+]
+
+.pull-right[
+
+```r
+knitr::kable(sum, format = "html", digits = 1)
+```
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; status &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Mean &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; SD &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; n &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Non smokers &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 42.2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 15.6 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 11 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Smokers &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 50.6 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 18.9 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 11 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;br&gt;
+
+.blockquote[
+Is the aggregation of blood platelets affected by smoking?
+]
+
+]
+
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M632 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8zM553.3 87.1c-5.7-3.8-9.3-10-9.3-16.8V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v62.3c0 22 10.2 43.4 28.6 55.4 42.2 27.3 67.4 73.8 67.4 124V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-65.5-32.4-126.2-86.7-162.6zM432 352H48c-26.5 0-48 21.5-48 48v64c0 26.5 21.5 48 48 48h384c8.8 0 16-7.2 16-16V368c0-8.8-7.2-16-16-16zm-32 112H224v-64h176v64zm87.7-322.4C463.8 125 448 99.3 448 70.3V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v66.4c0 43.7 24.6 81.6 60.3 106.7 22.4 15.7 35.7 41.2 35.7 68.6V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-43.3-21-83.4-56.3-108.1zM536 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+library("ggplot2")
+ggplot(dat, aes(x = status, y = platelets)) + 
+  geom_boxplot() + 
+  geom_jitter(width=0.15, size = 3, colour = "blue") + 
+  theme_bw(base_size = 28) + 
+  labs(x = "", y = "Blood platelet aggregation")
+```
+
+&lt;img src="lec10_files/figure-html/unnamed-chunk-11-1.png" width="864" /&gt;
+
+---
+
+## Two-sample `\(t\)`-test
+
+.blockquote[
+1. **Hypotheses:** `\(H_0\colon\ \mu_x=\mu_y\)` vs `\(H_1\colon\ \mu_x&gt;\mu_y\)` or `\(\mu_x&lt;\mu_y\)` or `\(\mu_x\not =\mu_y\)`
+
+1. **Assumptions:** `\(X_1,...,X_{n_x}\)` are _iid_ `\(N(\mu_X,\sigma^2)\)`,
+`\(Y_1,...,Y_{n_y}\)` are _iid_ `\(N(\mu_Y,\sigma^2)\)` and 
+`\(X_i\)`'s are independent of `\(Y_i\)`'s. 
+
+1. **Test statistic:** `\(T = \dfrac{{\bar X} - {\bar Y}}{S_p \sqrt{\frac{1}{n_1} + \frac{1}{n_2}}}\)` where `\(S^2_p = \dfrac{(n_x-1) S_{x}^2 + (n_y-1) S_{y}^2}{n_x+n_y-2}\)`.  Under `\(H_0\)`, `\(T \sim t_{n_x+n_y-2}\)` 
+
+1. **Observed test statistic:** `\(t_0 = \dfrac{{\bar x} - {\bar y}}{s_p \sqrt{\frac{1}{n_1} + \frac{1}{n_2}}}\)` where `\(s^2_p = \dfrac{(n_x-1) s_{x}^2 + (n_y-1) s_{y}^2}{n_x+n_y-2}\)`.
+
+1. **p-value:** `\(P(t_{n_x+n_y-2}\ge t_0)\)` or `\(P(t_{n_x+n_y-2}\le t_0)\)` or  `\(2P(t_{n_x+n_y-2} \ge |t_0|)\)`.
+
+1. **Decision:** If the p-value is less than `\(\alpha\)`, there is evidence against `\(H_0\)`.  If the p-value is greater than `\(\alpha\)`, the data are consistent with `\(H_0\)`.
+]
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M632 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8zM553.3 87.1c-5.7-3.8-9.3-10-9.3-16.8V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v62.3c0 22 10.2 43.4 28.6 55.4 42.2 27.3 67.4 73.8 67.4 124V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-65.5-32.4-126.2-86.7-162.6zM432 352H48c-26.5 0-48 21.5-48 48v64c0 26.5 21.5 48 48 48h384c8.8 0 16-7.2 16-16V368c0-8.8-7.2-16-16-16zm-32 112H224v-64h176v64zm87.7-322.4C463.8 125 448 99.3 448 70.3V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v66.4c0 43.7 24.6 81.6 60.3 106.7 22.4 15.7 35.7 41.2 35.7 68.6V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-43.3-21-83.4-56.3-108.1zM536 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+Let `\(X_i\)` be the blood platelet aggregation levels for the `\(i^{th}\)` non-smoker and `\(Y_j\)` the levels for the `\(j^{th}\)` smoker.  Let `\(\mu_S\)` and `\(\mu_N\)` be the population mean platelet aggregation levels for smokers and non-smokers respectively.
+
+.blockquote[
+1. **Hypotheses:** `\(H_0\colon\ \mu_{S}=\mu_{N}\)` vs `\(H_1\colon\ \mu_{S} \ne \mu_{N}\)`
+
+1. **Assumptions:** `\(X_1,...,X_{n_x}\)` are _iid_ `\(N(\mu_X,\sigma^2)\)`,
+`\(Y_1,...,Y_{n_y}\)` are _iid_ `\(N(\mu_Y,\sigma^2)\)` and 
+`\(X_i\)`'s are independent of `\(Y_i\)`'s. 
+
+1. **Test statistic:** `\(T = \dfrac{{\bar X} - {\bar Y}}{S_p \sqrt{\frac{1}{n_1} + \frac{1}{n_2}}}\)` where `\(S^2_p = \dfrac{(n_x-1) S_{x}^2 + (n_y-1) S_{y}^2}{n_x+n_y-2}\)`.  Under `\(H_0\)`, `\(T \sim t_{n_x+n_y-2}\)`
+
+1. **Observed test statistic:** `\(t_0 = \dfrac{50.6 - 42.2}{17.3 \sqrt{\frac{1}{11} + \frac{1}{11}}} = 1.14\)`   where `\(s^2_p = \frac{(11-1) 18.9^2 + (11-1) 15.6^2}{11+11-2}=17.3\)`.
+
+1. **p-value:** `\(2P(t_{20} \ge |1.14|) = 0.27\)`
+
+1. **Decision:** The data are consistent with `\(H_0\)`. There does not appear to be evidence that blood platelet aggregation levels are different in smokers.
+]
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M632 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8zM553.3 87.1c-5.7-3.8-9.3-10-9.3-16.8V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v62.3c0 22 10.2 43.4 28.6 55.4 42.2 27.3 67.4 73.8 67.4 124V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-65.5-32.4-126.2-86.7-162.6zM432 352H48c-26.5 0-48 21.5-48 48v64c0 26.5 21.5 48 48 48h384c8.8 0 16-7.2 16-16V368c0-8.8-7.2-16-16-16zm-32 112H224v-64h176v64zm87.7-322.4C463.8 125 448 99.3 448 70.3V8c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v66.4c0 43.7 24.6 81.6 60.3 106.7 22.4 15.7 35.7 41.2 35.7 68.6V280c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-30.3c0-43.3-21-83.4-56.3-108.1zM536 352h-48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left[
+
+```r
+t.test(smokers, non_smokers, alternative = "two.sided", var.equal = TRUE)
+```
+
+```
+## 
+## 	Two Sample t-test
+## 
+## data:  smokers and non_smokers
+## t = 1.144, df = 20, p-value = 0.2661
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  -6.961816 23.870907
+## sample estimates:
+## mean of x mean of y 
+##  50.63636  42.18182
+```
+
+```r
+nS = length(smokers)
+nN = length(non_smokers)
+sS = sd(smokers)
+sN = sd(non_smokers)
+sP = sqrt(((nS - 1) * sS^2 + (nN - 1) * sN^2)/
+            (nS + nN - 2))
+xbarS = mean(smokers)
+xbarN = mean(non_smokers)
+deg_free = nS+nN-2
+```
+]
+.pull-right[
+
+```r
+t0 = (xbarS - xbarN)/(sP * sqrt(1/nS + 1/nN))
+p_val = 2 * (1 - pt(abs(t0), deg_free))
+c(t0, p_val)
+```
+
+```
+## [1] 1.1439712 0.2661433
+```
+
+&lt;br&gt;
+
+&lt;img src="lec10_files/figure-html/unnamed-chunk-14-1.png" width="864" /&gt;
+]
+---
+
+## The Equal Variance Assumption
+
+- Lurking among all the assumptions a few slides back was:
+- `\(X_1,...,X_{n_x}\)` are _iid_ `\(N(\mu_X,\sigma^2)\)`,
+- `\(Y_1,...,Y_{n_y}\)` are _iid_ `\(N(\mu_Y,\sigma^2)\)` and 
+- `\(X_i's\)` are independent of `\(Y_i's\)`. 
+- In particular, we assume that the two underlying normal populations _have the same variance_.
+- In this example, does this seem reasonable?
+
+```r
+c(sS,sN)
+```
+
+```
+## [1] 18.89589 15.61293
+```
+- These are a little different: are they so different that the "equal underlying population variances" assumption is not reasonable?
+- We have options: the **Welch Test**.
+
+---
+
+## The Welch Two-Sample `\(t\)`-test
+
+- Welch developed an alternative test which does **not** assume equal population variances.
+- In that case, if 
+- the `\(X_i\)`'s are `\(N(\mu_X,\sigma_X^2)\)` and
+- the `\(Y_i\)`'s are `\(N(\mu_Y,\sigma_Y^2)\)` then
+then the variance of the sample mean difference is 
+$$ \operatorname{Var}(\bar X-\bar Y) = \operatorname{Var}(\bar X) + \operatorname{Var}(\bar Y) = \frac{\sigma_X^2}{n_x} +  \frac{\sigma_Y^2}{n_y}\,. $$
+- The standard error is obtained by plugging in the two sample variances and taking the square root (**note**: we do not need to compute a "pooled" estimate of the common variance!).
+- This gives the *Welch statistic*
+$$ \frac{\bar X-\bar Y}{\sqrt{\frac{S_X^2}{n_x}+\frac{S_Y^2}{n_y}}}\,.  $$
+
+---
+
+## Welch statistic **not** a proper t-statistic
+
+- Technically, this statistic is not a "usual" t-statistic since the denominator is not a scaled `\(\chi^2\)` independent of the numerator.
+- However, the whole statistic still has an *approximate* t-distribution:
+- the degrees of freedom is not necessarily a whole number, and is estimated from the data.
+- **Thankfully** R can implement this with no drama (we leave out the `var.equal = TRUE` argument):
+
+```r
+t.test(smokers, non_smokers, alternative = "two.sided")
+```
+
+```
+## 
+## 	Welch Two Sample t-test
+## 
+## data:  smokers and non_smokers
+## t = 1.144, df = 19.313, p-value = 0.2666
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  -6.997031 23.906122
+## sample estimates:
+## mean of x mean of y 
+##  50.63636  42.18182
+```
+- **Note** the p-value is much the same as the equal-variance assumption version (the Welch test is the default two-independent sample `\(t\)`-test in R!).
+---
+class: segue
+
+# Paired samples `\(t\)`-test
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M444.34 181.1c22.38 15.68 35.66 41.16 35.66 68.59V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-43.24-21.01-83.41-56.34-108.06C463.85 125.02 448 99.34 448 70.31V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v66.4c0 43.69 24.56 81.63 60.34 106.7zM194.97 358.98C126.03 370.07 59.69 394.69 0 432c83.65 52.28 180.3 80 278.94 80h88.57L254.79 380.49c-14.74-17.2-37.45-25.11-59.82-21.51zM553.28 87.09c-5.67-3.8-9.28-9.96-9.28-16.78V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v62.31c0 22.02 10.17 43.41 28.64 55.39C550.79 153.04 576 199.54 576 249.69V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-65.44-32.41-126.19-86.72-162.6zM360.89 352.05c-34.4.06-86.81.15-88.21.17l117.8 137.43A63.987 63.987 0 0 0 439.07 512h88.45L409.57 374.4a63.955 63.955 0 0 0-48.68-22.35zM616 352H432l117.99 137.65A63.987 63.987 0 0 0 598.58 512H616c13.25 0 24-10.75 24-24V376c0-13.26-10.75-24-24-24z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+### Smoking
+
+Blood samples from `\(11\)` individuals .bold[.red[before and after]] they smoked a cigarette are used to measure aggregation of blood platelets.  
+
+.pull-left[
+
+```r
+before = c(25, 25, 27, 44, 30, 67, 53, 53, 52, 60, 28)
+after =  c(27, 29, 37, 36, 46, 82, 57, 80, 61, 59, 43)
+df = data.frame(before, after,
+                difference = after-before)
+df
+```
+
+```
+##    before after difference
+## 1      25    27          2
+## 2      25    29          4
+## 3      27    37         10
+## 4      44    36         -8
+## 5      30    46         16
+## 6      67    82         15
+## 7      53    57          4
+## 8      53    80         27
+## 9      52    61          9
+## 10     60    59         -1
+## 11     28    43         15
+```
+]
+
+
+.pull-right[
+
+&lt;br&gt;
+
+.blockquote[
+Is the aggregation affected by smoking?
+]
+
+
+```r
+apply(df, 2, mean) %&gt;% round(2)
+```
+
+    before      after difference 
+     42.18      50.64       8.45 
+
+```r
+apply(df, 2, sd) %&gt;% round(2)
+```
+
+    before      after difference 
+     15.61      18.90       9.65 
+
+
+]
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M444.34 181.1c22.38 15.68 35.66 41.16 35.66 68.59V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-43.24-21.01-83.41-56.34-108.06C463.85 125.02 448 99.34 448 70.31V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v66.4c0 43.69 24.56 81.63 60.34 106.7zM194.97 358.98C126.03 370.07 59.69 394.69 0 432c83.65 52.28 180.3 80 278.94 80h88.57L254.79 380.49c-14.74-17.2-37.45-25.11-59.82-21.51zM553.28 87.09c-5.67-3.8-9.28-9.96-9.28-16.78V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v62.31c0 22.02 10.17 43.41 28.64 55.39C550.79 153.04 576 199.54 576 249.69V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-65.44-32.41-126.19-86.72-162.6zM360.89 352.05c-34.4.06-86.81.15-88.21.17l117.8 137.43A63.987 63.987 0 0 0 439.07 512h88.45L409.57 374.4a63.955 63.955 0 0 0-48.68-22.35zM616 352H432l117.99 137.65A63.987 63.987 0 0 0 598.58 512H616c13.25 0 24-10.75 24-24V376c0-13.26-10.75-24-24-24z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left-2[
+
+```r
+df %&gt;% 
+  summarise(across(.cols = c(before, after),
+                   .fns = list(Mean = mean, 
+                               SD = sd, 
+                               n = length))) %&gt;% 
+  pivot_longer(cols = everything(),
+               names_sep = "_",
+               names_to = c("time", ".value"))
+```
+
+```
+## # A tibble: 2 × 4
+##   time    Mean    SD     n
+##   &lt;chr&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt;
+## 1 before  42.2  15.6    11
+## 2 after   50.6  18.9    11
+```
+
+```r
+p = ggplot(df, aes(x="", y=difference)) +
+  geom_boxplot() +
+  geom_dotplot(binaxis = "y", stackdir = "center") +
+  theme_classic(base_size = 24) +
+  geom_hline(yintercept = 0, linetype='dashed') +
+  labs(y = 'Difference in blood platelet levels')+
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+```
+]
+.pull-right-1[
+
+```r
+p
+```
+
+&lt;img src="lec10_files/figure-html/unnamed-chunk-20-1.png" width="288" /&gt;
+]
+
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M444.34 181.1c22.38 15.68 35.66 41.16 35.66 68.59V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-43.24-21.01-83.41-56.34-108.06C463.85 125.02 448 99.34 448 70.31V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v66.4c0 43.69 24.56 81.63 60.34 106.7zM194.97 358.98C126.03 370.07 59.69 394.69 0 432c83.65 52.28 180.3 80 278.94 80h88.57L254.79 380.49c-14.74-17.2-37.45-25.11-59.82-21.51zM553.28 87.09c-5.67-3.8-9.28-9.96-9.28-16.78V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v62.31c0 22.02 10.17 43.41 28.64 55.39C550.79 153.04 576 199.54 576 249.69V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-65.44-32.41-126.19-86.72-162.6zM360.89 352.05c-34.4.06-86.81.15-88.21.17l117.8 137.43A63.987 63.987 0 0 0 439.07 512h88.45L409.57 374.4a63.955 63.955 0 0 0-48.68-22.35zM616 352H432l117.99 137.65A63.987 63.987 0 0 0 598.58 512H616c13.25 0 24-10.75 24-24V376c0-13.26-10.75-24-24-24z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+Let `\(X_i\)` and `\(Y_i\)` be the blood platelet aggregation levels for the `\(i^{th}\)` person before and after smoking, respectively. Define the change in person `\(i\)`'s platelet aggregation levels as `\(D_i = Y_i - X_i\)` and the population mean change in platelet aggregation levels as `\(\mu_d\)`.
+
+.pull-left[
+.blockquote[
+- __Hypothesis:__ `\(H_0\colon\ \mu_d = 0\)` vs `\(H_1\colon\ \mu_d \ne 0\)`
+- **Assumptions:** `\(D_i\)` are _iid_ `\(N(\mu_d, \sigma^2)\)`.
+- **Test statistic:** `\(T = \dfrac{\bar{D}}{S_d /\sqrt{n}}\)`.  Under `\(H_0\)`, `\(T\sim t_{n-1}\)`
+- **Observed test statistic:** `\(t_0 = \dfrac{8.45}{9.65 /\sqrt{11}}= 2.91\)`
+- **p-value:** `\(2P(t_{10} \ge |2.91|) = 0.016\)`.
+
+]]
+.pull-right[
+.blockquote[
+- **Decision:** As the p-value is small, there is evidence against the null hypothesis. There is evidence that blood platelet aggregation levels change after smoking.
+]
+&lt;img src="lec10_files/figure-html/unnamed-chunk-21-1.png" width="864" /&gt;
+]
+
+
+
+
+
+
+
+---
+
+## References
+
+For further details see Larsen and Marx (2012), sections 6.1, 6.2, 7.1-7.4 and 9.2.
+
+&lt;br&gt;
+
+Larsen, R. J. and M. L. Marx (2012). _An Introduction
+to Mathematical Statistics and its Applications_. 5th
+ed. Boston, MA: Prentice Hall. ISBN:
+978-0-321-69394-5.
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="assets/remark-zoom.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

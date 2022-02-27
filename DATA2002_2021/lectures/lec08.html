@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>DATA2002</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Garth Tarr" />
+    <script src="lec08_files/header-attrs-2.10/header-attrs.js"></script>
+    <link href="lec08_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } },
+      "HTML-CSS": {
+        styles: {
+          ".MathJax a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+          ".MathJax_Preview a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+        }
+      }
+      });
+    </script>
+    <link rel="stylesheet" href="assets/sydney-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="assets/sydney.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# DATA2002
+## Testing for independence
+### Garth Tarr
+
+---
+
+class: segue
+
+
+
+
+
+.large[
+Testing for independence in `\(2\times2\)` tables
+
+Testing for independence in general tables
+]
+
+---
+class: segue
+
+# Testing for independence in `\(2\times2\)` tables
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M496.616 372.639l70.012-70.012c16.899-16.9 9.942-45.771-12.836-53.092L512 236.102V96c0-17.673-14.327-32-32-32h-64V24c0-13.255-10.745-24-24-24H248c-13.255 0-24 10.745-24 24v40h-64c-17.673 0-32 14.327-32 32v140.102l-41.792 13.433c-22.753 7.313-29.754 36.173-12.836 53.092l70.012 70.012C125.828 416.287 85.587 448 24 448c-13.255 0-24 10.745-24 24v16c0 13.255 10.745 24 24 24 61.023 0 107.499-20.61 143.258-59.396C181.677 487.432 216.021 512 256 512h128c39.979 0 74.323-24.568 88.742-59.396C508.495 491.384 554.968 512 616 512c13.255 0 24-10.745 24-24v-16c0-13.255-10.745-24-24-24-60.817 0-101.542-31.001-119.384-75.361zM192 128h256v87.531l-118.208-37.995a31.995 31.995 0 0 0-19.584 0L192 215.531V128z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Titanic
+
+.pull-left[
+- The `Titanic` dataset comes preloaded in R. 
+
+- This data set provides information on the fate of passengers on the fatal maiden voyage of the ocean liner Titanic, summarized according to economic status (class), sex, age and survival.
+
+.blockquote[
+&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 448c-110.532 0-200-89.431-200-200 0-110.495 89.472-200 200-200 110.491 0 200 89.471 200 200 0 110.53-89.431 200-200 200zm107.244-255.2c0 67.052-72.421 68.084-72.421 92.863V300c0 6.627-5.373 12-12 12h-45.647c-6.627 0-12-5.373-12-12v-8.659c0-35.745 27.1-50.034 47.579-61.516 17.561-9.845 28.324-16.541 28.324-29.579 0-17.246-21.999-28.693-39.784-28.693-23.189 0-33.894 10.977-48.942 29.969-4.057 5.12-11.46 6.071-16.666 2.124l-27.824-21.098c-5.107-3.872-6.251-11.066-2.644-16.363C184.846 131.491 214.94 112 261.794 112c49.071 0 101.45 38.304 101.45 88.8zM298 368c0 23.159-18.841 42-42 42s-42-18.841-42-42 18.841-42 42-42 42 18.841 42 42z"&gt;&lt;/path&gt;&lt;/svg&gt;
+Is there any evidence that being a women increased your chance of survival on the ship?
+]
+]
+
+.pull-right[
+
+```r
+x = as.data.frame(Titanic)
+head(x)
+```
+
+```
+##   Class    Sex   Age Survived Freq
+## 1   1st   Male Child       No    0
+## 2   2nd   Male Child       No    0
+## 3   3rd   Male Child       No   35
+## 4  Crew   Male Child       No    0
+## 5   1st Female Child       No    0
+## 6   2nd Female Child       No    0
+```
+
+```r
+y.mat = xtabs(Freq ~ Sex + Survived, x)
+y.mat
+```
+
+```
+##         Survived
+## Sex        No  Yes
+##   Male   1364  367
+##   Female  126  344
+```
+]
+
+---
+
+## Tests for independence
+
+- There are times where a sample may be categorised according to two or more factors.
+
+- It is of interest to know whether the factors for the classification are independent.
+
+- We summarise what we know in a contingency table
+
+`$$\begin{array}{l|cc|c}
+&amp; \text{Survived} &amp; \text{Did not survive} &amp; \text{Row total} \\ \hline
+\text{Male} &amp; y_{11} &amp; y_{12} &amp; y_{1\bullet}\\
+\text{Female} &amp; y_{21} &amp; y_{22} &amp; y_{2\bullet}\\ \hline
+\text{Column total} &amp;  y_{\bullet 1} &amp; y_{\bullet 2} &amp; n\\
+\end{array}$$`
+
+---
+
+## Table of proportions
+
+Let `\(p_{ij}\)` denote the probability of an observation falling in the `\((i,j)^{th}\)`
+category.  
+
+The marginal row and column probabilities are respectively:
+`$$p_{i\bullet}=\sum_{j=1}^2 p_{ij}\quad \text{and}\quad p_{\bullet j}=\sum_{i=1}^2p_{ij}$$`
+
+`$$\begin{array}{l|cc|c}
+&amp; \text{Survived} &amp; \text{Did not survive} &amp; \text{Row total} \\ \hline
+\text{Male} &amp; p_{11} &amp; p_{12} &amp; p_{1\bullet}\\
+\text{Female} &amp; p_{21} &amp; p_{22} &amp; p_{2\bullet}\\ \hline
+\text{Column total} &amp;  p_{\bullet 1} &amp; p_{\bullet 2} &amp; 1\\
+\end{array}$$`
+
+
+---
+
+## Independence
+
+`\(X\)` and `\(Y\)` are said to be independent if 
+
+`$$P(X=x~|~Y=y) = P(X=x) \quad \text{or} \quad P(X=x, Y=y) = P(X=x)P(Y=y).$$`
+
+--
+
+In the context of a `\(2\times 2\)` table of proportions,
+
+`$$\begin{array}{l|cc|c}
+&amp; \text{Survived} &amp; \text{Did not survive} &amp; \text{Row total} \\ \hline
+\text{Male} &amp; p_{11} &amp; p_{12} &amp; p_{1\bullet}\\
+\text{Female} &amp; p_{21} &amp; p_{22} &amp; p_{2\bullet}\\ \hline
+\text{Column total} &amp;  p_{\bullet 1} &amp; p_{\bullet 2} &amp; 1\\
+\end{array}$$`
+
+Let `\(X\)` be a random variable representing survival status and let `\(Y\)` be a random variable representing sex. Under independence, 
+`$$p_{11} = P(X = \text{Survived}, Y = \text{Male}) = P(X = \text{Survived})P(Y = \text{Male}) = p_{\bullet 1}p_{1\bullet}$$`
+
+---
+
+## Test statistic
+
+Under the null hypothesis of independence, the expected frequencies are `\(e_{ij} = n p_{ij} = n p_{i\bullet} p_{\bullet j}\)`. 
+
+A large test statistic,
+`$$T=\sum_{i=1}^2\sum_{j=1}^2\frac{(Y_{ij}- e_{ij})^2}{e_{ij}} = \sum_{i=1}^2\sum_{j=1}^2\frac{(Y_{ij}- n p_{i\bullet} p_{\bullet j})^2}{n p_{i\bullet} p_{\bullet j}},$$`
+indicates that we should reject `\(H_0\)`.  
+
+--
+
+However `\(T\)` includes unknown parameters `\(p_{i\bullet}\)` and `\(p_{\bullet j}\)`.
+
+We need to estimate `\(p_{i\bullet}\)` and `\(p_{\bullet j}\)` by
+`$$\hat p_{i\bullet}= y_{i\bullet}/n,\qquad \hat p_{\bullet j}= y_{\bullet j}/n.$$`
+
+Hence, we calculate the observed test statistic,
+`$$t_0 = \sum_{i=1}^2\sum_{j=1}^2\frac{(y_{ij}-n\,\hat p_{i\bullet}\, \hat p_{\bullet j})^2}{n\, \hat p_{i\bullet}\, \hat p_{\bullet j}}
+=\sum_{i=1}^2\sum_{j=1}^2\frac{(y_{ij}-y_{i\bullet}y_{\bullet j}/n)^2}{y_{i\bullet}y_{\bullet j}/n}.$$`
+
+---
+
+## Hypothesis testing workflow
+
+The workflow for the test of independence between two variables in a `\(2\times 2\)` contingency table are:
+
+&gt;- **Hypothesis:** `\(H_0\colon\ p_{ij} = p_{i\bullet}p_{\bullet j}, \quad i=1,2; \ j=1,2\)` vs `\(H_1\colon\)` Not all equalities hold.
+  
+&gt;- **Assumptions:** independent observations and `\(e_{ij}=y_{i\bullet}y_{\bullet j}/n \ge 5\)`.
+
+&gt;- **Test statistic:** `\(\displaystyle T = \sum_{i=1}^2\sum_{j=1}^2\frac{(Y_{ij}-e_{ij})^2}{e_{ij}}\)`. Under `\(H_0\)`, `\(T \sim \chi_{1}^2\)` approx.
+
+&gt;- **Observed test statistic:** `\(\displaystyle t_0 = \sum_{i=1}^2\sum_{j=1}^2\frac{(y_{ij}-y_{i\bullet}y_{\bullet j}/n)^2}{y_{i\bullet}y_{\bullet j}/n}\)`
+   
+&gt;-  **P-value:** `\(P(T \ge t_0) = P(\chi_{1}^2 \ge t_0)\)`
+
+&gt;- **Decision:** Reject `\(H_0\)` if the p-value `\(&lt; \alpha\)`
+
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M496.616 372.639l70.012-70.012c16.899-16.9 9.942-45.771-12.836-53.092L512 236.102V96c0-17.673-14.327-32-32-32h-64V24c0-13.255-10.745-24-24-24H248c-13.255 0-24 10.745-24 24v40h-64c-17.673 0-32 14.327-32 32v140.102l-41.792 13.433c-22.753 7.313-29.754 36.173-12.836 53.092l70.012 70.012C125.828 416.287 85.587 448 24 448c-13.255 0-24 10.745-24 24v16c0 13.255 10.745 24 24 24 61.023 0 107.499-20.61 143.258-59.396C181.677 487.432 216.021 512 256 512h128c39.979 0 74.323-24.568 88.742-59.396C508.495 491.384 554.968 512 616 512c13.255 0 24-10.745 24-24v-16c0-13.255-10.745-24-24-24-60.817 0-101.542-31.001-119.384-75.361zM192 128h256v87.531l-118.208-37.995a31.995 31.995 0 0 0-19.584 0L192 215.531V128z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Titanic
+
+.pull-left[
+- The `Titanic` dataset comes preloaded in R. 
+
+- This data set provides information on the fate of passengers on the fatal maiden voyage of the ocean liner Titanic, summarized according to economic status (class), sex, age and survival.
+
+.blockquote[
+&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 448c-110.532 0-200-89.431-200-200 0-110.495 89.472-200 200-200 110.491 0 200 89.471 200 200 0 110.53-89.431 200-200 200zm107.244-255.2c0 67.052-72.421 68.084-72.421 92.863V300c0 6.627-5.373 12-12 12h-45.647c-6.627 0-12-5.373-12-12v-8.659c0-35.745 27.1-50.034 47.579-61.516 17.561-9.845 28.324-16.541 28.324-29.579 0-17.246-21.999-28.693-39.784-28.693-23.189 0-33.894 10.977-48.942 29.969-4.057 5.12-11.46 6.071-16.666 2.124l-27.824-21.098c-5.107-3.872-6.251-11.066-2.644-16.363C184.846 131.491 214.94 112 261.794 112c49.071 0 101.45 38.304 101.45 88.8zM298 368c0 23.159-18.841 42-42 42s-42-18.841-42-42 18.841-42 42-42 42 18.841 42 42z"&gt;&lt;/path&gt;&lt;/svg&gt;
+Is there any evidence that being a women increased your chance of survival on the ship?
+]
+]
+
+.pull-right[
+
+```r
+x = as.data.frame(Titanic)
+head(x)
+```
+
+```
+##   Class    Sex   Age Survived Freq
+## 1   1st   Male Child       No    0
+## 2   2nd   Male Child       No    0
+## 3   3rd   Male Child       No   35
+## 4  Crew   Male Child       No    0
+## 5   1st Female Child       No    0
+## 6   2nd Female Child       No    0
+```
+
+```r
+y.mat = xtabs(Freq ~ Sex + Survived, x)
+y.mat
+```
+
+```
+##         Survived
+## Sex        No  Yes
+##   Male   1364  367
+##   Female  126  344
+```
+]
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M496.616 372.639l70.012-70.012c16.899-16.9 9.942-45.771-12.836-53.092L512 236.102V96c0-17.673-14.327-32-32-32h-64V24c0-13.255-10.745-24-24-24H248c-13.255 0-24 10.745-24 24v40h-64c-17.673 0-32 14.327-32 32v140.102l-41.792 13.433c-22.753 7.313-29.754 36.173-12.836 53.092l70.012 70.012C125.828 416.287 85.587 448 24 448c-13.255 0-24 10.745-24 24v16c0 13.255 10.745 24 24 24 61.023 0 107.499-20.61 143.258-59.396C181.677 487.432 216.021 512 256 512h128c39.979 0 74.323-24.568 88.742-59.396C508.495 491.384 554.968 512 616 512c13.255 0 24-10.745 24-24v-16c0-13.255-10.745-24-24-24-60.817 0-101.542-31.001-119.384-75.361zM192 128h256v87.531l-118.208-37.995a31.995 31.995 0 0 0-19.584 0L192 215.531V128z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Titanic
+
+The test for independence between survival and sex is:
+
+&gt;- **Hypothesis:**     `\(H_0\colon\ p_{ij} = p_{i\bullet}p_{\bullet j}, \quad i=1,2; \ j=1,2\)` vs `\(H_1\colon\)` Not all equalities hold.
+  
+&gt;- **Assumptions:** `\(e_{ij}=y_{i\bullet}y_{\bullet j}/n \ge 5\)` (do you think we have independent observations?).
+
+&gt;- **Test statistic:** `\(\displaystyle T = \sum_{i=1}^2\sum_{j=1}^2\frac{(Y_{ij}-e_{ij})^2}{e_{ij}}\)`. Under `\(H_0\)`, `\(T \sim \chi_{1}^2\)` approx.
+
+&gt;- **Observed test statistic:** `\(\displaystyle t_0 = \sum_{i=1}^2\sum_{j=1}^2\frac{(y_{ij}-y_{i\bullet}y_{\bullet j}/n)^2}{y_{i\bullet}y_{\bullet j}/n} = 456.87\)`
+   
+&gt;-  **P-value:** `\(P(T \ge t_0) = P(\chi_{1}^2 \ge 456.87) &lt; 0.001\)`
+
+&gt;- **Decision:** We reject the null hypothesis that sex is independent of survival as the p-value is very small (much smaller than 0.05).  Hence, there is evidence to suggest that survival status of passengers on the Titanic is related to the sex of the passenger.
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M496.616 372.639l70.012-70.012c16.899-16.9 9.942-45.771-12.836-53.092L512 236.102V96c0-17.673-14.327-32-32-32h-64V24c0-13.255-10.745-24-24-24H248c-13.255 0-24 10.745-24 24v40h-64c-17.673 0-32 14.327-32 32v140.102l-41.792 13.433c-22.753 7.313-29.754 36.173-12.836 53.092l70.012 70.012C125.828 416.287 85.587 448 24 448c-13.255 0-24 10.745-24 24v16c0 13.255 10.745 24 24 24 61.023 0 107.499-20.61 143.258-59.396C181.677 487.432 216.021 512 256 512h128c39.979 0 74.323-24.568 88.742-59.396C508.495 491.384 554.968 512 616 512c13.255 0 24-10.745 24-24v-16c0-13.255-10.745-24-24-24-60.817 0-101.542-31.001-119.384-75.361zM192 128h256v87.531l-118.208-37.995a31.995 31.995 0 0 0-19.584 0L192 215.531V128z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left[
+
+```r
+y.mat
+```
+
+```
+##         Survived
+## Sex        No  Yes
+##   Male   1364  367
+##   Female  126  344
+```
+
+```r
+chisq.test(y.mat, correct = FALSE)
+```
+
+```
+## 
+## 	Pearson's Chi-squared test
+## 
+## data:  y.mat
+## X-squared = 456.87, df = 1, p-value &lt; 2.2e-16
+```
+]
+.pull-right[
+&lt;img src="lec08_files/figure-html/unnamed-chunk-4-1.png" width="864" /&gt;
+]
+
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M496.616 372.639l70.012-70.012c16.899-16.9 9.942-45.771-12.836-53.092L512 236.102V96c0-17.673-14.327-32-32-32h-64V24c0-13.255-10.745-24-24-24H248c-13.255 0-24 10.745-24 24v40h-64c-17.673 0-32 14.327-32 32v140.102l-41.792 13.433c-22.753 7.313-29.754 36.173-12.836 53.092l70.012 70.012C125.828 416.287 85.587 448 24 448c-13.255 0-24 10.745-24 24v16c0 13.255 10.745 24 24 24 61.023 0 107.499-20.61 143.258-59.396C181.677 487.432 216.021 512 256 512h128c39.979 0 74.323-24.568 88.742-59.396C508.495 491.384 554.968 512 616 512c13.255 0 24-10.745 24-24v-16c0-13.255-10.745-24-24-24-60.817 0-101.542-31.001-119.384-75.361zM192 128h256v87.531l-118.208-37.995a31.995 31.995 0 0 0-19.584 0L192 215.531V128z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left[
+
+```r
+r = c = 2
+(yr = apply(y.mat, 1, sum))  # rowSums(y.mat)
+```
+
+```
+##   Male Female 
+##   1731    470
+```
+
+```r
+(yc = apply(y.mat, 2, sum))  # colSums(y.mat)
+```
+
+```
+##   No  Yes 
+## 1490  711
+```
+
+```r
+(yr.mat = matrix(yr, r, c, byrow = FALSE))
+```
+
+```
+##      [,1] [,2]
+## [1,] 1731 1731
+## [2,]  470  470
+```
+
+```r
+(yc.mat = matrix(yc, r, c, byrow = TRUE))
+```
+
+```
+##      [,1] [,2]
+## [1,] 1490  711
+## [2,] 1490  711
+```
+]
+.pull-right[
+
+```r
+(ey.mat = yr.mat * yc.mat / sum(y.mat)) 
+```
+
+```
+##           [,1]     [,2]
+## [1,] 1171.8264 559.1736
+## [2,]  318.1736 151.8264
+```
+
+```r
+# or using matrix multiplication
+# ey.mat = yr %*% t(yc) / n
+all(ey.mat &gt;= 5) # check e_{ij} &gt;= 5
+```
+
+```
+## [1] TRUE
+```
+
+```r
+(t0 = sum((y.mat - ey.mat)^2 / ey.mat))
+```
+
+```
+## [1] 456.8742
+```
+
+```r
+(pval = pchisq(t0, 1, lower.tail = FALSE))
+```
+
+```
+## [1] 2.302151e-101
+```
+]
+
+
+---
+class: segue
+
+# Testing for independence in general tables
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M482.1 32H28.7C5.8 32 0 37.9 0 60.9v390.2C0 474.4 5.8 480 28.7 480h453.4c24.4 0 29.9-5.2 29.9-29.7V62.2c0-24.6-5.4-30.2-29.9-30.2zM178.4 220.3c-27.5-20.2-72.1-8.7-84.2 23.4-4.3 11.1-9.3 9.5-17.5 8.3-9.7-1.5-17.2-3.2-22.5-5.5-28.8-11.4 8.6-55.3 24.9-64.3 41.1-21.4 83.4-22.2 125.3-4.8 40.9 16.8 34.5 59.2 34.5 128.5 2.7 25.8-4.3 58.3 9.3 88.8 1.9 4.4.4 7.9-2.7 10.7-8.4 6.7-39.3 2.2-46.6-7.4-1.9-2.2-1.8-3.6-3.9-6.2-3.6-3.9-7.3-2.2-11.9 1-57.4 36.4-140.3 21.4-147-43.3-3.1-29.3 12.4-57.1 39.6-71 38.2-19.5 112.2-11.8 114-30.9 1.1-10.2-1.9-20.1-11.3-27.3zm286.7 222c0 15.1-11.1 9.9-17.8 9.9H52.4c-7.4 0-18.2 4.8-17.8-10.7.4-13.9 10.5-9.1 17.1-9.1 132.3-.4 264.5-.4 396.8 0 6.8 0 16.6-4.4 16.6 9.9zm3.8-340.5v291c0 5.7-.7 13.9-8.1 13.9-12.4-.4-27.5 7.1-36.1-5.6-5.8-8.7-7.8-4-12.4-1.2-53.4 29.7-128.1 7.1-144.4-85.2-6.1-33.4-.7-67.1 15.7-100 11.8-23.9 56.9-76.1 136.1-30.5v-71c0-26.2-.1-26.2 26-26.2 3.1 0 6.6.4 9.7 0 10.1-.8 13.6 4.4 13.6 14.3-.1.2-.1.3-.1.5zm-51.5 232.3c-19.5 47.6-72.9 43.3-90 5.2-15.1-33.3-15.5-68.2.4-101.5 16.3-34.1 59.7-35.7 81.5-4.8 20.6 28.8 14.9 84.6 8.1 101.1zm-294.8 35.3c-7.5-1.3-33-3.3-33.7-27.8-.4-13.9 7.8-23 19.8-25.8 24.4-5.9 49.3-9.9 73.7-14.7 8.9-2 7.4 4.4 7.8 9.5 1.4 33-26.1 59.2-67.6 58.8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Advertisement
+
+200 randomly sampled people are classified according to their income level and their reactions to an advertisement for a product (positive, negative, no opinion). 
+
+`$$\begin{array}{l|ccc|r}
+&amp; \text{Positive}  &amp;\text{Negative}  &amp;\text{No opinion}&amp; \text{Total}\\
+\hline
+\text{High income}   &amp; 24 &amp; 46 &amp; 38 &amp; 108 \\
+\text{Low income} &amp; 32 &amp; 22 &amp; 38 &amp; 92  \\
+\hline
+\text{Total}  &amp; 56 &amp; 68 &amp; 76 &amp; 200
+\end{array}$$`
+
+.blockquote[
+&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 448c-110.532 0-200-89.431-200-200 0-110.495 89.472-200 200-200 110.491 0 200 89.471 200 200 0 110.53-89.431 200-200 200zm107.244-255.2c0 67.052-72.421 68.084-72.421 92.863V300c0 6.627-5.373 12-12 12h-45.647c-6.627 0-12-5.373-12-12v-8.659c0-35.745 27.1-50.034 47.579-61.516 17.561-9.845 28.324-16.541 28.324-29.579 0-17.246-21.999-28.693-39.784-28.693-23.189 0-33.894 10.977-48.942 29.969-4.057 5.12-11.46 6.071-16.666 2.124l-27.824-21.098c-5.107-3.872-6.251-11.066-2.644-16.363C184.846 131.491 214.94 112 261.794 112c49.071 0 101.45 38.304 101.45 88.8zM298 368c0 23.159-18.841 42-42 42s-42-18.841-42-42 18.841-42 42-42 42 18.841 42 42z"&gt;&lt;/path&gt;&lt;/svg&gt;
+Do the data present sufficient evidence to indicate that income level and opinion are related?
+]
+
+---
+
+## General 2-way contingency tables
+
+.pull-left[
+We now turn our attention from `\(2\times 2\)` table to `\(r\times c\)` tables with classifying factors `\(R\)` at `\(r\)` levels and `\(S\)` at `\(c\)` levels. Let
+`$$P(R=i,S=j) = p_{ij}, \quad 1\le i \le r, \ 1\le j \le c.$$`
+
+Let `\(y_{ij}\)` be the observed count in the `\((i,j)\)`th cell. Again, we will use the `\(\bullet\)` notation to denote summation over a particular index. So that `\(y_{i\bullet}\)` is the sum of values in the `\(i\)`th row and  `\(y_{\bullet j}\)` is the sum of values in the `\(j\)`th column. 
+]
+
+.pull-right[
+We can summarise this data in a contingency table, 
+
+`$$\begin{array}{c|cccc|c}
+&amp; S=1  &amp; S=2 &amp; \cdots &amp; S=c  &amp; \text{Total} \\
+\hline 
+R=1    &amp; y_{11} &amp; y_{12} &amp; \cdots &amp; y_{1c} &amp; y_{1\bullet} \\
+R=2    &amp; y_{21} &amp; y_{22} &amp; \cdots &amp; y_{2c} &amp; y_{2\bullet} \\
+\vdots &amp; \vdots &amp; \vdots &amp;        &amp; \vdots  \\
+R=r    &amp; y_{r1} &amp; y_{12} &amp; \cdots &amp; y_{rc} &amp; y_{r\bullet} \\
+	\hline 
+\text{Total}	&amp; y_{\bullet 1} &amp; y_{\bullet 2} &amp; \cdots &amp; y_{\bullet c} &amp; y_{\bullet\bullet} 
+\end{array}$$`
+
+Hence, `\(y_{\bullet\bullet} = \sum_{i=1}^r \sum_{j=1}^c y_{ij} = n\)`, the sample size.
+]
+
+---
+
+## General 2-way contingency tables
+
+To make this a little more concrete, suppose a sample of size `\(n\)` is classified into categories according to two factors and the data is presented in a *contingency table* as follows:
+
+`$$\begin{array}{lc|cccc|c}
+&amp;&amp; &amp; \textbf{Variable 1} &amp; &amp; &amp;  \\
+&amp;&amp; \text{Level 1} &amp; \text{Level 2} &amp; \ldots &amp; \text{Level }c &amp; \text{Row total} \\ \hline
+&amp;\text{Level 1} &amp; y_{11} &amp; y_{12} &amp; \ldots &amp; y_{1c} &amp; y_{1\bullet} \\
+\textbf{Variable 2}&amp;\text{Level 2} &amp; y_{21} &amp; y_{22} &amp; \ldots &amp; y_{2c} &amp; y_{2\bullet} \\ 
+&amp;\vdots  &amp; \vdots &amp; \vdots &amp; &amp; \vdots &amp; \vdots \\
+&amp;\text{Level }r &amp; y_{r1} &amp; y_{r2} &amp; \ldots &amp; y_{rc} &amp; y_{r\bullet} \\ \hline
+&amp;\text{Column total} &amp; y_{\bullet 1}  &amp; y_{\bullet 2} &amp; \ldots &amp; y_{\bullet 3} &amp; y_{\bullet\bullet} = n
+\end{array}$$`
+
+We want to know whether the two variables are independent or related.  
+
+---
+
+## Independence
+
+Let `\(p_{ij}\)` denote the probability of an observation falling in the `\((i,j)^{th}\)` category.  
+
+In the general case we can summarise the probabilities as depicted below:
+
+`$$\begin{array}{c|cccc|c}
+&amp; S=1  &amp; S=2 &amp; \cdots &amp; S=c  &amp;  \\
+\hline 
+R=1    &amp; p_{11} &amp; p_{12} &amp; \cdots &amp; p_{1c} &amp; p_{1\bullet} \\
+R=2    &amp; p_{21} &amp; p_{22} &amp; \cdots &amp; p_{2c} &amp; p_{2\bullet} \\
+\vdots &amp; \vdots &amp; \vdots &amp;        &amp; \vdots  \\
+R=r    &amp; p_{r1} &amp; p_{12} &amp; \cdots &amp; p_{rc} &amp; p_{r\bullet} \\
+	\hline 
+	&amp; p_{\bullet 1} &amp; p_{\bullet 2} &amp; \cdots &amp; p_{\bullet c} &amp; 1
+\end{array}$$`
+
+The marginal row and column probabilities are respectively:
+
+`$$p_{i\bullet}=\sum_{j=1}^c p_{ij}\quad \text{and}\quad p_{\bullet j}=\sum_{i=1}^rp_{ij}.$$`
+
+
+
+---
+
+## Estimating `\(p_{ij}\)` under independence
+
+Suppose we have a completely random sample of size `\(n\)` classified by `\(R\)` and `\(S\)`. We want to test 
+$$H_0 \colon \text{$R$ and `\(S\)` are independent}.$$
+
+If `\(R\)` and `\(S\)` are independent, by definition of independence,
+`$$p_{ij} = P(R = i, S = j) = P(R = i) P (S = j)$$`
+
+This equation allows us to estimate the marginal probabilities
+`\(P(R = i)\)` and `\(P(S = j)\)` via
+`$$P(R = i) = p_{i \bullet} = \sum_{j=1}^c p_{ij} \;\;\text{estimated by}\;\; \frac{1}{n}\sum_{j=1}^c y_{ij} = \frac{y_{i\bullet}}{n} \quad \text{and}$$`
+`$$P(S = j) = p_{\bullet j} = \sum_{i=1}^r p_{ij} \;\;\text{estimated by}\;\;\frac{1}{n}\sum_{i=1}^r y_{ij} = \frac{y_{\bullet j}}{n}.$$`
+
+Hence, under the independence hypothesis, the expected frequency in the 
+`\((i,j)\)`th cell is
+`$$e_{ij} = n \widehat{p}_{ij} = n \widehat{p}_{i \bullet} \widehat{p}_{\bullet j} = \frac{y_{i \bullet} y_{\bullet j}}{n}$$`
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M482.1 32H28.7C5.8 32 0 37.9 0 60.9v390.2C0 474.4 5.8 480 28.7 480h453.4c24.4 0 29.9-5.2 29.9-29.7V62.2c0-24.6-5.4-30.2-29.9-30.2zM178.4 220.3c-27.5-20.2-72.1-8.7-84.2 23.4-4.3 11.1-9.3 9.5-17.5 8.3-9.7-1.5-17.2-3.2-22.5-5.5-28.8-11.4 8.6-55.3 24.9-64.3 41.1-21.4 83.4-22.2 125.3-4.8 40.9 16.8 34.5 59.2 34.5 128.5 2.7 25.8-4.3 58.3 9.3 88.8 1.9 4.4.4 7.9-2.7 10.7-8.4 6.7-39.3 2.2-46.6-7.4-1.9-2.2-1.8-3.6-3.9-6.2-3.6-3.9-7.3-2.2-11.9 1-57.4 36.4-140.3 21.4-147-43.3-3.1-29.3 12.4-57.1 39.6-71 38.2-19.5 112.2-11.8 114-30.9 1.1-10.2-1.9-20.1-11.3-27.3zm286.7 222c0 15.1-11.1 9.9-17.8 9.9H52.4c-7.4 0-18.2 4.8-17.8-10.7.4-13.9 10.5-9.1 17.1-9.1 132.3-.4 264.5-.4 396.8 0 6.8 0 16.6-4.4 16.6 9.9zm3.8-340.5v291c0 5.7-.7 13.9-8.1 13.9-12.4-.4-27.5 7.1-36.1-5.6-5.8-8.7-7.8-4-12.4-1.2-53.4 29.7-128.1 7.1-144.4-85.2-6.1-33.4-.7-67.1 15.7-100 11.8-23.9 56.9-76.1 136.1-30.5v-71c0-26.2-.1-26.2 26-26.2 3.1 0 6.6.4 9.7 0 10.1-.8 13.6 4.4 13.6 14.3-.1.2-.1.3-.1.5zm-51.5 232.3c-19.5 47.6-72.9 43.3-90 5.2-15.1-33.3-15.5-68.2.4-101.5 16.3-34.1 59.7-35.7 81.5-4.8 20.6 28.8 14.9 84.6 8.1 101.1zm-294.8 35.3c-7.5-1.3-33-3.3-33.7-27.8-.4-13.9 7.8-23 19.8-25.8 24.4-5.9 49.3-9.9 73.7-14.7 8.9-2 7.4 4.4 7.8 9.5 1.4 33-26.1 59.2-67.6 58.8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Advertisement
+
+`$$\begin{array}{l|ccc|r}
+ &amp; \text{Positive} &amp; \text{Negative} &amp; \text{No opinion} &amp; \text{Total}\\
+\hline
+\text{High income}   &amp; p_{11} &amp; p_{12} &amp; p_{13} &amp; p_{1\bullet} \\
+\text{Low income} &amp; p_{21} &amp; p_{22} &amp; p_{23} &amp; p_{2\bullet} \\
+\hline
+\text{Total} &amp; p_{\bullet 1} &amp; p_{\bullet 2} &amp; p_{\bullet 3} &amp; 1
+\end{array}$$`
+
+Recall: `\(X\)` and `\(Y\)` are said to be independent if 
+`$$P(X=x~|~Y=y) = P(X=x) \quad \text{or} \quad P(X=x, Y=y) = P(X=x)P(Y=y)$$`
+
+Let `\(X\)` be a random variable representing opinion and let `\(Y\)` be a random variable representing income. Under independence, 
+`$$p_{12} = P(X = \text{Negative}, Y = \text{High income}) = P(X = \text{Negative})P(Y = \text{High income}) = p_{\bullet 2}p_{1\bullet}$$`
+
+---
+
+## Test statistic
+
+Under `\(H_0\)` of independence, the expected frequencies are `\(e_{ij} = n p_{ij} = n p_{i\bullet} p_{\bullet j}\)` for `\(i=1,2,\ldots,r\)` and `\(j=1,2,\ldots,c\)`. Hence
+`$$T=\sum_{i=1}^r\sum_{j=1}^c\frac{(Y_{ij}-e_{ij})^2}{e_{ij}} = \sum_{i=1}^r\sum_{j=1}^c\frac{(Y_{ij}-n\,p_{i\bullet}\, p_{\bullet j})^2}{n\,p_{i\bullet}\, p_{\bullet j}}$$`
+will be large if we should reject `\(H_0\)`.  
+
+However `\(T\)` includes unknown parameters `\(p_{i\bullet}\)` and `\(p_{\bullet j}\)`. We estimate `\(p_{i\bullet}\)` and `\(p_{\bullet j}\)` with
+`$$\hat p_{i\bullet}= y_{i\bullet}/n,\qquad \hat p_{\bullet j}= y_{\bullet j}/n.$$`
+
+Hence, we may calculate the observed test statistic as
+`$$t_0=\sum_{i=1}^r\sum_{j=1}^c\frac{(y_{ij}-n\,\hat p_{i\bullet}\, \hat p_{\bullet j})^2}{n\, \hat p_{i\bullet}\, \hat p_{\bullet j}}
+=\sum_{i=1}^r\sum_{j=1}^c\frac{(y_{ij}-y_{i\bullet}y_{\bullet j}/n)^2}{y_{i\bullet}y_{\bullet j}/n}.$$`
+
+---
+
+## Degrees of freedom
+
+`$$\begin{array}{r|rrr|r}
+      &amp; \text{Positive}  &amp;\text{Negative}  &amp;\text{No opinion}&amp; \text{Total}\\
+\hline
+   \text{High income}  &amp;y_{11}&amp;y_{12}&amp;y_{13}&amp;y_{1\bullet}\\
+   \text{Low income}  &amp;y_{21}&amp;y_{22}&amp;y_{23}&amp;y_{2\bullet}\\
+\hline
+ \text{Total}     &amp;y_{\bullet 1} &amp;y_{\bullet 2} &amp;y_{\bullet 3} &amp; n
+\end{array}$$`
+
+- The degrees of freedom for a `\(r \times c\)` table is `\((r-1)(c-1)\)`.
+`$$(rc - 1) - (r-1) - (c-1) = rc - r - c + 1 = (r-1)(c-1)$$`
+- The degrees of freedom for a `\(2 \ \times \ 3\)` table is 2.
+
+---
+
+## Hypothesis testing workflow
+
+The workflow for the test of independence between the two factors are:
+
+
+&gt;- **Hypothesis:** `\(H_0\colon\  p_{ij}=p_{i\bullet}p_{\bullet j}\)`, `\(i=1, 2,\ldots,r\)`, `\(j=1,2,\ldots,c\)` vs `\(H_1\colon\)` Not all equalities hold.
+
+&gt;-  **Assumptions:** independent observations and `\(e_{ij} = y_{i\bullet} y_{\bullet j}/n \ge 5\)`.
+  
+&gt;- **Test statistic:** `\(\displaystyle T = \sum_{i=1}^r\sum_{j=1}^c\frac{(y_{ij} - e_{ij})^2}{e_{ij}}\)`.  Under `\(H_0\)`, `\(T \sim \chi_{(r-1)(c-1)}^2\)` approx.
+
+&gt;- **Observed test statistic:** `\(\displaystyle t_0 = \sum_{i=1}^r\sum_{j=1}^c\frac{(y_{ij}-y_{i\bullet}y_{\bullet j}/n)^2}{y_{i\bullet}y_{\bullet j}/n}\)`.
+  
+&gt;-  **P-value:** `\(P(T \ge t_0) = P(\chi_{(r-1)(c-1)}^2 \ge t_0)\)`
+
+&gt;- **Decision:** Reject `\(H_0\)` if the p-value `\(&lt; \alpha\)`
+
+As noted in the assumptions, this test should only really be applied when all cells have expected counts greater than 5, `\(e_{ij} \geq 5\)`. If there are expected cell counts less than 5, consider using simulation or Fisher's exact test.
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M482.1 32H28.7C5.8 32 0 37.9 0 60.9v390.2C0 474.4 5.8 480 28.7 480h453.4c24.4 0 29.9-5.2 29.9-29.7V62.2c0-24.6-5.4-30.2-29.9-30.2zM178.4 220.3c-27.5-20.2-72.1-8.7-84.2 23.4-4.3 11.1-9.3 9.5-17.5 8.3-9.7-1.5-17.2-3.2-22.5-5.5-28.8-11.4 8.6-55.3 24.9-64.3 41.1-21.4 83.4-22.2 125.3-4.8 40.9 16.8 34.5 59.2 34.5 128.5 2.7 25.8-4.3 58.3 9.3 88.8 1.9 4.4.4 7.9-2.7 10.7-8.4 6.7-39.3 2.2-46.6-7.4-1.9-2.2-1.8-3.6-3.9-6.2-3.6-3.9-7.3-2.2-11.9 1-57.4 36.4-140.3 21.4-147-43.3-3.1-29.3 12.4-57.1 39.6-71 38.2-19.5 112.2-11.8 114-30.9 1.1-10.2-1.9-20.1-11.3-27.3zm286.7 222c0 15.1-11.1 9.9-17.8 9.9H52.4c-7.4 0-18.2 4.8-17.8-10.7.4-13.9 10.5-9.1 17.1-9.1 132.3-.4 264.5-.4 396.8 0 6.8 0 16.6-4.4 16.6 9.9zm3.8-340.5v291c0 5.7-.7 13.9-8.1 13.9-12.4-.4-27.5 7.1-36.1-5.6-5.8-8.7-7.8-4-12.4-1.2-53.4 29.7-128.1 7.1-144.4-85.2-6.1-33.4-.7-67.1 15.7-100 11.8-23.9 56.9-76.1 136.1-30.5v-71c0-26.2-.1-26.2 26-26.2 3.1 0 6.6.4 9.7 0 10.1-.8 13.6 4.4 13.6 14.3-.1.2-.1.3-.1.5zm-51.5 232.3c-19.5 47.6-72.9 43.3-90 5.2-15.1-33.3-15.5-68.2.4-101.5 16.3-34.1 59.7-35.7 81.5-4.8 20.6 28.8 14.9 84.6 8.1 101.1zm-294.8 35.3c-7.5-1.3-33-3.3-33.7-27.8-.4-13.9 7.8-23 19.8-25.8 24.4-5.9 49.3-9.9 73.7-14.7 8.9-2 7.4 4.4 7.8 9.5 1.4 33-26.1 59.2-67.6 58.8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Advertisement
+
+200 randomly sampled people are classified according to their income level and their reactions to an advertisement for a product (positive, negative, no opinion). 
+
+`$$\begin{array}{r|rrr|r}
+      &amp; \text{Positive}  &amp;\text{Negative}  &amp;\text{No opinion}&amp; \text{Total}\\
+\hline
+   \text{High income}  &amp;24&amp;46&amp;38&amp;108\\
+   \text{Low income}  &amp;32&amp;22&amp;38&amp;92\\
+\hline
+ \text{Total}     &amp;56 &amp;68 &amp;76 &amp;200
+\end{array}$$`
+
+.blockquote[
+&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 448c-110.532 0-200-89.431-200-200 0-110.495 89.472-200 200-200 110.491 0 200 89.471 200 200 0 110.53-89.431 200-200 200zm107.244-255.2c0 67.052-72.421 68.084-72.421 92.863V300c0 6.627-5.373 12-12 12h-45.647c-6.627 0-12-5.373-12-12v-8.659c0-35.745 27.1-50.034 47.579-61.516 17.561-9.845 28.324-16.541 28.324-29.579 0-17.246-21.999-28.693-39.784-28.693-23.189 0-33.894 10.977-48.942 29.969-4.057 5.12-11.46 6.071-16.666 2.124l-27.824-21.098c-5.107-3.872-6.251-11.066-2.644-16.363C184.846 131.491 214.94 112 261.794 112c49.071 0 101.45 38.304 101.45 88.8zM298 368c0 23.159-18.841 42-42 42s-42-18.841-42-42 18.841-42 42-42 42 18.841 42 42z"&gt;&lt;/path&gt;&lt;/svg&gt;
+Do the data present sufficient evidence to indicate that income level and opinion are related?
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M482.1 32H28.7C5.8 32 0 37.9 0 60.9v390.2C0 474.4 5.8 480 28.7 480h453.4c24.4 0 29.9-5.2 29.9-29.7V62.2c0-24.6-5.4-30.2-29.9-30.2zM178.4 220.3c-27.5-20.2-72.1-8.7-84.2 23.4-4.3 11.1-9.3 9.5-17.5 8.3-9.7-1.5-17.2-3.2-22.5-5.5-28.8-11.4 8.6-55.3 24.9-64.3 41.1-21.4 83.4-22.2 125.3-4.8 40.9 16.8 34.5 59.2 34.5 128.5 2.7 25.8-4.3 58.3 9.3 88.8 1.9 4.4.4 7.9-2.7 10.7-8.4 6.7-39.3 2.2-46.6-7.4-1.9-2.2-1.8-3.6-3.9-6.2-3.6-3.9-7.3-2.2-11.9 1-57.4 36.4-140.3 21.4-147-43.3-3.1-29.3 12.4-57.1 39.6-71 38.2-19.5 112.2-11.8 114-30.9 1.1-10.2-1.9-20.1-11.3-27.3zm286.7 222c0 15.1-11.1 9.9-17.8 9.9H52.4c-7.4 0-18.2 4.8-17.8-10.7.4-13.9 10.5-9.1 17.1-9.1 132.3-.4 264.5-.4 396.8 0 6.8 0 16.6-4.4 16.6 9.9zm3.8-340.5v291c0 5.7-.7 13.9-8.1 13.9-12.4-.4-27.5 7.1-36.1-5.6-5.8-8.7-7.8-4-12.4-1.2-53.4 29.7-128.1 7.1-144.4-85.2-6.1-33.4-.7-67.1 15.7-100 11.8-23.9 56.9-76.1 136.1-30.5v-71c0-26.2-.1-26.2 26-26.2 3.1 0 6.6.4 9.7 0 10.1-.8 13.6 4.4 13.6 14.3-.1.2-.1.3-.1.5zm-51.5 232.3c-19.5 47.6-72.9 43.3-90 5.2-15.1-33.3-15.5-68.2.4-101.5 16.3-34.1 59.7-35.7 81.5-4.8 20.6 28.8 14.9 84.6 8.1 101.1zm-294.8 35.3c-7.5-1.3-33-3.3-33.7-27.8-.4-13.9 7.8-23 19.8-25.8 24.4-5.9 49.3-9.9 73.7-14.7 8.9-2 7.4 4.4 7.8 9.5 1.4 33-26.1 59.2-67.6 58.8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Advertisement
+
+The test for independence between factors of *income level* and *opinion* is
+
+&gt;- **Hypothesis:** `\(H_0\colon\ p_{ij}=p_{i\bullet}p_{\bullet j}\)`, `\(i=1,2\)`; `\(j=1,2,3\)`, vs `\(H_1\colon\)` Not all equalities hold **or** `\(H_0\colon\)` income level is independent of opinion vs `\(H_1\colon\)` income level is not independent of opinion.
+  
+&gt;-  **Assumptions:** independent observations (satisfied, they were randomly sampled) `\(e_{ij} = y_{i\bullet} y_{\bullet j}/n \ge 5\)` (satisfied, checked with calculations).
+
+&gt;- **Test statistic:** `\(\displaystyle T = \sum_{i=1}^r\sum_{j=1}^c\frac{(y_{ij} - e_{ij})^2}{e_{ij}}\)`.  Under `\(H_0\)`, `\(T \sim \chi_{2}^2\)` approx.
+
+&gt;- **Observed test statistic:** `\(\displaystyle t_0 = \sum_{i=1}^r\sum_{j=1}^c\frac{(y_{ij}-y_{i\bullet}y_{\bullet j}/n)^2}{y_{i\bullet}y_{\bullet j}/n} = 8.39\)`.
+
+&gt;- **P-value:** `\(P(T \ge t_0) = P(\chi_{2}^2 \ge 8.39) = 0.015\)`
+
+&gt;- **Decision:** Since the p-value is less than 0.05, the data provide evidence against `\(H_0\)`. There is evidence to suggest that there is an association between income level and opinion.
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M482.1 32H28.7C5.8 32 0 37.9 0 60.9v390.2C0 474.4 5.8 480 28.7 480h453.4c24.4 0 29.9-5.2 29.9-29.7V62.2c0-24.6-5.4-30.2-29.9-30.2zM178.4 220.3c-27.5-20.2-72.1-8.7-84.2 23.4-4.3 11.1-9.3 9.5-17.5 8.3-9.7-1.5-17.2-3.2-22.5-5.5-28.8-11.4 8.6-55.3 24.9-64.3 41.1-21.4 83.4-22.2 125.3-4.8 40.9 16.8 34.5 59.2 34.5 128.5 2.7 25.8-4.3 58.3 9.3 88.8 1.9 4.4.4 7.9-2.7 10.7-8.4 6.7-39.3 2.2-46.6-7.4-1.9-2.2-1.8-3.6-3.9-6.2-3.6-3.9-7.3-2.2-11.9 1-57.4 36.4-140.3 21.4-147-43.3-3.1-29.3 12.4-57.1 39.6-71 38.2-19.5 112.2-11.8 114-30.9 1.1-10.2-1.9-20.1-11.3-27.3zm286.7 222c0 15.1-11.1 9.9-17.8 9.9H52.4c-7.4 0-18.2 4.8-17.8-10.7.4-13.9 10.5-9.1 17.1-9.1 132.3-.4 264.5-.4 396.8 0 6.8 0 16.6-4.4 16.6 9.9zm3.8-340.5v291c0 5.7-.7 13.9-8.1 13.9-12.4-.4-27.5 7.1-36.1-5.6-5.8-8.7-7.8-4-12.4-1.2-53.4 29.7-128.1 7.1-144.4-85.2-6.1-33.4-.7-67.1 15.7-100 11.8-23.9 56.9-76.1 136.1-30.5v-71c0-26.2-.1-26.2 26-26.2 3.1 0 6.6.4 9.7 0 10.1-.8 13.6 4.4 13.6 14.3-.1.2-.1.3-.1.5zm-51.5 232.3c-19.5 47.6-72.9 43.3-90 5.2-15.1-33.3-15.5-68.2.4-101.5 16.3-34.1 59.7-35.7 81.5-4.8 20.6 28.8 14.9 84.6 8.1 101.1zm-294.8 35.3c-7.5-1.3-33-3.3-33.7-27.8-.4-13.9 7.8-23 19.8-25.8 24.4-5.9 49.3-9.9 73.7-14.7 8.9-2 7.4 4.4 7.8 9.5 1.4 33-26.1 59.2-67.6 58.8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left[
+
+```r
+y = c(24, 32, 46, 22, 38, 38)
+n = sum(y)
+c = 3
+r = 2
+y.mat = matrix(y, nrow = r, ncol = c)
+colnames(y.mat) = c("Positive", "Negative", "No opinion")
+rownames(y.mat) = c("High income", "Low income")
+y.mat
+```
+
+```
+##             Positive Negative No opinion
+## High income       24       46         38
+## Low income        32       22         38
+```
+
+```r
+chisq.test(y.mat, correct = FALSE)
+```
+
+```
+## 
+## 	Pearson's Chi-squared test
+## 
+## data:  y.mat
+## X-squared = 8.3871, df = 2, p-value = 0.01509
+```
+]
+.pull-right[
+&lt;img src="lec08_files/figure-html/unnamed-chunk-8-1.png" width="864" /&gt;
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M482.1 32H28.7C5.8 32 0 37.9 0 60.9v390.2C0 474.4 5.8 480 28.7 480h453.4c24.4 0 29.9-5.2 29.9-29.7V62.2c0-24.6-5.4-30.2-29.9-30.2zM178.4 220.3c-27.5-20.2-72.1-8.7-84.2 23.4-4.3 11.1-9.3 9.5-17.5 8.3-9.7-1.5-17.2-3.2-22.5-5.5-28.8-11.4 8.6-55.3 24.9-64.3 41.1-21.4 83.4-22.2 125.3-4.8 40.9 16.8 34.5 59.2 34.5 128.5 2.7 25.8-4.3 58.3 9.3 88.8 1.9 4.4.4 7.9-2.7 10.7-8.4 6.7-39.3 2.2-46.6-7.4-1.9-2.2-1.8-3.6-3.9-6.2-3.6-3.9-7.3-2.2-11.9 1-57.4 36.4-140.3 21.4-147-43.3-3.1-29.3 12.4-57.1 39.6-71 38.2-19.5 112.2-11.8 114-30.9 1.1-10.2-1.9-20.1-11.3-27.3zm286.7 222c0 15.1-11.1 9.9-17.8 9.9H52.4c-7.4 0-18.2 4.8-17.8-10.7.4-13.9 10.5-9.1 17.1-9.1 132.3-.4 264.5-.4 396.8 0 6.8 0 16.6-4.4 16.6 9.9zm3.8-340.5v291c0 5.7-.7 13.9-8.1 13.9-12.4-.4-27.5 7.1-36.1-5.6-5.8-8.7-7.8-4-12.4-1.2-53.4 29.7-128.1 7.1-144.4-85.2-6.1-33.4-.7-67.1 15.7-100 11.8-23.9 56.9-76.1 136.1-30.5v-71c0-26.2-.1-26.2 26-26.2 3.1 0 6.6.4 9.7 0 10.1-.8 13.6 4.4 13.6 14.3-.1.2-.1.3-.1.5zm-51.5 232.3c-19.5 47.6-72.9 43.3-90 5.2-15.1-33.3-15.5-68.2.4-101.5 16.3-34.1 59.7-35.7 81.5-4.8 20.6 28.8 14.9 84.6 8.1 101.1zm-294.8 35.3c-7.5-1.3-33-3.3-33.7-27.8-.4-13.9 7.8-23 19.8-25.8 24.4-5.9 49.3-9.9 73.7-14.7 8.9-2 7.4 4.4 7.8 9.5 1.4 33-26.1 59.2-67.6 58.8z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left[
+
+```r
+(yr = apply(y.mat, 1, sum))  # rowSums(y.mat)
+```
+
+```
+## High income  Low income 
+##         108          92
+```
+
+```r
+(yc = apply(y.mat, 2, sum))  # colSums(y.mat)
+```
+
+```
+##   Positive   Negative No opinion 
+##         56         68         76
+```
+
+```r
+(yr.mat = matrix(yr, r, c, byrow = FALSE))
+```
+
+```
+##      [,1] [,2] [,3]
+## [1,]  108  108  108
+## [2,]   92   92   92
+```
+
+```r
+(yc.mat = matrix(yc, r, c, byrow = TRUE))
+```
+
+```
+##      [,1] [,2] [,3]
+## [1,]   56   68   76
+## [2,]   56   68   76
+```
+]
+.pull-right[
+
+```r
+# matrix mult: ey.mat = yr %*% t(yc) / n
+(ey.mat = yr.mat * yc.mat / sum(y.mat)) 
+```
+
+```
+##       [,1]  [,2]  [,3]
+## [1,] 30.24 36.72 41.04
+## [2,] 25.76 31.28 34.96
+```
+
+```r
+all(ey.mat&gt;=5) # check all e_{ij} &gt;= 5
+```
+
+```
+## [1] TRUE
+```
+
+```r
+(t0 = sum((y.mat - ey.mat)^2 / ey.mat))
+```
+
+```
+## [1] 8.387123
+```
+
+```r
+(pval = pchisq(t0, (r - 1) * (c - 1), 
+               lower.tail=FALSE))
+```
+
+```
+## [1] 0.01509244
+```
+]
+
+
+---
+
+## References
+
+
+For further details see Larsen and Marx (2012), section 10.5.
+
+&lt;br&gt;
+
+Franke, T. M., T. Ho, and C. A. Christie (2012). "The
+Chi-Square Test: Often Used and More Often
+Misinterpreted". In: _American Journal of Evaluation_
+33.3, pp. 448-458. DOI:
+[10.1177/1098214011426594](https://doi.org/10.1177%2F1098214011426594).
+URL:
+[https://journals-sagepub-com.ezproxy.library.sydney.edu.au/doi/10.1177/1098214011426594](https://journals-sagepub-com.ezproxy.library.sydney.edu.au/doi/10.1177/1098214011426594).
+
+Larsen, R. J. and M. L. Marx (2012). _An Introduction
+to Mathematical Statistics and its Applications_. 5th
+ed. Boston, MA: Prentice Hall. ISBN:
+978-0-321-69394-5.
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="assets/remark-zoom.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

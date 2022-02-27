@@ -1,0 +1,3 @@
+norm.var.umpu=function(alpha,n) { 
+  ...
+}

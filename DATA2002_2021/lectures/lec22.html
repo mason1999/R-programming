@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>DATA2002</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Garth Tarr" />
+    <script src="lec22_files/header-attrs-2.10/header-attrs.js"></script>
+    <link href="lec22_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } },
+      "HTML-CSS": {
+        styles: {
+          ".MathJax a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+          ".MathJax_Preview a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+        }
+      }
+      });
+    </script>
+    <link rel="stylesheet" href="assets/sydney-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="assets/sydney.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# DATA2002
+## ANOVA post hoc tests
+### Garth Tarr
+
+---
+
+class: segue
+
+
+
+
+
+.large[
+
+Multiple comparisons
+
+Checking for normality with residuals
+
+Bonferroni method
+
+Tukey's method
+
+Scheffé's method
+
+]
+
+---
+class: segue
+
+# Multiple comparisons: simultaneous confidence intervals
+
+---
+&lt;svg viewBox="0 0 352 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M176 80c-52.94 0-96 43.06-96 96 0 8.84 7.16 16 16 16s16-7.16 16-16c0-35.3 28.72-64 64-64 8.84 0 16-7.16 16-16s-7.16-16-16-16zM96.06 459.17c0 3.15.93 6.22 2.68 8.84l24.51 36.84c2.97 4.46 7.97 7.14 13.32 7.14h78.85c5.36 0 10.36-2.68 13.32-7.14l24.51-36.84c1.74-2.62 2.67-5.7 2.68-8.84l.05-43.18H96.02l.04 43.18zM176 0C73.72 0 0 82.97 0 176c0 44.37 16.45 84.85 43.56 115.78 16.64 18.99 42.74 58.8 52.42 92.16v.06h48v-.12c-.01-4.77-.72-9.51-2.15-14.07-5.59-17.81-22.82-64.77-62.17-109.67-20.54-23.43-31.52-53.15-31.61-84.14-.2-73.64 59.67-128 127.95-128 70.58 0 128 57.42 128 128 0 30.97-11.24 60.85-31.65 84.14-39.11 44.61-56.42 91.47-62.1 109.46a47.507 47.507 0 0 0-2.22 14.3v.1h48v-.05c9.68-33.37 35.78-73.18 52.42-92.16C335.55 260.85 352 220.37 352 176 352 78.8 273.2 0 176 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Multiple comparisons: simultaneous confidence intervals
+
+-   In general, there may be more than one "contrast of interest".
+-   Consider the "flicker frequency" data, considered in this week's tutorial:
+
+
+```r
+path = "https://raw.githubusercontent.com/DATA2002/data/master/flicker.txt"
+flicker = read_tsv(path)
+glimpse(flicker)
+```
+
+```
+## Rows: 19
+## Columns: 2
+## $ Colour  &lt;chr&gt; "Brown", "Brown", "Brown", "Brown", "Brown…
+## $ Flicker &lt;dbl&gt; 26.8, 27.9, 23.7, 25.0, 26.3, 24.8, 25.7, …
+```
+
+---
+&lt;svg viewBox="0 0 352 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M176 80c-52.94 0-96 43.06-96 96 0 8.84 7.16 16 16 16s16-7.16 16-16c0-35.3 28.72-64 64-64 8.84 0 16-7.16 16-16s-7.16-16-16-16zM96.06 459.17c0 3.15.93 6.22 2.68 8.84l24.51 36.84c2.97 4.46 7.97 7.14 13.32 7.14h78.85c5.36 0 10.36-2.68 13.32-7.14l24.51-36.84c1.74-2.62 2.67-5.7 2.68-8.84l.05-43.18H96.02l.04 43.18zM176 0C73.72 0 0 82.97 0 176c0 44.37 16.45 84.85 43.56 115.78 16.64 18.99 42.74 58.8 52.42 92.16v.06h48v-.12c-.01-4.77-.72-9.51-2.15-14.07-5.59-17.81-22.82-64.77-62.17-109.67-20.54-23.43-31.52-53.15-31.61-84.14-.2-73.64 59.67-128 127.95-128 70.58 0 128 57.42 128 128 0 30.97-11.24 60.85-31.65 84.14-39.11 44.61-56.42 91.47-62.1 109.46a47.507 47.507 0 0 0-2.22 14.3v.1h48v-.05c9.68-33.37 35.78-73.18 52.42-92.16C335.55 260.85 352 220.37 352 176 352 78.8 273.2 0 176 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+p1 = ggplot(flicker, aes(x = Colour, y = Flicker)) + 
+  geom_boxplot() + theme_classic(base_size = 20)
+p2 = ggplot(flicker, aes(sample = Flicker)) + 
+  geom_qq() + geom_qq_line() + facet_wrap(~ Colour) + theme_classic(base_size = 20)
+gridExtra::grid.arrange(p1, p2, ncol=2)
+```
+
+&lt;img src="lec22_files/figure-html/unnamed-chunk-2-1.png" width="1080" /&gt;
+
+---
+&lt;svg viewBox="0 0 352 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M176 80c-52.94 0-96 43.06-96 96 0 8.84 7.16 16 16 16s16-7.16 16-16c0-35.3 28.72-64 64-64 8.84 0 16-7.16 16-16s-7.16-16-16-16zM96.06 459.17c0 3.15.93 6.22 2.68 8.84l24.51 36.84c2.97 4.46 7.97 7.14 13.32 7.14h78.85c5.36 0 10.36-2.68 13.32-7.14l24.51-36.84c1.74-2.62 2.67-5.7 2.68-8.84l.05-43.18H96.02l.04 43.18zM176 0C73.72 0 0 82.97 0 176c0 44.37 16.45 84.85 43.56 115.78 16.64 18.99 42.74 58.8 52.42 92.16v.06h48v-.12c-.01-4.77-.72-9.51-2.15-14.07-5.59-17.81-22.82-64.77-62.17-109.67-20.54-23.43-31.52-53.15-31.61-84.14-.2-73.64 59.67-128 127.95-128 70.58 0 128 57.42 128 128 0 30.97-11.24 60.85-31.65 84.14-39.11 44.61-56.42 91.47-62.1 109.46a47.507 47.507 0 0 0-2.22 14.3v.1h48v-.05c9.68-33.37 35.78-73.18 52.42-92.16C335.55 260.85 352 220.37 352 176 352 78.8 273.2 0 176 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+sum_stat = flicker %&gt;% 
+  group_by(Colour) %&gt;% 
+  summarise(n_i = n(),
+            ybar_i = mean(Flicker),
+            v_i = var(Flicker))
+sum_stat
+```
+
+```
+## # A tibble: 3 × 4
+##   Colour   n_i ybar_i   v_i
+##   &lt;chr&gt;  &lt;int&gt;  &lt;dbl&gt; &lt;dbl&gt;
+## 1 Blue       6   28.2  2.33
+## 2 Brown      8   25.6  1.86
+## 3 Green      5   26.9  3.40
+```
+
+```r
+n_i = sum_stat %&gt;% pull(n_i)
+ybar_i = sum_stat %&gt;% pull(ybar_i)
+v_i = sum_stat %&gt;% pull(v_i)
+```
+
+---
+&lt;svg viewBox="0 0 352 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M176 80c-52.94 0-96 43.06-96 96 0 8.84 7.16 16 16 16s16-7.16 16-16c0-35.3 28.72-64 64-64 8.84 0 16-7.16 16-16s-7.16-16-16-16zM96.06 459.17c0 3.15.93 6.22 2.68 8.84l24.51 36.84c2.97 4.46 7.97 7.14 13.32 7.14h78.85c5.36 0 10.36-2.68 13.32-7.14l24.51-36.84c1.74-2.62 2.67-5.7 2.68-8.84l.05-43.18H96.02l.04 43.18zM176 0C73.72 0 0 82.97 0 176c0 44.37 16.45 84.85 43.56 115.78 16.64 18.99 42.74 58.8 52.42 92.16v.06h48v-.12c-.01-4.77-.72-9.51-2.15-14.07-5.59-17.81-22.82-64.77-62.17-109.67-20.54-23.43-31.52-53.15-31.61-84.14-.2-73.64 59.67-128 127.95-128 70.58 0 128 57.42 128 128 0 30.97-11.24 60.85-31.65 84.14-39.11 44.61-56.42 91.47-62.1 109.46a47.507 47.507 0 0 0-2.22 14.3v.1h48v-.05c9.68-33.37 35.78-73.18 52.42-92.16C335.55 260.85 352 220.37 352 176 352 78.8 273.2 0 176 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Aside: checking for normality with residuals
+
+.pull-left[
+The population model is,
+`$$Y_{ij} = \mu_i + \varepsilon_{ij},$$`
+where `\(\varepsilon_{ij}\sim N(0,\sigma^2)\)`.
+
+
+Rather than looking at QQ plots for each sample, we can instead consider the ANOVA residuals,
+`$$r_{ij} = y_{ij} - \bar{y}_{i\bullet}.$$`
+
+If the ANOVA assumptions hold true, then the residuals should be normally distributed.
+]
+
+
+.pull-right[
+
+```r
+flicker_anova = aov(Flicker~Colour, 
+                    data = flicker)
+flicker_resid = flicker_anova$residuals
+ggplot(data.frame(flicker_resid),
+       aes(sample = flicker_resid)) + 
+  geom_qq(size=3) + geom_qq_line() + 
+  theme_classic(base_size = 32)
+```
+
+&lt;img src="lec22_files/figure-html/unnamed-chunk-4-1.png" width="864" /&gt;
+]
+
+---
+
+## All pairwise differences
+
+-   When no single group is "special" or notable, so that each pairwise
+difference is equally interesting, we can consider each pairwise
+difference as a contrast of interest.
+-   In this case,
+-   a `\(t\)`-statistic can be constructed for each pairwise difference;
+-   a `\(t\)`-based confidence interval can be constructed for each
+pairwise "population" difference (contrast).
+-   Let's focus on confidence intervals for the moment.
+
+---
+&lt;svg viewBox="0 0 352 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M176 80c-52.94 0-96 43.06-96 96 0 8.84 7.16 16 16 16s16-7.16 16-16c0-35.3 28.72-64 64-64 8.84 0 16-7.16 16-16s-7.16-16-16-16zM96.06 459.17c0 3.15.93 6.22 2.68 8.84l24.51 36.84c2.97 4.46 7.97 7.14 13.32 7.14h78.85c5.36 0 10.36-2.68 13.32-7.14l24.51-36.84c1.74-2.62 2.67-5.7 2.68-8.84l.05-43.18H96.02l.04 43.18zM176 0C73.72 0 0 82.97 0 176c0 44.37 16.45 84.85 43.56 115.78 16.64 18.99 42.74 58.8 52.42 92.16v.06h48v-.12c-.01-4.77-.72-9.51-2.15-14.07-5.59-17.81-22.82-64.77-62.17-109.67-20.54-23.43-31.52-53.15-31.61-84.14-.2-73.64 59.67-128 127.95-128 70.58 0 128 57.42 128 128 0 30.97-11.24 60.85-31.65 84.14-39.11 44.61-56.42 91.47-62.1 109.46a47.507 47.507 0 0 0-2.22 14.3v.1h48v-.05c9.68-33.37 35.78-73.18 52.42-92.16C335.55 260.85 352 220.37 352 176 352 78.8 273.2 0 176 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## *Individual* 95% confidence intervals
+
+-   We now construct 95% confidence intervals for each pairwise
+comparison *individually*:
+-   the standard error for `\(\bar y_{i\bullet}-\bar y_{h\bullet}\)` is `\(\hat{\sigma} \sqrt{\frac{1}{n_i}+\frac{1}{n_h}}\)`.
+
+
+```r
+N = length(flicker_resid)
+g = 3
+sig_sq_hat = sum(flicker_resid^2)/(N-g) # Mean square resiudal
+sig_sq_hat
+```
+
+```
+## [1] 2.39438
+```
+
+```r
+# alternatively
+# sig_sq_hat = sum((n_i - 1) * v_i)/sum(n_i - 1)
+t_star = qt(.975, df = sum(n_i - 1))
+t_star
+```
+
+```
+## [1] 2.119905
+```
+
+
+
+---
+&lt;svg viewBox="0 0 352 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M176 80c-52.94 0-96 43.06-96 96 0 8.84 7.16 16 16 16s16-7.16 16-16c0-35.3 28.72-64 64-64 8.84 0 16-7.16 16-16s-7.16-16-16-16zM96.06 459.17c0 3.15.93 6.22 2.68 8.84l24.51 36.84c2.97 4.46 7.97 7.14 13.32 7.14h78.85c5.36 0 10.36-2.68 13.32-7.14l24.51-36.84c1.74-2.62 2.67-5.7 2.68-8.84l.05-43.18H96.02l.04 43.18zM176 0C73.72 0 0 82.97 0 176c0 44.37 16.45 84.85 43.56 115.78 16.64 18.99 42.74 58.8 52.42 92.16v.06h48v-.12c-.01-4.77-.72-9.51-2.15-14.07-5.59-17.81-22.82-64.77-62.17-109.67-20.54-23.43-31.52-53.15-31.61-84.14-.2-73.64 59.67-128 127.95-128 70.58 0 128 57.42 128 128 0 30.97-11.24 60.85-31.65 84.14-39.11 44.61-56.42 91.47-62.1 109.46a47.507 47.507 0 0 0-2.22 14.3v.1h48v-.05c9.68-33.37 35.78-73.18 52.42-92.16C335.55 260.85 352 220.37 352 176 352 78.8 273.2 0 176 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+#### Blue vs Brown
+
+
+```r
+se.Bl.Br = sqrt(sig_sq_hat * ((1/n_i[1]) + (1/n_i[2])))
+(int.Bl.Br.95.indiv = ybar_i[1] - ybar_i[2] + c(-1,1) * t_star * se.Bl.Br)
+```
+
+```
+## [1] 0.8076044 4.3507289
+```
+
+#### Blue vs Green
+
+
+```r
+se.Bl.Gr = sqrt(sig_sq_hat * ((1/n_i[1]) + (1/n_i[3])))
+(int.Bl.Gr.95.indiv = ybar_i[1] - ybar_i[3] + c(-1, 1) * t_star * se.Bl.Gr)
+```
+
+```
+## [1] -0.7396511  3.2329845
+```
+
+#### Green vs Brown
+
+
+```r
+se.Gr.Br = sqrt(sig_sq_hat*((1/n_i[2]) + (1/n_i[3])))
+(int.Gr.Br.95.indiv = ybar_i[2] - ybar_i[3] + c(-1, 1) * t_star * se.Gr.Br)
+```
+
+```
+## [1] -3.2025564  0.5375564
+```
+
+---
+&lt;svg viewBox="0 0 352 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M176 80c-52.94 0-96 43.06-96 96 0 8.84 7.16 16 16 16s16-7.16 16-16c0-35.3 28.72-64 64-64 8.84 0 16-7.16 16-16s-7.16-16-16-16zM96.06 459.17c0 3.15.93 6.22 2.68 8.84l24.51 36.84c2.97 4.46 7.97 7.14 13.32 7.14h78.85c5.36 0 10.36-2.68 13.32-7.14l24.51-36.84c1.74-2.62 2.67-5.7 2.68-8.84l.05-43.18H96.02l.04 43.18zM176 0C73.72 0 0 82.97 0 176c0 44.37 16.45 84.85 43.56 115.78 16.64 18.99 42.74 58.8 52.42 92.16v.06h48v-.12c-.01-4.77-.72-9.51-2.15-14.07-5.59-17.81-22.82-64.77-62.17-109.67-20.54-23.43-31.52-53.15-31.61-84.14-.2-73.64 59.67-128 127.95-128 70.58 0 128 57.42 128 128 0 30.97-11.24 60.85-31.65 84.14-39.11 44.61-56.42 91.47-62.1 109.46a47.507 47.507 0 0 0-2.22 14.3v.1h48v-.05c9.68-33.37 35.78-73.18 52.42-92.16C335.55 260.85 352 220.37 352 176 352 78.8 273.2 0 176 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## The emmeans package
+
+
+```r
+# install.packages("emmeans")
+suppressPackageStartupMessages(library(emmeans))
+flicker_anova = aov(Flicker ~ Colour, data = flicker)
+flicker_em = emmeans(flicker_anova, ~ Colour)
+confint(flicker_em, adjust = "none")
+```
+
+```
+##  Colour emmean    SE df lower.CL upper.CL
+##  Blue     28.2 0.632 16     26.8     29.5
+##  Brown    25.6 0.547 16     24.4     26.7
+##  Green    26.9 0.692 16     25.5     28.4
+## 
+## Confidence level used: 0.95
+```
+
+```r
+confint(pairs(flicker_em, adjust = "none"))
+```
+
+```
+##  contrast      estimate    SE df lower.CL upper.CL
+##  Blue - Brown      2.58 0.836 16    0.808    4.351
+##  Blue - Green      1.25 0.937 16   -0.740    3.233
+##  Brown - Green    -1.33 0.882 16   -3.203    0.538
+## 
+## Confidence level used: 0.95
+```
+
+---
+&lt;svg viewBox="0 0 352 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M176 80c-52.94 0-96 43.06-96 96 0 8.84 7.16 16 16 16s16-7.16 16-16c0-35.3 28.72-64 64-64 8.84 0 16-7.16 16-16s-7.16-16-16-16zM96.06 459.17c0 3.15.93 6.22 2.68 8.84l24.51 36.84c2.97 4.46 7.97 7.14 13.32 7.14h78.85c5.36 0 10.36-2.68 13.32-7.14l24.51-36.84c1.74-2.62 2.67-5.7 2.68-8.84l.05-43.18H96.02l.04 43.18zM176 0C73.72 0 0 82.97 0 176c0 44.37 16.45 84.85 43.56 115.78 16.64 18.99 42.74 58.8 52.42 92.16v.06h48v-.12c-.01-4.77-.72-9.51-2.15-14.07-5.59-17.81-22.82-64.77-62.17-109.67-20.54-23.43-31.52-53.15-31.61-84.14-.2-73.64 59.67-128 127.95-128 70.58 0 128 57.42 128 128 0 30.97-11.24 60.85-31.65 84.14-39.11 44.61-56.42 91.47-62.1 109.46a47.507 47.507 0 0 0-2.22 14.3v.1h48v-.05c9.68-33.37 35.78-73.18 52.42-92.16C335.55 260.85 352 220.37 352 176 352 78.8 273.2 0 176 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+confint(flicker_em, adjust = "none") %&gt;% plot(colors = "black") + theme_classic(base_size = 30)
+```
+
+&lt;img src="lec22_files/figure-html/unnamed-chunk-10-1.png" width="864" /&gt;
+
+```r
+confint(pairs(flicker_em, adjust = "none")) %&gt;% plot(colors = "black") + 
+   geom_vline(xintercept = 0)
+```
+
+&lt;img src="lec22_files/figure-html/unnamed-chunk-10-2.png" width="864" /&gt;
+
+---
+
+## Summary of *individual* intervals
+
+-   So it would appear that *individually* the only "significantly different" pair is Blue and Brown.
+-   **However**, we have constructed each interval *without taking any regard of the others*.
+-   More precisely:
+    -   each interval has been constructed using a procedure so that *when the model is correct*, the probability that the "correct" population contrast is covered is 0.95... *individually*.
+-   **But**, what is the probability that **all** intervals cover their corresponding true values **simultaneously**?
+
+---
+
+## The Bonferroni method
+
+-   Let `\(A_1\)`, `\(A_2\)` `\(A_3\)` denote the events where each of the 3 intervals above cover the corresponding "true" value.
+-   Then, under our normal-equal-variance model, we have
+`$$P(A_1)=P(A_2)=P(A_3)=0.95\,.$$`
+-   However, what is `\(P \left( A_1\cap A_2\cap A_3 \right)\)`?
+-   This is "a bit hard".fn[1], but we can derive a *lower bound* a bit more
+easily using the relation 
+`$$\left( A_1\cap A_2\cap A_3 \right)^c=A_1^c\cup A_2^c\cup A_3^c\,.$$`
+
+.footnote[
+This is solved *exactly* in the case of equal sample sizes using Tukey's method.
+]
+
+---
+
+## 
+
+-   Recall that `\(P(A\cup B)\leq P(A)+P(B)\)`, so we get
+
+`\begin{align*}
+1- P \left( A_1\cap A_2\cap A_3 \right) = P\left\{ \left( A_1\cap A_2\cap A_3 \right)^c\right\}&amp;= P\left(A_1^c\cup A_2^c\cup A_3^c\right) \\
+&amp;\leq P(A_1^c)+P(A_2^c)+P(A_3^c)\\
+&amp;= 0.05+0.05+0.05=0.15.
+\end{align*}`
+
+-   Therefore, `\(P(A_1\cap A_2\cap A_3)\geq 0.85\)`.
+
+The *simultaneous coverage probability* of all 3 intervals is therefore *at least* 85%.
+
+---
+
+## Make the individual intervals *a little bit wider*
+
+-   This method shows us how to get a lower bound of 0.95:
+-   make each interval have *individual* coverage probability `\(1-(0.05)/3=59/60=0.98\dot3\)` (this requires the `\(1-(0.05/6)\)` quantile!):
+
+
+```r
+t_simul = qt(1 - (0.05)/6, df = sum(n_i - 1))
+t_simul
+```
+
+```
+## [1] 2.673032
+```
+
+
+---
+
+## Simultaneous (at least) 95% confidence intervals
+
+
+#### Blue vs Brown
+
+
+```r
+(int.Bl.Br.95.simul = ybar_i[1] - ybar_i[2] + c(-1,1) * t_simul * se.Bl.Br)
+```
+
+```
+## [1] 0.3453673 4.8129660
+```
+
+
+#### Blue vs Green
+
+
+```r
+(int.Bl.Gr.95.simul = ybar_i[1] - ybar_i[3] + c(-1,1) * t_simul * se.Bl.Gr)
+```
+
+```
+## [1] -1.257922  3.751256
+```
+
+#### Green vs Brown
+
+
+```r
+(int.Gr.Br.95.simul = ybar_i[2] - ybar_i[3] + c(-1, 1) * t_simul * se.Gr.Br)
+```
+
+```
+## [1] -3.690493  1.025493
+```
+
+---
+&lt;svg viewBox="0 0 352 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M176 80c-52.94 0-96 43.06-96 96 0 8.84 7.16 16 16 16s16-7.16 16-16c0-35.3 28.72-64 64-64 8.84 0 16-7.16 16-16s-7.16-16-16-16zM96.06 459.17c0 3.15.93 6.22 2.68 8.84l24.51 36.84c2.97 4.46 7.97 7.14 13.32 7.14h78.85c5.36 0 10.36-2.68 13.32-7.14l24.51-36.84c1.74-2.62 2.67-5.7 2.68-8.84l.05-43.18H96.02l.04 43.18zM176 0C73.72 0 0 82.97 0 176c0 44.37 16.45 84.85 43.56 115.78 16.64 18.99 42.74 58.8 52.42 92.16v.06h48v-.12c-.01-4.77-.72-9.51-2.15-14.07-5.59-17.81-22.82-64.77-62.17-109.67-20.54-23.43-31.52-53.15-31.61-84.14-.2-73.64 59.67-128 127.95-128 70.58 0 128 57.42 128 128 0 30.97-11.24 60.85-31.65 84.14-39.11 44.61-56.42 91.47-62.1 109.46a47.507 47.507 0 0 0-2.22 14.3v.1h48v-.05c9.68-33.37 35.78-73.18 52.42-92.16C335.55 260.85 352 220.37 352 176 352 78.8 273.2 0 176 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## emmeans package
+
+
+```r
+flicker_em = emmeans(flicker_anova, ~ Colour)
+confint(flicker_em, adjust = "bonferroni")
+```
+
+```
+##  Colour emmean    SE df lower.CL upper.CL
+##  Blue     28.2 0.632 16     26.5     29.9
+##  Brown    25.6 0.547 16     24.1     27.0
+##  Green    26.9 0.692 16     25.1     28.8
+## 
+## Confidence level used: 0.95 
+## Conf-level adjustment: bonferroni method for 3 estimates
+```
+
+```r
+confint(pairs(flicker_em, adjust = "bonferonni"))
+```
+
+```
+##  contrast      estimate    SE df lower.CL upper.CL
+##  Blue - Brown      2.58 0.836 16    0.345     4.81
+##  Blue - Green      1.25 0.937 16   -1.258     3.75
+##  Brown - Green    -1.33 0.882 16   -3.690     1.03
+## 
+## Confidence level used: 0.95 
+## Conf-level adjustment: bonferroni method for 3 estimates
+```
+
+---
+&lt;svg viewBox="0 0 352 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M176 80c-52.94 0-96 43.06-96 96 0 8.84 7.16 16 16 16s16-7.16 16-16c0-35.3 28.72-64 64-64 8.84 0 16-7.16 16-16s-7.16-16-16-16zM96.06 459.17c0 3.15.93 6.22 2.68 8.84l24.51 36.84c2.97 4.46 7.97 7.14 13.32 7.14h78.85c5.36 0 10.36-2.68 13.32-7.14l24.51-36.84c1.74-2.62 2.67-5.7 2.68-8.84l.05-43.18H96.02l.04 43.18zM176 0C73.72 0 0 82.97 0 176c0 44.37 16.45 84.85 43.56 115.78 16.64 18.99 42.74 58.8 52.42 92.16v.06h48v-.12c-.01-4.77-.72-9.51-2.15-14.07-5.59-17.81-22.82-64.77-62.17-109.67-20.54-23.43-31.52-53.15-31.61-84.14-.2-73.64 59.67-128 127.95-128 70.58 0 128 57.42 128 128 0 30.97-11.24 60.85-31.65 84.14-39.11 44.61-56.42 91.47-62.1 109.46a47.507 47.507 0 0 0-2.22 14.3v.1h48v-.05c9.68-33.37 35.78-73.18 52.42-92.16C335.55 260.85 352 220.37 352 176 352 78.8 273.2 0 176 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+confint(flicker_em, adjust = "bonferroni") %&gt;% plot(colors = "black")
+```
+
+&lt;img src="lec22_files/figure-html/unnamed-chunk-16-1.png" width="864" /&gt;
+
+```r
+confint(pairs(flicker_em, adjust = "bonferonni")) %&gt;% plot(colors = "black") + 
+  geom_vline(xintercept = 0)
+```
+
+&lt;img src="lec22_files/figure-html/unnamed-chunk-16-2.png" width="864" /&gt;
+
+---
+
+## "Simultaneous" conclusions
+
+-   So, even though we "adjusted for multiplicity", the "Blue&amp;#x2013;Brown" difference is *still significant*, in the sense that the corresponding interval does **not** include zero.
+-   By increasing the confidence level of each *individual* comparison, we are able to make "simultaneous" valid statments about them all.
+
+
+---
+
+## The general Bonferroni approach for `\(k\)` simultaneous comparisons
+
+-   In general, if we have `\(k\)` confidence intervals that we wish to have *simultaneous* coverage probability of (*at least*) `\(100(1-\alpha)\%\)`, we can achieve this (possibly conservatively!) by constructing each interval to have *individual* coverage probability `\(100(1-\alpha/k)\%\)`.
+-   If we have `\(g\)` groups, then there are `\(k=\binom{g}{2}=\frac{g(g-1)}{2}\)` possible pairs.
+-   For moderate-to-large `\(g\)`, this grows "quadratically" i.e. like `\(g^2\)`;
+-   other approaches e.g. Tukey's method, Scheffé's method can give "less conservative" (i.e. smaller) multipliers.
+
+---
+&lt;svg viewBox="0 0 352 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M176 80c-52.94 0-96 43.06-96 96 0 8.84 7.16 16 16 16s16-7.16 16-16c0-35.3 28.72-64 64-64 8.84 0 16-7.16 16-16s-7.16-16-16-16zM96.06 459.17c0 3.15.93 6.22 2.68 8.84l24.51 36.84c2.97 4.46 7.97 7.14 13.32 7.14h78.85c5.36 0 10.36-2.68 13.32-7.14l24.51-36.84c1.74-2.62 2.67-5.7 2.68-8.84l.05-43.18H96.02l.04 43.18zM176 0C73.72 0 0 82.97 0 176c0 44.37 16.45 84.85 43.56 115.78 16.64 18.99 42.74 58.8 52.42 92.16v.06h48v-.12c-.01-4.77-.72-9.51-2.15-14.07-5.59-17.81-22.82-64.77-62.17-109.67-20.54-23.43-31.52-53.15-31.61-84.14-.2-73.64 59.67-128 127.95-128 70.58 0 128 57.42 128 128 0 30.97-11.24 60.85-31.65 84.14-39.11 44.61-56.42 91.47-62.1 109.46a47.507 47.507 0 0 0-2.22 14.3v.1h48v-.05c9.68-33.37 35.78-73.18 52.42-92.16C335.55 260.85 352 220.37 352 176 352 78.8 273.2 0 176 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Pairwise `\(t\)` tests
+
+.pull-left[
+
+A general `\(t\)` test for a contrast takes the form:
+
+`$$t_0 = \frac{\sum_{i=1}^g c_i \bar{y}_{i\bullet}}{\hat{\sigma} \sqrt{\sum_{i=1}^g c_i^2/n_i}}$$`
+
+#### Blue vs Brown
+
+`$$t_0 = \frac{\bar{y}_{1\bullet} - \bar{y}_{2\bullet}}{\hat{\sigma} \sqrt{1/n_1 + 1/n_2}}$$`
+
+
+```r
+se.Bl.Br = sqrt(sig_sq_hat *
+                  ((1/n_i[1]) + (1/n_i[2])))
+t_stat.Bl.Br = (ybar_i[1]-ybar_i[2])/se.Bl.Br
+2*(1-pt(abs(t_stat.Bl.Br), df = sum(n_i-1)))
+```
+
+```
+## [1] 0.007079982
+```
+]
+.pull-right[
+
+
+#### Blue vs Green
+
+
+```r
+t_stat.Bl.Gr=(ybar_i[1]-ybar_i[3])/se.Bl.Gr
+2*(1-pt(abs(t_stat.Bl.Gr),df=sum(n_i-1)))
+```
+
+```
+## [1] 0.2020033
+```
+
+#### Brown vs Green 
+
+
+```r
+t_stat.Gr.Br=(ybar_i[2]-ybar_i[3])/se.Gr.Br
+2*(1-pt(abs(t_stat.Gr.Br),df=sum(n_i-1)))
+```
+
+```
+## [1] 0.1504046
+```
+]
+
+
+---
+&lt;svg viewBox="0 0 352 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M176 80c-52.94 0-96 43.06-96 96 0 8.84 7.16 16 16 16s16-7.16 16-16c0-35.3 28.72-64 64-64 8.84 0 16-7.16 16-16s-7.16-16-16-16zM96.06 459.17c0 3.15.93 6.22 2.68 8.84l24.51 36.84c2.97 4.46 7.97 7.14 13.32 7.14h78.85c5.36 0 10.36-2.68 13.32-7.14l24.51-36.84c1.74-2.62 2.67-5.7 2.68-8.84l.05-43.18H96.02l.04 43.18zM176 0C73.72 0 0 82.97 0 176c0 44.37 16.45 84.85 43.56 115.78 16.64 18.99 42.74 58.8 52.42 92.16v.06h48v-.12c-.01-4.77-.72-9.51-2.15-14.07-5.59-17.81-22.82-64.77-62.17-109.67-20.54-23.43-31.52-53.15-31.61-84.14-.2-73.64 59.67-128 127.95-128 70.58 0 128 57.42 128 128 0 30.97-11.24 60.85-31.65 84.14-39.11 44.61-56.42 91.47-62.1 109.46a47.507 47.507 0 0 0-2.22 14.3v.1h48v-.05c9.68-33.37 35.78-73.18 52.42-92.16C335.55 260.85 352 220.37 352 176 352 78.8 273.2 0 176 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Pairwise `\(t\)` tests using emmeans
+
+.pull-left-2[
+
+#### No adjustment
+
+
+```r
+test(pairs(flicker_em, adjust = "none"))
+```
+
+```
+##  contrast      estimate    SE df t.ratio p.value
+##  Blue - Brown      2.58 0.836 16   3.086  0.0071
+##  Blue - Green      1.25 0.937 16   1.331  0.2020
+##  Brown - Green    -1.33 0.882 16  -1.511  0.1504
+```
+
+#### Bonferroni adjustment (multiply unadjusted p-values by 3)
+
+
+```r
+test(pairs(flicker_em, adjust = "bonferroni"))
+```
+
+```
+##  contrast      estimate    SE df t.ratio p.value
+##  Blue - Brown      2.58 0.836 16   3.086  0.0212
+##  Blue - Green      1.25 0.937 16   1.331  0.6060
+##  Brown - Green    -1.33 0.882 16  -1.511  0.4512
+## 
+## P value adjustment: bonferroni method for 3 tests
+```
+
+]
+
+.pull-right-1[
+
+#### Summary
+
+&lt;table&gt;
+
+
+&lt;colgroup&gt;
+&lt;col  class="org-left"&gt;
+
+&lt;col  class="org-right"&gt;
+
+&lt;col  class="org-right"&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th scope="col" class="org-left"&gt;Contrast&lt;/th&gt;
+&lt;th scope="col" class="org-right"&gt;Unadjusted p-value&lt;/th&gt;
+&lt;th scope="col" class="org-right"&gt;Adjusted p-value&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class="org-left"&gt;Blue&amp;#x2013;Brown&lt;/td&gt;
+&lt;td class="org-right"&gt;0.007&lt;/td&gt;
+&lt;td class="org-right"&gt;0.021&lt;/td&gt;
+&lt;/tr&gt;
+
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;Blue&amp;#x2013;Green&lt;/td&gt;
+&lt;td class="org-right"&gt;0.202&lt;/td&gt;
+&lt;td class="org-right"&gt;0.606&lt;/td&gt;
+&lt;/tr&gt;
+
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;Brown&amp;#x2013;Green&lt;/td&gt;
+&lt;td class="org-right"&gt;0.150&lt;/td&gt;
+&lt;td class="org-right"&gt;0.450&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class="org-left"&gt;Overall p-value&lt;/td&gt;
+&lt;td class="org-right"&gt;&amp;#xa0;&lt;/td&gt;
+&lt;td class="org-right"&gt;0.021&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+
+
+---
+
+## Tukey's method
+
+-   John Tukey derived the *exact* multiplier needed for simultaneous confidence intervals for all pairwise comparisons **when the sample sizes are equal**.
+-   It was later shown that when sample sizes are *unequal*, Tukey's procedure is *conservative*, thus yielding valid simultaneous intervals that may be *narrower* than those using the Bonferroni method.
+-   Multiplicity-adjusted p-values can be obtained in the same way by inverting the intervals.
+-   The "overall ANOVA null hypothesis" can be tested using the *smallest* of these.
+-   Tukey named his method "Honest Significant Differences"; it is implemented in the function `TukeyHSD()`, which takes as argument an `aov()` fit or using the `emmeans` package
+
+---
+&lt;svg viewBox="0 0 352 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M176 80c-52.94 0-96 43.06-96 96 0 8.84 7.16 16 16 16s16-7.16 16-16c0-35.3 28.72-64 64-64 8.84 0 16-7.16 16-16s-7.16-16-16-16zM96.06 459.17c0 3.15.93 6.22 2.68 8.84l24.51 36.84c2.97 4.46 7.97 7.14 13.32 7.14h78.85c5.36 0 10.36-2.68 13.32-7.14l24.51-36.84c1.74-2.62 2.67-5.7 2.68-8.84l.05-43.18H96.02l.04 43.18zM176 0C73.72 0 0 82.97 0 176c0 44.37 16.45 84.85 43.56 115.78 16.64 18.99 42.74 58.8 52.42 92.16v.06h48v-.12c-.01-4.77-.72-9.51-2.15-14.07-5.59-17.81-22.82-64.77-62.17-109.67-20.54-23.43-31.52-53.15-31.61-84.14-.2-73.64 59.67-128 127.95-128 70.58 0 128 57.42 128 128 0 30.97-11.24 60.85-31.65 84.14-39.11 44.61-56.42 91.47-62.1 109.46a47.507 47.507 0 0 0-2.22 14.3v.1h48v-.05c9.68-33.37 35.78-73.18 52.42-92.16C335.55 260.85 352 220.37 352 176 352 78.8 273.2 0 176 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Tukey's method
+
+
+```r
+# TukeyHSD(flicker_anova, conf.level = 0.95)
+confint(pairs(flicker_em, adjust = "tukey"))
+```
+
+```
+##  contrast      estimate    SE df lower.CL upper.CL
+##  Blue - Brown      2.58 0.836 16    0.423    4.735
+##  Blue - Green      1.25 0.937 16   -1.171    3.664
+##  Brown - Green    -1.33 0.882 16   -3.609    0.944
+## 
+## Confidence level used: 0.95 
+## Conf-level adjustment: tukey method for comparing a family of 3 estimates
+```
+
+
+```r
+test(pairs(flicker_em, adjust = "tukey"))
+```
+
+```
+##  contrast      estimate    SE df t.ratio p.value
+##  Blue - Brown      2.58 0.836 16   3.086  0.0184
+##  Blue - Green      1.25 0.937 16   1.331  0.3994
+##  Brown - Green    -1.33 0.882 16  -1.511  0.3124
+## 
+## P value adjustment: tukey method for comparing a family of 3 estimates
+```
+
+
+---
+
+## Scheffé's simultaneous confidence interval method
+
+-   If we choose the special multiplier
+`$$t^\star_{\text{Sch}}(\alpha)= \sqrt{(g-1)F_{g-1,N-g}(\alpha)} = \sqrt{(g-1)\texttt{*qf(1}-\alpha\texttt{,}g-1,N-g\texttt{)}}$$`
+and construct simultaneous confidence intervals for **all possible contrasts** according to
+`$$\sum_{i=1}^gc_i \bar Y_{i\bullet} \pm t^\star_{\text{Sch}}(\alpha)\,\hat{\sigma} \sqrt{\sum_{i=1}^g \frac{c_i^2}{n_i}}$$`
+then the probability that **all** sample contrasts include their true population values is **exactly** `\(1-\alpha\)`.
+-   We effectively compare each contrast `\(t\)`-statistic to the `\(\sqrt{(g-1)F}\)` distribution.
+-   Any which exceeds *that* critical value is significant in this "simultaneous" sense.
+-   The *smallest* such p-value is the `\(F\)`-test p-value!
+
+---
+&lt;svg viewBox="0 0 352 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M176 80c-52.94 0-96 43.06-96 96 0 8.84 7.16 16 16 16s16-7.16 16-16c0-35.3 28.72-64 64-64 8.84 0 16-7.16 16-16s-7.16-16-16-16zM96.06 459.17c0 3.15.93 6.22 2.68 8.84l24.51 36.84c2.97 4.46 7.97 7.14 13.32 7.14h78.85c5.36 0 10.36-2.68 13.32-7.14l24.51-36.84c1.74-2.62 2.67-5.7 2.68-8.84l.05-43.18H96.02l.04 43.18zM176 0C73.72 0 0 82.97 0 176c0 44.37 16.45 84.85 43.56 115.78 16.64 18.99 42.74 58.8 52.42 92.16v.06h48v-.12c-.01-4.77-.72-9.51-2.15-14.07-5.59-17.81-22.82-64.77-62.17-109.67-20.54-23.43-31.52-53.15-31.61-84.14-.2-73.64 59.67-128 127.95-128 70.58 0 128 57.42 128 128 0 30.97-11.24 60.85-31.65 84.14-39.11 44.61-56.42 91.47-62.1 109.46a47.507 47.507 0 0 0-2.22 14.3v.1h48v-.05c9.68-33.37 35.78-73.18 52.42-92.16C335.55 260.85 352 220.37 352 176 352 78.8 273.2 0 176 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Scheffé's simultaneous confidence intervals using emmeans
+
+
+```r
+confint(pairs(flicker_em, adjust = "scheffe"))
+```
+
+```
+##  contrast      estimate    SE df lower.CL upper.CL
+##  Blue - Brown      2.58 0.836 16    0.326     4.83
+##  Blue - Green      1.25 0.937 16   -1.279     3.77
+##  Brown - Green    -1.33 0.882 16   -3.711     1.05
+## 
+## Confidence level used: 0.95 
+## Conf-level adjustment: scheffe method with rank 2
+```
+
+```r
+test(pairs(flicker_em, adjust = "scheffe"))
+```
+
+```
+##  contrast      estimate    SE df t.ratio p.value
+##  Blue - Brown      2.58 0.836 16   3.086  0.0238
+##  Blue - Green      1.25 0.937 16   1.331  0.4319
+##  Brown - Green    -1.33 0.882 16  -1.511  0.3442
+## 
+## P value adjustment: scheffe method with rank 2
+```
+
+---
+&lt;svg viewBox="0 0 352 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M176 80c-52.94 0-96 43.06-96 96 0 8.84 7.16 16 16 16s16-7.16 16-16c0-35.3 28.72-64 64-64 8.84 0 16-7.16 16-16s-7.16-16-16-16zM96.06 459.17c0 3.15.93 6.22 2.68 8.84l24.51 36.84c2.97 4.46 7.97 7.14 13.32 7.14h78.85c5.36 0 10.36-2.68 13.32-7.14l24.51-36.84c1.74-2.62 2.67-5.7 2.68-8.84l.05-43.18H96.02l.04 43.18zM176 0C73.72 0 0 82.97 0 176c0 44.37 16.45 84.85 43.56 115.78 16.64 18.99 42.74 58.8 52.42 92.16v.06h48v-.12c-.01-4.77-.72-9.51-2.15-14.07-5.59-17.81-22.82-64.77-62.17-109.67-20.54-23.43-31.52-53.15-31.61-84.14-.2-73.64 59.67-128 127.95-128 70.58 0 128 57.42 128 128 0 30.97-11.24 60.85-31.65 84.14-39.11 44.61-56.42 91.47-62.1 109.46a47.507 47.507 0 0 0-2.22 14.3v.1h48v-.05c9.68-33.37 35.78-73.18 52.42-92.16C335.55 260.85 352 220.37 352 176 352 78.8 273.2 0 176 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+confint(flicker_em, adjust = "scheffe") %&gt;% plot(colors = "black")
+```
+
+&lt;img src="lec22_files/figure-html/unnamed-chunk-25-1.png" width="864" /&gt;
+
+```r
+confint(pairs(flicker_em, adjust = "scheffe")) %&gt;% plot(colors = "black") + 
+   geom_vline(xintercept = 0)
+```
+
+&lt;img src="lec22_files/figure-html/unnamed-chunk-25-2.png" width="864" /&gt;
+
+
+---
+
+## Concluding remarks
+
+-   The ANOVA `\(F\)`-test alone may or may not address the important scientific questions in each example.
+-   Depending on the context, a test based on the most significant contrast(s) may be *more* useful than a straight `\(F\)`-test.
+-   Bonferroni procedures are in general *conservative* i.e. p-values and confidence intervals may be larger than they really need to be.
+    -   alternative methods which may be more accurate i.e. less conservative exist: e.g. Tukey's method.
+-   Any contrasts must be decided upon **before looking at the data**. Otherwise we are **data snooping**.
+-   If we "snoop" until we find a significant contrast, we *must take account of that*:
+    -   Scheffé's method permits unlimited data snooping
+    -   If we snoop only across `\(k\)` fixed contrasts e.g. all pairwise comparisons, we can use the Bonferroni method to adjust for that (but for large `\(k\)` Tukey's method or Scheffé's method may give smaller intervals).
+
+---
+
+## References
+
+Lenth, R. (2018). _emmeans: Estimated Marginal Means,
+aka Least-Squares Means_. R package version 1.2.3.
+URL:
+[https://CRAN.R-project.org/package=emmeans](https://CRAN.R-project.org/package=emmeans).
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="assets/remark-zoom.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

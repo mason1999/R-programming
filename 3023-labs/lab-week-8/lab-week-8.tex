@@ -1,0 +1,371 @@
+\documentclass[12pt, a4paper]{article}\usepackage[]{graphicx}\usepackage[]{color}
+% maxwidth is the original width if it is less than linewidth
+% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\usepackage{Sweavel}
+
+
+\input{./everything/everything.tex}
+\input{./everything/preamble.tex}
+
+\begin{document}
+% refer to https://yihui.org/knitr/options/#code-decoration for more options
+
+
+% (1) Remember that we want the default page style
+% (2) but for this page we want an empty page style for the title 
+% (3) we input our title 
+% (4) we call a new page and reset the page counter to 1
+\pagestyle{default}
+\thispagestyle{empty}
+\input{./title_page.tex}
+\newpage
+\setcounter{page}{1}
+{\centering \tbf{Two-sided tests for normal variance}
+
+}
+Suppose $X_1, ..., X_n$ are iid $N\brac{\mu, \sigma^2}$. In week 7 tutorial it was noted that the statistic $Y = \brac{n - 1}S^2 = \sum_{i = 1}^n\brac{X_i - \overline{X}}^2$ (where $\overline{X} = \frac{1}{n}\sum_{i = 1}^nX_i$ and $S^2$ are the sample mean and sample variance) has a $\sigma^2\chi_{n - 1}^2$ distribution (note we are \tbf{not} multiplying by $\frac{1}{2}$ as we did in the week 7 Tutorial!). Consider testing
+
+\begin{align}
+H_0: \sigma^2 = 1 \qquad\text{against}\qquad H_1:\sigma^2 \neq 1
+\end{align}
+
+\begin{enumerate}[label = {\bfseries\arabic*.}]
+\item One possible level-$\alpha$ test is the “equal-tailed” test based on $Y$ , where we reject for $Y < a$ or $Y > b$ where
+$$P_0\cbrac{Y < a} = P_0\cbrac{Y > b} = \frac{\alpha}{2}$$
+  \begin{enumerate}[label = (\alph*)]
+    \item Taking $\alpha = 0.04$ and $n = 5$, find appropriate values \verb+a+ and \verb+b+.
+    {\setlength{\leftskip}{3ex}
+    
+    \tbf{Solution}
+    
+    since $Y \thicksim \sigma^2\chi_{n - 1}^2$ under the null hypothesis and taking $n = 5$ we have that $Y \thicksim \chi_4^2$. With a significance level of $\alpha = 0.04$, to find the values of $a$ and $b$ note the following code:
+    
+\begin{Schunk}
+\begin{Sinput}
+alpha = 0.04
+n = 5
+# P0(Y < a) = alpha/2 F_Y(a) = P0(Y <= a) = alpha/2 [as Y is continuous]
+a = qchisq(p = alpha/2, df = n - 1, lower.tail = TRUE)
+# P0(Y > b) = alpha/2 1 - P0(Y <= b) = alpha/2 P0(Y <= b) = 1 - alpha/2
+b = qchisq(p = 1 - alpha/2, df = n - 1, lower.tail = TRUE)
+# print out the values of a and b
+c(a, b)
+\end{Sinput}
+\begin{Soutput}
+[1]  0.4293982 11.6678434
+\end{Soutput}
+\end{Schunk}
+    
+    }
+    \item Defining \verb+sig.sq=(50:150)/100+ plot the power of the test against \verb+sig.sq+. Add a horizontal dotted line to indicate the level.
+    
+    {\setlength{\leftskip}{3ex}
+    
+    \tbf{Solution}
+    
+    We plot the power of the test for various values of $\sigma^2$. To do this, recall that the probability of rejecting  is $P\brac{ Y < a} + P\brac{ Y > b}$ for $a$ and $b$. Since $Y\thicksim \sigma^2\chi_{n - 1}^2 \iff \frac{Y}{\sigma^2} \thicksim \chi_{n - 1}^2$ we have that: 
+    \begin{align*}
+    P\brac{Y < a} & = P\brac{\frac{Y}{\sigma^2} < \frac{a}{\sigma^2}}\\
+    & = P\brac{\chi_{4}^2 < \frac{a}{\sigma^2}}
+    \end{align*}
+And that
+    \begin{align*}
+    P\brac{Y > b} & = P\brac{\frac{Y}{\sigma^2} > \frac{b}{\sigma^2}}\\
+    & = P\brac{\chi_{4}^2 > \frac{b}{\sigma^2}}
+    \end{align*}
+
+
+\begin{Schunk}
+\begin{Sinput}
+# sigma values
+sig.sq = (50:150)/100
+# power of rejecting: P(chi^2 < a/sigma^2) + P(chi^2 > b/sigma^2)
+power.rej = pchisq(q = a/sig.sq, df = n - 1, lower.tail = TRUE) + pchisq(q = b/sig.sq, df = n - 1, lower.tail = FALSE)
+# plot power against theta
+plot(sig.sq, power.rej, type = "l", main = "Power of two tail test", xlab = "sigma squared", ylab = "power")
+# add a horizontal dotted line at 0.04
+abline(h = 0.04, lty = 2)
+# add sigma_0^2 too
+abline(v = 1, col = "red")
+\end{Sinput}
+
+
+{\centering \includegraphics[width=\maxwidth]{figure/unnamed-chunk-3-1} 
+
+}
+
+\end{Schunk}
+Note that the red veritcal line represents the value of $\sigma^2 = \sigma_0^2 = 1$
+
+    }
+  \end{enumerate}
+\item In Tutorial week 7 we also saw that the UMPU test rejects for large values of $$S^2 - \log \brac{S^2}$$which is equivalent to rejecting for small values of the statistic $$T = \brac{n - 1}\log Y  - Y;$$
+to see this, write $\log \brac{S^2} = \log Y - \log \brac{n -1}$, multiply through by $n - 1$ and ignore the $\brac{n - 1}\log \brac{n - 1}$ term. 
+
+If the test is to have level $\alpha$, we reject for $Y \le c$ or $Y \ge d$ where:
+\begin{align}
+P_0\brac{Y \le c} + P_0\brac{ Y \ge d} = \alpha
+\end{align}
+And
+\begin{align}
+\brac{n - 1}\log\brac{c} - c = \brac{n - 1}\log\brac{d} - d
+\end{align} 
+  \begin{enumerate}[label = (\alph*)]
+    \item Write a function of the form 
+    \lstinputlisting{2a.r}
+    which
+    \begin{itemize}
+    \item computes the appropiate \verb+d+ so that \verb+c+ and \verb+d+ satisfy (2)
+    \item then computes and outputs the difference between the left-hand side and right-hand side in (3).
+    \end{itemize}
+    {\setlength{\leftskip}{3ex}
+    \tbf{Solution}
+    
+    For this question, what you're essentially doing is solving for $d$ in terms of $c$ from equation (2) and then forming an equation \tbf{in terms of } $c$ for equation (3) via substitution. This sets us up to \tbf{solve the equation} in part (b)
+    
+\begin{Schunk}
+\begin{Sinput}
+fn = function(c, alpha, n) {
+    # find the value of d which satisfies the relationship of equation (2). Note that d is a
+    # function of c when written like this!  P0(Y <= c) + P0(Y >= d) = alpha P0(Y >= d) = alpha -
+    # P0(Y <= c) P0(Y < d) = 1 - alpha + P0(Y <= c) P0(Y <= d) = 1 - alpha + P0(Y <= c) [since Y is
+    # continuous]
+    d = qchisq(1 - alpha + pchisq(c, df = n - 1), df = n - 1)
+
+    # sub it into equation (3) and return it as our equation
+    equation = (n - 1) * log(c) - c - (n - 1) * log(d) + d
+    return(equation)
+}
+\end{Sinput}
+\end{Schunk}
+
+    }
+  \item Use the R function \verb+uniroot()+ to find the root (in \verb+c+) of the equation \verb+fn(c,0.04,5)=0+. In your code you will need a command along the lines of
+  \lstinputlisting{2b_1.r}
+        Consult the week 7 exercise for some hints as to how to choose the \verb+upper=....+ When you have worked out the right commands, wrap it all in a function of the form
+  \lstinputlisting{2b_2.r}
+  which returns a list containing elements \verb+$c+ and \verb+$d+.
+  {\setlength{\leftskip}{3ex}
+  
+  \tbf{Solution}
+  
+  We note that $c$ can be no bigger than the lower $\alpha$-quantile of the $\chi_{n-1}^2$ distribution. hence the \verb+upper+ parameter will be the lower $\alpha$-quantile ``minus a little bit of wiggle room'' represented by the variable \verb+eps+
+\begin{Schunk}
+\begin{Sinput}
+eps = 1e-08
+alpha = 0.04
+n = 5
+uniroot(f = fn, lower = 0, upper = qchisq(alpha, df = n - 1) - eps, alpha = alpha, n = n)
+\end{Sinput}
+\begin{Soutput}
+$root
+[1] 0.5395026
+
+$f.root
+[1] 1.269793e-07
+
+$iter
+[1] 7
+
+$init.it
+[1] NA
+
+$estim.prec
+[1] 9.838951e-05
+\end{Soutput}
+\end{Schunk}
+We now make a function solving for $c$ and $d$ by wrapping all the functions we have made in the following function. Note that up until and including this point, the main idea of this function is very simple-- all we did was solve for $d$ from equation (2), then sub that into equatin (3) to get an equation in $c$. We then solved that and finally we re-substitute the value of $c$ into equation (2) to solve for $d$ and output the answer in a list. 
+\begin{Schunk}
+\begin{Sinput}
+norm.var.umpu = function(alpha, n) {
+    # wiggle room
+    eps = 1e-08
+    # calculate c
+    c = uniroot(f = fn, lower = 0, upper = qchisq(alpha, df = n - 1) - eps, alpha = alpha, n = n)$root
+    # calculate d. Recall: P0(Y <= d) = 1 - alpha + P0(Y <= c) [since Y is continuous]
+    d = qchisq(1 - alpha + pchisq(c, df = n - 1), df = n - 1)
+    return(list(c = c, d = d))
+}
+norm.var.umpu(0.04, 5)
+\end{Sinput}
+\begin{Soutput}
+$c
+[1] 0.5395026
+
+$d
+[1] 13.38425
+\end{Soutput}
+\end{Schunk}
+  
+  }
+  \item Recreate your plot from part (b) of the previous question and add to it the power function of the UMPU test.
+  
+  {\setlength{\leftskip}{3ex}
+  
+  \tbf{Solution}
+
+\begin{Schunk}
+\begin{Sinput}
+# significane level
+alpha = 0.04
+# degrees of freedom
+n = 5
+# sigma squared values
+sig.sq = (50:150)/100
+
+# for the two tailed test (use a and b from before):
+power.rej = pchisq(q = a/sig.sq, df = n - 1, lower.tail = TRUE) + pchisq(q = b/sig.sq, df = n - 1, lower.tail = FALSE)
+plot(sig.sq, power.rej, type = "l", main = "comparing tests", xlab = "sigma squared", ylab = "power")
+abline(h = 0.04, lty = 2)
+abline(v = 1, col = "red")
+
+# for the UMPU test: 1. find the values of c and d according to alpha = 0.04 and n = 5
+umpu = norm.var.umpu(alpha, n)
+# 2. find the power of the umpu test for each theta value:
+umpu.power = pchisq(umpu$c/sig.sq, df = n - 1) + pchisq(umpu$d/sig.sq, df = n - 1, lower.tail = FALSE)
+# 3. plot
+lines(sig.sq, umpu.power, col = "blue")
+# legend
+legend("top", legend = c("Power of equal-tailed test", "power of UMPU test"), col = c("black", "blue"),
+    lty = c(1, 1))
+\end{Sinput}
+
+
+{\centering \includegraphics[width=\maxwidth]{figure/unnamed-chunk-7-1} 
+
+}
+
+\end{Schunk}
+  
+  }
+  \end{enumerate}
+  \item The GLRT test of (1) above uses the statistic
+  $$L_n = \ell \brac{\overline{X}, \frac{Y}{n}; \bs{X}} - \ell \brac{\overline{X}, 1; \bs{X}} = -\frac{n}{2}\log\brac{\frac{Y}{n}} - \frac{n}{2} + \frac{Y}{2}$$
+  which is an increasing function of $Y - n\log Y$ (as opposed to the UMPU which rejects for large $Y - n\log Y$). Adapt your code for the previous question to compute the power of the exact GLRT, recreate your earlier plot and add a power curve to it so it shows all 3 power curves on the 1 graph. Add an informative heading, legend, etc.. Comment on the main differences between the 3 tests.
+  
+  {\setlength{\leftskip}{3ex}
+  \tbf{Solution}
+  
+  Quite simply we just repeat the steps for the new equation, analgous to equation (3):
+  
+  \begin{align}
+  -\frac{n}{2}\log\brac{\frac{c}{2}} - \frac{n}{2} + \frac{c}{2} = -\frac{n}{2}\log\brac{\frac{d}{2}} - \frac{n}{2} + \frac{d}{2}
+  \end{align}
+  
+\begin{Schunk}
+\begin{Sinput}
+# function for generalized linear ratio test (equation in c to be solved)
+fn.glrt = function(c, alpha, n) {
+    d = qchisq(1 - alpha + pchisq(c, df = n - 1), df = n - 1)
+    equation = -(n/2) * log(c/n) + c/2 + (n/2) * log(d/n) - d/2
+    return(equation)
+}
+# calculate c and d
+norm.var.glrt = function(alpha, n) {
+    # wiggle room
+    eps = 1e-08
+    # calculate c
+    c = uniroot(f = fn.glrt, lower = 0, upper = qchisq(alpha, df = n - 1) - eps, alpha = alpha, n = n)$root
+    # calculate d. Recall: P0(Y <= d) = 1 - alpha + P0(Y <= c) [since Y is continuous]
+    d = qchisq(1 - alpha + pchisq(c, df = n - 1), df = n - 1)
+    return(list(c = c, d = d))
+}
+
+# plot everything
+alpha = 0.04
+n = 5
+sig.sq = (50:150)/100
+
+# for the two tailed test (use a and b from before):
+power.rej = pchisq(q = a/sig.sq, df = n - 1, lower.tail = TRUE) + pchisq(q = b/sig.sq, df = n - 1, lower.tail = FALSE)
+plot(sig.sq, power.rej, type = "l", main = "comparing tests", xlab = "sigma squared", ylab = "power")
+abline(h = 0.04, lty = 2)
+abline(v = 1, col = "red")
+
+# for the UMPU test:
+umpu = norm.var.umpu(alpha, n)
+umpu.power = pchisq(umpu$c/sig.sq, df = n - 1) + pchisq(umpu$d/sig.sq, df = n - 1, lower.tail = FALSE)
+lines(sig.sq, umpu.power, col = "blue")
+
+# for the glrt:
+glrt = norm.var.glrt(alpha, n)
+glrt.power = pchisq(glrt$c/sig.sq, df = n - 1) + pchisq(glrt$d/sig.sq, df = n - 1, lower.tail = FALSE)
+lines(sig.sq, glrt.power, col = "Darkgreen")
+
+# legend
+legend("top", legend = c("Power of equal-tailed test", "power of UMPU test", "power of GLRT test"), col = c("black",
+    "blue", "Darkgreen"), lty = c(1, 1, 1))
+\end{Sinput}
+
+
+{\centering \includegraphics[width=\maxwidth]{figure/unnamed-chunk-8-1} 
+
+}
+
+\end{Schunk}
+And so what we see is that:\footnote{These comments take into account the graph from Q4 too}
+\begin{itemize}
+\item For values greater  than $\sigma_0$ the power of the equal tailed test \tbf{exceeds} the other two tests. For values less than $\sigma_0$ the power of the equal tailed test is lower than the other two tests
+\item The UMPU test is the only unbiased test in the sense that there \tbf{are not} any values $\sigma$ for which the power is lower than that of $\sigma_0$. The further you get away from the null, the higher the probability of rejecting (which is good!)
+\item For values greater than $\sigma_0$ the power of the GLRT is \tbf{lower} the other two tests. For values less than $\sigma_0$ the power of the GLRT \tbf{exceeds} the other two tests. 
+\end{itemize}
+It seems to me that if you were to do a single sided test, either pick the equal tailed test or the GLRT depending on the alternative (so the power is greater) whereas with a two sided test, stick with the UMPU test. 
+
+  }
+  \item As a final step, recreate your last plot but use an extended range for the parameter: 
+  
+  \verb+sig.sq=(1:400)/100+.
+  
+  {\setlength{\leftskip}{3ex}
+  \tbf{Solution}
+
+\begin{Schunk}
+\begin{Sinput}
+# plot everything
+alpha = 0.04
+n = 5
+sig.sq = (1:400)/100
+
+# for the two tailed test (use a and b from before):
+power.rej = pchisq(q = a/sig.sq, df = n - 1, lower.tail = TRUE) + pchisq(q = b/sig.sq, df = n - 1, lower.tail = FALSE)
+plot(sig.sq, power.rej, type = "l", main = "comparing tests", xlab = "sigma squared", ylab = "power")
+abline(h = 0.04, lty = 2)
+abline(v = 1, col = "red")
+
+# for the UMPU test:
+umpu = norm.var.umpu(alpha, n)
+umpu.power = pchisq(umpu$c/sig.sq, df = n - 1) + pchisq(umpu$d/sig.sq, df = n - 1, lower.tail = FALSE)
+lines(sig.sq, umpu.power, col = "blue")
+
+# for the glrt:
+glrt = norm.var.glrt(alpha, n)
+glrt.power = pchisq(glrt$c/sig.sq, df = n - 1) + pchisq(glrt$d/sig.sq, df = n - 1, lower.tail = FALSE)
+lines(sig.sq, glrt.power, col = "Darkgreen")
+
+# legend
+legend("top", legend = c("Power of equal-tailed test", "power of UMPU test", "power of GLRT test"), col = c("black",
+    "blue", "Darkgreen"), lty = c(1, 1, 1))
+\end{Sinput}
+
+
+{\centering \includegraphics[width=\maxwidth]{figure/unnamed-chunk-9-1} 
+
+}
+
+\end{Schunk}
+  
+  
+  }
+\end{enumerate}
+
+\end{document}

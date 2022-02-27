@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>DATA2002</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Garth Tarr" />
+    <script src="lec11_files/header-attrs-2.10/header-attrs.js"></script>
+    <link href="lec11_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } },
+      "HTML-CSS": {
+        styles: {
+          ".MathJax a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+          ".MathJax_Preview a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+        }
+      }
+      });
+    </script>
+    <link rel="stylesheet" href="assets/sydney-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="assets/sydney.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# DATA2002
+## Critical values, rejection regions and confidence intervals
+### Garth Tarr
+
+---
+
+class: segue
+
+
+
+
+
+.large[
+Random variables review
+
+Critical values
+
+Confidence intervals
+
+Rejection regions
+]
+
+---
+class: segue
+
+# Random variables
+
+---
+
+## Random variable basics
+
+- A random variable can be thought of as a mathematical object which takes certain values with certain probabilities.
+- We have *discrete* and *continuous* random variables, although we can always "approximate" a continuous one with a discrete one (taking values on a suitably fine grid).
+- A simple discrete random variable `\(X\)` can be described as a *single random* draw from a "box" containing tickets, each with numbers written on them.
+- In this case,
+- `\(\operatorname{E}(X) = \mu\)`  (the average of the numbers in the box);
+- `\(\operatorname{Var}(X)= \sigma^2\)` (the *population variance* of the numbers in the box);
+- `\(\operatorname{SD}(X)=\sigma\)`.
+
+&lt;!--
+
+## Multiplication by a Constant
+- Suppose we have a new random variable `\(Y=cX\)` for some constant `\(c\)`.
+- Then `\(Y\)` is what we would have if we *multiplied all the numbers in the box by `\(c\)`*.
+- What are `\(\operatorname{E}(Y)\)`, `\(\operatorname{Var}(Y)\)` and `\(\operatorname{SD}(Y)\)`?
+- The average in the "new box" is `\(c\mu\)` so this is `\(\operatorname{E}(Y)\)`.
+- The population variance of the "new box" is `\(c^2\sigma^2\)` so this is `\(\operatorname{Var}(Y)\)`.
+- Thus `\(\operatorname{SD}(Y)=\sqrt{\operatorname{Var}(Y)} = |c|\sigma\)` (*careful* we didn't say if `\(c\)` was positive or negative!).
+
+--&gt;
+
+---
+
+## Random sample with replacement
+
+- Next, consider taking a random sample of size `\(n\)` *with replacement*, denote the values `\(X_1,X_2,\ldots,X_n\)`.
+- This means, one of *all possible samples of size `\(n\)`* is chosen in such a way that each is equally likely.
+- If there are `\(N\)` tickets in the box, how many such samples are there?
+- It turns out that these `\(X_i\)`'s are *independent and identically distributed*. This means
+  - each `\(X_i\)` has the same distribution as a single draw;
+  - the `\(X_i\)`'s are all mutually independent.
+- Consider now taking the total `\(T=\sum_{i=1}^nX_i\)`.
+- What is `\(\operatorname{E}(T)\)`?
+- What is `\(\operatorname{Var}(T)\)`?
+
+---
+
+## Expectation and variance of sums
+
+The **expectation** of a sum is *always* the sum of the expectations.  For example,
+`$$\operatorname{E}(T) = \operatorname{E}\left(X_1+\cdots+X_n\right) = \operatorname{E}(X_1)+\cdots+\operatorname{E}(X_n) =\underbrace{\mu+\cdots+\mu}_{n\textrm{ terms}} = n\mu\,.$$`
+
+--
+
+**Variance of sum of independent random variables**
+
+- The variance of a sum is *not always* the sum of the variances.
+- However, it *is* if the `\(X_i\)`'s are *independent*. So, 
+`$$\operatorname{Var}(T) = \operatorname{Var}(X_1+\cdots+X_n) = \operatorname{Var}(X_1)+\cdots+\operatorname{Var}(X_n) = \underbrace{\sigma^{2}+\cdots+\sigma^{2}}_{n\text{ terms}} = n\sigma^2\,.$$`
+
+--
+
+**Multiplying by a constant**:  for any random variable `\(X\)` and any constant `\(c\)`, 
+`$$\operatorname{E}(cX)=c\operatorname{E}(X)\quad\text{ and }\quad\operatorname{Var}(cX)=c^2\operatorname{Var}(X)\,.$$`
+
+---
+
+## Sample mean
+
+Consider the sample mean `\(\bar X=\frac1n\sum_{i=1}^{n}X_i = \frac{1}{n}T\)`. What is `\(\operatorname{E}(\bar X)\)`? What is `\(\operatorname{Var}(\bar X)\)`?
+
+
+- Thus since `\(\bar X=\frac{1}{n}T\)`, 
+`\begin{align*}
+\operatorname{E}(\bar X) &amp;= \operatorname{E}\left(\frac{1}{n}T\right)=\frac{1}{n}\operatorname{E}(T)=\frac{1}{n}n\mu=\mu\,.\\            
+\operatorname{Var}(\bar X)&amp;=\operatorname{Var}\left(\frac{1}{n}T\right)=
+\left(\frac{1}{n}\right)^2\operatorname{Var}(T)=\frac{1}{n^2}\,n\sigma^2=\frac{\sigma^2}{n}\,.
+\end{align*}`
+
+---
+
+## Estimating `\(\mu\)`
+
+- In many applications, we model data `\(x_1,\ldots,x_n\)` as values taken by such a sample `\(X_1,\ldots,X_n\)` and we are interested in "estimating" or "learning" `\(\mu\)` (which is an "unknown population mean").
+- In this case the *estimator* is the sample mean `\(\bar X\)` (regarded as a *random variable*). 
+- The *estimate* is `\(\bar x=\frac1n\sum_{i=1}^nx_i\)`, the observed value of the mean of the data (this is *conceptually different* to `\(\bar X\)`!!) 
+ &lt;!-- , which is  a random variable that *only exists in our minds*! --&gt;
+- An important theoretical quantity is the *standard error*, the *standard deviation of the estimator*:
+`$$\operatorname{SE}=\operatorname{SD}(\bar X) = \sqrt{\operatorname{Var}(\bar X)}=\frac{\sigma}{\sqrt{n}}\,.$$`
+this is (in general) *also an unknown parameter*.
+
+---
+
+## Importance of the standard error
+
+- The standard error (standard deviation of the estimator) is important to know, since it tells us the "likely size of the estimation error".
+- An estimate on its own is not very useful, we need to also know how accurate or reliable the estimate is.
+  - This is what the standard error provides.
+- *Unfortunately* in most contexts the standard error *is also unknown*;
+  - but we can usually (also) estimate the standard error!
+
+---
+
+## Estimating the standard error
+
+- The standard error (at least when estimating a population mean `\(\mu\)`) involves the (usually unknown) population variance `\(\sigma^2\)`:
+`$$\operatorname{SE} = \frac{\sigma}{\sqrt{n}}\,.$$`
+- Fortunately, we can usually estimate `\(\sigma^2\)` using the *sample variance*
+`$$S^2= \frac{1}{n-1}\sum_{i=1}^n (X_i-\bar X)^2\,.$$`
+- The corresponding *estimated standard error* is
+$$ \widehat{\operatorname{SE}} = s/\sqrt{n}\,,$$
+where `\(s^2=\frac{1}{n-1}\sum_{i=1}^n(x_i-\bar x)^2\)` is the observed value of the sample variance.
+
+---
+class: segue
+
+# Critical values and confidence intervals
+
+---
+
+## More precise inference
+
+- Usually, we want to know if a given value `\(\mu_0\)` is a "plausible value" for the unknown `\(\mu\)`, based on observed data `\(x_1,\ldots,x_n\)`.
+
+- Roughly speaking, we do this by
+  1. computing the value of the *estimate* `\(\bar x\)`;
+  2. computing the value of the *estimated standard error* `\(s/\sqrt{n}\)`;
+  3. seeing if the *discrepancy* `\(\bar x - \mu_0\)` is "large" compared to the standard error.
+
+- The various procedures we look at:
+
+    - `\(t\)`-tests (with corresponding p-values)
+    - confidence intervals
+    - rejection regions
+
+  are all variations on this single idea.
+
+---
+
+## What kind of discrepancies are of interest?
+
+- We need to have it very clear in our minds which kind of discrepancies `\(\bar x-\mu_0\)` we are interested in:
+  - positive
+  - negative
+  - both
+
+- Another way to think about it is, given a fixed `\(\mu_0\)` of interest and an observed sample mean `\(\bar x\)`, which of the following questions are we asking:
+  1. Is `\(\bar x\)` significantly *more* than `\(\mu_0\)`? (*one-sided*)
+  2. Is `\(\bar x\)` significantly *less* than `\(\mu_0\)`? (*one-sided*)
+  3. Is `\(\bar x\)` significantly *different* to `\(\mu_0\)`? (*two-sided*)
+
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M368 96h-48V56c0-13.255-10.745-24-24-24H24C10.745 32 0 42.745 0 56v400c0 13.255 10.745 24 24 24h272c13.255 0 24-10.745 24-24v-42.11l80.606-35.977C429.396 365.063 448 336.388 448 304.86V176c0-44.112-35.888-80-80-80zm16 208.86a16.018 16.018 0 0 1-9.479 14.611L320 343.805V160h48c8.822 0 16 7.178 16 16v128.86zM208 384c-8.836 0-16-7.164-16-16V144c0-8.836 7.164-16 16-16s16 7.164 16 16v224c0 8.836-7.164 16-16 16zm-96 0c-8.836 0-16-7.164-16-16V144c0-8.836 7.164-16 16-16s16 7.164 16 16v224c0 8.836-7.164 16-16 16z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Beer contents
+
+.pull-left-2[
+Beer contents in a pack of six bottles (in millilitres) are:
+
+&lt;center&gt;
+374.8, 375.0, 375.3, 374.8, 374.4, 374.9
+&lt;/center&gt;
+&lt;br&gt;
+
+Does the mean beer content differ from the 375 mL claimed on the label?
+
+
+```r
+x = c(374.8, 375.0, 375.3, 374.8, 374.4, 374.9)
+mean(x)
+```
+
+```
+## [1] 374.8667
+```
+
+```r
+sd(x)
+```
+
+```
+## [1] 0.294392
+```
+]
+.pull-right-1[
+&lt;img src="lec11_files/figure-html/unnamed-chunk-2-1.png" width="864" /&gt;
+]
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M368 96h-48V56c0-13.255-10.745-24-24-24H24C10.745 32 0 42.745 0 56v400c0 13.255 10.745 24 24 24h272c13.255 0 24-10.745 24-24v-42.11l80.606-35.977C429.396 365.063 448 336.388 448 304.86V176c0-44.112-35.888-80-80-80zm16 208.86a16.018 16.018 0 0 1-9.479 14.611L320 343.805V160h48c8.822 0 16 7.178 16 16v128.86zM208 384c-8.836 0-16-7.164-16-16V144c0-8.836 7.164-16 16-16s16 7.164 16 16v224c0 8.836-7.164 16-16 16zm-96 0c-8.836 0-16-7.164-16-16V144c0-8.836 7.164-16 16-16s16 7.164 16 16v224c0 8.836-7.164 16-16 16z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Beer example
+
+- In the beer example there are different possible points of view.
+- For *consumers*, the results will only be "interesting" if `\(\bar x\)` is significantly *less* than 375:
+  - in this case the company is "ripping consumers off".
+- However for the *beer producers*, both positive and negative discrepancies might be of interest:
+  - if they are *underfilling*, consumers will be unhappy;
+  - if they are *overfilling*, they are "wasting" some of their product.
+- Thus both a *one-sided* and *two-sided* point of view are conceivable even for this example.
+
+---
+
+## Two-sided discrepancies of interest
+
+- When two-sided discrepancies are of interest we are basically asking: for a given `\(\mu_0\)`, is the *absolute value* `\(|\bar x-\mu_0|\)` large, compared to the standard error `\(s/\sqrt{n}\)`?
+
+.blockquote[
+`\(t\)`-test approach: declare `\(\mu_0\)` not plausible if `\(|\bar x-\mu_0|&gt; c \frac{s}{\sqrt{n}}\)` for some "suitably chosen" constant `\(c\)`.
+]
+
+&lt;br&gt;
+
+.blockquote[
+Confidence interval approach: the set of plausible values for the unknown `\(\mu\)` is
+$$ \bar x \pm c \frac{s}{\sqrt{n}}\,,$$
+for some "suitably chosen" constant `\(c\)`.
+]
+
+- Note that if the *same* `\(c\)` is chosen in both approaches, the set of plausible values *is the same*:
+  - `\(\mu_0\)` in the confidence interval `\(\Leftrightarrow |\bar x-\mu_0|\leq cs/\sqrt{n}\)`.
+
+---
+
+## How to choose the constant `\(c\)`?
+
+- The constant `\(c\)` can be chosen in a sensible way in each context.
+- .blue[.bold[Testing]]: control the .blue[.bold[false alarm rate]].
+- .red[.bold[Confidence intervals]]: control the .red[.bold[coverage probability]];
+  - the coverage probability is commonly also called the confidence level and expressed as a percentage.
+
+---
+
+## False alarm rate
+
+- A ".blue[.bold[false alarm]]" is when we "reject incorrectly".
+- Using our current language it is when we "reject a given value `\(\mu_0\)`" when we shouldn't.
+- That is, we declare `\(\mu_0\)` "not plausible" when it is in fact the true value!
+- We pick choose small `\(0\leq\alpha\leq1\)`  for the desired ".blue[.bold[false alarm rate]]" e.g. 0.05, 0.01.
+- Choose `\(c\)` such that (if possible)
+$$ P\left(|\bar X-\mu_0|&gt;c \frac{S}{\sqrt{n}}\right)=\alpha\,;$$
+- If this is not possible then just try to ensure that this probability does not *exceed* `\(\alpha\)`!
+- The .blue[.bold[false alarm rate]] is also called the .blue[.bold[significance level]].
+
+---
+
+## Normal population: use the `\(t\)`-distribution
+
+- Under the special statistical model where the data are modelled as values taken by iid normal random variables, we know that *if the true population mean is indeed `\(\boldsymbol{\mu_0}\)`*, then the ratio
+`$$\frac{\bar X-\mu_{0}}{S/\sqrt{n}}\sim t_{n-1}\,$$`
+and we can thus choose `\(c\)` such that
+`$$\begin{equation}
+P\left(|\bar X-\mu_0|&gt;c \frac{S}{\sqrt{n}}\right)=
+P\left(\frac{|\bar X-\mu_0|}{S/\sqrt{n}}&gt;c\right)=P(|t_{n-1}|&gt;c)=\alpha\,.\tag{$*$}
+\end{equation}$$`
+
+
+---
+&lt;svg viewBox="0 0 581 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M581 226.6C581 119.1 450.9 32 290.5 32S0 119.1 0 226.6C0 322.4 103.3 402 239.4 418.1V480h99.1v-61.5c24.3-2.7 47.6-7.4 69.4-13.9L448 480h112l-67.4-113.7c54.5-35.4 88.4-84.9 88.4-139.7zm-466.8 14.5c0-73.5 98.9-133 220.8-133s211.9 40.7 211.9 133c0 50.1-26.5 85-70.3 106.4-2.4-1.6-4.7-2.9-6.4-3.7-10.2-5.2-27.8-10.5-27.8-10.5s86.6-6.4 86.6-92.7-90.6-87.9-90.6-87.9h-199V361c-74.1-21.5-125.2-67.1-125.2-119.9zm225.1 38.3v-55.6c57.8 0 87.8-6.8 87.8 27.3 0 36.5-38.2 28.3-87.8 28.3zm-.9 72.5H365c10.8 0 18.9 11.7 24 19.2-16.1 1.9-33 2.8-50.6 2.9v-22.1z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Finding quantiles in R
+
+&lt;br&gt;
+
+In R, we get quantiles using the `qDISTRIBUTION()` range of functions, e.g. `qt(p, n - 1)`, `qnorm(p)`, `qchisq(p, n - 1)` for `\(t\)`, normal and `\(\chi^2\)` distributions respectively.  
+
+.pull-left[
+
+```r
+qt(0.05, 5)
+```
+
+```
+## [1] -2.015048
+```
+
+&lt;img src="lec11_files/figure-html/unnamed-chunk-4-1.png" width="864" /&gt;
+
+]
+.pull-right[
+
+```r
+qnorm(0.05)
+```
+
+```
+## [1] -1.644854
+```
+
+&lt;img src="lec11_files/figure-html/unnamed-chunk-6-1.png" width="864" /&gt;
+]
+
+---
+
+## Using `qt()`
+
+- Note that if `\(P(|t_{n-1}|&gt;c)=\alpha\)` then
+`$$P(|t_{n-1}|\leq c)=P(-c\leq t_{n-1}\leq c)=1-\alpha$$`
+and furthermore
+`$$P(t_{n-1}&lt;-c)+P(t_{n-1}&gt;c)=2P(t_{n-1}&gt;c)=\alpha$$`
+so
+`$$P(t_{n-1}&gt;c)=\frac{\alpha}{2} \quad\text{ or equivalently }\quad P(t_{n-1}\leq c)=1-\frac{\alpha}{2}$$`
+- So for e.g. 
+  - `\(\alpha=0.05\)`, we need `\(c\)` such that `\(P(t_{n-1}\leq c)=1-0.025=0.975\)` use `c = qt(0.975, df = n-1)`
+  - `\(\alpha=0.01\)`, we need `\(c\)` such that `\(P(t_{n-1}\leq c)=1-0.005=0.995\)` use `c = qt(0.975, df = n-1)`.
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M368 96h-48V56c0-13.255-10.745-24-24-24H24C10.745 32 0 42.745 0 56v400c0 13.255 10.745 24 24 24h272c13.255 0 24-10.745 24-24v-42.11l80.606-35.977C429.396 365.063 448 336.388 448 304.86V176c0-44.112-35.888-80-80-80zm16 208.86a16.018 16.018 0 0 1-9.479 14.611L320 343.805V160h48c8.822 0 16 7.178 16 16v128.86zM208 384c-8.836 0-16-7.164-16-16V144c0-8.836 7.164-16 16-16s16 7.164 16 16v224c0 8.836-7.164 16-16 16zm-96 0c-8.836 0-16-7.164-16-16V144c0-8.836 7.164-16 16-16s16 7.164 16 16v224c0 8.836-7.164 16-16 16z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Beer example
+
+.pull-left-2[
+- Recall we have observations
+
+```r
+x = c(374.8, 375.0, 375.3, 374.8, 374.4, 374.9)
+```
+
+- Here the sample size `\(n=6\)` so if 
+  - `\(\alpha=0.05\)` we need `\(c\)` such that `\(P(t_5\leq c)=0.975\)`;
+  - `\(\alpha=0.01\)` we need `\(c\)` such that `\(P(t_5\leq c)=0.995\)`.
+- These are given by
+
+
+```r
+qt(0.975,5)
+```
+
+```
+## [1] 2.570582
+```
+
+```r
+qt(0.995,5)
+```
+
+```
+## [1] 4.032143
+```
+]
+.pull-right-1[
+&lt;img src="lec11_files/figure-html/unnamed-chunk-9-1.png" width="864" /&gt;&lt;img src="lec11_files/figure-html/unnamed-chunk-9-2.png" width="864" /&gt;
+
+]
+
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M368 96h-48V56c0-13.255-10.745-24-24-24H24C10.745 32 0 42.745 0 56v400c0 13.255 10.745 24 24 24h272c13.255 0 24-10.745 24-24v-42.11l80.606-35.977C429.396 365.063 448 336.388 448 304.86V176c0-44.112-35.888-80-80-80zm16 208.86a16.018 16.018 0 0 1-9.479 14.611L320 343.805V160h48c8.822 0 16 7.178 16 16v128.86zM208 384c-8.836 0-16-7.164-16-16V144c0-8.836 7.164-16 16-16s16 7.164 16 16v224c0 8.836-7.164 16-16 16zm-96 0c-8.836 0-16-7.164-16-16V144c0-8.836 7.164-16 16-16s16 7.164 16 16v224c0 8.836-7.164 16-16 16z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Beer example
+
+.pull-left[
+- The sample mean is
+
+```r
+xbar = mean(x)
+xbar
+```
+
+```
+## [1] 374.8667
+```
+
+- The standard error is
+
+```r
+se = sd(x)/sqrt(6)
+se
+```
+
+```
+## [1] 0.120185
+```
+
+
+]
+
+.pull-right[
+- The discrepancy from the "given value" 375 is
+
+```r
+discrep=abs(xbar-375)
+discrep 
+```
+
+```
+## [1] 0.1333333
+```
+- This is only slightly more than 1 (estimated) standard error.
+- We need it to be at least 2.57 standard errors to "reject at the 0.05 .blue[.bold[false alarm rate]]":
+- Therefore we cannot reject `\(H_0\)`, so 375 is a plausible value (in this two-sided sense).
+]
+
+---
+
+## Coverage probability
+
+- For a .red[.bold[confidence interval]], the .red[.bold[coverage probability]] is simply the probability that the "true" value of the unknown parameter lies inside (is "covered by") the .red[.bold[confidence interval]].
+- This is a *long run property* and should be interpreted in the context of *repeated experiments*.
+- We choose a (small) *non-coverage probability* `\(\alpha\)`, say 0.05 or 0.01;
+  - then the .red[.bold[coverage probability]] is `\(1-\alpha\)`.
+- Thus, under some statistical model we choose `\(c\)` so that the .red[.bold[coverage probability]] *under the model* satisfies (with `\(\mu\)` the *true population mean*):
+`$$P\left(\bar X-c \frac{S}{\sqrt{n}}\leq \mu \leq \bar X+c \frac{S}{\sqrt{n}}\right)=
+P\left(|\bar X-\mu|\leq c \frac{S}{\sqrt{n}}\right)=1-\alpha\,.$$`
+
+---
+
+## Equivalent to false alarm rate condition for `\(t\)`-test
+
+- The .red[.bold[coverage probability]] condition on the previous slide is an equivalent statement to the .blue[.bold[false alarm rate]] condition for the `\(t\)`-test (for the same `\(\alpha\)`). 
+- Thus if the desired .red[.bold[coverage probability]] is
+  - 0.95 (i.e. non-coverage probability `\(\alpha=0.05\)`) then we need `\(c\)` such that `$$P(t_{n-1}\leq c)=1-0.025=0.975\,;$$`
+  - 0.99 (i.e. non-coverage probability `\(\alpha=0.01\)`) then we need `\(c\)` such that `$$P(t_{n-1}\leq c)=1-0.005=0.995\,.$$` 
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M368 96h-48V56c0-13.255-10.745-24-24-24H24C10.745 32 0 42.745 0 56v400c0 13.255 10.745 24 24 24h272c13.255 0 24-10.745 24-24v-42.11l80.606-35.977C429.396 365.063 448 336.388 448 304.86V176c0-44.112-35.888-80-80-80zm16 208.86a16.018 16.018 0 0 1-9.479 14.611L320 343.805V160h48c8.822 0 16 7.178 16 16v128.86zM208 384c-8.836 0-16-7.164-16-16V144c0-8.836 7.164-16 16-16s16 7.164 16 16v224c0 8.836-7.164 16-16 16zm-96 0c-8.836 0-16-7.164-16-16V144c0-8.836 7.164-16 16-16s16 7.164 16 16v224c0 8.836-7.164 16-16 16z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Beer example
+
+.pull-left[
+- For a 95% .red[.bold[confidence interval]] for `\(\mu\)` we thus choose `\(c\)` via
+
+```r
+c_95 = qt(0.975,5)
+c_95
+```
+
+```
+## [1] 2.570582
+```
+giving
+
+```r
+xbar + c(-1,1) * c_95 * se
+```
+
+```
+## [1] 374.5577 375.1756
+```
+- Note that this includes the "special value" 375 and so is consistent with our 0.05 .blue[.bold[false-alarm rate]] test earlier.
+
+]
+
+.pull-right[
+- For a 99% .red[.bold[confidence interval]] for `\(\mu\)` we thus choose `\(c\)` via
+
+```r
+c_99 = qt(0.995,5)
+c_99
+```
+
+```
+## [1] 4.032143
+```
+giving
+
+```r
+xbar + c(-1,1)*c_99*se
+```
+
+```
+## [1] 374.3821 375.3513
+```
+
+- As we'd expect, this CI is wider, and also includes 375.
+]
+
+---
+
+## Using `t.test()`
+
+- Compare our "manual" computations above with the output of the R function `t.test()`:
+
+.pull-left[
+- First the default:
+
+
+```r
+t.test(x, mu = 375)
+```
+
+```
+## 
+## 	One Sample t-test
+## 
+## data:  x
+## t = -1.1094, df = 5, p-value = 0.3177
+## alternative hypothesis: true mean is not equal to 375
+## 95 percent confidence interval:
+##  374.5577 375.1756
+## sample estimates:
+## mean of x 
+##  374.8667
+```
+
+]
+.pull-right[
+- Setting `conf.level=0.99`:
+
+```r
+t.test(x, mu = 375, conf.level = 0.99)
+```
+
+```
+## 
+## 	One Sample t-test
+## 
+## data:  x
+## t = -1.1094, df = 5, p-value = 0.3177
+## alternative hypothesis: true mean is not equal to 375
+## 99 percent confidence interval:
+##  374.3821 375.3513
+## sample estimates:
+## mean of x 
+##  374.8667
+```
+
+]
+
+- Note the default in R is *two-sided*.
+
+---
+
+## One-sided discrepancies of interest
+
+- The "two-sided" approach just outlined would be of interest to the beer producers, but not necessarily the beer consumers.
+- Let us consider the point of view of the consumers now.
+- `\(t\)`-test approach: declare 
+  - `\(\mu_0\)` not plausible if `\(\bar x - \mu_0 &lt; -c \frac{s}{\sqrt{n}} \Leftrightarrow \bar x &lt; \mu_0-c \frac{s}{\sqrt{n}}\)` for some "suitably chosen" constant `\(c\)`.
+- .red[.bold[Confidence interval]] approach: set of plausible values for the unknown `\(\mu\)` are those "not too much bigger than `\(\bar x\)`", i.e.
+`$$\bigg(-\infty, \bar x + c\frac{s}{\sqrt{n}} \bigg]$$`
+for a "suitably chosen" constant `\(c\)`.
+  - the upper endpoint is sometimes called an "upper confidence limit"
+  - it can be interpreted as "the largest value consistent with the data".
+
+---
+
+## Same set of plausible values 
+
+- Again, note that for the same `\(c\)` these two approaches give the *same set of plausible values* for `\(\mu\)`:
+  - `\(\mu_0\)` is in the (one-sided) .red[.bold[confidence interval]] `\(\Leftrightarrow \bar x\geq \mu_0- c \frac{s}{\sqrt{n}}\)`.
+
+---
+
+## Controlling the (one-sided) false alarm rate
+
+- We use a similar approach to the two-sided case, but with a crucial difference!
+- We again know that under the iid normal model with population mean `\(\mu\)`, `\(T = \dfrac{\bar X-\mu}{S/\sqrt{n}}\sim t_{n-1}\)`.
+- We thus choose `\(c\)` so that if `\(\mu_0\)` is the true value,
+`$$P \left( \bar X &lt; \mu_0 - c \frac{S}{\sqrt{n}}\right) = P \left( \frac{\bar X-\mu_0}{S/\sqrt{n}}&lt; -c\right)=P(t_{n-1} &lt; -c)=\alpha\,.$$`
+- By symmetry we must also have
+`$$P(t_{n-1}&gt;c)=\alpha \quad\text{ or }\quad P(t_{n-1}\leq c)=1-\alpha\,.$$`
+- Thus for .blue[.bold[false alarm rate]]
+  - 0.05 we need `\(c\)` such that `\(P(t_{n-1}\leq c)=1-0.05=0.95\)`;
+  - 0.01 we need `\(c\)` such that `\(P(t_{n-1}\leq c)=1-0.01=0.99\)`.
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M368 96h-48V56c0-13.255-10.745-24-24-24H24C10.745 32 0 42.745 0 56v400c0 13.255 10.745 24 24 24h272c13.255 0 24-10.745 24-24v-42.11l80.606-35.977C429.396 365.063 448 336.388 448 304.86V176c0-44.112-35.888-80-80-80zm16 208.86a16.018 16.018 0 0 1-9.479 14.611L320 343.805V160h48c8.822 0 16 7.178 16 16v128.86zM208 384c-8.836 0-16-7.164-16-16V144c0-8.836 7.164-16 16-16s16 7.164 16 16v224c0 8.836-7.164 16-16 16zm-96 0c-8.836 0-16-7.164-16-16V144c0-8.836 7.164-16 16-16s16 7.164 16 16v224c0 8.836-7.164 16-16 16z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Beer example
+
+.pull-left[
+For the `\(\alpha=0.05\)` .blue[.bold[false alarm rate]], since `\(n=6\)` we need
+
+```r
+c_05 = qt(.95, 5)
+c_05
+```
+
+```
+## [1] 2.015048
+```
+
+Note this is *smaller* than the two-sided version.
+
+- We have already seen that the discrepancy is only slightly more than 1 standard error:
+
+```r
+c(xbar - 375, se)
+```
+
+```
+## [1] -0.1333333  0.1201850
+```
+so in this one-sided sense, 375 is a plausible value.
+]
+
+--
+
+.pull-right[
+For the `\(\alpha=0.01\)` .blue[.bold[false alarm rate]], since `\(n=6\)` we need
+
+```r
+c_01 = qt(.99, 5)
+c_01
+```
+
+```
+## [1] 3.36493
+```
+- Note that this is also smaller than the two-sided version.
+- This makes the one-sided tests "more sensitive" than the two-sided versions.
+
+]
+
+---
+
+## One-sided confidence intervals
+
+- Again we fix the .red[.bold[coverage probability]] `\(1-\alpha\)`:
+`$$P\left(\mu_0\leq \bar X + c \frac{S}{\sqrt{n}}\right) =
+P\left(\frac{\bar X-\mu_0}{S/\sqrt{n}}\geq -c\right) = P(t_{n-1}\geq -c)=P(t_{n-1}\leq +c)=1-\alpha\,.$$`
+which is again the same as the corresponding .blue[.bold[false alarm rate]] condition.
+- Thus for non-coverage probability 
+  - 0.05 we need `\(c\)` such that `\(P(t_{n-1}\leq c)=1-0.05=0.95\)`;
+  - 0.01 we need `\(c\)` such that `\(P(t_{n-1}\leq c)=1-0.01=0.99\)`.
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M368 96h-48V56c0-13.255-10.745-24-24-24H24C10.745 32 0 42.745 0 56v400c0 13.255 10.745 24 24 24h272c13.255 0 24-10.745 24-24v-42.11l80.606-35.977C429.396 365.063 448 336.388 448 304.86V176c0-44.112-35.888-80-80-80zm16 208.86a16.018 16.018 0 0 1-9.479 14.611L320 343.805V160h48c8.822 0 16 7.178 16 16v128.86zM208 384c-8.836 0-16-7.164-16-16V144c0-8.836 7.164-16 16-16s16 7.164 16 16v224c0 8.836-7.164 16-16 16zm-96 0c-8.836 0-16-7.164-16-16V144c0-8.836 7.164-16 16-16s16 7.164 16 16v224c0 8.836-7.164 16-16 16z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Beer example
+
+.pull-left[
+- We can use `c_05` and `c_01` already obtained.
+- The 95% "upper confidence limit" is thus
+
+```r
+xbar + c_05*se
+```
+
+```
+## [1] 375.1088
+```
+which gives the one-sided .red[.bold[confidence interval]]
+
+```r
+c(-Inf, xbar + c_05*se)
+```
+
+```
+## [1]     -Inf 375.1088
+```
+]
+.pull-right[
+- For 99%,
+
+```r
+c(-Inf, xbar + c_01*se)
+```
+
+```
+## [1]     -Inf 375.2711
+```
+- These both include 375!
+]
+
+---
+
+## Using `t.test()`
+
+- We need to explicitly ask for a one-sided analysis:
+
+```r
+t.test(x, mu = 375, alternative = "less")
+```
+
+```
+## 
+## 	One Sample t-test
+## 
+## data:  x
+## t = -1.1094, df = 5, p-value = 0.1589
+## alternative hypothesis: true mean is less than 375
+## 95 percent confidence interval:
+##      -Inf 375.1088
+## sample estimates:
+## mean of x 
+##  374.8667
+```
+
+---
+
+
+```r
+t.test(x, mu = 375, alternative = "less", conf.level = 0.99)
+```
+
+```
+## 
+## 	One Sample t-test
+## 
+## data:  x
+## t = -1.1094, df = 5, p-value = 0.1589
+## alternative hypothesis: true mean is less than 375
+## 99 percent confidence interval:
+##      -Inf 375.2711
+## sample estimates:
+## mean of x 
+##  374.8667
+```
+
+---
+
+## Observed significance level: the p-value
+
+- Finally, to tie all of this together we relate it all to the p-value.
+- The *observed signficance level* (or *p-value*) is the value of `\(\alpha\)` for which the observed data is "right on the edge".
+- More precisely that is
+  - the smallest .blue[.bold[false alarm rate]] for which we would "reject" a given value `\(\mu_0\)`;
+  - the *non-coverage probability* (i.e. `\(1-\)` confidence level) for which `\(\mu_0\)` is on the boundary of the .red[.bold[confidence interval]].
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M368 96h-48V56c0-13.255-10.745-24-24-24H24C10.745 32 0 42.745 0 56v400c0 13.255 10.745 24 24 24h272c13.255 0 24-10.745 24-24v-42.11l80.606-35.977C429.396 365.063 448 336.388 448 304.86V176c0-44.112-35.888-80-80-80zm16 208.86a16.018 16.018 0 0 1-9.479 14.611L320 343.805V160h48c8.822 0 16 7.178 16 16v128.86zM208 384c-8.836 0-16-7.164-16-16V144c0-8.836 7.164-16 16-16s16 7.164 16 16v224c0 8.836-7.164 16-16 16zm-96 0c-8.836 0-16-7.164-16-16V144c0-8.836 7.164-16 16-16s16 7.164 16 16v224c0 8.836-7.164 16-16 16z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Beer example: two-sided
+
+```r
+t.test(x, mu = 375, conf.level = 1 - 0.3177)
+```
+
+```
+## 
+## 	One Sample t-test
+## 
+## data:  x
+## t = -1.1094, df = 5, p-value = 0.3177
+## alternative hypothesis: true mean is not equal to 375
+## 68.23 percent confidence interval:
+##  374.7333 375.0000
+## sample estimates:
+## mean of x 
+##  374.8667
+```
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M368 96h-48V56c0-13.255-10.745-24-24-24H24C10.745 32 0 42.745 0 56v400c0 13.255 10.745 24 24 24h272c13.255 0 24-10.745 24-24v-42.11l80.606-35.977C429.396 365.063 448 336.388 448 304.86V176c0-44.112-35.888-80-80-80zm16 208.86a16.018 16.018 0 0 1-9.479 14.611L320 343.805V160h48c8.822 0 16 7.178 16 16v128.86zM208 384c-8.836 0-16-7.164-16-16V144c0-8.836 7.164-16 16-16s16 7.164 16 16v224c0 8.836-7.164 16-16 16zm-96 0c-8.836 0-16-7.164-16-16V144c0-8.836 7.164-16 16-16s16 7.164 16 16v224c0 8.836-7.164 16-16 16z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Beer example: one-sided
+
+
+```r
+t.test(x, mu = 375, alternative = "less", conf.level = 1-0.1589)
+```
+
+```
+## 
+## 	One Sample t-test
+## 
+## data:  x
+## t = -1.1094, df = 5, p-value = 0.1589
+## alternative hypothesis: true mean is less than 375
+## 84.11 percent confidence interval:
+##  -Inf  375
+## sample estimates:
+## mean of x 
+##  374.8667
+```
+
+---
+class: segue
+
+# Rejection regions
+
+---
+
+## Decision rules
+
+- To test a hypothesis, we previously defined a **decision rule** to reject `\(H_0\)`. That is when the p-value is less than certain fixed preassigned levels, say p-value `\(\le \alpha\)` where `\(\alpha = 0.05\)`, `\(0.10\)`, etc. 
+
+- In other words, we reject or do not reject `\(H_0\)` according to whether the p-value is less than `\(\alpha\)` or greater than `\(\alpha\)`. 
+
+- The `\(\alpha\)` is called the significance level of the test, which is the boundary between rejecting and not rejecting `\(H_0\)`.
+
+--
+
+
+
+### Notation
+
+.pull-left-2[
+
+Let `\(t_{n-1}(\alpha)\)` be the **critical value** (or quantile) given by 
+`$$P(t_{n-1} \le t_{n-1}(\alpha))=\alpha,$$` 
+or if we are using the standard normal distribution `\(Z\sim N(0,1)\)` then `\(z(\alpha)\)` is defined by `\(P(Z \le z(\alpha))=\alpha\)`.
+
+]
+.pull-right-1[
+
+![t distribution with quantile](imgs/t_quantile.png)
+
+]
+
+
+---
+
+## Critical value decision rule
+
+The critical value depends on the level of significance, `\(\alpha\)`, and the distribution of `\(T\)` under `\(H_0\)`, `\(t_{n-1}\)`. 
+
+.blockquote[
+### &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M444.52 3.52L28.74 195.42c-47.97 22.39-31.98 92.75 19.19 92.75h175.91v175.91c0 51.17 70.36 67.17 92.75 19.19l191.9-415.78c15.99-38.39-25.59-79.97-63.97-63.97z"&gt;&lt;/path&gt;&lt;/svg&gt; Decision rule
+For a test of `\(H_0\colon\ \mu = \mu_0\)` vs `\(H_1\colon\ \mu&gt;\mu_0\)`, the **decision rule** at level `\(\alpha\)` is:
+- reject `\(H_0\)` if `\(t_0 \ge t_{n-1}(1-\alpha)\)` or equivalently reject `\(H_0\)` if `\(t_0 \ge |t_{n-1}(\alpha)|\)`
+
+For a test of `\(H_0\colon\ \mu = \mu_0\)` vs `\(H_1\colon\ \mu &lt; \mu_0\)`, the **decision rule** at level `\(\alpha\)` is:
+- reject `\(H_0\)` if `\(t_0 \le t_{n-1}(\alpha)\)`
+
+For a test of `\(H_0\colon\ \mu = \mu_0\)` vs `\(H_1\colon\ \mu \neq \mu_0\)`, the **decision rule** at level `\(\alpha\)` is:
+- reject `\(H_0\)` if `\(|t_0| \ge |t_{n-1}(\alpha/2)|\)`
+- do not reject `\(H_0\)` if `\(|t_0| &lt; |t_{n-1}(\alpha/2)|\)`
+]
+
+
+---
+
+## Rejection region for two-sided test, `\(H_1\colon\ \mu\neq\mu_0\)`
+
+&lt;img src="lec11_files/figure-html/unnamed-chunk-29-1.png" width="1152" /&gt;
+
+---
+
+## Rejection region for test statistics
+
+.pull-left[
+.blockquote[
+- **Hypothesis:** `\(H_0\colon\ \mu=\mu_0\)` vs `\(H_1\colon\  \mu&gt;\mu_0, \ \mu &lt; \mu_0, \ \mu \neq \mu_0\)`
+
+-  **Assumptions:** `\(X_i\)` are iid `\({\mathcal N}(\mu,\sigma^2)\)`, where `\(\sigma^2\)` is .bold[.blue[unknown]].
+
+- **Test statistic:** `\(T = \frac{\bar{X}-\mu_0}{S/\sqrt{n}} \sim t_{n-1}\)`
+
+- **Observed test statistic:** `\(t_0 = \frac{\bar{x}-\mu_0}{s/\sqrt{n}}\)`
+
+-  **Rejection region:** 
+
+- `\(H_1\colon\ \mu \lessgtr \mu_0\)`: `\(t_0 \leq t_{n-1}(\alpha)\)` or `\(t_0 \geq |t_{n-1}(\alpha)|\)`
+
+- `\(H_1\colon\ \mu \not= \mu_0\)`: `\(|t_0| \ge |t_{n-1}(\alpha/2)|\)`
+
+- **Decision:** We reject `\(H_0\)` if `\(t_0\)` is in the rejection region.
+
+]
+]
+.pull-right[
+.blockquote[
+- **Hypothesis:** `\(H_0\colon\ \mu=\mu_0\)` vs `\(H_1\colon\  \mu&gt;\mu_0, \ \mu \neq \mu_0\)`
+
+-  **Assumptions:** `\(X_i\)` are iid `\({\mathcal N}(\mu,\sigma^2)\)`, where `\(\sigma^2\)` is .bold[.blue[known]].
+
+- **Test statistic:** `\(Z=\frac{\bar{X}-\mu_0}{\sigma/\sqrt{n}} \sim {\mathcal N}(0,1)\)`
+
+- **Observed test statistic:** `\(z_0 = \frac{\bar{x}-\mu_0}{\sigma/\sqrt{n}}\)`
+
+-  **Rejection region:** 
+
+- `\(H_1\colon\ \mu \lessgtr \mu_0\)`: `\(z_0 \leq z(\alpha)\)` or `\(z_0 \geq |z(\alpha)|\)`
+
+- `\(H_1\colon\ \mu \not= \mu_0\)`: `\(|z_0| \ge |z(\alpha/2)|\)`
+
+- **Decision:** We reject `\(H_0\)` if `\(z_0\)` is in the rejection region.
+]
+]
+
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M368 96h-48V56c0-13.255-10.745-24-24-24H24C10.745 32 0 42.745 0 56v400c0 13.255 10.745 24 24 24h272c13.255 0 24-10.745 24-24v-42.11l80.606-35.977C429.396 365.063 448 336.388 448 304.86V176c0-44.112-35.888-80-80-80zm16 208.86a16.018 16.018 0 0 1-9.479 14.611L320 343.805V160h48c8.822 0 16 7.178 16 16v128.86zM208 384c-8.836 0-16-7.164-16-16V144c0-8.836 7.164-16 16-16s16 7.164 16 16v224c0 8.836-7.164 16-16 16zm-96 0c-8.836 0-16-7.164-16-16V144c0-8.836 7.164-16 16-16s16 7.164 16 16v224c0 8.836-7.164 16-16 16z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Beer contents
+
+We have `\(n=6\)`, `\(\bar{x} = 374.87\)`, `\(s=0.29\)`, `\(t_0=-1.11\)`. Hypothesis test using critical value.
+
+.pull-left[
+.blockquote[
+- __Hypothesis:__ `\(H_0\colon\ \mu = 375\)` vs `\(H_1\colon\ \mu &lt; 375\)`
+- **Assumptions:** `\(X_i\)` are _iid_ rv and follow `\(N(\mu, \sigma^2)\)`.
+- **Test statistic:** `\(T = \dfrac{\bar{X} - \mu_0}{S /\sqrt{n}}\)`.  Under `\(H_0\)`, `\(T \sim t_{n-1}\)`.
+- **Observed test statistic:** `\(t_0 = \dfrac{374.87 - 375}{0.29 /\sqrt{6}} = -1.11\)`
+]
+]
+
+.pull-right[
+.blockquote[
+- **Critical value:** `\(t_5(0.05) = -2.015\)`.
+I.e. reject if `\(t_0\)` is less than -2.015
+- **Decision:** the observed test statistic, `\(t_0 = -1.11\)` is greater than -2.015, so do not reject `\(H_0\)`.
+]
+]
+
+---
+class: segue
+
+# Rejection region on the data scale
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M444.34 181.1c22.38 15.68 35.66 41.16 35.66 68.59V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-43.24-21.01-83.41-56.34-108.06C463.85 125.02 448 99.34 448 70.31V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v66.4c0 43.69 24.56 81.63 60.34 106.7zM194.97 358.98C126.03 370.07 59.69 394.69 0 432c83.65 52.28 180.3 80 278.94 80h88.57L254.79 380.49c-14.74-17.2-37.45-25.11-59.82-21.51zM553.28 87.09c-5.67-3.8-9.28-9.96-9.28-16.78V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v62.31c0 22.02 10.17 43.41 28.64 55.39C550.79 153.04 576 199.54 576 249.69V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-65.44-32.41-126.19-86.72-162.6zM360.89 352.05c-34.4.06-86.81.15-88.21.17l117.8 137.43A63.987 63.987 0 0 0 439.07 512h88.45L409.57 374.4a63.955 63.955 0 0 0-48.68-22.35zM616 352H432l117.99 137.65A63.987 63.987 0 0 0 598.58 512H616c13.25 0 24-10.75 24-24V376c0-13.26-10.75-24-24-24z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Smoking
+
+Blood samples from 11 individuals before and after they smoked a cigarette are used to measure aggregation of blood platelets.  
+
+.pull-left-2[
+
+```r
+before = c(25, 25, 27, 44, 30, 67, 53, 53, 52, 60, 28)
+after =  c(27, 29, 37, 36, 46, 82, 57, 80, 61, 59, 43)
+df = data.frame(before, after, difference = after-before)
+```
+
+This is a match-pair sample. We reduce the data to one sample by considering the aggregation difference.
+
+Let `\(X_i\)` and `\(Y_i\)` be the blood platelet aggregation levels for the `\(i^{th}\)` person before and after smoking, respectively. Define the change in person `\(i\)`'s platelet aggregation levels as `\(D_i = Y_i - X_i\)` and the population mean change in platelet aggregation levels as `\(\mu_d\)`.
+
+.blockquote[
+Is blod platelet aggregation affected by smoking?
+]
+]
+.pull-right-1[
+.center[
+&lt;img src="lec11_files/figure-html/unnamed-chunk-31-1.png" width="288" /&gt;
+]]
+
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M444.34 181.1c22.38 15.68 35.66 41.16 35.66 68.59V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-43.24-21.01-83.41-56.34-108.06C463.85 125.02 448 99.34 448 70.31V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v66.4c0 43.69 24.56 81.63 60.34 106.7zM194.97 358.98C126.03 370.07 59.69 394.69 0 432c83.65 52.28 180.3 80 278.94 80h88.57L254.79 380.49c-14.74-17.2-37.45-25.11-59.82-21.51zM553.28 87.09c-5.67-3.8-9.28-9.96-9.28-16.78V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v62.31c0 22.02 10.17 43.41 28.64 55.39C550.79 153.04 576 199.54 576 249.69V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-65.44-32.41-126.19-86.72-162.6zM360.89 352.05c-34.4.06-86.81.15-88.21.17l117.8 137.43A63.987 63.987 0 0 0 439.07 512h88.45L409.57 374.4a63.955 63.955 0 0 0-48.68-22.35zM616 352H432l117.99 137.65A63.987 63.987 0 0 0 598.58 512H616c13.25 0 24-10.75 24-24V376c0-13.26-10.75-24-24-24z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+The paired sample t-test on whether the aggregation is affected by smoking.
+
+.pull-left-2[
+
+.blockquote[
+
+- **Hypothesis:** `\(H_0\colon\ \mu_d=0\)` vs `\(H_1\colon\ \mu_d \neq 0.\)`
+
+-  **Assumptions:** `\(D_i\sim {\mathcal N}(\mu,\sigma^2)\)`  where `\(\sigma^2\)` is unknown. The symmetric boxplot shows that the normal assumption is at least approximately satisfied.
+
+- **Test statistic:** `\(T = \frac{\bar{D} - \mu_d}{S_d/\sqrt{n}}\)`. Under `\(H_0\)`,  `\(T \sim t_{10}\)`.
+
+- **Observed test statistic:** `\(t_0 = \frac{\bar{d}}{s_d/\sqrt n} = \frac{8.45}{9.65/\sqrt{11} }= 2.9\)`
+
+- **Rejection region:** Large value of `\(|t_0|\)` argue against `\(H_0\)` in favour of `\(H_1\)`. Specifically, the critical value is, `\(|t_{n-1}(\alpha/2)|=|t_{10}(0.025)|= 2.228\)`
+
+- **Decision:**  Since `\(|t_0| = 2.9 &gt; |t_{10}(0.025)| = 2.2\)`, there is strong evidence against `\(H_0\)`. Hence we reject `\(H_0\)` and conclude that the aggregation is affected by smoking at the `\(\alpha=0.05\)` level of significance.
+
+] 
+]
+.pull-right-1[
+
+```r
+n = length(df$difference)
+dbar = mean(df$difference)
+s_d = sd(df$difference)
+t0 = dbar/(s_d/sqrt(n))
+c(n, dbar, s_d, t0) %&gt;% round(2)
+```
+
+```
+## [1] 11.00  8.45  9.65  2.91
+```
+
+```r
+alpha = 0.05
+qt(1-alpha/2, n - 1)
+```
+
+```
+## [1] 2.228139
+```
+
+&lt;img src="lec11_files/figure-html/unnamed-chunk-33-1.png" width="864" /&gt;
+]
+
+---
+
+## Rejection region for sample mean
+
+The rejection regions for the test using test statistic 
+`$$t_0 = \frac{\bar{x} - \mu_0}{s/\sqrt{n}} \ge t_{n-1}(\alpha)$$`
+on the standardized scale can be transformed to the measurement scale.
+
+We can do this because...
+`$$\begin{align*}
+\alpha &amp; = P\left( \frac{\bar{x} - \mu_0}{s/\sqrt{n}} \ge t_{n-1}(\alpha) \right ) \\
+&amp; = P\left( \bar{x} - \mu_0 \ge t_{n-1}(\alpha)s/\sqrt{n} \right ) \\
+&amp; = P\left( \bar{x} \ge t_{n-1}(\alpha)s/\sqrt{n} + \mu_0 \right )
+\end{align*}$$`
+Which means we can define a rejection region on the measurement scale
+`$$\displaystyle{\{\bar{x}: \bar{x} \ge k_0=\mu_0+t_{n-1}(\alpha) s/\sqrt{n} \} \quad \mbox{for} \quad  H_1\colon\ \ \mu &gt; \mu_0}.$$`
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M444.34 181.1c22.38 15.68 35.66 41.16 35.66 68.59V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-43.24-21.01-83.41-56.34-108.06C463.85 125.02 448 99.34 448 70.31V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v66.4c0 43.69 24.56 81.63 60.34 106.7zM194.97 358.98C126.03 370.07 59.69 394.69 0 432c83.65 52.28 180.3 80 278.94 80h88.57L254.79 380.49c-14.74-17.2-37.45-25.11-59.82-21.51zM553.28 87.09c-5.67-3.8-9.28-9.96-9.28-16.78V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v62.31c0 22.02 10.17 43.41 28.64 55.39C550.79 153.04 576 199.54 576 249.69V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-65.44-32.41-126.19-86.72-162.6zM360.89 352.05c-34.4.06-86.81.15-88.21.17l117.8 137.43A63.987 63.987 0 0 0 439.07 512h88.45L409.57 374.4a63.955 63.955 0 0 0-48.68-22.35zM616 352H432l117.99 137.65A63.987 63.987 0 0 0 598.58 512H616c13.25 0 24-10.75 24-24V376c0-13.26-10.75-24-24-24z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+We have `\(n=11\)`, `\(\bar{d} = 8.45\)`, `\(s_d=9.65\)`, `\(t_0=2.91\)`
+
+.blockquote[
+- **Observed test statistic:** `\(t_0 = \dfrac{\bar{d}}{s_d/\sqrt n} = \dfrac{8.45}{9.65/\sqrt{11}}= 2.91\)`
+- **Rejection region:** `\(\left|\dfrac{\bar{d} - \mu_d}{ s_d/\sqrt{n} }\right| &gt; t_{10}(0.025) = 2.228\)`, rearranging,
+`$$\begin{align*}
+\bar{d} &amp; &lt; \mu_d - t_{n-1}(0.025) \, s_d/\sqrt{n} \\
+\bar{d} &amp; &lt; 0 - 2.228 \times 9.65/\sqrt{11} \\ 
+\bar{d} &amp; &lt; -6.48
+\end{align*}$$`
+and
+`$$\begin{align*}
+\bar{d} &amp; &gt; \mu_d + t_{n-1}(0.025) \, s_d/\sqrt{n} \\
+\bar{d} &amp; &gt; 0 + 2.228 \times 9.65/\sqrt{11} \\ 
+\bar{d} &amp; &gt; 6.48
+\end{align*}$$`
+
+- **Decision:** If `\(\bar{d} &lt; - 6.48\)` or `\(\bar{d} &gt; 6.48\)` then reject `\(H_0\)`.  In this case, `\(\bar{d} = 8.45 &gt; 6.48\)` so we reject `\(H_0\)`.
+]
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M444.34 181.1c22.38 15.68 35.66 41.16 35.66 68.59V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-43.24-21.01-83.41-56.34-108.06C463.85 125.02 448 99.34 448 70.31V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v66.4c0 43.69 24.56 81.63 60.34 106.7zM194.97 358.98C126.03 370.07 59.69 394.69 0 432c83.65 52.28 180.3 80 278.94 80h88.57L254.79 380.49c-14.74-17.2-37.45-25.11-59.82-21.51zM553.28 87.09c-5.67-3.8-9.28-9.96-9.28-16.78V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v62.31c0 22.02 10.17 43.41 28.64 55.39C550.79 153.04 576 199.54 576 249.69V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-65.44-32.41-126.19-86.72-162.6zM360.89 352.05c-34.4.06-86.81.15-88.21.17l117.8 137.43A63.987 63.987 0 0 0 439.07 512h88.45L409.57 374.4a63.955 63.955 0 0 0-48.68-22.35zM616 352H432l117.99 137.65A63.987 63.987 0 0 0 598.58 512H616c13.25 0 24-10.75 24-24V376c0-13.26-10.75-24-24-24z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+&lt;img src="lec11_files/figure-html/unnamed-chunk-34-1.png" width="1080" /&gt;
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M444.34 181.1c22.38 15.68 35.66 41.16 35.66 68.59V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-43.24-21.01-83.41-56.34-108.06C463.85 125.02 448 99.34 448 70.31V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v66.4c0 43.69 24.56 81.63 60.34 106.7zM194.97 358.98C126.03 370.07 59.69 394.69 0 432c83.65 52.28 180.3 80 278.94 80h88.57L254.79 380.49c-14.74-17.2-37.45-25.11-59.82-21.51zM553.28 87.09c-5.67-3.8-9.28-9.96-9.28-16.78V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v62.31c0 22.02 10.17 43.41 28.64 55.39C550.79 153.04 576 199.54 576 249.69V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-65.44-32.41-126.19-86.72-162.6zM360.89 352.05c-34.4.06-86.81.15-88.21.17l117.8 137.43A63.987 63.987 0 0 0 439.07 512h88.45L409.57 374.4a63.955 63.955 0 0 0-48.68-22.35zM616 352H432l117.99 137.65A63.987 63.987 0 0 0 598.58 512H616c13.25 0 24-10.75 24-24V376c0-13.26-10.75-24-24-24z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+before = c(25, 25, 27, 44, 30, 67, 53, 53, 52, 60, 28)
+after =  c(27, 29, 37, 36, 46, 82, 57, 80, 61, 59, 43)
+df = data.frame(before, after, difference = after-before)
+(s_d = sd(df$difference))
+```
+
+```
+## [1] 9.647421
+```
+
+```r
+n=nrow(df); mu0=0
+(crit_val=qt(0.975,n-1))
+```
+
+```
+## [1] 2.228139
+```
+
+```r
+rrlower=mu0-crit_val*s_d/sqrt(n)
+rrupper=mu0+crit_val*s_d/sqrt(n)
+c(rrlower,rrupper) %&gt;% round(2)
+```
+
+```
+## [1] -6.48  6.48
+```
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M368 96h-48V56c0-13.255-10.745-24-24-24H24C10.745 32 0 42.745 0 56v400c0 13.255 10.745 24 24 24h272c13.255 0 24-10.745 24-24v-42.11l80.606-35.977C429.396 365.063 448 336.388 448 304.86V176c0-44.112-35.888-80-80-80zm16 208.86a16.018 16.018 0 0 1-9.479 14.611L320 343.805V160h48c8.822 0 16 7.178 16 16v128.86zM208 384c-8.836 0-16-7.164-16-16V144c0-8.836 7.164-16 16-16s16 7.164 16 16v224c0 8.836-7.164 16-16 16zm-96 0c-8.836 0-16-7.164-16-16V144c0-8.836 7.164-16 16-16s16 7.164 16 16v224c0 8.836-7.164 16-16 16z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Beer contents
+
+We have `\(n=6\)`, `\(\bar{x} = 374.87\)`, `\(s=0.29\)`, `\(t_0=-1.11\)`. Hypothesis test using rejection region with `\(\alpha=0.05\)`.
+
+.pull-left[
+.blockquote[
+- __Hypothesis:__ `\(H_0\colon\ \mu = 375\)` vs `\(H_1\colon\ \mu &lt; 375\)`
+- **Assumptions:** `\(X_i\)` are _iid_ rv and follow `\(N(\mu, \sigma^2)\)`.
+- **Test statistic:** `\(T = \dfrac{\bar{X} - \mu_0}{S /\sqrt{n}}\)`.  Under `\(H_0\)`, `\(T \sim t_{n-1}\)`.
+]
+]
+
+.pull-right[
+.blockquote[
+- **Rejection region (on the data scale):**
+`$$\begin{align*}
+\frac{\bar{X} - \mu}{ s/\sqrt{n} } &amp; &lt; t_{n-1}(0.05)  \\
+\bar{X} &amp; &lt; \mu + t_{n-1}(0.05) \, s/\sqrt{n} \\
+\bar{X} &amp; &lt; 375 - 2.015 \times 0.29/\sqrt{6} \\
+\bar{X} &amp; &lt; 374.74
+\end{align*}$$`
+I.e. reject if `\(\bar{x}\)` is less than 374.74.
+- **Decision:** the observed sample mean, `\(\bar{x} = 374.9\)` is greater than 374.74, so do not reject `\(H_0\)`.
+]
+]
+
+
+---
+
+## Confidence intervals
+
+To link decision rules with .red[.bold[confidence intervals]]:
+
+- if the population parameter is inside the .red[.bold[confidence interval]] then it is within the range of plausible values
+- **do not reject** `\(H_0\)` at the `\(\alpha\)` level if significance if the value of the population parameter under the null hypothesis is **inside** the `\(100(1-\alpha)\)`% .red[.bold[confidence interval]]
+
+---
+
+## References
+
+For further details see Larsen and Marx (2012), sections 6.1, 6.2 and 6.4.
+
+&lt;br&gt;
+
+Larsen, R. J. and M. L. Marx (2012). _An Introduction
+to Mathematical Statistics and its Applications_. 5th
+ed. Boston, MA: Prentice Hall. ISBN:
+978-0-321-69394-5.
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="assets/remark-zoom.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

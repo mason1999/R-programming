@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>DATA2002</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Garth Tarr" />
+    <script src="lec04_files/header-attrs-2.10/header-attrs.js"></script>
+    <link href="lec04_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } },
+      "HTML-CSS": {
+        styles: {
+          ".MathJax a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+          ".MathJax_Preview a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+        }
+      }
+      });
+    </script>
+    <link rel="stylesheet" href="assets/sydney-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="assets/sydney.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# DATA2002
+## Chi-squared goodness of fit tests
+### Garth Tarr
+
+---
+
+class: segue
+
+
+
+
+
+&lt;!-- .large[ 
+ Goodness of fit tests for discrete distributions
+] --&gt;
+
+
+# Goodness of fit tests for discrete distributions
+
+---
+&lt;svg viewBox="0 0 496 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M328.2 255.8h151.6c9.1 0 16.8-7.7 16.2-16.8-5.1-75.8-44.4-142.2-102.5-184.2-7.4-5.3-17.9-2.9-22.7 4.8L290.4 188c22.6 14.3 37.8 39.2 37.8 67.8zm-37.8 67.7c-12.3 7.7-26.8 12.4-42.4 12.4-15.6 0-30-4.7-42.4-12.4L125.2 452c-4.8 7.7-2.4 18.1 5.6 22.4C165.7 493.2 205.6 504 248 504s82.3-10.8 117.2-29.6c8-4.3 10.4-14.8 5.6-22.4l-80.4-128.5zM248 303.8c26.5 0 48-21.5 48-48s-21.5-48-48-48-48 21.5-48 48 21.5 48 48 48zm-231.8-48h151.6c0-28.6 15.2-53.5 37.8-67.7L125.2 59.7c-4.8-7.7-15.3-10.2-22.7-4.8C44.4 96.9 5.1 163.3 0 239.1c-.6 9 7.1 16.7 16.2 16.7z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Radiation exposure 
+
+The goal in biological dosimetry is to estimate the dose of .red[.bold[ionizing radiation]], absorbed by an exposed individual by using chromosome damage in peripheral lymphocytes. 
+
+When radiation exposure occurs, the damage in DNA is randomly distributed between cells producing chromosome aberrations. The outcome of interest is the number of aberrations observed. The number of aberrations typically follows a Poisson distribution, the rate of which depends on the dose.
+
+The table below shows the number of chromosome aberrations from a patient exposed to radiation after the nuclear accident of Stamboliyski (Bulgaria) in 2011 (Puig and Weiß, 2020).
+
+`$$\begin{array}{l|cccc}
+\text{Number of aberrations} &amp; 0   &amp; 1  &amp; 2  &amp; 3  &amp; 4 &amp; 5 &amp; 6 &amp; 7 \\ \hline 
+\text{Frequency}             &amp; 117 &amp; 94 &amp; 51 &amp; 15 &amp; 0 &amp; 0 &amp; 0 &amp; 1
+\end{array}$$`
+
+&gt; We want to test whether the random variable generating this data follows a **Poisson** distribution.
+
+---
+
+## Poisson distribution
+
+.pull-left[
+A **Poisson** random variable represents the probability of a given number of events occurring in a fixed interval (e.g. number of events in a fixed period of time) if these event occur independently with some known average rate `\(\lambda\)` per unit time.
+
+If `\(X\)` is a Poisson random variable with rate parameter `\(\lambda\)`, the probability mass function is:
+`$$P(X = k) = e^{-\lambda}\frac{\lambda^k}{k!}, \quad k = 0,1,2,\ldots$$`
+]
+.pull-right[.small[
+`\(\lambda = 2\)`
+
+```r
+plot(table(rpois(n=10000, lambda=2)), ylab = "Count")
+```
+
+&lt;img src="lec04_files/figure-html/unnamed-chunk-1-1.png" width="864" /&gt;
+
+`\(\lambda = 6\)`
+
+```r
+library(dplyr) # for %&gt;% 
+rpois(n=10000, lambda=6) %&gt;% table() %&gt;% 
+  plot(ylab = "Count")
+```
+
+&lt;img src="lec04_files/figure-html/unnamed-chunk-2-1.png" width="864" /&gt;
+
+]
+]
+
+.footnote[
+[&lt;svg viewBox="0 0 640 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M640 51.2l-.3 12.2c-28.1.8-45 15.8-55.8 40.3-25 57.8-103.3 240-155.3 358.6H415l-81.9-193.1c-32.5 63.6-68.3 130-99.2 193.1-.3.3-15 0-15-.3C172 352.3 122.8 243.4 75.8 133.4 64.4 106.7 26.4 63.4.2 63.7c0-3.1-.3-10-.3-14.2h161.9v13.9c-19.2 1.1-52.8 13.3-43.3 34.2 21.9 49.7 103.6 240.3 125.6 288.6 15-29.7 57.8-109.2 75.3-142.8-13.9-28.3-58.6-133.9-72.8-160-9.7-17.8-36.1-19.4-55.8-19.7V49.8l142.5.3v13.1c-19.4.6-38.1 7.8-29.4 26.1 18.9 40 30.6 68.1 48.1 104.7 5.6-10.8 34.7-69.4 48.1-100.8 8.9-20.6-3.9-28.6-38.6-29.4.3-3.6 0-10.3.3-13.6 44.4-.3 111.1-.3 123.1-.6v13.6c-22.5.8-45.8 12.8-58.1 31.7l-59.2 122.8c6.4 16.1 63.3 142.8 69.2 156.7L559.2 91.8c-8.6-23.1-36.4-28.1-47.2-28.3V49.6l127.8 1.1.2.5z"&gt;&lt;/path&gt;&lt;/svg&gt; Poisson distribution](https://en.wikipedia.org/wiki/Poisson_distribution)
+]
+
+---
+
+## Chi-squared tests for discrete distributions
+
+Suppose we have a sample `\(x_1, x_2,\ldots,x_n\)`. 
+
+We want to test whether the sample is taken from a population with a given distribution function `\(F_0(x| \theta_1,\theta_2,...,\theta_h)\)` where `\(\theta_l\)` are parameters of the distribution.  
+
+We may count the frequencies `\(y_i\)` for each value of `\(x_j\)` and compare them to the expected frequencies, `\(e_i\)`, calculated using the expected probabilities, `\(p_i\)`, from the hypothesised distribution, `\(F_0(x| \theta_1,\theta_2,...,\theta_h)\)`. 
+
+This is a *general* chi-squared goodness-of-fit test with test statistic,
+`$$T=\sum_{i=1}^k \frac{(Y_i- e_i)^2}{e_i}=\sum_{i=1}^k \frac{(Y_i-n p_i)^2}{n p_i}.$$`
+
+---
+
+## Chi-squared tests for discrete distributions
+
+However the model parameters `\(\theta_1,\theta_2,\ldots,\theta_h\)` are usually **unknown** and have to be estimated from the sample.  
+
+In this case, the expected probabilities `\(p_i\)` are replaced by their estimates `\(\hat p_i\)`. 
+
+Then the observed test statistic is
+`$$t_0 =\sum_{i=1}^k \frac{(y_i-n\hat p_i)^2}{n\hat p_i},$$`
+and the approximate p-value is
+`$$P(\chi_{k-1-q}^2\ge t_0).$$`
+Note the degrees of freedom are `\(k-1-q\)` where `\(q\)` is the number of parameters we need to estimate.
+
+
+---
+&lt;svg viewBox="0 0 496 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M328.2 255.8h151.6c9.1 0 16.8-7.7 16.2-16.8-5.1-75.8-44.4-142.2-102.5-184.2-7.4-5.3-17.9-2.9-22.7 4.8L290.4 188c22.6 14.3 37.8 39.2 37.8 67.8zm-37.8 67.7c-12.3 7.7-26.8 12.4-42.4 12.4-15.6 0-30-4.7-42.4-12.4L125.2 452c-4.8 7.7-2.4 18.1 5.6 22.4C165.7 493.2 205.6 504 248 504s82.3-10.8 117.2-29.6c8-4.3 10.4-14.8 5.6-22.4l-80.4-128.5zM248 303.8c26.5 0 48-21.5 48-48s-21.5-48-48-48-48 21.5-48 48 21.5 48 48 48zm-231.8-48h151.6c0-28.6 15.2-53.5 37.8-67.7L125.2 59.7c-4.8-7.7-15.3-10.2-22.7-4.8C44.4 96.9 5.1 163.3 0 239.1c-.6 9 7.1 16.7 16.2 16.7z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Radiation exposure 
+
+- Let `\(X\)` be a random variable such that `\(X \sim \text{Poisson}(\lambda)\)`.
+
+- Let `\(y_i\)` be the observed frequency of `\(X=i\)`.
+
+- The expected probabilities `\(p_i\)` are given by the probability mass function,
+`$$P(X=i)=p_i=e^{-\lambda}\frac{\lambda^i}{i!} \quad \text{ for }i=0,1,2,\ldots,$$`
+where `\(p_i\)` denote the probability of the number of chromosome aberrations in the `\(i\)`-th category. 
+
+- Note that for a Poisson distribution both `\(\operatorname{E}(X)\)` and `\(\operatorname{Var}(X)\)` are equal to the parameter `\(\lambda\)`. 
+
+---
+&lt;svg viewBox="0 0 496 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M328.2 255.8h151.6c9.1 0 16.8-7.7 16.2-16.8-5.1-75.8-44.4-142.2-102.5-184.2-7.4-5.3-17.9-2.9-22.7 4.8L290.4 188c22.6 14.3 37.8 39.2 37.8 67.8zm-37.8 67.7c-12.3 7.7-26.8 12.4-42.4 12.4-15.6 0-30-4.7-42.4-12.4L125.2 452c-4.8 7.7-2.4 18.1 5.6 22.4C165.7 493.2 205.6 504 248 504s82.3-10.8 117.2-29.6c8-4.3 10.4-14.8 5.6-22.4l-80.4-128.5zM248 303.8c26.5 0 48-21.5 48-48s-21.5-48-48-48-48 21.5-48 48 21.5 48 48 48zm-231.8-48h151.6c0-28.6 15.2-53.5 37.8-67.7L125.2 59.7c-4.8-7.7-15.3-10.2-22.7-4.8C44.4 96.9 5.1 163.3 0 239.1c-.6 9 7.1 16.7 16.2 16.7z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+Since `\(\lambda\)` is unknown, we estimate `\(\lambda\)` by the sample mean
+`\(\hat \lambda = \bar x = 248/278 = 0.89\)`.  
+
+`$${\small
+\begin{array}{l|crrr} \hline 
+i 	 &amp;	y_i	 &amp;	\hat p_i=e^{- \hat{\lambda}}\hat{\lambda}^i /i!									 &amp;	\hat{e}_i = n\hat{p}_i 					 &amp;	 \frac{(y_i-\hat{e}_{i})^2}{\hat{e}_{i}} \\ \hline 	
+0	 &amp; 	117	&amp;  \dfrac{0.89^0 e^{-0.89}}{0!} = 0.4098 &amp; 278 \times 0.4098 = 113.92 &amp; \dfrac{(117-113.92)^2}{113.92} = 0.08  \\	
+1	 &amp; 	94	&amp;  \dfrac{0.89^1 e^{-0.89}}{1!} = 0.3656 &amp; 278 \times 0.3656 = 101.63 &amp; \dfrac{(94-101.63)^2}{101.63} = 0.57 	\\	
+2	 &amp; 	51	&amp;  \dfrac{0.89^2 e^{-0.89}}{2!} = 0.1631 &amp; 278 \times 0.1631 = 45.33 	&amp; \dfrac{(51-45.33)^2}{45.33} = 0.71  \\	
+3  &amp; 	15	&amp;  \dfrac{0.89^3 e^{-0.89}}{3!} = 0.0485 &amp; 278 \times 0.0485 = 13.48 	&amp; \dfrac{(15-13.48)^2}{13.48} = 0.17  \\	
+4  &amp; 	0	  &amp;  \dfrac{0.89^4 e^{-0.89}}{4!} = 0.0108 &amp; 278 \times 0.0108 = 3.01 	&amp; \dfrac{(0-3.01)^2}{3.01} = 3.01  \\	
+5  &amp; 	0	  &amp;  \dfrac{0.89^5 e^{-0.89}}{5!} = 0.0019 &amp; 278 \times 0.0019 = 0.54 	&amp; \dfrac{(0-0.54)^2}{0.54} = 0.54  \\	
+6  &amp; 	0	  &amp;  \dfrac{0.89^6 e^{-0.89}}{6!} = 0.0003 &amp; 278 \times 0.0003 = 0.08 	&amp; \dfrac{(0-0.08)^2}{0.08} = 0.08  \\	
+\ge 7 &amp; 1	&amp;   1 -	0.4098 -	0.3656 - \ldots -	0.0003	=	0.00004 &amp; 278 \times 0.00004 = 0.01 &amp; \dfrac{(1 - 0.01)^2}{0.01}=	96.40 \\ 
+\hline
+\text{Total}	 &amp; 	278	 &amp;  		1 	 &amp; 					278 	 &amp; 					 101.56 	 \\ \end{array}
+}$$`
+
+.footnote[
+Note that the numbers have been rounded. Calculations were actually done using R, so there's likely rounding errors, e.g. `(1-0.01)^2/0.01 = 98.01` but I've reported R's more accurate number (`96.40`) in the table which didn't suffer rounding errors.
+]
+
+---
+&lt;svg viewBox="0 0 496 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M328.2 255.8h151.6c9.1 0 16.8-7.7 16.2-16.8-5.1-75.8-44.4-142.2-102.5-184.2-7.4-5.3-17.9-2.9-22.7 4.8L290.4 188c22.6 14.3 37.8 39.2 37.8 67.8zm-37.8 67.7c-12.3 7.7-26.8 12.4-42.4 12.4-15.6 0-30-4.7-42.4-12.4L125.2 452c-4.8 7.7-2.4 18.1 5.6 22.4C165.7 493.2 205.6 504 248 504s82.3-10.8 117.2-29.6c8-4.3 10.4-14.8 5.6-22.4l-80.4-128.5zM248 303.8c26.5 0 48-21.5 48-48s-21.5-48-48-48-48 21.5-48 48 21.5 48 48 48zm-231.8-48h151.6c0-28.6 15.2-53.5 37.8-67.7L125.2 59.7c-4.8-7.7-15.3-10.2-22.7-4.8C44.4 96.9 5.1 163.3 0 239.1c-.6 9 7.1 16.7 16.2 16.7z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+- But wait! There are a number of cells where the expected number of counts is `\(&lt; 5\)` which violates an assumption. 
+- We combine the last five classes so that the final group is `\(\ge3\)` with observed frequency `\(y_{\ge3} = 15+1 = 16\)`, the expected count is `\(\hat{e}_{\ge3} = 13.48+3.01+0.54+0.08+0.01 = 17.12\)`, and the contribution to the chi-square test statistic is `\(\frac{(16 - 17.12)^2}{17.12} = 0.07\)`. 
+
+`$${\small
+\begin{array}{l|crrr} \hline 
+i 	 &amp;	y_i	 &amp;	\hat p_i=e^{- \hat{\lambda}}\hat{\lambda}^i /i!									 &amp;	\hat{e}_i = n\hat{p}_i 					 &amp;	 \frac{(y_i-\hat{e}_{i})^2}{\hat{e}_{i}} \\ \hline 	
+0	 &amp; 	117	&amp;  \dfrac{0.89^0 e^{-0.89}}{0!} = 0.4098 &amp; 278 \times 0.4098 = 113.92 &amp; \dfrac{(117-113.92)^2}{113.92} = 0.08  \\	
+1	 &amp; 	94	&amp;  \dfrac{0.89^1 e^{-0.89}}{1!} = 0.3656 &amp; 278 \times 0.3656 = 101.63 &amp; \dfrac{(94-101.63)^2}{101.63} = 0.57 	\\	
+2	 &amp; 	51	&amp;  \dfrac{0.89^2 e^{-0.89}}{2!} = 0.1631 &amp; 278 \times 0.1631 = 45.33 	&amp; \dfrac{(51-45.33)^2}{45.33} = 0.71  \\	
+\ge 3  &amp; 	16	&amp;  1-0.4098-0.3656-0.1631 = 0.0615 &amp; 278 \times 0.0615 = 17.12 	&amp; \dfrac{(16-17.12)^2}{17.12} = 0.07  \\	
+\hline
+\text{Total}	 &amp; 	278	 &amp;  		1 	 &amp; 					278 	 &amp; 					 1.43 	 \\ \end{array}
+}$$`
+
+- The final observed test statistic is, `\(t_0=0.08+0.57+0.71+0.07=1.43\)`. 
+.footnote[
+There's a little rounding error here, the actual test statistic, without rounding error is `\(1.4372\)`.  Don't stress about rounding errors, in practice you will have R do everything for you and so it's not important whether you round to 2 or 3 or 4 decimal places.
+]
+
+---
+&lt;svg viewBox="0 0 496 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M328.2 255.8h151.6c9.1 0 16.8-7.7 16.2-16.8-5.1-75.8-44.4-142.2-102.5-184.2-7.4-5.3-17.9-2.9-22.7 4.8L290.4 188c22.6 14.3 37.8 39.2 37.8 67.8zm-37.8 67.7c-12.3 7.7-26.8 12.4-42.4 12.4-15.6 0-30-4.7-42.4-12.4L125.2 452c-4.8 7.7-2.4 18.1 5.6 22.4C165.7 493.2 205.6 504 248 504s82.3-10.8 117.2-29.6c8-4.3 10.4-14.8 5.6-22.4l-80.4-128.5zM248 303.8c26.5 0 48-21.5 48-48s-21.5-48-48-48-48 21.5-48 48 21.5 48 48 48zm-231.8-48h151.6c0-28.6 15.2-53.5 37.8-67.7L125.2 59.7c-4.8-7.7-15.3-10.2-22.7-4.8C44.4 96.9 5.1 163.3 0 239.1c-.6 9 7.1 16.7 16.2 16.7z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Hypothesis test
+
+.pull-left[
+&gt;- **Hypothesis:** `\(H_0\colon\)` the data come from a Poisson distribution vs `\(H_1\)`: the data do not come from a Poisson distribution.
+
+&gt;-  **Assumptions:** The expected frequencies, `\(e_i=np_{i}\ge 5\)`. Observations are independent.
+
+&gt;- **Test statistic:** `\(\displaystyle{T=\sum_{i=1}^k \frac{(Y_i-n p_i)^2}{n p_i}}\)`. Under `\(H_0\)`, `\(T \sim \chi_{2}^2\)` approximately. 
+
+&gt;- **Observed test statistic:** `\(t_0 = 1.43\)`
+
+&gt;-  **P-value:** `\(P(T \ge t_0) = P(\chi_{2}^2 \ge 1.43) = 0.49\)`
+
+]
+.pull-right[
+&gt;- **Decision:** Since the p-value is greater than 0.05, we do not reject the null hypothesis. The data are consistent with a Poisson distribution.
+
+&lt;img src="lec04_files/figure-html/unnamed-chunk-3-1.png" width="864" /&gt;
+]
+
+---
+&lt;svg viewBox="0 0 496 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M328.2 255.8h151.6c9.1 0 16.8-7.7 16.2-16.8-5.1-75.8-44.4-142.2-102.5-184.2-7.4-5.3-17.9-2.9-22.7 4.8L290.4 188c22.6 14.3 37.8 39.2 37.8 67.8zm-37.8 67.7c-12.3 7.7-26.8 12.4-42.4 12.4-15.6 0-30-4.7-42.4-12.4L125.2 452c-4.8 7.7-2.4 18.1 5.6 22.4C165.7 493.2 205.6 504 248 504s82.3-10.8 117.2-29.6c8-4.3 10.4-14.8 5.6-22.4l-80.4-128.5zM248 303.8c26.5 0 48-21.5 48-48s-21.5-48-48-48-48 21.5-48 48 21.5 48 48 48zm-231.8-48h151.6c0-28.6 15.2-53.5 37.8-67.7L125.2 59.7c-4.8-7.7-15.3-10.2-22.7-4.8C44.4 96.9 5.1 163.3 0 239.1c-.6 9 7.1 16.7 16.2 16.7z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## In R
+
+
+```r
+y = c(117, 94, 51, 15, 0, 0, 0, 1) # input the observed counts
+x = 0:7 # define the corresponding groups
+n = sum(y) # total number of samples (sample size)
+k = length(y) # number of groups
+(lam = sum(y * x)/n) # estimate the lambda parameter
+```
+
+```
+## [1] 0.8920863
+```
+
+```r
+p = dpois(x, lambda = lam) # obtain the p_i from the Poisson pmf
+p
+```
+
+```
+## [1] 4.097999e-01 3.655769e-01 1.630631e-01 4.848878e-02
+## [5] 1.081404e-02 1.929412e-03 2.868670e-04 3.655859e-05
+```
+
+```r
+p[8] = 1 - sum(p[1:7]) # redefine the 8th element P(&gt;=7) NOT P(7)
+round(p, 5)
+```
+
+```
+## [1] 0.40980 0.36558 0.16306 0.04849 0.01081 0.00193 0.00029
+## [8] 0.00004
+```
+
+.footnote[
+Note: `p` is a vector of length 8, because `x` is a vector of length 8.  We can extract the first three elements in the vector using `p[1:7]` where `1:7` means all the integers between 1 and 3 inclusive, this is the same as `p[c(1,2,3,4,5,6,7)]`.  We can access and overwrite the 8th element in a vector in a similar way.  `p[8]` would print out the 8th element, but `p[8] = 1 - sum(p[1:7])` overwrites the 8th element.
+]
+
+---
+&lt;svg viewBox="0 0 496 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M328.2 255.8h151.6c9.1 0 16.8-7.7 16.2-16.8-5.1-75.8-44.4-142.2-102.5-184.2-7.4-5.3-17.9-2.9-22.7 4.8L290.4 188c22.6 14.3 37.8 39.2 37.8 67.8zm-37.8 67.7c-12.3 7.7-26.8 12.4-42.4 12.4-15.6 0-30-4.7-42.4-12.4L125.2 452c-4.8 7.7-2.4 18.1 5.6 22.4C165.7 493.2 205.6 504 248 504s82.3-10.8 117.2-29.6c8-4.3 10.4-14.8 5.6-22.4l-80.4-128.5zM248 303.8c26.5 0 48-21.5 48-48s-21.5-48-48-48-48 21.5-48 48 21.5 48 48 48zm-231.8-48h151.6c0-28.6 15.2-53.5 37.8-67.7L125.2 59.7c-4.8-7.7-15.3-10.2-22.7-4.8C44.4 96.9 5.1 163.3 0 239.1c-.6 9 7.1 16.7 16.2 16.7z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+(ey = n * p)  # calculate the expected frequencies
+```
+
+```
+## [1] 113.92436722 101.63037076  45.33153228  13.47988010
+## [5]   3.00630420   0.53637658   0.07974904   0.01141984
+```
+
+```r
+ey &gt;= 5  #check assumption e_i &gt;= 5 not all satisfied
+```
+
+```
+## [1]  TRUE  TRUE  TRUE  TRUE FALSE FALSE FALSE FALSE
+```
+
+```r
+# combine adjacent classes to satisfy assumptions
+(yr = c(y[1:3], sum(y[4:8])))
+```
+
+```
+## [1] 117  94  51  16
+```
+
+```r
+(eyr = c(ey[1:3], sum(ey[4:8])))
+```
+
+```
+## [1] 113.92437 101.63037  45.33153  17.11373
+```
+
+```r
+(pr = c(p[1:3], sum(p[4:8])))
+```
+
+```
+## [1] 0.40979988 0.36557687 0.16306307 0.06156018
+```
+
+---
+&lt;svg viewBox="0 0 496 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M328.2 255.8h151.6c9.1 0 16.8-7.7 16.2-16.8-5.1-75.8-44.4-142.2-102.5-184.2-7.4-5.3-17.9-2.9-22.7 4.8L290.4 188c22.6 14.3 37.8 39.2 37.8 67.8zm-37.8 67.7c-12.3 7.7-26.8 12.4-42.4 12.4-15.6 0-30-4.7-42.4-12.4L125.2 452c-4.8 7.7-2.4 18.1 5.6 22.4C165.7 493.2 205.6 504 248 504s82.3-10.8 117.2-29.6c8-4.3 10.4-14.8 5.6-22.4l-80.4-128.5zM248 303.8c26.5 0 48-21.5 48-48s-21.5-48-48-48-48 21.5-48 48 21.5 48 48 48zm-231.8-48h151.6c0-28.6 15.2-53.5 37.8-67.7L125.2 59.7c-4.8-7.7-15.3-10.2-22.7-4.8C44.4 96.9 5.1 163.3 0 239.1c-.6 9 7.1 16.7 16.2 16.7z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+kr = length(yr)  # number of combined classes
+(t0 = sum((yr - eyr)^2/eyr))  # test statistic
+```
+
+```
+## [1] 1.43721
+```
+
+```r
+(pval = 1 - pchisq(t0, df = kr - 1 - 1))  # p-value
+```
+
+```
+## [1] 0.4874317
+```
+
+```r
+chisq.test(yr, p = pr)  # note the (incorrect) degrees of freedom
+```
+
+```
+## 
+## 	Chi-squared test for given probabilities
+## 
+## data:  yr
+## X-squared = 1.4372, df = 3, p-value = 0.6968
+```
+
+&gt; Why are the degrees of freedom in `chisq.test()` wrong?
+
+---
+&lt;svg viewBox="0 0 496 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M328.2 255.8h151.6c9.1 0 16.8-7.7 16.2-16.8-5.1-75.8-44.4-142.2-102.5-184.2-7.4-5.3-17.9-2.9-22.7 4.8L290.4 188c22.6 14.3 37.8 39.2 37.8 67.8zm-37.8 67.7c-12.3 7.7-26.8 12.4-42.4 12.4-15.6 0-30-4.7-42.4-12.4L125.2 452c-4.8 7.7-2.4 18.1 5.6 22.4C165.7 493.2 205.6 504 248 504s82.3-10.8 117.2-29.6c8-4.3 10.4-14.8 5.6-22.4l-80.4-128.5zM248 303.8c26.5 0 48-21.5 48-48s-21.5-48-48-48-48 21.5-48 48 21.5 48 48 48zm-231.8-48h151.6c0-28.6 15.2-53.5 37.8-67.7L125.2 59.7c-4.8-7.7-15.3-10.2-22.7-4.8C44.4 96.9 5.1 163.3 0 239.1c-.6 9 7.1 16.7 16.2 16.7z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+xr = c("0", "1", "2", "&gt;=3")  # group labels
+par(mfrow = c(1, 2), cex = 1.5)  # plot options
+barplot(yr, names.arg = xr, main = "Observed frequency")
+barplot(eyr, names.arg = xr, main = "Expected frequency")
+```
+
+&lt;img src="lec04_files/figure-html/unnamed-chunk-7-1.png" width="864" /&gt;
+
+
+---
+&lt;svg viewBox="0 0 581 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M581 226.6C581 119.1 450.9 32 290.5 32S0 119.1 0 226.6C0 322.4 103.3 402 239.4 418.1V480h99.1v-61.5c24.3-2.7 47.6-7.4 69.4-13.9L448 480h112l-67.4-113.7c54.5-35.4 88.4-84.9 88.4-139.7zm-466.8 14.5c0-73.5 98.9-133 220.8-133s211.9 40.7 211.9 133c0 50.1-26.5 85-70.3 106.4-2.4-1.6-4.7-2.9-6.4-3.7-10.2-5.2-27.8-10.5-27.8-10.5s86.6-6.4 86.6-92.7-90.6-87.9-90.6-87.9h-199V361c-74.1-21.5-125.2-67.1-125.2-119.9zm225.1 38.3v-55.6c57.8 0 87.8-6.8 87.8 27.3 0 36.5-38.2 28.3-87.8 28.3zm-.9 72.5H365c10.8 0 18.9 11.7 24 19.2-16.1 1.9-33 2.8-50.6 2.9v-22.1z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## R packages and functions
+
+.small[
+- `rpois()` generate pseudo-random data from a Poisson distribution
+- `dpois()` probabilities from a Poisson distribution
+- `table()` tabulate discrete data
+- `nrow()`, `mean()`, `sd()` and `var()`
+- `plot()` a generic function that generates different plots depending on what you feed it.  E.g. when you feed it a `table` object, it plots a frequency distribution.
+- `1:n` returns a vector of integers between `1` and `n` inclusive
+- `x[1:3]` returns the first 3 values in the vector `x`
+- `x[4] = 41` sets the 4th element in the object `x` to be `41`
+]
+
+
+---
+
+## References
+
+For further details see Larsen and Marx (2012), sections 10.3 and 10.4.
+
+&lt;br&gt;
+
+Larsen, R. J. and M. L. Marx (2012). _An Introduction
+to Mathematical Statistics and its Applications_. 5th
+ed. Boston, MA: Prentice Hall. ISBN:
+978-0-321-69394-5.
+
+Puig, P. and C. H. Weiß (2020). "Some goodness-of-fit
+tests for the Poisson distribution with applications
+in Biodosimetry". In: _Computational Statistics &amp;
+Data Analysis_ 144, p. 106878. ISSN: 0167-9473. DOI:
+[10.1016/j.csda.2019.106878](https://doi.org/10.1016%2Fj.csda.2019.106878).
+
+
+
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="assets/remark-zoom.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

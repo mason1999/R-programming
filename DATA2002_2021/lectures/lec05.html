@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>DATA2002</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Garth Tarr" />
+    <script src="lec05_files/header-attrs-2.10/header-attrs.js"></script>
+    <link href="lec05_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } },
+      "HTML-CSS": {
+        styles: {
+          ".MathJax a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+          ".MathJax_Preview a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+        }
+      }
+      });
+    </script>
+    <link rel="stylesheet" href="assets/sydney-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="assets/sydney.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# DATA2002
+## Measures of performance
+### Garth Tarr
+
+---
+
+class: segue
+
+
+
+
+
+.large[
+Types of errors
+
+Conditional probability
+
+Evaluating classification models
+]
+
+---
+class: segue
+
+## Types of errors
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M128 244v-40c0-6.627 5.373-12 12-12h40c6.627 0 12 5.373 12 12v40c0 6.627-5.373 12-12 12h-40c-6.627 0-12-5.373-12-12zm140 12h40c6.627 0 12-5.373 12-12v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12zm-76 84v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm76 12h40c6.627 0 12-5.373 12-12v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12zm180 124v36H0v-36c0-6.627 5.373-12 12-12h19.5V85.035C31.5 73.418 42.245 64 55.5 64H144V24c0-13.255 10.745-24 24-24h112c13.255 0 24 10.745 24 24v40h88.5c13.255 0 24 9.418 24 21.035V464H436c6.627 0 12 5.373 12 12zM79.5 463H192v-67c0-6.627 5.373-12 12-12h40c6.627 0 12 5.373 12 12v67h112.5V112H304v24c0 13.255-10.745 24-24 24H168c-13.255 0-24-10.745-24-24v-24H79.5v351zM266 64h-26V38a6 6 0 0 0-6-6h-20a6 6 0 0 0-6 6v26h-26a6 6 0 0 0-6 6v20a6 6 0 0 0 6 6h26v26a6 6 0 0 0 6 6h20a6 6 0 0 0 6-6V96h26a6 6 0 0 0 6-6V70a6 6 0 0 0-6-6z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Breast cancer
+
+&lt;img src="imgs/breast_cancer.png" width="920" /&gt;
+
+.blockquote[
+&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 448c-110.532 0-200-89.431-200-200 0-110.495 89.472-200 200-200 110.491 0 200 89.471 200 200 0 110.53-89.431 200-200 200zm107.244-255.2c0 67.052-72.421 68.084-72.421 92.863V300c0 6.627-5.373 12-12 12h-45.647c-6.627 0-12-5.373-12-12v-8.659c0-35.745 27.1-50.034 47.579-61.516 17.561-9.845 28.324-16.541 28.324-29.579 0-17.246-21.999-28.693-39.784-28.693-23.189 0-33.894 10.977-48.942 29.969-4.057 5.12-11.46 6.071-16.666 2.124l-27.824-21.098c-5.107-3.872-6.251-11.066-2.644-16.363C184.846 131.491 214.94 112 261.794 112c49.071 0 101.45 38.304 101.45 88.8zM298 368c0 23.159-18.841 42-42 42s-42-18.841-42-42 18.841-42 42-42 42 18.841 42 42z"&gt;&lt;/path&gt;&lt;/svg&gt; How **good** is the test for breast cancer?  How you define **good**?  If you test positive, what are the chances that you actually have breast cancer?
+]
+
+---
+
+## Test result vs actual status
+
+In general, __positive__ = identified and __negative__ = rejected. 
+
+Therefore:
+
+__True positive__ = correctly identified &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.033 8 8 119.033 8 256s111.033 248 248 248 248-111.033 248-248S392.967 8 256 8zm0 48c110.532 0 200 89.451 200 200 0 110.532-89.451 200-200 200-110.532 0-200-89.451-200-200 0-110.532 89.451-200 200-200m140.204 130.267l-22.536-22.718c-4.667-4.705-12.265-4.736-16.97-.068L215.346 303.697l-59.792-60.277c-4.667-4.705-12.265-4.736-16.97-.069l-22.719 22.536c-4.705 4.667-4.736 12.265-.068 16.971l90.781 91.516c4.667 4.705 12.265 4.736 16.97.068l172.589-171.204c4.704-4.668 4.734-12.266.067-16.971z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+__False positive__ = incorrectly identified &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm101.8-262.2L295.6 256l62.2 62.2c4.7 4.7 4.7 12.3 0 17l-22.6 22.6c-4.7 4.7-12.3 4.7-17 0L256 295.6l-62.2 62.2c-4.7 4.7-12.3 4.7-17 0l-22.6-22.6c-4.7-4.7-4.7-12.3 0-17l62.2-62.2-62.2-62.2c-4.7-4.7-4.7-12.3 0-17l22.6-22.6c4.7-4.7 12.3-4.7 17 0l62.2 62.2 62.2-62.2c4.7-4.7 12.3-4.7 17 0l22.6 22.6c4.7 4.7 4.7 12.3 0 17z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+__True negative__ = correctly rejected &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.033 8 8 119.033 8 256s111.033 248 248 248 248-111.033 248-248S392.967 8 256 8zm0 48c110.532 0 200 89.451 200 200 0 110.532-89.451 200-200 200-110.532 0-200-89.451-200-200 0-110.532 89.451-200 200-200m140.204 130.267l-22.536-22.718c-4.667-4.705-12.265-4.736-16.97-.068L215.346 303.697l-59.792-60.277c-4.667-4.705-12.265-4.736-16.97-.069l-22.719 22.536c-4.705 4.667-4.736 12.265-.068 16.971l90.781 91.516c4.667 4.705 12.265 4.736 16.97.068l172.589-171.204c4.704-4.668 4.734-12.266.067-16.971z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+__False negative__ = incorrectly rejected &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm101.8-262.2L295.6 256l62.2 62.2c4.7 4.7 4.7 12.3 0 17l-22.6 22.6c-4.7 4.7-12.3 4.7-17 0L256 295.6l-62.2 62.2c-4.7 4.7-12.3 4.7-17 0l-22.6-22.6c-4.7-4.7-4.7-12.3 0-17l62.2-62.2-62.2-62.2c-4.7-4.7-4.7-12.3 0-17l22.6-22.6c4.7-4.7 12.3-4.7 17 0l62.2 62.2 62.2-62.2c4.7-4.7 12.3-4.7 17 0l22.6 22.6c4.7 4.7 4.7 12.3 0 17z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+&lt;br&gt;
+
+We can summarise this in a table:
+
+|        | Actual positive            | Actual negative  |
+| ------------------ |:-------------------:| :--------:|
+| **Test positive**       | True positive (TP) &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.033 8 8 119.033 8 256s111.033 248 248 248 248-111.033 248-248S392.967 8 256 8zm0 48c110.532 0 200 89.451 200 200 0 110.532-89.451 200-200 200-110.532 0-200-89.451-200-200 0-110.532 89.451-200 200-200m140.204 130.267l-22.536-22.718c-4.667-4.705-12.265-4.736-16.97-.068L215.346 303.697l-59.792-60.277c-4.667-4.705-12.265-4.736-16.97-.069l-22.719 22.536c-4.705 4.667-4.736 12.265-.068 16.971l90.781 91.516c4.667 4.705 12.265 4.736 16.97.068l172.589-171.204c4.704-4.668 4.734-12.266.067-16.971z"&gt;&lt;/path&gt;&lt;/svg&gt;  | False positive (FP) &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm101.8-262.2L295.6 256l62.2 62.2c4.7 4.7 4.7 12.3 0 17l-22.6 22.6c-4.7 4.7-12.3 4.7-17 0L256 295.6l-62.2 62.2c-4.7 4.7-12.3 4.7-17 0l-22.6-22.6c-4.7-4.7-4.7-12.3 0-17l62.2-62.2-62.2-62.2c-4.7-4.7-4.7-12.3 0-17l22.6-22.6c4.7-4.7 12.3-4.7 17 0l62.2 62.2 62.2-62.2c4.7-4.7 12.3-4.7 17 0l22.6 22.6c4.7 4.7 4.7 12.3 0 17z"&gt;&lt;/path&gt;&lt;/svg&gt;  |
+| **Test negative**       | False negative (FN) &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm101.8-262.2L295.6 256l62.2 62.2c4.7 4.7 4.7 12.3 0 17l-22.6 22.6c-4.7 4.7-12.3 4.7-17 0L256 295.6l-62.2 62.2c-4.7 4.7-12.3 4.7-17 0l-22.6-22.6c-4.7-4.7-4.7-12.3 0-17l62.2-62.2-62.2-62.2c-4.7-4.7-4.7-12.3 0-17l22.6-22.6c4.7-4.7 12.3-4.7 17 0l62.2 62.2 62.2-62.2c4.7-4.7 12.3-4.7 17 0l22.6 22.6c4.7 4.7 4.7 12.3 0 17z"&gt;&lt;/path&gt;&lt;/svg&gt; | True negative (TN) &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.033 8 8 119.033 8 256s111.033 248 248 248 248-111.033 248-248S392.967 8 256 8zm0 48c110.532 0 200 89.451 200 200 0 110.532-89.451 200-200 200-110.532 0-200-89.451-200-200 0-110.532 89.451-200 200-200m140.204 130.267l-22.536-22.718c-4.667-4.705-12.265-4.736-16.97-.068L215.346 303.697l-59.792-60.277c-4.667-4.705-12.265-4.736-16.97-.069l-22.719 22.536c-4.705 4.667-4.736 12.265-.068 16.971l90.781 91.516c4.667 4.705 12.265 4.736 16.97.068l172.589-171.204c4.704-4.668 4.734-12.266.067-16.971z"&gt;&lt;/path&gt;&lt;/svg&gt;  |
+
+.footnote[
+[&lt;svg viewBox="0 0 640 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M640 51.2l-.3 12.2c-28.1.8-45 15.8-55.8 40.3-25 57.8-103.3 240-155.3 358.6H415l-81.9-193.1c-32.5 63.6-68.3 130-99.2 193.1-.3.3-15 0-15-.3C172 352.3 122.8 243.4 75.8 133.4 64.4 106.7 26.4 63.4.2 63.7c0-3.1-.3-10-.3-14.2h161.9v13.9c-19.2 1.1-52.8 13.3-43.3 34.2 21.9 49.7 103.6 240.3 125.6 288.6 15-29.7 57.8-109.2 75.3-142.8-13.9-28.3-58.6-133.9-72.8-160-9.7-17.8-36.1-19.4-55.8-19.7V49.8l142.5.3v13.1c-19.4.6-38.1 7.8-29.4 26.1 18.9 40 30.6 68.1 48.1 104.7 5.6-10.8 34.7-69.4 48.1-100.8 8.9-20.6-3.9-28.6-38.6-29.4.3-3.6 0-10.3.3-13.6 44.4-.3 111.1-.3 123.1-.6v13.6c-22.5.8-45.8 12.8-58.1 31.7l-59.2 122.8c6.4 16.1 63.3 142.8 69.2 156.7L559.2 91.8c-8.6-23.1-36.4-28.1-47.2-28.3V49.6l127.8 1.1.2.5z"&gt;&lt;/path&gt;&lt;/svg&gt; False positives and false negatives](https://en.wikipedia.org/wiki/False_positives_and_false_negatives)
+]
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M128 244v-40c0-6.627 5.373-12 12-12h40c6.627 0 12 5.373 12 12v40c0 6.627-5.373 12-12 12h-40c-6.627 0-12-5.373-12-12zm140 12h40c6.627 0 12-5.373 12-12v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12zm-76 84v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm76 12h40c6.627 0 12-5.373 12-12v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12zm180 124v36H0v-36c0-6.627 5.373-12 12-12h19.5V85.035C31.5 73.418 42.245 64 55.5 64H144V24c0-13.255 10.745-24 24-24h112c13.255 0 24 10.745 24 24v40h88.5c13.255 0 24 9.418 24 21.035V464H436c6.627 0 12 5.373 12 12zM79.5 463H192v-67c0-6.627 5.373-12 12-12h40c6.627 0 12 5.373 12 12v67h112.5V112H304v24c0 13.255-10.745 24-24 24H168c-13.255 0-24-10.745-24-24v-24H79.5v351zM266 64h-26V38a6 6 0 0 0-6-6h-20a6 6 0 0 0-6 6v26h-26a6 6 0 0 0-6 6v20a6 6 0 0 0 6 6h26v26a6 6 0 0 0 6 6h20a6 6 0 0 0 6-6V96h26a6 6 0 0 0 6-6V70a6 6 0 0 0-6-6z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Breast cancer
+
+
+|        | Have breast cancer            | Do not have breast cancer  |
+| ------------------ |:-------------------:| :--------:|
+| **Mammogram returns a positive test result**       | True positive &lt;br&gt;(TP) &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.033 8 8 119.033 8 256s111.033 248 248 248 248-111.033 248-248S392.967 8 256 8zm0 48c110.532 0 200 89.451 200 200 0 110.532-89.451 200-200 200-110.532 0-200-89.451-200-200 0-110.532 89.451-200 200-200m140.204 130.267l-22.536-22.718c-4.667-4.705-12.265-4.736-16.97-.068L215.346 303.697l-59.792-60.277c-4.667-4.705-12.265-4.736-16.97-.069l-22.719 22.536c-4.705 4.667-4.736 12.265-.068 16.971l90.781 91.516c4.667 4.705 12.265 4.736 16.97.068l172.589-171.204c4.704-4.668 4.734-12.266.067-16.971z"&gt;&lt;/path&gt;&lt;/svg&gt;  | False positive &lt;br&gt; (FP) &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm101.8-262.2L295.6 256l62.2 62.2c4.7 4.7 4.7 12.3 0 17l-22.6 22.6c-4.7 4.7-12.3 4.7-17 0L256 295.6l-62.2 62.2c-4.7 4.7-12.3 4.7-17 0l-22.6-22.6c-4.7-4.7-4.7-12.3 0-17l62.2-62.2-62.2-62.2c-4.7-4.7-4.7-12.3 0-17l22.6-22.6c4.7-4.7 12.3-4.7 17 0l62.2 62.2 62.2-62.2c4.7-4.7 12.3-4.7 17 0l22.6 22.6c4.7 4.7 4.7 12.3 0 17z"&gt;&lt;/path&gt;&lt;/svg&gt;  |
+| **Mammogram returns a negative test result**       | False negative &lt;br&gt; (FN) &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm101.8-262.2L295.6 256l62.2 62.2c4.7 4.7 4.7 12.3 0 17l-22.6 22.6c-4.7 4.7-12.3 4.7-17 0L256 295.6l-62.2 62.2c-4.7 4.7-12.3 4.7-17 0l-22.6-22.6c-4.7-4.7-4.7-12.3 0-17l62.2-62.2-62.2-62.2c-4.7-4.7-4.7-12.3 0-17l22.6-22.6c4.7-4.7 12.3-4.7 17 0l62.2 62.2 62.2-62.2c4.7-4.7 12.3-4.7 17 0l22.6 22.6c4.7 4.7 4.7 12.3 0 17z"&gt;&lt;/path&gt;&lt;/svg&gt; | True negative &lt;br&gt; (TN) &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.033 8 8 119.033 8 256s111.033 248 248 248 248-111.033 248-248S392.967 8 256 8zm0 48c110.532 0 200 89.451 200 200 0 110.532-89.451 200-200 200-110.532 0-200-89.451-200-200 0-110.532 89.451-200 200-200m140.204 130.267l-22.536-22.718c-4.667-4.705-12.265-4.736-16.97-.068L215.346 303.697l-59.792-60.277c-4.667-4.705-12.265-4.736-16.97-.069l-22.719 22.536c-4.705 4.667-4.736 12.265-.068 16.971l90.781 91.516c4.667 4.705 12.265 4.736 16.97.068l172.589-171.204c4.704-4.668 4.734-12.266.067-16.971z"&gt;&lt;/path&gt;&lt;/svg&gt;  |
+
+.pull-left[
+__True positive__: Mammogram returns a positive test result and you actually have breast cancer
+
+__False negative__: Mammogram returns a negative test result but you do actually have breast cancer
+]
+.pull-right[
+__False positive__: Mammogram returns a positive test result but you don't actually have breast cancer
+
+__True negative__: Mammogram returns a negative test result and you don't actually have breast cancer
+]
+
+.blockquote[
+&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 448c-110.532 0-200-89.431-200-200 0-110.495 89.472-200 200-200 110.491 0 200 89.471 200 200 0 110.53-89.431 200-200 200zm107.244-255.2c0 67.052-72.421 68.084-72.421 92.863V300c0 6.627-5.373 12-12 12h-45.647c-6.627 0-12-5.373-12-12v-8.659c0-35.745 27.1-50.034 47.579-61.516 17.561-9.845 28.324-16.541 28.324-29.579 0-17.246-21.999-28.693-39.784-28.693-23.189 0-33.894 10.977-48.942 29.969-4.057 5.12-11.46 6.071-16.666 2.124l-27.824-21.098c-5.107-3.872-6.251-11.066-2.644-16.363C184.846 131.491 214.94 112 261.794 112c49.071 0 101.45 38.304 101.45 88.8zM298 368c0 23.159-18.841 42-42 42s-42-18.841-42-42 18.841-42 42-42 42 18.841 42 42z"&gt;&lt;/path&gt;&lt;/svg&gt; What's worse?  FN or FP?
+]
+
+
+
+---
+
+## Extra notation
+
+Let's formalise this.  Let,
+
+- `\(\color{blue}{D^+}\)` be the event that an individual **has** a particular disease. The **prevalence** is the marginal probability of disease, `\(P(D^+)\)`.
+- `\(\color{blue}{D^-}\)` be the event that an individual **does not have** a particular disease. 
+- `\(\color{red}{S^+}\)` represent a positive screening test result or a symptom being present.
+- `\(\color{red}{S^-}\)` represent a negative screening test result or no symptom.
+
+With this notation, we can start to quantify the influence of a risk factor or screening test ( `\(S\)` ) on the disease outcome ( `\(D\)` ).
+
+Our table becomes:
+
+|        | .blue[Actual positive] `\(\color{blue}{D^+}\)` | .blue[Actual negative] `\(\color{blue}{D^-}\)` |
+| ------------------ |:-------------------:| :--------:|
+| .bold[.red[Test positive]] `\(\color{red}{S^+}\)`       | True positive (TP) &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.033 8 8 119.033 8 256s111.033 248 248 248 248-111.033 248-248S392.967 8 256 8zm0 48c110.532 0 200 89.451 200 200 0 110.532-89.451 200-200 200-110.532 0-200-89.451-200-200 0-110.532 89.451-200 200-200m140.204 130.267l-22.536-22.718c-4.667-4.705-12.265-4.736-16.97-.068L215.346 303.697l-59.792-60.277c-4.667-4.705-12.265-4.736-16.97-.069l-22.719 22.536c-4.705 4.667-4.736 12.265-.068 16.971l90.781 91.516c4.667 4.705 12.265 4.736 16.97.068l172.589-171.204c4.704-4.668 4.734-12.266.067-16.971z"&gt;&lt;/path&gt;&lt;/svg&gt;  | False positive (FP) &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm101.8-262.2L295.6 256l62.2 62.2c4.7 4.7 4.7 12.3 0 17l-22.6 22.6c-4.7 4.7-12.3 4.7-17 0L256 295.6l-62.2 62.2c-4.7 4.7-12.3 4.7-17 0l-22.6-22.6c-4.7-4.7-4.7-12.3 0-17l62.2-62.2-62.2-62.2c-4.7-4.7-4.7-12.3 0-17l22.6-22.6c4.7-4.7 12.3-4.7 17 0l62.2 62.2 62.2-62.2c4.7-4.7 12.3-4.7 17 0l22.6 22.6c4.7 4.7 4.7 12.3 0 17z"&gt;&lt;/path&gt;&lt;/svg&gt;  |
+| .bold[.red[Test negative]] `\(\color{red}{S^-}\)`       | False negative (FN) &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm101.8-262.2L295.6 256l62.2 62.2c4.7 4.7 4.7 12.3 0 17l-22.6 22.6c-4.7 4.7-12.3 4.7-17 0L256 295.6l-62.2 62.2c-4.7 4.7-12.3 4.7-17 0l-22.6-22.6c-4.7-4.7-4.7-12.3 0-17l62.2-62.2-62.2-62.2c-4.7-4.7-4.7-12.3 0-17l22.6-22.6c4.7-4.7 12.3-4.7 17 0l62.2 62.2 62.2-62.2c4.7-4.7 12.3-4.7 17 0l22.6 22.6c4.7 4.7 4.7 12.3 0 17z"&gt;&lt;/path&gt;&lt;/svg&gt; | True negative (TN) &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.033 8 8 119.033 8 256s111.033 248 248 248 248-111.033 248-248S392.967 8 256 8zm0 48c110.532 0 200 89.451 200 200 0 110.532-89.451 200-200 200-110.532 0-200-89.451-200-200 0-110.532 89.451-200 200-200m140.204 130.267l-22.536-22.718c-4.667-4.705-12.265-4.736-16.97-.068L215.346 303.697l-59.792-60.277c-4.667-4.705-12.265-4.736-16.97-.069l-22.719 22.536c-4.705 4.667-4.736 12.265-.068 16.971l90.781 91.516c4.667 4.705 12.265 4.736 16.97.068l172.589-171.204c4.704-4.668 4.734-12.266.067-16.971z"&gt;&lt;/path&gt;&lt;/svg&gt;  |
+
+---
+
+## Table with counts of outcomes
+
+|        | .blue[Actual positive] `\(\color{blue}{D^+}\)` | .blue[Actual negative] `\(\color{blue}{D^-}\)` | |
+| ------------------ |:-------------------:| :--------:| :---: |
+| .bold[.red[Test positive]] `\(\color{red}{S^+}\)` | `\(a\)`  | `\(b\)`  | `\(a+b\)` | 
+| .bold[.red[Test negative]] `\(\color{red}{S^-}\)` | `\(c\)` | `\(d\)`  | `\(c+d\)` |
+| | `\(a + c\)` | `\(b + d\)`  | `\(a+b+c+d\)` |
+
+.pull-left[
+- **False negative rate**: `\(P(S^- | D^+) = \dfrac{c}{a+c}\)`
+- **False positive rate**: `\(P(S^+ | D^-) = \dfrac{b}{b+d}\)`
+- **Sensitivity/Recall**: `\(P(S^+ | D^+) = \dfrac{a}{a+c}\)`, the probability that the test is positive given that the subject actually has the disease
+- **Specificity**: `\(P(S^- | D^-) = \dfrac{d}{b+d}\)`, the probability that the test is negative given that the subject does not have the disease
+]
+.pull-right[
+- **Positive predictive value/Precision**: `\(P(D^+|S^+) = \dfrac{a}{a+b}\)`, the probability that the subject has the  disease given that the test is positive
+- **Negative predictive value**: `\(P(D^- | S^-) = \dfrac{d}{c+d}\)`, the probability that the subject does not have the disease given that the test is negative
+- **Accuracy**: `\(\dfrac{a+d}{a+b+c+d}\)`
+]
+
+
+.footnote[
+[&lt;svg viewBox="0 0 640 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M640 51.2l-.3 12.2c-28.1.8-45 15.8-55.8 40.3-25 57.8-103.3 240-155.3 358.6H415l-81.9-193.1c-32.5 63.6-68.3 130-99.2 193.1-.3.3-15 0-15-.3C172 352.3 122.8 243.4 75.8 133.4 64.4 106.7 26.4 63.4.2 63.7c0-3.1-.3-10-.3-14.2h161.9v13.9c-19.2 1.1-52.8 13.3-43.3 34.2 21.9 49.7 103.6 240.3 125.6 288.6 15-29.7 57.8-109.2 75.3-142.8-13.9-28.3-58.6-133.9-72.8-160-9.7-17.8-36.1-19.4-55.8-19.7V49.8l142.5.3v13.1c-19.4.6-38.1 7.8-29.4 26.1 18.9 40 30.6 68.1 48.1 104.7 5.6-10.8 34.7-69.4 48.1-100.8 8.9-20.6-3.9-28.6-38.6-29.4.3-3.6 0-10.3.3-13.6 44.4-.3 111.1-.3 123.1-.6v13.6c-22.5.8-45.8 12.8-58.1 31.7l-59.2 122.8c6.4 16.1 63.3 142.8 69.2 156.7L559.2 91.8c-8.6-23.1-36.4-28.1-47.2-28.3V49.6l127.8 1.1.2.5z"&gt;&lt;/path&gt;&lt;/svg&gt; Sensitivity and specificity](https://en.wikipedia.org/wiki/Sensitivity_and_specificity) and [&lt;svg viewBox="0 0 640 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M640 51.2l-.3 12.2c-28.1.8-45 15.8-55.8 40.3-25 57.8-103.3 240-155.3 358.6H415l-81.9-193.1c-32.5 63.6-68.3 130-99.2 193.1-.3.3-15 0-15-.3C172 352.3 122.8 243.4 75.8 133.4 64.4 106.7 26.4 63.4.2 63.7c0-3.1-.3-10-.3-14.2h161.9v13.9c-19.2 1.1-52.8 13.3-43.3 34.2 21.9 49.7 103.6 240.3 125.6 288.6 15-29.7 57.8-109.2 75.3-142.8-13.9-28.3-58.6-133.9-72.8-160-9.7-17.8-36.1-19.4-55.8-19.7V49.8l142.5.3v13.1c-19.4.6-38.1 7.8-29.4 26.1 18.9 40 30.6 68.1 48.1 104.7 5.6-10.8 34.7-69.4 48.1-100.8 8.9-20.6-3.9-28.6-38.6-29.4.3-3.6 0-10.3.3-13.6 44.4-.3 111.1-.3 123.1-.6v13.6c-22.5.8-45.8 12.8-58.1 31.7l-59.2 122.8c6.4 16.1 63.3 142.8 69.2 156.7L559.2 91.8c-8.6-23.1-36.4-28.1-47.2-28.3V49.6l127.8 1.1.2.5z"&gt;&lt;/path&gt;&lt;/svg&gt; Positive and negative predictive values](https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values)
+]
+
+
+---
+&lt;svg viewBox="0 0 448 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M128 244v-40c0-6.627 5.373-12 12-12h40c6.627 0 12 5.373 12 12v40c0 6.627-5.373 12-12 12h-40c-6.627 0-12-5.373-12-12zm140 12h40c6.627 0 12-5.373 12-12v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12zm-76 84v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm76 12h40c6.627 0 12-5.373 12-12v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12zm180 124v36H0v-36c0-6.627 5.373-12 12-12h19.5V85.035C31.5 73.418 42.245 64 55.5 64H144V24c0-13.255 10.745-24 24-24h112c13.255 0 24 10.745 24 24v40h88.5c13.255 0 24 9.418 24 21.035V464H436c6.627 0 12 5.373 12 12zM79.5 463H192v-67c0-6.627 5.373-12 12-12h40c6.627 0 12 5.373 12 12v67h112.5V112H304v24c0 13.255-10.745 24-24 24H168c-13.255 0-24-10.745-24-24v-24H79.5v351zM266 64h-26V38a6 6 0 0 0-6-6h-20a6 6 0 0 0-6 6v26h-26a6 6 0 0 0-6 6v20a6 6 0 0 0 6 6h26v26a6 6 0 0 0 6 6h20a6 6 0 0 0 6-6V96h26a6 6 0 0 0 6-6V70a6 6 0 0 0-6-6z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Breast cancer
+
+.pull-left[
+
+
+|        | .blue[Breast cancer] `\(\color{blue}{D^+}\)` | .blue[No breast cancer] `\(\color{blue}{D^-}\)` | |
+| ------------------ |:-------------------:| :--------:| :---: |
+| .bold[.red[Test positive]] `\(\color{red}{S^+}\)` | 9  | 99  | 108 | 
+| .bold[.red[Test negative]] `\(\color{red}{S^-}\)` | 1 | 891  | 892 |
+| | 10 | 990  | 1000 |
+
+
+Prevalence: 1% (10/1000)
+
+Sensitivity: 90% (9/10)
+
+Specificity: 90% (891/990)
+
+&lt;br&gt;
+
+**Positive predictive value (or precision)**
+`$$P(D^+|S^+) = 9/(9+99) = 0.08$$`
+
+]
+.pull-right[
+&lt;img src="imgs/breast_cancer_full.png" width="967" /&gt;
+]
+
+.footnote[
+Image source: Spiegelhalter, Pearson, and Short (2011)
+]
+
+
+---
+class: segue
+
+## Conditional probability
+
+---
+
+## Conditional probability: motivation
+
+.pull-left[
+It's been suggested that lawn bowls is one of the most dangerous sports in the world (highest death rates).
+
+&lt;br&gt;
+
+.blockquote[
+&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 448c-110.532 0-200-89.431-200-200 0-110.495 89.472-200 200-200 110.491 0 200 89.471 200 200 0 110.53-89.431 200-200 200zm107.244-255.2c0 67.052-72.421 68.084-72.421 92.863V300c0 6.627-5.373 12-12 12h-45.647c-6.627 0-12-5.373-12-12v-8.659c0-35.745 27.1-50.034 47.579-61.516 17.561-9.845 28.324-16.541 28.324-29.579 0-17.246-21.999-28.693-39.784-28.693-23.189 0-33.894 10.977-48.942 29.969-4.057 5.12-11.46 6.071-16.666 2.124l-27.824-21.098c-5.107-3.872-6.251-11.066-2.644-16.363C184.846 131.491 214.94 112 261.794 112c49.071 0 101.45 38.304 101.45 88.8zM298 368c0 23.159-18.841 42-42 42s-42-18.841-42-42 18.841-42 42-42 42 18.841 42 42z"&gt;&lt;/path&gt;&lt;/svg&gt; 
+Given that you're a young adult, should you be worried about playing?
+]
+
+]
+.pull-right[
+&lt;img src="imgs/ball-2517_1280.jpg" width="1707" /&gt;
+]
+
+--
+
+&lt;br&gt;
+
+**Conditional on being a young adult**, the risk of playing lawn bowls is very small.  
+
+Even though the probability of dying while playing lawn bowls is higher than many other sports, the overwhelming majority of lawn bowl related deaths are linked to the extreme age of the player.
+
+???
+Image source: https://pixabay.com/en/ball-bowl-bowls-bowling-field-2517/
+CC0 Creative Commons
+Free for commercial use 
+No attribution required
+
+---
+
+## Conditional probability: definition
+
+- Let `\(B\)` be an event so that `\(P(B) &gt; 0\)`
+- The conditional probability of an event `\(A\)` given that `\(B\)` has occurred is
+`$$P(A ~|~ B) = \frac{P(A \cap B)}{P(B)}$$`
+
+- Rearranging, we also have 
+  - `\(P(A\cap B) = P(A ~|~ B)P(B)\)`  
+  - `\(P(A\cap B) = P(B ~|~ A)P(A)\)`
+
+--
+
+- For the _classical definition of probability_ where we have a finite number of equally likely outcomes, then 
+  - `\(P(A)\)` is the _proportion_ of outcomes in the subset `\(A\)`
+  - `\(P(B)\)` is the _proportion_ of outcomes in the subset `\(B\)`
+  - and `\(P(A|B)\)` can be interpreted as _the proportion of outcomes in `\(B\)` that are also in `\(A\)`_.
+
+.footnote[
+[&lt;svg viewBox="0 0 640 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M640 51.2l-.3 12.2c-28.1.8-45 15.8-55.8 40.3-25 57.8-103.3 240-155.3 358.6H415l-81.9-193.1c-32.5 63.6-68.3 130-99.2 193.1-.3.3-15 0-15-.3C172 352.3 122.8 243.4 75.8 133.4 64.4 106.7 26.4 63.4.2 63.7c0-3.1-.3-10-.3-14.2h161.9v13.9c-19.2 1.1-52.8 13.3-43.3 34.2 21.9 49.7 103.6 240.3 125.6 288.6 15-29.7 57.8-109.2 75.3-142.8-13.9-28.3-58.6-133.9-72.8-160-9.7-17.8-36.1-19.4-55.8-19.7V49.8l142.5.3v13.1c-19.4.6-38.1 7.8-29.4 26.1 18.9 40 30.6 68.1 48.1 104.7 5.6-10.8 34.7-69.4 48.1-100.8 8.9-20.6-3.9-28.6-38.6-29.4.3-3.6 0-10.3.3-13.6 44.4-.3 111.1-.3 123.1-.6v13.6c-22.5.8-45.8 12.8-58.1 31.7l-59.2 122.8c6.4 16.1 63.3 142.8 69.2 156.7L559.2 91.8c-8.6-23.1-36.4-28.1-47.2-28.3V49.6l127.8 1.1.2.5z"&gt;&lt;/path&gt;&lt;/svg&gt; Conditional probability](https://en.wikipedia.org/wiki/Conditional_probability)
+]
+
+---
+
+## Bayes' rule
+
+Bayes' rule allows us to reverse the conditioning set provided that we know some marginal probabilities,
+`$$\begin{align*}
+P(B ~|~ A) &amp; = \frac{P(B\cap A)}{P(A)} \\
+&amp; = \frac{P(A ~|~ B) P(B)}{P(A ~|~ B) P(B) + P(A ~|~ B^c)P(B^c)}.
+\end{align*}$$`
+where `\(B^c\)` is the event that `\(B\)` doesn't occur.
+
+Note that we've used the [law of total probability](https://en.wikipedia.org/wiki/Law_of_total_probability)
+`$$P(A) = P(A\cap B) + P(A\cap B^c) =  P(A ~|~ B) P(B) + P(A ~|~ B^c)P(B^c)$$`
+
+.footnote[
+[&lt;svg viewBox="0 0 640 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M640 51.2l-.3 12.2c-28.1.8-45 15.8-55.8 40.3-25 57.8-103.3 240-155.3 358.6H415l-81.9-193.1c-32.5 63.6-68.3 130-99.2 193.1-.3.3-15 0-15-.3C172 352.3 122.8 243.4 75.8 133.4 64.4 106.7 26.4 63.4.2 63.7c0-3.1-.3-10-.3-14.2h161.9v13.9c-19.2 1.1-52.8 13.3-43.3 34.2 21.9 49.7 103.6 240.3 125.6 288.6 15-29.7 57.8-109.2 75.3-142.8-13.9-28.3-58.6-133.9-72.8-160-9.7-17.8-36.1-19.4-55.8-19.7V49.8l142.5.3v13.1c-19.4.6-38.1 7.8-29.4 26.1 18.9 40 30.6 68.1 48.1 104.7 5.6-10.8 34.7-69.4 48.1-100.8 8.9-20.6-3.9-28.6-38.6-29.4.3-3.6 0-10.3.3-13.6 44.4-.3 111.1-.3 123.1-.6v13.6c-22.5.8-45.8 12.8-58.1 31.7l-59.2 122.8c6.4 16.1 63.3 142.8 69.2 156.7L559.2 91.8c-8.6-23.1-36.4-28.1-47.2-28.3V49.6l127.8 1.1.2.5z"&gt;&lt;/path&gt;&lt;/svg&gt; Bayes' theorem](https://en.wikipedia.org/wiki/Bayes%27_theorem)
+]
+
+---
+
+## Example
+
+A study comparing the efficacy of HIV tests, reports on an experiment which concluded that HIV antibody tests have a **sensitivity** of 99.7% and a **specificity** of 98.5%.  Suppose that a subject, from a population with a .1% **prevalence** of HIV, receives a positive test result. What is the positive predictive value?
+
+
+- Mathematically, we want `\(P(D^+ ~|~ S^+)\)` given the sensitivity, `\(P(S^+ ~|~ D^+) = .997\)`, the specificity, `\(P(S^- ~|~ D^-) =.985\)`, and the prevalence `\(P(D^+) = .001\)`
+`$$P(D^+ ~|~ S^+) = \frac{P(S^+~|~D^+)P(D^+)}{P(S^+~|~D^+)P(D^+) + P(S^+~|~D^-)P(D^-)}$$`
+
+Need to find:
+
+- `\(P(D^-) = 1-P(D^+) = 1- 0.001 = 0.999\)`
+- `\(P(S^+~|~D^-) = 1-P(S^-~|~D^-) = 1 - 0.985 = 0.015\)`
+
+---
+
+## Using Bayes' formula
+
+`$$\begin{align*}
+P(D^+ ~|~ S^+) &amp; = \frac{P(S^+~|~D^+)P(D^+)}{P(S^+~|~D^+)P(D^+) + P(S^+~|~D^-)P(D^-)}\\ 
+&amp; = \frac{.997\times .001}{.997 \times .001 + .015 \times .999}  = 0.062
+\end{align*}$$`
+
+In this population a positive test result only suggests a 6.2% probability that the subject has the disease  I.e. the **positive predictive value** is 6.2% for this test.
+
+- The low positive predictive value is due to low prevalence of disease and the somewhat modest specificity
+- Suppose it was known that the subject was an intravenous drug user and routinely had intercourse with an HIV infected partner
+- The evidence implied by a positive test result does not change because of the prevalence of disease in the subject's population, only our interpretation of that evidence changes
+
+---
+
+## NIPT
+
+.pull-left[
+Non-invasive prenatal tests (NIPT) are an increasingly popular way of screening for chromosome conditions and advertise as having very high **accuracy**.
+
+Taylor-Phillips, Freeman, Geppert, et al. (2016) perform a meta-analysis on the accuracy of non-invasive prenatal testing using cell-free DNA for detection of Down syndrome.
+
+They broke their findings down by "general obstetric population" and "high risk propulation".
+]
+
+.pull-right[
+&lt;blockquote class="twitter-tweet"&gt;&lt;p lang="und" dir="ltr"&gt;&lt;a href="https://twitter.com/hashtag/ausvotes19?src=hash&amp;amp;ref_src=twsrc%5Etfw"&gt;#ausvotes19&lt;/a&gt; &lt;a href="https://t.co/tzrJjJBF4t"&gt;pic.twitter.com/tzrJjJBF4t&lt;/a&gt;&lt;/p&gt;&amp;mdash; Garth Tarr (@garthtarr) &lt;a href="https://twitter.com/garthtarr/status/1129556882870349824?ref_src=twsrc%5Etfw"&gt;May 18, 2019&lt;/a&gt;&lt;/blockquote&gt; &lt;script async src="https://platform.twitter.com/widgets.js" charset="utf-8"&gt;&lt;/script&gt;
+]
+
+---
+
+## NIPT
+
+.pull-left[
+They presented their findings as if they had taken a sample of 100,000 pregnancies from the **general obstetric population**:
+
+- True positives: 417
+- False positives: 94
+- True negatives: 99471
+- False negatives: 18
+
+]
+.pull-right[
+
+And a sample of 10,000 pregnancies from the **high risk population**:
+
+- True positives: 324
+- False positives: 31
+- True negatives: 9636
+- False negatives: 9
+]
+
+&gt; Calculate the sensitivity, specificity, precision and accuracy for the test in both the general population and the high risk population.  Do your findings have any public health implications?
+
+???
+
+### High risk population
+
+Prevelance 0.435% implies of the 100,000 pregnancies `\(0.00435\times 100,000= 435\)` will actually have Down's syndrome and the remainder `\(100,000-435 = 99,565\)` won't have Down's syndrome.
+
+A precision of 82% means that 82% of people who test positive will actually have the disease.  Hence, we will see false positives for $(1-0.82)\times 435 = 
+
+---
+class: segue
+
+## Evaluating classification models
+
+---
+
+## Evaluating a classification model
+
+Imagine a very simple classification model.fn[1] looking to classify a particular type of deformation, kyphosis, in children who have had corrective spinal surgery (Chambers and Hastie, 1991).  
+
+The **outcome** is absence or presence of kyphosis after the operation.
+
+The **predictor** is the number of the topmost vertebra operated on.
+
+- If the highest vertebrae operated on was 9th or higher, we predict that kyphosis will be absent after surgery.
+- If the highest vertebrae operated on was 8th or lower, we predict that kyphosis will be present after surgery.
+
+The data can be found in the `kyphosis` data frame that comes with the **rpart** package.
+
+.footnote[
+1. We'll explore fitting and evaluating classification models in more detail later in semester.
+]
+
+---
+
+## Evaluating a classification model
+
+
+```r
+## install.packages("rpart")
+data(kyphosis, package = "rpart")
+dplyr::glimpse(kyphosis)
+```
+
+```
+## Rows: 81
+## Columns: 4
+## $ Kyphosis &lt;fct&gt; absent, absent, present, absent, absent, …
+## $ Age      &lt;int&gt; 71, 158, 128, 2, 1, 1, 61, 37, 113, 59, 8…
+## $ Number   &lt;int&gt; 3, 3, 4, 5, 4, 2, 2, 3, 2, 6, 5, 3, 5, 4,…
+## $ Start    &lt;int&gt; 5, 14, 5, 1, 15, 16, 17, 16, 16, 12, 14, …
+```
+
+```r
+truth = kyphosis$Kyphosis
+prediction = ifelse(kyphosis$Start &gt;= 9, 
+                    "Predict absent", 
+                    "Predict present")
+table(prediction, truth)
+```
+
+```
+##                  truth
+## prediction        absent present
+##   Predict absent      56       6
+##   Predict present      8      11
+```
+
+---
+
+## Evaluating a classification model
+
+
+```r
+table(prediction, truth)
+```
+
+```
+##                  truth
+## prediction        absent present
+##   Predict absent      56       6
+##   Predict present      8      11
+```
+
+For our prediction model, define `\(D^+\)`, `\(D^-\)`, `\(S^+\)`, `\(S^-\)`, and find the
+- sensitivity
+- specificity
+- false negative rate
+- false positive rate
+- positive predictive value
+- negative predictive value
+
+Reordering the rows and columns in the table might help!
+
+???
+
+`\(D^+\)` is kyphosis present
+`\(D^-\)` is kyphosis absent
+`\(S^+\)` is predict kyphosis present
+`\(D^-\)` is predict kyphosis absent
+
+Might help to rewrite the table
+
+|               | actual present `\(D^+\)` | actual absent `\(D^-\)` |
+| ------------- | -------------------- | ------------ |
+| predict present `\(S^+\)` |   TP = 11    | FP = 8  |
+| predict absent  `\(S^-\)` |   FN = 6     | TN = 56 |
+
+- sensitivity TP/(TP+FN) = 11/(11+6) = 65% (true positive rate)
+- specificity TN/(TN+FP) = 56/(56+8) = 87.5% (true negative rate)
+- false positive rate FP/(FP+TN) = 8/(8+56) = 12.5% (1 - specificity)
+- false negative rate FN/(TP+FN) = 6/(11+6) = 35% (1 - sensitivity)
+- positive predictive value TP/(TP+FP) = 11/(11+8) = 58%
+- negative predictive value TN/(TM+FN) = 56/(56+6) = 90%
+
+---
+
+## References
+
+Chambers, J. M. and T. J. Hastie (1991). _Statistical
+Models in S_. Chapman &amp; Hall/CRC The R Series. Boca
+Raton, FL: Chapman and Hall/CRC. ISBN:
+978-0412830402.
+
+Spiegelhalter, D., M. Pearson, and I. Short (2011).
+"Visualizing Uncertainty About the Future". In:
+_Science_ 333.6048, pp. 1393-1400. ISSN: 0036-8075.
+DOI:
+[10.1126/science.1191181](https://doi.org/10.1126%2Fscience.1191181).
+
+Taylor-Phillips, S., K. Freeman, J. Geppert, A.
+Agbebiyi, O. A. Uthman, J. Madan, A. Clarke, S.
+Quenby, and A. Clarke (2016). "Accuracy of
+non-invasive prenatal testing using cell-free DNA for
+detection of Down, Edwards and Patau syndromes: a
+systematic review and meta-analysis". In: _BMJ Open_
+6.1. ISSN: 2044-6055. DOI:
+[10.1136/bmjopen-2015-010002](https://doi.org/10.1136%2Fbmjopen-2015-010002).
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="assets/remark-zoom.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

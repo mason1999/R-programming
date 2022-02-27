@@ -1,0 +1,9 @@
+simple=function(X){ 
+  if (X==0) {
+    out=... 
+  } else {
+    ...
+    out=... 
+    }
+  out
+}

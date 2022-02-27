@@ -79,7 +79,7 @@ To find an unbiased estimator of $\theta$ we recall the method of moments. We ha
 
 To find an unbiased estimator of $\theta$ we recall the method of moments. We have that $1_{\{Y_i = 2\}} \thicksim bernoulli(\theta^2)$. Hence we have that $\E\brac{1_{\{Y_i = 2\}}} =\theta^2$. With the random sample $1_{\{Y_1 = 2\}}, 1_{\{Y_2 = 2\}},$ 
 
-$..., 1_{\{Y_n = 2\}}$. We have that (by the method of moments) $ \theta^2 = \frac{1}{n}\sum_{i = 1}^n 1_{\{Y_i = 2\}} \implies \theta^2 = \frac{1}{n}N_0 \implies \hat{\theta_2} = \sqrt{\frac{N_0}{n}}$
+$..., 1_{\{Y_n = 2\}}$. We have that (by the method of moments) $ \theta^2 = \frac{1}{n}\sum_{i = 1}^n 1_{\{Y_i = 2\}} \implies \theta^2 = \frac{1}{n}N_2 \implies \hat{\theta_2} = \sqrt{\frac{N_2}{n}}$
 
 }
 
@@ -88,59 +88,80 @@ $..., 1_{\{Y_n = 2\}}$. We have that (by the method of moments) $ \theta^2 = \fr
 {\setlength{\leftskip}{3ex}
 \tbf{Solution}
 
-We want to now compare the variance of $\hat{\theta_0}, \hat{\theta_1}$ and $\hat{\theta_2}$ with the CRLB of $\frac{\theta\rbrac{1 - \theta}}{2n}$. To do this, we illustrate the idea with $\hat{\theta_0}$ first. 
+We want to now compare the variance of $\hat{\theta_0}, \hat{\theta_1}$ and $\hat{\theta_2}$ with the CRLB of $\frac{\theta\rbrac{1 - \theta}}{2n}$. 
 
 <<>>=
-# create a partiton of theta values
-theta_vals = (1:39)/40
-
-# create a vector to store the theta_0 values we obtain
-var_theta_0_for_each_theta = rep(0, length(theta_vals))
-
-# set the sample size n and the number of simulation iterations N
+# sample size
 n = 100
+# Number of simulation iterations
 N = 1000
+# theta values and length of this vector of values
+thetaVals = (1:39)/40
+len = length(thetaVals)
+# Declare the mean squared error vectors to be plotted against the theta values
+mse0 = vector(mode = "numeric", length = len)
+mse1 = vector(mode = "numeric", length = len)
+mse2 = vector(mode = "numeric", length = len)
 
-# Define the MSE0 to be zero 
-MSE0 = 0
+# Declare temporary variables to be used in the loop
+temp0 = vector(mode = "numeric", length = N)
+temp1 = vector(mode = "numeric", length = N)
+temp2 = vector(mode = "numeric", length = N)
 
-# define a vector of length 1000 so store our simulation values
-simulate_N = rep(0, N)
-
-
-# for each value of theta_vals, we want to estimate the variance of theta_0. 
-for (i in 1:length(theta_vals)) {
-  # We draw n times from Y ~ B(2, theta_vals[1]) and calculate theta_1_hat. 
-  # We simulate this experiment N times. 
+for (i in 1:len) {
+  # We set the current value of theta. 
+  currThetaValue = thetaVals[i]
   
-  # temp_vect = rbinom(n * N, 2, theta_vals[i])
-  # mat_sim = matrix(temp_vect, ncols = n, nrows = N)
-  # mat_sim = mat_sim == 0
-  # theta_0_estimates = apply(mat_sim, MARGIN = 1, FUN = sum)
-  # theta_0_estimates = sqrt(theta_0_estimates/n)
-  # var_theta_0_for_each_theta[i] = sum((theta_0_estimates - theta_vals[i])^2)/N
-  
-  for (ii in 1:N) {
-    temp_vect = rbinom(n, 2, theta_vals[i])
-    temp_vect = temp_vect == 0
-    simulate_N[ii] = 1 - sqrt(sum(temp_vect)/n)
+  # For the current theta value, we calculate the mean squared error for all 
+  # three estimators
+  for (j in 1:N) {
+    
+    # step 1: Draw a sample of n binomal observations
+    obs = rbinom(n = n, size = 2, prob = currThetaValue)
+    
+    # calculate the value of theta0, theta1 and theta2
+    temp0[j] = 1 - sqrt(sum(obs == 0)/n)
+    temp1[j] = 1/2 * mean(obs)
+    temp2[j] = sqrt(sum(obs == 2)/n)
+    
   }
   
-  var_theta_0_for_each_theta[i] = sum((simulate_N - theta_vals[i])^2)/N
+  temp0 = (temp0 - currThetaValue)^2
+  temp1 = (temp1 - currThetaValue)^2
+  temp2 = (temp2 - currThetaValue)^2
   
-  
+  mse0[i] = mean(temp0)
+  mse1[i] = mean(temp1)
+  mse2[i] = mean(temp2)
 }
 
-var_theta_0_for_each_theta
+@
+After all this processing, we can now plot the values of the mean squared error for each value of $\theta_k$ (where $k \in \cbrac{1, 2, 3, ..., 39}$). We also plot the 
+Cramer Rao Lower Bound and show the result below:
 
-plot(theta_vals, var_theta_0_for_each_theta)
+<<>>=
+# returns the min and max value for the range
+yRange = range(c(mse0, mse1, mse2))
+# plot the best estimator theta1 hat
+plot(x = thetaVals, y = mse1, col = "red", ylim = yRange, 
+     type = "l", main = "Empirical MSE's", 
+     xlab = "Theta values", 
+     ylab = "mean squared error")
+# plot theta0 hat
+lines(x = thetaVals, y = mse0, col = "blue")
+# plot theta2 hat
+lines(x = thetaVals, y = mse2, col = "DarkGreen")
+# plot the CRLB
+curve(0.5 * x * (1 - x)/n, add = TRUE, lty = 2)
+# legend
+legend(x = "top", 
+       legend = c("using average", "using N0", "using N2", "CRLB"), 
+       col = c("red", "blue", "DarkGreen", "black"), 
+       lty = c(1, 1, 1, 2))
+
 @
 
 }
 \end{enumerate}
-
-<<>>=
-
-@
 
 \end{document}

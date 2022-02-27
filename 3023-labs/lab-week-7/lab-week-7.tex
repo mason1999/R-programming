@@ -1,0 +1,383 @@
+\documentclass[12pt, a4paper]{article}\usepackage[]{graphicx}\usepackage[]{color}
+% maxwidth is the original width if it is less than linewidth
+% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+\let\hlipl\hlkwb
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+\input{./everything/everything.tex}
+\input{./everything/preamble.tex}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+% refer to https://yihui.org/knitr/options/#code-decoration for more options
+
+
+% (1) Remember that we want the default page style
+% (2) but for this page we want an empty page style for the title 
+% (3) we input our title 
+% (4) we call a new page and reset the page counter to 1
+\pagestyle{default}
+\thispagestyle{empty}
+\input{./title_page.tex}
+\newpage
+\setcounter{page}{1}
+
+Consider the test of $H_0: \theta = \theta_0$ against $H_1 : \theta \neq \theta_0$ based on $X\thicksim f(. ; \gamma_0, \theta)$ where
+\begin{align}
+f\brac{x; \gamma, \theta} = 
+\begin{cases}
+\frac{1}{\Gamma\brac{\gamma}\theta^\gamma}x^{\gamma - 1}e^{-\frac{x}{\theta}} &\quad\text{for } x > 0 \\
+0 &\quad\text{otherwise}
+\end{cases}
+\end{align}
+that is $X$ has a gamma distribution with known shape parameter $\gamma_0$ but unknown scale parameter $\theta$.
+
+\begin{enumerate}[label = {\bfseries \arabic*.}]
+\item Consider first the exponential case where $\gamma_0 = 1$ and suppose the hypothesised value of the scale parameter (also the mean in this case) is $\theta_0 = 1$
+
+  \begin{enumerate}[label = (\alph*)]
+  \item The ``equal-tailed''test at level $\alpha$ rejects for $X \le a$ or $X \ge b$ where
+    \begin{align}
+    P_1\brac{X\le a} = P_1\brac{X\ge b} = \frac{\alpha}{2}
+    \end{align}
+    Taking $\alpha = 0.05$, determine the value sof \verb+a+ and \verb+b+ satisfying (2) above (\tbf{hint:} use \verb+qexp()+).
+    
+{\setlength{\leftskip}{3ex}
+\tbf{Solution}
+
+Since we take $\gamma_0 = 1$ and under the null $\theta_0 = 1$ we have that the the pdf is given by: 
+$$ f(x) = e^{-x}\qquad\text{for } x > 0$$
+\begin{knitrout}\footnotesize
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{a} \hlkwb{=} \hlkwd{qexp}\hlstd{(}\hlnum{0.025}\hlstd{,} \hlkwc{rate} \hlstd{=} \hlnum{1}\hlstd{)}
+\hlstd{b} \hlkwb{=} \hlkwd{qexp}\hlstd{(}\hlnum{0.975}\hlstd{,} \hlkwc{rate} \hlstd{=} \hlnum{1}\hlstd{)}
+\hlkwd{c}\hlstd{(a, b)}
+\end{alltt}
+\begin{verbatim}
+## [1] 0.02531781 3.68887945
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+}
+    \item We shall plot the power function of the equal-tailed test. Define a vector of $\theta$-values: \verb+th=(250:1500)/1000+ and obtain a corresponding vector of values of the power (the proba- bility of rejecting) for each such $\theta$-value; that is:
+    $$P_\theta \brac{X\le a} + P_\theta \brac{ X \ge b}$$
+    Finally plot the power against \verb+th+ and add a horizontal dashed line at $\gamma = 0.05$. Add an informative heading, etc and remember to use \verb+type = 'l'+
+    
+    {\setlength{\leftskip}{3ex}
+    
+    \tbf{Solution}
+    
+    We plot the power function of the equal-tailed test. Note that for $P_\theta\brac{X \ge b}$ we note that $P_\theta\brac{X \ge b} = 1 - P_\theta\brac{X \le b}$. We alse use the \verb+abline(.)+ function to plot a horizontal line
+    
+\begin{knitrout}\footnotesize
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{th} \hlkwb{=} \hlstd{(}\hlnum{250}\hlopt{:}\hlnum{1500}\hlstd{)}\hlopt{/}\hlnum{1000}
+\hlstd{power} \hlkwb{=} \hlkwd{pexp}\hlstd{(a,} \hlkwc{rate} \hlstd{=} \hlnum{1}\hlopt{/}\hlstd{th,} \hlkwc{lower.tail} \hlstd{=} \hlnum{TRUE}\hlstd{)} \hlopt{+} \hlkwd{pexp}\hlstd{(b,} \hlkwc{rate} \hlstd{=} \hlnum{1}\hlopt{/}\hlstd{th,} \hlkwc{lower.tail} \hlstd{=} \hlnum{FALSE}\hlstd{)}
+\hlcom{# Plot theta against the power:}
+\hlkwd{plot}\hlstd{(th, power,} \hlkwc{type} \hlstd{=} \hlstr{"l"}\hlstd{,} \hlkwc{main} \hlstd{=} \hlstr{"Power of two tail test"}\hlstd{)}
+\hlcom{# add a horizontal dashed line at gamma = 0.05}
+\hlkwd{abline}\hlstd{(}\hlkwc{h} \hlstd{=} \hlnum{0.05}\hlstd{,} \hlkwc{lty} \hlstd{=} \hlnum{2}\hlstd{)}
+\end{alltt}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/unnamed-chunk-3-1} 
+
+}
+
+
+\end{knitrout}
+    
+    }
+    \item This is a 1-parameter exponential family with sufficient statistic $X$ and so (since it is continuous) the \textit{uniformly most powerful unbiased} (UMPU) test is of the form
+    \begin{align}
+    \delta\brac{X} = 
+      \begin{cases}
+      1 &\qquad\text{for } X \ge d \\
+      0 &\qquad\text{for } c < X < d\\
+      1 &\qquad \text{for } X \le c
+      \end{cases}
+    \end{align}
+Where $c$ and $d$ are chosen so that:
+  \begin{align}
+    \E_{\theta_0}\rbrac{\delta\brac{X}} = \alpha
+  \end{align}
+  \begin{align}
+  \E_{\theta_0}\rbrac{X\delta\brac{X}} = \alpha\E_{\theta_0}\brac{X} = \alpha
+  \end{align}
+  Since $\E_{\theta_0}\brac{X} = 1$. We show in a tutorial exercise these are equivalent to
+  \begin{align*}
+  1 - e^{-c} + e^{-d} & = \alpha \\
+  ce^{-c} & = de^{-d}
+  \end{align*}
+  From the first equation we get:
+  \begin{align*}
+  e^{-d} & = \alpha - 1 + e^{-c} \\
+  \implies d & = -\log \rbrac{\alpha -1 + e^{-c}}
+  \end{align*}
+  Hence, once $c$ is determined we can compute $d$. To determine $c$ we need to solve the equation:
+  \begin{align*}
+  ce^{-c} - de^{-d} = ce^{-c} + \cbrac{\log \rbrac{\alpha - 1 + e^{-c}}}\rbrac{\alpha - 1 + e^{-c}} = 0
+  \end{align*}
+  We can use the R function \verb+uniroot()+ to determine c \textit{numerically}.
+    \begin{enumerate}[label=(\roman*)]
+      \item Write an R function which computes the middle member of the equation above (i.e. the function whose root we wish to find).
+      
+      {\setlength{\leftskip}{3ex}
+      \tbf{Solution}
+      
+      We write a function which computes the root $c$ to the equation 
+      $$ce^{-c} + \cbrac{\log \rbrac{\alpha - 1 + e^{-c}}}\rbrac{\alpha - 1 + e^{-c}} = 0$$
+\begin{knitrout}\footnotesize
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{fn} \hlkwb{=} \hlkwa{function}\hlstd{(}\hlkwc{c}\hlstd{,} \hlkwc{alpha}\hlstd{) \{}
+    \hlstd{term} \hlkwb{=} \hlstd{alpha} \hlopt{-} \hlnum{1} \hlopt{+} \hlkwd{exp}\hlstd{(}\hlopt{-}\hlnum{1} \hlopt{*} \hlstd{c)}
+    \hlkwd{return}\hlstd{(c} \hlopt{*} \hlkwd{exp}\hlstd{(}\hlopt{-}\hlstd{c)} \hlopt{+} \hlstd{(}\hlkwd{log}\hlstd{(term)} \hlopt{*} \hlstd{term))}
+\hlstd{\}}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+      
+      }
+      \item Noting that $c$ can be no bigger than the lower 0.05-quantile of the exponential(1) distribution, execute a certain command involving \verb+eps = 1e-5+. Note: the use of \verb+eps+ here is to stay away from the upper bound, since there the function is trying to evaluate \verb+log(0)+
+\begin{knitrout}\footnotesize
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{eps} \hlkwb{=} \hlnum{1e-05}
+\hlkwd{uniroot}\hlstd{(}\hlkwc{f} \hlstd{= fn,} \hlkwc{lower} \hlstd{=} \hlnum{0}\hlstd{,} \hlkwc{upper} \hlstd{=} \hlkwd{qexp}\hlstd{(}\hlnum{0.05}\hlstd{)} \hlopt{-} \hlstd{eps,} \hlkwc{alpha} \hlstd{=} \hlnum{0.05}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+## $root
+## [1] 0.04235629
+## 
+## $f.root
+## [1] -3.187136e-05
+## 
+## $iter
+## [1] 4
+## 
+## $init.it
+## [1] NA
+## 
+## $estim.prec
+## [1] 6.103516e-05
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+      \item Write an R function which takes as an argument the level \verb+alpha+ and returns a list with elements \verb+c+ and \verb+d+, corresponding to the desired values $c$ and $d$ defining the UMPU test (3) above for $\theta_0 = 1$ and $\alpha = 0.05$
+      
+      {\setlength{\leftskip}{3ex}
+      
+      \tbf{Solution}
+      
+      We write a function \verb+expon.umpu+ (exponential uniformly most powerful unbiased test) which takes in $\alpha$ and returns the optimal $c$ and $d$ which solve the above equations. 
+      
+\begin{knitrout}\footnotesize
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{expon.umpu} \hlkwb{=} \hlkwa{function}\hlstd{(}\hlkwc{alpha}\hlstd{) \{}
+    \hlstd{eps} \hlkwb{=} \hlnum{1e-08}
+    \hlstd{c} \hlkwb{=} \hlkwd{uniroot}\hlstd{(}\hlkwc{f} \hlstd{= fn,} \hlkwc{lower} \hlstd{=} \hlnum{0}\hlstd{,} \hlkwc{upper} \hlstd{=} \hlkwd{qexp}\hlstd{(alpha)} \hlopt{-} \hlstd{eps,} \hlkwc{alpha} \hlstd{= alpha)}\hlopt{$}\hlstd{root}
+    \hlstd{term} \hlkwb{=} \hlstd{alpha} \hlopt{-} \hlnum{1} \hlopt{+} \hlkwd{exp}\hlstd{(}\hlopt{-}\hlstd{c)}
+    \hlstd{d} \hlkwb{=} \hlopt{-}\hlkwd{log}\hlstd{(term)}
+    \hlkwd{list}\hlstd{(}\hlkwc{c_val} \hlstd{= c,} \hlkwc{d_val} \hlstd{= d)}
+\hlstd{\}}
+\hlkwd{expon.umpu}\hlstd{(}\hlnum{0.05}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+## $c_val
+## [1] 0.04235611
+## 
+## $d_val
+## [1] 4.764356
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+      
+      }
+    \end{enumerate}
+  \item Recreate your plot from part (b) above and add to it a red curve of the power of the UMPU test. Add an informative heading and legend. \tbf{Comment} on what feature of the plot indicates that the UMPU test is unbiased. The power function of the UMPU test never goes below the 0.05 level, thus it is unbiased.
+  
+  {\setlength{\leftskip}{3ex}
+  \tbf{Solution}
+  
+  We now plot the power of the UMPU test in red:
+  
+\begin{knitrout}\footnotesize
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{th} \hlkwb{=} \hlstd{(}\hlnum{250}\hlopt{:}\hlnum{1500}\hlstd{)}\hlopt{/}\hlnum{1000}
+\hlcom{# for the two tailed test}
+\hlstd{power} \hlkwb{=} \hlkwd{pexp}\hlstd{(a,} \hlnum{1}\hlopt{/}\hlstd{th)} \hlopt{+} \hlkwd{pexp}\hlstd{(b,} \hlnum{1}\hlopt{/}\hlstd{th,} \hlkwc{lower.tail} \hlstd{=} \hlnum{FALSE}\hlstd{)}
+\hlkwd{plot}\hlstd{(th, power,} \hlkwc{type} \hlstd{=} \hlstr{"l"}\hlstd{,} \hlkwc{main} \hlstd{=} \hlstr{"testing for an exponential mean"}\hlstd{)}
+\hlkwd{abline}\hlstd{(}\hlkwc{h} \hlstd{=} \hlnum{0.05}\hlstd{,} \hlkwc{lty} \hlstd{=} \hlnum{2}\hlstd{)}
+\hlcom{# for the uniformly most powerful test:}
+\hlstd{umpu} \hlkwb{=} \hlkwd{expon.umpu}\hlstd{(}\hlnum{0.05}\hlstd{)}
+\hlstd{umpu.power} \hlkwb{=} \hlkwd{pexp}\hlstd{(umpu}\hlopt{$}\hlstd{c,} \hlnum{1}\hlopt{/}\hlstd{th)} \hlopt{+} \hlkwd{pexp}\hlstd{(umpu}\hlopt{$}\hlstd{d,} \hlnum{1}\hlopt{/}\hlstd{th,} \hlkwc{lower.tail} \hlstd{=} \hlnum{FALSE}\hlstd{)}
+\hlkwd{lines}\hlstd{(th, umpu.power,} \hlkwc{col} \hlstd{=} \hlstr{"red"}\hlstd{)}
+\hlkwd{legend}\hlstd{(}\hlstr{"top"}\hlstd{,} \hlkwc{legend} \hlstd{=} \hlkwd{c}\hlstd{(}\hlstr{"Power of equal-tailed test"}\hlstd{,} \hlstr{"power of UMPU test"}\hlstd{),} \hlkwc{col} \hlstd{=} \hlkwd{c}\hlstd{(}\hlstr{"black"}\hlstd{,} \hlstr{"red"}\hlstd{),}
+    \hlkwc{lty} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,} \hlnum{1}\hlstd{))}
+\end{alltt}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/unnamed-chunk-7-1} 
+
+}
+
+
+\end{knitrout}
+  
+  }
+  \end{enumerate}
+\item Consider now the case where $Y_1, ..., Y_n$ are iid exponential with mean $\theta$ and we again wish to test $H_0: \theta = \theta_0$ against a two sided $H_1: \theta \neq \theta_0$. The likelihood is:
+$$\Pi_{i = 1}^n\rbrac{\frac{1}{\theta}e^{-\frac{Y_i}{\theta}}} = \exp\brac{-\frac{1}{\theta}\sum_{i = 1}^nY_i - n\log\theta}$$
+and so clearly $X = \sum_{i = 1}^nY_i$ is a sufficient statistic; indeed this is a 1-parameter exponential family. The UMPU test is thus of the form (3) where $c$ and $d$ are chosen to satisfy the two conditions (4) and (5).
+
+However since $X$ itself has a gamma distribution with shape parameter $n$ and scale parameter $\theta$, the UMPU above is the same as for a single observation from the density (1) above with $\gamma_0 = n$. We show in the tutorial that in the present case the two conditions (4) and (5) are equivalent to
+$$ \int_0^cf\brac{x; n, 1}\dx + \int_d^\infty f\brac{x; n, 1}\dx = \alpha = \int_0^c f\brac{x; n + 1, 1}\dx + \int_d^\infty f\brac{x; n + 1, 1}\dx$$
+
+Below we shall write a function to determine the UMPU test, for the case $n = 5$ and $\alpha = 0.05$.
+\begin{enumerate}[label=(\alph*)]
+  \item By adapting your solution to part (c) of the previous question, write a function (playing the same role as the function \verb+fn()+ above; it will use \verb+pgamma()+ and \verb+qgamma()+) the root of which gives the desired value of $c$ to solve the above equations (\tbf{hint}: in the body of this function you will need to first find \verb+d+ in terms of \verb+c+ and \verb+alpha+ using one of the two constraints). Then use \verb+uniroot()+ to actually find the root. Wrap this all in an appropriate function which takes as input values of \verb+alpha+ and \verb+n+ and outputs a list with elements \verb+c+ and \verb+d+, the lower and upper critical values of the desired UMPU test.
+  
+  {\setlength{\leftskip}{3ex}
+  \tbf{Solution}
+  
+\begin{knitrout}\footnotesize
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{gamma.root} \hlkwb{=} \hlkwa{function}\hlstd{(}\hlkwc{c}\hlstd{,} \hlkwc{n}\hlstd{,} \hlkwc{alpha}\hlstd{) \{}
+    \hlstd{lower} \hlkwb{=} \hlkwd{pgamma}\hlstd{(}\hlkwc{q} \hlstd{= c,} \hlkwc{shape} \hlstd{= n,} \hlkwc{scale} \hlstd{=} \hlnum{1}\hlstd{)}  \hlcom{# P (X < c)}
+    \hlcom{# P(X < c) + P(X > d) = alpha P(X > d) = alpha - P(x < c) P(X < d) = 1 - alpha + P(X < c) d =}
+    \hlcom{# F^-1(1 - alpha + P(X < c))}
+    \hlstd{d} \hlkwb{=} \hlkwd{qgamma}\hlstd{(}\hlkwc{p} \hlstd{=} \hlnum{1} \hlopt{-} \hlstd{alpha} \hlopt{+} \hlstd{lower,} \hlkwc{shape} \hlstd{= n,} \hlkwc{scale} \hlstd{=} \hlnum{1}\hlstd{)}
+
+    \hlcom{# return the equation to solve--> the latter half of the integral equation}
+    \hlkwd{return}\hlstd{(}\hlkwd{pgamma}\hlstd{(c,} \hlkwc{shape} \hlstd{= (n} \hlopt{+} \hlnum{1}\hlstd{),} \hlkwc{scale} \hlstd{=} \hlnum{1}\hlstd{)} \hlopt{+} \hlkwd{pgamma}\hlstd{(d,} \hlkwc{shape} \hlstd{= (n} \hlopt{+} \hlnum{1}\hlstd{),} \hlkwc{scale} \hlstd{=} \hlnum{1}\hlstd{,} \hlkwc{lower.tail} \hlstd{=} \hlnum{FALSE}\hlstd{)} \hlopt{-}
+        \hlstd{alpha)}
+\hlstd{\}}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+Show the roots:
+\begin{knitrout}\footnotesize
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{eps} \hlkwb{=} \hlnum{1e-08}
+\hlstd{upper} \hlkwb{=} \hlkwd{qgamma}\hlstd{(}\hlnum{0.05}\hlstd{,} \hlkwc{shape} \hlstd{=} \hlnum{5}\hlstd{,} \hlkwc{scale} \hlstd{=} \hlnum{1}\hlstd{)} \hlopt{-} \hlstd{eps}
+\hlkwd{uniroot}\hlstd{(}\hlkwc{f} \hlstd{= gamma.root,} \hlkwc{lower} \hlstd{=} \hlnum{0}\hlstd{,} \hlkwc{upper} \hlstd{= upper,} \hlkwc{n} \hlstd{=} \hlnum{5}\hlstd{,} \hlkwc{alpha} \hlstd{=} \hlnum{0.05}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+## $root
+## [1] 1.758069
+## 
+## $f.root
+## [1] 1.352949e-06
+## 
+## $iter
+## [1] 6
+## 
+## $init.it
+## [1] NA
+## 
+## $estim.prec
+## [1] 6.103516e-05
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+And finally wrap all this up in a function:
+\begin{knitrout}\footnotesize
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{gamma.umpu} \hlkwb{=} \hlkwa{function}\hlstd{(}\hlkwc{alpha}\hlstd{,} \hlkwc{n}\hlstd{) \{}
+    \hlstd{eps} \hlkwb{=} \hlnum{1e-08}
+    \hlstd{upper} \hlkwb{=} \hlkwd{qgamma}\hlstd{(alpha,} \hlkwc{shape} \hlstd{= n,} \hlkwc{scale} \hlstd{=} \hlnum{1}\hlstd{)} \hlopt{-} \hlstd{eps}
+    \hlstd{c} \hlkwb{=} \hlkwd{uniroot}\hlstd{(}\hlkwc{f} \hlstd{= gamma.root,} \hlkwc{lower} \hlstd{=} \hlnum{0}\hlstd{,} \hlkwc{upper} \hlstd{= upper,} \hlkwc{n} \hlstd{= n,} \hlkwc{alpha} \hlstd{= alpha)}\hlopt{$}\hlstd{root}
+    \hlstd{lower} \hlkwb{=} \hlkwd{pgamma}\hlstd{(c,} \hlkwc{shape} \hlstd{= n,} \hlkwc{scale} \hlstd{=} \hlnum{1}\hlstd{)}
+    \hlstd{d} \hlkwb{=} \hlkwd{qgamma}\hlstd{(}\hlnum{1} \hlopt{-} \hlstd{(alpha} \hlopt{-} \hlstd{lower),} \hlkwc{shape} \hlstd{= n,} \hlkwc{scale} \hlstd{=} \hlnum{1}\hlstd{)}
+    \hlkwd{return}\hlstd{(}\hlkwd{list}\hlstd{(}\hlkwc{c_val} \hlstd{= c,} \hlkwc{d_val} \hlstd{= d))}
+\hlstd{\}}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+  
+  }
+  \item Use your \verb+gamma.umpu()+ function to determine the appropriate $c$ and $d$ for the UMPU test for this problem with $n = 5$ and $\alpha = 0.05$. Plot the power as a function of $\theta$ and graphically verify that the test is unbiased and of level 0.05.
+\begin{knitrout}\footnotesize
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{gamma.umpu}\hlstd{(}\hlnum{0.05}\hlstd{,} \hlnum{5}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+## $c_val
+## [1] 1.758069
+## 
+## $d_val
+## [1] 10.86438
+\end{verbatim}
+\begin{alltt}
+\hlstd{gu} \hlkwb{=} \hlkwd{gamma.umpu}\hlstd{(}\hlnum{0.05}\hlstd{,} \hlnum{5}\hlstd{)}  \hlcom{# obtain c and d}
+\hlstd{g.power} \hlkwb{=} \hlkwd{pgamma}\hlstd{(gu}\hlopt{$}\hlstd{c,} \hlkwc{shape} \hlstd{=} \hlnum{5}\hlstd{,} \hlkwc{scale} \hlstd{= th)} \hlopt{+} \hlnum{1} \hlopt{-} \hlkwd{pgamma}\hlstd{(gu}\hlopt{$}\hlstd{d,} \hlkwc{shape} \hlstd{=} \hlnum{5}\hlstd{,} \hlkwc{scale} \hlstd{= th)}
+\hlkwd{plot}\hlstd{(th, g.power,} \hlkwc{type} \hlstd{=} \hlstr{"l"}\hlstd{)}
+\hlkwd{abline}\hlstd{(}\hlkwc{h} \hlstd{=} \hlnum{0.05}\hlstd{,} \hlkwc{lty} \hlstd{=} \hlnum{2}\hlstd{)}
+\end{alltt}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/unnamed-chunk-11-1} 
+
+}
+
+
+\end{knitrout}
+\end{enumerate}
+\end{enumerate}
+
+\newpage
+
+\end{document}

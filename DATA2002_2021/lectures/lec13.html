@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>DATA2002</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Garth Tarr" />
+    <script src="lec13_files/header-attrs-2.10/header-attrs.js"></script>
+    <link href="lec13_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } },
+      "HTML-CSS": {
+        styles: {
+          ".MathJax a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+          ".MathJax_Preview a": { color: "black",
+                          "pointer-events": "none",
+                          cursor: "default",
+                          "text-decoration": "none"
+          },
+        }
+      }
+      });
+    </script>
+    <link rel="stylesheet" href="assets/sydney-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="assets/sydney.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# DATA2002
+## Sign test
+### Garth Tarr
+
+---
+
+class: segue
+
+
+
+
+
+.large[
+Paired `\(t\)`-tests (revision)
+
+Checking for normality
+
+Sign test
+]
+
+
+---
+class: segue
+
+# Paired `\(t\)`-tests (revision)
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M448 64h-25.98C438.44 92.28 448 125.01 448 160c0 105.87-86.13 192-192 192S64 265.87 64 160c0-34.99 9.56-67.72 25.98-96H64C28.71 64 0 92.71 0 128v320c0 35.29 28.71 64 64 64h384c35.29 0 64-28.71 64-64V128c0-35.29-28.71-64-64-64zM256 320c88.37 0 160-71.63 160-160S344.37 0 256 0 96 71.63 96 160s71.63 160 160 160zm-.3-151.94l33.58-78.36c3.5-8.17 12.94-11.92 21.03-8.41 8.12 3.48 11.88 12.89 8.41 21l-33.67 78.55C291.73 188 296 197.45 296 208c0 22.09-17.91 40-40 40s-40-17.91-40-40c0-21.98 17.76-39.77 39.7-39.94z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Rats
+
+.blockquote[
+&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 448c-110.532 0-200-89.431-200-200 0-110.495 89.472-200 200-200 110.491 0 200 89.471 200 200 0 110.53-89.431 200-200 200zm107.244-255.2c0 67.052-72.421 68.084-72.421 92.863V300c0 6.627-5.373 12-12 12h-45.647c-6.627 0-12-5.373-12-12v-8.659c0-35.745 27.1-50.034 47.579-61.516 17.561-9.845 28.324-16.541 28.324-29.579 0-17.246-21.999-28.693-39.784-28.693-23.189 0-33.894 10.977-48.942 29.969-4.057 5.12-11.46 6.071-16.666 2.124l-27.824-21.098c-5.107-3.872-6.251-11.066-2.644-16.363C184.846 131.491 214.94 112 261.794 112c49.071 0 101.45 38.304 101.45 88.8zM298 368c0 23.159-18.841 42-42 42s-42-18.841-42-42 18.841-42 42-42 42 18.841 42 42z"&gt;&lt;/path&gt;&lt;/svg&gt; Does a biochemical substance have an inhibitive effect on muscular growth?
+]
+
+.pull-left[
+
+For each of 10 rats: 
+
+- One hind leg muscle was regularly injected with the **biochemical substance**
+- The corresponding muscle on the other hind leg was regularly injected with a **harmless placebo**
+- At the end of 6 months the weights of the muscles were measured (in grams) and recorded as follows:
+
+]
+.pull-right[
+&lt;img src="imgs/800px-Wistar_rat.jpg" width="533" /&gt;
+]
+
+`$$\begin{array}{l|cccccccccc}
+\text{Rat ID}       &amp; 1   &amp; 2   &amp; 3   &amp; 4   &amp; 5   &amp; 6   &amp; 7   &amp; 8   &amp; 9   &amp; 10  \\ \hline 
+\text{Biochemical}  &amp; 1.7 &amp; 2.0 &amp; 1.7 &amp; 1.5 &amp; 1.6 &amp; 2.4 &amp; 2.3 &amp; 2.4 &amp; 2.4 &amp; 2.6 \\
+\text{Placebo}      &amp; 2.1 &amp; 1.8 &amp; 2.2 &amp; 2.2 &amp; 1.5 &amp; 2.9 &amp; 2.9 &amp; 2.4 &amp; 2.6 &amp; 2.5 \\
+\end{array}$$`
+
+.footnote[
+Source: Phipps and Quine (2001; p. 125)
+]
+
+???
+
+Image source: https://commons.wikimedia.org/wiki/File:Wistar_rat.jpg
+
+
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M448 64h-25.98C438.44 92.28 448 125.01 448 160c0 105.87-86.13 192-192 192S64 265.87 64 160c0-34.99 9.56-67.72 25.98-96H64C28.71 64 0 92.71 0 128v320c0 35.29 28.71 64 64 64h384c35.29 0 64-28.71 64-64V128c0-35.29-28.71-64-64-64zM256 320c88.37 0 160-71.63 160-160S344.37 0 256 0 96 71.63 96 160s71.63 160 160 160zm-.3-151.94l33.58-78.36c3.5-8.17 12.94-11.92 21.03-8.41 8.12 3.48 11.88 12.89 8.41 21l-33.67 78.55C291.73 188 296 197.45 296 208c0 22.09-17.91 40-40 40s-40-17.91-40-40c0-21.98 17.76-39.77 39.7-39.94z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Paired `\(t\)`-test
+
+.pull-left-2[
+
+```r
+rat = data.frame(
+  bio = c(1.7, 2.0, 1.7, 1.5, 1.6, 2.4, 2.3, 2.4, 2.4, 2.6),
+  pla = c(2.1, 1.8, 2.2, 2.2, 1.5, 2.9, 2.9, 2.4, 2.6, 2.5)
+) %&gt;% # d = placebo - biochemical
+  mutate(d = pla - bio)
+rat %&gt;% summarise(mean = mean(d), sd = sd(d))
+```
+
+```
+##   mean        sd
+## 1 0.25 0.3308239
+```
+
+```r
+t.test(rat$d, alternative = "greater")
+```
+
+```
+## 
+## 	One Sample t-test
+## 
+## data:  rat$d
+## t = 2.3897, df = 9, p-value = 0.02029
+## alternative hypothesis: true mean is greater than 0
+## 95 percent confidence interval:
+##  0.05822761        Inf
+## sample estimates:
+## mean of x 
+##      0.25
+```
+]
+.pull-right-1[
+
+```r
+rat %&gt;% ggplot() + 
+  aes(x = "", y = d) + 
+  geom_boxplot() + 
+  geom_dotplot(
+    binaxis = "y", 
+    stackdir = "center") + 
+  labs(x = "",
+       y = "Difference\n(placebo - biochemical)")
+```
+
+&lt;img src="lec13_files/figure-html/unnamed-chunk-3-1.png" width="540" /&gt;
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M448 64h-25.98C438.44 92.28 448 125.01 448 160c0 105.87-86.13 192-192 192S64 265.87 64 160c0-34.99 9.56-67.72 25.98-96H64C28.71 64 0 92.71 0 128v320c0 35.29 28.71 64 64 64h384c35.29 0 64-28.71 64-64V128c0-35.29-28.71-64-64-64zM256 320c88.37 0 160-71.63 160-160S344.37 0 256 0 96 71.63 96 160s71.63 160 160 160zm-.3-151.94l33.58-78.36c3.5-8.17 12.94-11.92 21.03-8.41 8.12 3.48 11.88 12.89 8.41 21l-33.67 78.55C291.73 188 296 197.45 296 208c0 22.09-17.91 40-40 40s-40-17.91-40-40c0-21.98 17.76-39.77 39.7-39.94z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Paired `\(t\)`-test
+
+Let `\(\mu_d\)` be the population mean difference in muscle weight between the treated leg and the placebo leg (difference = placebo - treatment).
+
+.blockquote[
+- __Hypothesis:__ `\(H_0\colon\ \mu_d = 0\)` vs `\(H_1\colon\ \mu_d &gt; 0\)`
+- **Assumptions:** `\(D_i\)` are independent and identically distributed (iid) `\(N(\mu, \sigma^2)\)`.
+- **Test statistic:** `\(T = \dfrac{\bar{D} - \mu_d}{S_d /\sqrt{n}}\)`.  Under `\(H_0\)`, `\(T\sim t_{n-1}\)`
+- **Observed test statistic:** `\(t_0 = \dfrac{0.25}{0.33 /\sqrt{10}}= 2.39\)`
+- **p-value:** `\(P(t_{9} \geq 2.39) = 0.02\)`
+- **Conclusion:** The p-value is less than 0.05, therefore we reject the null hypothesis at the 5% level of significance and conclude that the biochemical substance does inhibit muscle growth.
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M448 64h-25.98C438.44 92.28 448 125.01 448 160c0 105.87-86.13 192-192 192S64 265.87 64 160c0-34.99 9.56-67.72 25.98-96H64C28.71 64 0 92.71 0 128v320c0 35.29 28.71 64 64 64h384c35.29 0 64-28.71 64-64V128c0-35.29-28.71-64-64-64zM256 320c88.37 0 160-71.63 160-160S344.37 0 256 0 96 71.63 96 160s71.63 160 160 160zm-.3-151.94l33.58-78.36c3.5-8.17 12.94-11.92 21.03-8.41 8.12 3.48 11.88 12.89 8.41 21l-33.67 78.55C291.73 188 296 197.45 296 208c0 22.09-17.91 40-40 40s-40-17.91-40-40c0-21.98 17.76-39.77 39.7-39.94z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Critical values and rejection regions
+
+Our test statistic followed a `\(t\)` distribution with `\(n-1=9\)` degrees of freedom.  Hence we could also have made our decision by looking at the **critical value** (equivalently, the **rejection region**).
+
+.pull-left[
+The shaded area to the right is 0.05.
+
+The critical value, `\(c\)`, is:
+
+
+```r
+qt(0.95, df = 9)
+```
+
+```
+## [1] 1.833113
+```
+
+The **rejection region** is the part of the real line greater than `\(c = 1.833\)`.
+
+If we observe a test statistic at least as big as 1.833, we reject the null hypothesis.
+
+Our **observed test statistic** was `\(t_0 = 2.39\)`, which is larger than 1.833, hence we reject the null hypothesis at the 5% level of significance.
+]
+
+.pull-right[
+&lt;img src="lec13_files/figure-html/unnamed-chunk-5-1.png" width="864" /&gt;
+
+.blockquote[
+&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 448c-110.532 0-200-89.431-200-200 0-110.495 89.472-200 200-200 110.491 0 200 89.471 200 200 0 110.53-89.431 200-200 200zm107.244-255.2c0 67.052-72.421 68.084-72.421 92.863V300c0 6.627-5.373 12-12 12h-45.647c-6.627 0-12-5.373-12-12v-8.659c0-35.745 27.1-50.034 47.579-61.516 17.561-9.845 28.324-16.541 28.324-29.579 0-17.246-21.999-28.693-39.784-28.693-23.189 0-33.894 10.977-48.942 29.969-4.057 5.12-11.46 6.071-16.666 2.124l-27.824-21.098c-5.107-3.872-6.251-11.066-2.644-16.363C184.846 131.491 214.94 112 261.794 112c49.071 0 101.45 38.304 101.45 88.8zM298 368c0 23.159-18.841 42-42 42s-42-18.841-42-42 18.841-42 42-42 42 18.841 42 42z"&gt;&lt;/path&gt;&lt;/svg&gt;  Why is the rejection region only in the upper tail of the `\(t\)` distribution?
+]]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M448 64h-25.98C438.44 92.28 448 125.01 448 160c0 105.87-86.13 192-192 192S64 265.87 64 160c0-34.99 9.56-67.72 25.98-96H64C28.71 64 0 92.71 0 128v320c0 35.29 28.71 64 64 64h384c35.29 0 64-28.71 64-64V128c0-35.29-28.71-64-64-64zM256 320c88.37 0 160-71.63 160-160S344.37 0 256 0 96 71.63 96 160s71.63 160 160 160zm-.3-151.94l33.58-78.36c3.5-8.17 12.94-11.92 21.03-8.41 8.12 3.48 11.88 12.89 8.41 21l-33.67 78.55C291.73 188 296 197.45 296 208c0 22.09-17.91 40-40 40s-40-17.91-40-40c0-21.98 17.76-39.77 39.7-39.94z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Rejection region for the sample mean
+
+Instead of operating on the scale of the test statistic, we can map back to the original scale and write the rejection region in terms of the sample mean.
+
+.pull-left[
+The rejection region using test statistic:
+`$$t_0 = \frac{\bar{d} - \mu_0}{s_d/\sqrt{n}} \ge c$$`
+Noting that,
+`$$\begin{align*}
+\alpha &amp; = P\left( \frac{\bar{D} - \mu_0}{S_d/\sqrt{n}} \ge c \right ) \\
+&amp; = P\left( \bar{D} \ge \mu_0 + c s_d/\sqrt{n} \right ),
+\end{align*}$$`
+we define a rejection region on the measurement scale as:
+`$$\displaystyle{\{\bar{D}: \bar{D} \ge \mu_0 + c s_d/\sqrt{n} \} \quad \mbox{for} \quad  H_1\colon\ \ \mu_d &gt; \mu_0}.$$`
+]
+.pull-right[
+
+```r
+qt(0.95, df = 9)*sd(rat$d)/sqrt(nrow(rat))
+```
+
+```
+## [1] 0.1917724
+```
+
+`$$\mu_0 + c s_d/\sqrt{n} = 1.833 \times 0.33/\sqrt{10} = 0.19$$`
+
+**Rejection region on the measurement scale:**
+
+`$$\{ \bar{d}: \bar{d} \ge 0.19 \}$$`
+Hence, we would reject the null hypothesis when we observe a sample mean difference greater than 0.19 grams.
+
+In the present case, the sample mean difference was 0.25 grams, so we reject the null hypothesis.
+
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M448 64h-25.98C438.44 92.28 448 125.01 448 160c0 105.87-86.13 192-192 192S64 265.87 64 160c0-34.99 9.56-67.72 25.98-96H64C28.71 64 0 92.71 0 128v320c0 35.29 28.71 64 64 64h384c35.29 0 64-28.71 64-64V128c0-35.29-28.71-64-64-64zM256 320c88.37 0 160-71.63 160-160S344.37 0 256 0 96 71.63 96 160s71.63 160 160 160zm-.3-151.94l33.58-78.36c3.5-8.17 12.94-11.92 21.03-8.41 8.12 3.48 11.88 12.89 8.41 21l-33.67 78.55C291.73 188 296 197.45 296 208c0 22.09-17.91 40-40 40s-40-17.91-40-40c0-21.98 17.76-39.77 39.7-39.94z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Confidence interval for the sample mean
+
+For a .blue[.bold[two-sided alternative hypothesis]], the confidence interval is:
+
+`$$\bar{d} \pm c\frac{s_d}{\sqrt{n}}$$`
+
+Here the alternative hypothesis is `\(H_1\colon\ \mu_d&gt;0\)` and so we have a .red[.bold[one sided confidence interval]]. The lower bound for the one sided confidence interval is:
+
+`$$\bar{d} - c\frac{s_d}{\sqrt{n}} = 0.25 - 1.83\times\frac{0.33}{\sqrt{10}} \approx 0.06$$`
+
+Hence the 95% confidence interval is `\((0.06, \infty)\)`.
+
+.blockquote[
+&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 448c-110.532 0-200-89.431-200-200 0-110.495 89.472-200 200-200 110.491 0 200 89.471 200 200 0 110.53-89.431 200-200 200zm107.244-255.2c0 67.052-72.421 68.084-72.421 92.863V300c0 6.627-5.373 12-12 12h-45.647c-6.627 0-12-5.373-12-12v-8.659c0-35.745 27.1-50.034 47.579-61.516 17.561-9.845 28.324-16.541 28.324-29.579 0-17.246-21.999-28.693-39.784-28.693-23.189 0-33.894 10.977-48.942 29.969-4.057 5.12-11.46 6.071-16.666 2.124l-27.824-21.098c-5.107-3.872-6.251-11.066-2.644-16.363C184.846 131.491 214.94 112 261.794 112c49.071 0 101.45 38.304 101.45 88.8zM298 368c0 23.159-18.841 42-42 42s-42-18.841-42-42 18.841-42 42-42 42 18.841 42 42z"&gt;&lt;/path&gt;&lt;/svg&gt; Using the confidence interval, how do we know whether or not to reject the null hypothesis, `\(H_0\colon\ \mu_d =0\)`?
+]
+
+---
+class:segue
+
+# Assumptions
+
+---
+
+&lt;div align="center"&gt;
+&lt;img src="imgs/Dilbert1.png" width="90%"&gt;
+&lt;/div&gt;
+&lt;div align="center"&gt;
+&lt;img src="imgs/Dilbert2.png" width="90%"&gt;
+&lt;/div&gt;
+
+---
+
+## Normality
+
+- The assumption that your data are .blue[sampled from a normal population] arises quite often.
+
+- If you have a **large enough** sample size, then the normality assumption is not as important as you can usually rely on the central limit theorem to ensure your test statistic at least approximately follows a `\(t\)`-distribution.
+
+- In .blue[small samples] it can be difficult to tell whether or not your sample comes from a normal population!
+
+You can check the normality assumption using:
+- **Boxplots** (looking for symmetry)
+- **QQ plots** (looking for a straight line)
+- Formal hypothesis tests?
+
+---
+
+## Checking for normality: boxplots
+
+.pull-left-2[
+
+```r
+set.seed(2019)
+values = rnorm(200)
+group = rep(letters[1:20], each = 10)
+dat = data.frame(values, group)
+library(ggplot2)
+ggplot(dat, aes(x = group, y = values)) + geom_boxplot()
+```
+
+&lt;img src="lec13_files/figure-html/unnamed-chunk-7-1.png" width="864" /&gt;
+]
+.pull-right-1[
+These are all boxplots of 10 observations drawn from a normal population.
+
+If we're checking for normality in a boxplot, then we're mostly looking for **symmetry**.
+]
+
+---
+
+## Checking for normality: QQ plots (base)
+
+.pull-left-2[
+
+```r
+par(mfrow = c(2,3), cex = 1.5, mar = c(4,4,1.1,0.5))
+for(i in letters[1:6]){
+  qqnorm(dat$values[dat$group == i], main = i)
+  qqline(dat$values[dat$group == i])
+}
+```
+
+&lt;img src="lec13_files/figure-html/unnamed-chunk-8-1.png" width="864" /&gt;
+]
+.pull-right-1[
+These are QQ-plots, each with 10 observations drawn from a normal population.
+
+If we're checking for normality in a QQ plot, then we're mostly looking for **points that lie reasonably close to the line**.
+]
+
+
+---
+
+## Checking for normality: QQ plots (ggplot2)
+
+.pull-left-2[
+
+```r
+library(dplyr)
+dat %&gt;% dplyr::filter(group %in% letters[7:14]) %&gt;% 
+  ggplot(aes(sample = values, group = group)) + geom_qq() + geom_qq_line() + 
+  facet_wrap(~group, nrow = 2)
+```
+
+&lt;img src="lec13_files/figure-html/unnamed-chunk-9-1.png" width="936" /&gt;
+]
+.pull-right-1[
+These are also QQ-plots, each with 10 observations drawn from a normal population.
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M448 64h-25.98C438.44 92.28 448 125.01 448 160c0 105.87-86.13 192-192 192S64 265.87 64 160c0-34.99 9.56-67.72 25.98-96H64C28.71 64 0 92.71 0 128v320c0 35.29 28.71 64 64 64h384c35.29 0 64-28.71 64-64V128c0-35.29-28.71-64-64-64zM256 320c88.37 0 160-71.63 160-160S344.37 0 256 0 96 71.63 96 160s71.63 160 160 160zm-.3-151.94l33.58-78.36c3.5-8.17 12.94-11.92 21.03-8.41 8.12 3.48 11.88 12.89 8.41 21l-33.67 78.55C291.73 188 296 197.45 296 208c0 22.09-17.91 40-40 40s-40-17.91-40-40c0-21.98 17.76-39.77 39.7-39.94z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Rat data: normality (base graphics) 
+
+.pull-left[
+
+```r
+par(cex = 3, mar = c(4, 0.5, 0.5, 0.5))
+boxplot(rat$d, horizontal = TRUE, 
+        xlab="Difference in muscle weight (g)") 
+stripchart(rat$d, pch = 20, at = 0.5,
+           add = TRUE, method="stack")
+```
+
+&lt;img src="lec13_files/figure-html/unnamed-chunk-10-1.png" width="864" /&gt;
+]
+.pull-right[
+
+```r
+par(cex=3)
+qqnorm(rat$d)
+qqline(rat$d)
+```
+
+&lt;img src="lec13_files/figure-html/unnamed-chunk-11-1.png" width="864" /&gt;
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M448 64h-25.98C438.44 92.28 448 125.01 448 160c0 105.87-86.13 192-192 192S64 265.87 64 160c0-34.99 9.56-67.72 25.98-96H64C28.71 64 0 92.71 0 128v320c0 35.29 28.71 64 64 64h384c35.29 0 64-28.71 64-64V128c0-35.29-28.71-64-64-64zM256 320c88.37 0 160-71.63 160-160S344.37 0 256 0 96 71.63 96 160s71.63 160 160 160zm-.3-151.94l33.58-78.36c3.5-8.17 12.94-11.92 21.03-8.41 8.12 3.48 11.88 12.89 8.41 21l-33.67 78.55C291.73 188 296 197.45 296 208c0 22.09-17.91 40-40 40s-40-17.91-40-40c0-21.98 17.76-39.77 39.7-39.94z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Rat data: normality (ggplot2) 
+
+.pull-left[
+
+```r
+ggplot(rat, aes(x = "", y = d)) + 
+  geom_boxplot() + 
+  geom_jitter(width = 0.1, 
+              size = 2,
+              colour = "blue") + 
+  labs(x = "", 
+       y = "Difference in muscle weight (g)") + 
+  coord_flip()
+```
+
+&lt;img src="lec13_files/figure-html/unnamed-chunk-12-1.png" width="576" /&gt;
+]
+.pull-right[
+
+```r
+ggplot(rat, aes(sample = d)) + 
+  geom_qq(size = 3) +
+  geom_qq_line() + 
+  labs(x = "Theoretical quantiles",
+       y = "Sample quantiles")
+```
+
+&lt;img src="lec13_files/figure-html/unnamed-chunk-13-1.png" width="504" /&gt;
+]
+
+
+---
+class:segue
+
+# Sign test
+
+---
+
+## Sign test
+
+- Suppose a sample `\(X_1,\ldots,X_n\)` are independently sampled from a continuous distribution with mean `\(\mu\)`.
+
+- We want to test `\(H_0\colon\  \mu = \mu_0\)`. 
+
+- If the distribution is .bold[.red[symmetric]] about `\(\mu_0\)` under `\(H_0\)`, then `\(D_i = X_i - \mu_0\)` should scatter around 0
+  - i.e. `\(D_i\)` is equally likely to be positive or negative.
+
+- If `\(H_0\)` is true, the probability `\(p_+\)`, of getting a positive `\(D_i\)` is `\(0.5\)`.
+
+- The .bold[.red[sign test]] reduces to a binomial test of proportions. 
+
+- The sign test is a .bold[.red[nonparametric]] test as no assumption on the data distribution is made except symmetry (though we do still require the independence assumption).
+
+---
+
+## Symmetric distributions
+
+
+```r
+set.seed(123)
+n = 100000
+par(cex = 2, mfrow = c(1,2))
+plot(density(rnorm(n)),
+     main = 'Standard normal',ylab = 'Density',xlab = 'x',col = 2, lwd = 2)
+plot(density(c(rnorm(n,-1.5),rnorm(n,1.5))),
+     main = 'Bimodal', ylab = 'Density', xlab = 'x',col = 4, lwd = 2)
+```
+
+&lt;img src="lec13_files/figure-html/unnamed-chunk-14-1.png" width="1080" /&gt;
+
+---
+
+Suppose `\(X_i,\dots,X_n\)` are drawn from some symmetric population with mean `\(\mu\)`.
+
+.blockquote[
+- **Hypothesis:** `\(H_0\colon\  \mu=\mu_0\)` vs `\(H_1\colon\  \mu&gt;\mu_0\)`, `\(\mu &lt; \mu_0\)` or `\(\mu \neq \mu_0\)`. We can also write it in terms of the probability of seeing a positive difference, `\(H_0\colon\  p_+=\frac{1}{2}\)` vs `\(H_1\colon\  p_+ &gt; \frac{1}{2}\)`, `\(p_+ &lt; \frac{1}{2}\)` or `\(p_+ \ne \frac{1}{2}\)`.
+
+- **Assumptions:** `\(X_i\)` are independently sampled from a symmetric distribution. 
+
+- **Test statistic:** `\(T=\#(D_i&gt;0)\)` where `\(D_i = X_i - \mu\)`. Under `\(H_0\)`, `\(T\sim B(n, \frac{1}{2})\)` where `\(n\)` is the number of non-zero differences.
+
+- **Observed test statistic:** `\(t_0 = \#(d_i &gt; 0)\)`
+
+-  **p-value:** 
+  - `\(H_1\colon\ \mu &lt; \mu_0\)` we use a lower tail p-value `\(P(T \le t_0)\)` 
+  - `\(H_1\colon\ \mu &gt; \mu_0\)` we use an upper tail p-value `\(P(T \ge t_0)\)`
+  - `\(H_1\colon\ \mu \neq \mu_0\)` and `\(t_0 &lt; \frac{n}{2}\)` we use two times the lower tail probability `\(2P(T \le t_0)\)`  
+  - `\(H_1\colon\ \mu \neq \mu_0\)` and `\(t_0 &gt; \frac{n}{2}\)` we use two times the upper tail probability `\(2P(T \ge t_0)\)`
+
+- **Decision:** If p-value `\(&lt; \alpha\)` there is evidence against `\(H_0\)`.
+]
+
+---
+
+## Binomial distribution
+
+.pull-left[
+&lt;img src="imgs/binomial10.png" width="537" /&gt;
+]
+
+.pull-right[
+&lt;img src="imgs/binomial100.png" width="537" /&gt;
+]
+
+.footnote[
+[&lt;svg viewBox="0 0 640 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M640 51.2l-.3 12.2c-28.1.8-45 15.8-55.8 40.3-25 57.8-103.3 240-155.3 358.6H415l-81.9-193.1c-32.5 63.6-68.3 130-99.2 193.1-.3.3-15 0-15-.3C172 352.3 122.8 243.4 75.8 133.4 64.4 106.7 26.4 63.4.2 63.7c0-3.1-.3-10-.3-14.2h161.9v13.9c-19.2 1.1-52.8 13.3-43.3 34.2 21.9 49.7 103.6 240.3 125.6 288.6 15-29.7 57.8-109.2 75.3-142.8-13.9-28.3-58.6-133.9-72.8-160-9.7-17.8-36.1-19.4-55.8-19.7V49.8l142.5.3v13.1c-19.4.6-38.1 7.8-29.4 26.1 18.9 40 30.6 68.1 48.1 104.7 5.6-10.8 34.7-69.4 48.1-100.8 8.9-20.6-3.9-28.6-38.6-29.4.3-3.6 0-10.3.3-13.6 44.4-.3 111.1-.3 123.1-.6v13.6c-22.5.8-45.8 12.8-58.1 31.7l-59.2 122.8c6.4 16.1 63.3 142.8 69.2 156.7L559.2 91.8c-8.6-23.1-36.4-28.1-47.2-28.3V49.6l127.8 1.1.2.5z"&gt;&lt;/path&gt;&lt;/svg&gt; Binomial distribution](https://en.wikipedia.org/wiki/Binomial_distribution)
+]
+
+---
+
+## Sign test for paired data
+
+- As we saw last week, .bold[.red[paired data]] are very common. 
+- For example before/after trials, studies on twins, left/right arm freckles count.
+- We have data of the form
+`$$\begin{array}{lcccc}
+\text{First variable: } X &amp;  X_1 &amp; X_2 &amp; \ldots &amp; X_n \\ 
+\text{Second variable: } Y &amp;  Y_1 &amp; Y_2 &amp; \ldots &amp; Y_n \\ \hline 
+\text{Difference: } D &amp;  D_1 &amp; D_2 &amp; \ldots &amp; D_n 
+\end{array}$$`
+where `\(D_i = X_i - Y_i\)` for `\(i=1,\ldots,n\)`.
+- We often want to see if there is a difference between the distributions of the `\(X\)` and `\(Y\)` populations.
+- If we can safely assume that the differences are .bold[.red[normally distributed]], we can use a paired `\(t\)`-test, to test if the population mean difference equals zero, `\(H_0\colon\ \mu_d=0\)`.
+- If we do not feel comfortable making the normality assumption, we can still analyse the differences using the .bold[.red[sign test]].
+
+&lt;!-- %## Differences of iid random variables are symmetric! --&gt;
+&lt;!-- % --&gt;
+&lt;!-- %Let the joint probability that `\(X=x\)` and `\(Y=y\)` be defined as --&gt;
+&lt;!-- %$P(X=x,Y=y)$. --&gt;
+&lt;!-- % --&gt;
+&lt;!-- %\begin{theorem}[Differences of iid random variables] --&gt;
+&lt;!-- %If `\(X\)` and `\(Y\)` are iid with distribution function `\(F\)` then the distribution of  --&gt;
+&lt;!-- %$D = X-Y$ is symmetric with symmetry centre 0, i.e.  --&gt;
+&lt;!-- %$P(D\leq -d) = P(D\geq d)$ for all `\(d\in \Bbb{R}\)`. --&gt;
+&lt;!-- %\end{theorem} --&gt;
+&lt;!-- % Due to independence, --&gt;
+&lt;!-- %$$P(X=x,Y=y) = P(X=x)P(Y=y)$$ --&gt;
+&lt;!-- %Since `\(X\)` and `\(Y\)` are identically distributed, --&gt;
+&lt;!-- %$$P(X=x)P(Y=y) = P(Y=x)P(X=y).$$ --&gt;
+&lt;!-- %%Using independence (in reverse) --&gt;
+&lt;!-- %%$$P(X=x,Y=y) = P(X=x)P(Y=y) = P(Y=x)P(X=y) = P(Y=x,X=y).$$ --&gt;
+&lt;!-- %\ --&gt;
+&lt;!-- % --&gt;
+&lt;!-- %\begin{proof}[\proofname\ (Cont.)] --&gt;
+&lt;!-- %%\noindent Then --&gt;
+&lt;!-- %\noindent --&gt;
+&lt;!-- %\begin{align*} --&gt;
+&lt;!-- %\displaystyle P(D=d)  --&gt;
+&lt;!-- %    &amp;  = \sum_{x}\sum_{y} \Ind\{x - y = d\} P(X=x,Y=y) \\ --&gt;
+&lt;!-- %    &amp;  = \sum_{x}\sum_{y} \Ind\{x - y = d\} P(X=y,Y=x) \\ --&gt;
+&lt;!-- %%    &amp;  \qquad \mbox{(using `\(P(X=x,Y=y)=P(X=y,Y=x)\)`)} \\ --&gt;
+&lt;!-- %    &amp;  = \sum_{y}\sum_{x} \Ind\{y - x = d\} P(X=x,Y=y) \\ --&gt;
+&lt;!-- %    &amp;  \qquad \mbox{(switching labels `\(x\)` and `\(y\)`, OK since `\(X\)` and `\(Y\)` iid)} \\ --&gt;
+&lt;!-- %    &amp;  = \sum_{x}\sum_{y} \Ind\{x - y = -d\} P(X=x,Y=y) \\ --&gt;
+&lt;!-- %    &amp;  \qquad \mbox{(reorder sum and multiply condition by -1 in `\(\Ind\{\cdot\}\)`)}\\ --&gt;
+&lt;!-- %    &amp;  = P(D=-d). --&gt;
+&lt;!-- %\end{align*} --&gt;
+&lt;!-- % --&gt;
+&lt;!-- %\noindent Hence, for `\(D = X - Y\)`, we have `\(P(D = d) = P(D = - d)\)`, --&gt;
+&lt;!-- %i.e. the distribution of `\(D\)` is symmetric. --&gt;
+&lt;!-- %\end{proof} --&gt;
+
+---
+
+## Sign test for paired data
+
+- We use the sign of the differences and ignore their magnitude
+
+`\(\Rightarrow\)` test reduces to a .red[.bold[test of proportions]]
+
+- Based on the proportion of positive differences, `\(p_+\)`.
+
+- The null hypothesis corresponding to .bold[.red[no difference]] between the two populations is `\(H_0\colon\ p_+=\frac{1}{2}\)`, i.e. there is an equal proportion of positive and negative differences.
+
+- Under the null hypothesis, the symmetry assumption of the sign test is guaranteed, so when considering a sign test on the differences we only need to assume that the differences are .bold[.red[independent]].
+
+&lt;br&gt;
+
+.blockquote[
+### &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 448c-110.532 0-200-89.431-200-200 0-110.495 89.472-200 200-200 110.491 0 200 89.471 200 200 0 110.53-89.431 200-200 200zm107.244-255.2c0 67.052-72.421 68.084-72.421 92.863V300c0 6.627-5.373 12-12 12h-45.647c-6.627 0-12-5.373-12-12v-8.659c0-35.745 27.1-50.034 47.579-61.516 17.561-9.845 28.324-16.541 28.324-29.579 0-17.246-21.999-28.693-39.784-28.693-23.189 0-33.894 10.977-48.942 29.969-4.057 5.12-11.46 6.071-16.666 2.124l-27.824-21.098c-5.107-3.872-6.251-11.066-2.644-16.363C184.846 131.491 214.94 112 261.794 112c49.071 0 101.45 38.304 101.45 88.8zM298 368c0 23.159-18.841 42-42 42s-42-18.841-42-42 18.841-42 42-42 42 18.841 42 42z"&gt;&lt;/path&gt;&lt;/svg&gt;  What happens when the before and after measurements are identical?
+
+The test of proportions is for binomial data with two possible outcomes only (yes/no, success/fail, etc). Thus, we will discard differences which are exactly zero.
+]
+
+
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M448 64h-25.98C438.44 92.28 448 125.01 448 160c0 105.87-86.13 192-192 192S64 265.87 64 160c0-34.99 9.56-67.72 25.98-96H64C28.71 64 0 92.71 0 128v320c0 35.29 28.71 64 64 64h384c35.29 0 64-28.71 64-64V128c0-35.29-28.71-64-64-64zM256 320c88.37 0 160-71.63 160-160S344.37 0 256 0 96 71.63 96 160s71.63 160 160 160zm-.3-151.94l33.58-78.36c3.5-8.17 12.94-11.92 21.03-8.41 8.12 3.48 11.88 12.89 8.41 21l-33.67 78.55C291.73 188 296 197.45 296 208c0 22.09-17.91 40-40 40s-40-17.91-40-40c0-21.98 17.76-39.77 39.7-39.94z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Rat muscle weights
+
+.pull-left-2[
+
+```r
+rat %&gt;% mutate(
+  pos_d = d &gt; 0
+) 
+```
+
+```
+##    bio pla    d pos_d
+## 1  1.7 2.1  0.4  TRUE
+## 2  2.0 1.8 -0.2 FALSE
+## 3  1.7 2.2  0.5  TRUE
+## 4  1.5 2.2  0.7  TRUE
+## 5  1.6 1.5 -0.1 FALSE
+## 6  2.4 2.9  0.5  TRUE
+## 7  2.3 2.9  0.6  TRUE
+## 8  2.4 2.4  0.0 FALSE
+## 9  2.4 2.6  0.2  TRUE
+## 10 2.6 2.5 -0.1 FALSE
+```
+]
+.pull-right-1[
+Count the number of positive differences (TRUE = 1, FALSE = 0)
+
+```r
+sum(rat$d &gt; 0) 
+```
+
+```
+## [1] 6
+```
+Count the number of non-zero differences
+
+```r
+sum(rat$d != 0)
+```
+
+```
+## [1] 9
+```
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M448 64h-25.98C438.44 92.28 448 125.01 448 160c0 105.87-86.13 192-192 192S64 265.87 64 160c0-34.99 9.56-67.72 25.98-96H64C28.71 64 0 92.71 0 128v320c0 35.29 28.71 64 64 64h384c35.29 0 64-28.71 64-64V128c0-35.29-28.71-64-64-64zM256 320c88.37 0 160-71.63 160-160S344.37 0 256 0 96 71.63 96 160s71.63 160 160 160zm-.3-151.94l33.58-78.36c3.5-8.17 12.94-11.92 21.03-8.41 8.12 3.48 11.88 12.89 8.41 21l-33.67 78.55C291.73 188 296 197.45 296 208c0 22.09-17.91 40-40 40s-40-17.91-40-40c0-21.98 17.76-39.77 39.7-39.94z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+Let `\(p_+\)` be the probability of a positive difference between the treated leg and the placebo leg (difference = placebo - treatment).
+
+.blockquote[
+- __Hypothesis:__ `\(H_0\colon\ p_+ = \frac{1}{2}\)` vs `\(H_1\colon\ p_+ &gt; \frac{1}{2}\)`
+- **Assumptions:** Differences, `\(D_i\)`, are independent.
+- **Test statistic:** Let `\(T\)` be the number of positive differences out of the `\(9\)` non-zero differences. Under `\(H_0\)`, `\(T\sim B(9,\frac{1}{2})\)`. I.e. under `\(H_0\)`, `\(T\)` follows a binomial distribution with `\(n=9\)` and `\(p=0.5\)`.
+- **Observed test statistic:** We observed `\(t_0=6\)` positive differences in the sample.
+- **p-value:** probability of getting a test statistic as or more extreme than what we observed,
+
+`$$\begin{aligned}
+P(T \ge 6) &amp; = 1 - P(T \le 5) \\
+&amp; = \texttt{1 - pbinom(5, size = 9, prob = 1/2)} \approx 0.2539
+\end{aligned}$$`
+
+- **Conclusion:** As the p-value is greater than 0.05, the data are consistent with the null hypothesis at the 5% level of significance.  There is no significant difference between the biochemical and the placebo.
+]
+
+---
+
+## Binomial distribution
+
+Let `\(T\sim B(9,0.5)\)` then, `\(P(T\geq 6) = 1-P(T\leq 5)\)`.
+
+.pull-left[
+&lt;img src="imgs/binomial9_6.png" width="537" /&gt;
+]
+
+.pull-right[
+&lt;img src="imgs/binomial9_5.png" width="537" /&gt;
+]
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M448 64h-25.98C438.44 92.28 448 125.01 448 160c0 105.87-86.13 192-192 192S64 265.87 64 160c0-34.99 9.56-67.72 25.98-96H64C28.71 64 0 92.71 0 128v320c0 35.29 28.71 64 64 64h384c35.29 0 64-28.71 64-64V128c0-35.29-28.71-64-64-64zM256 320c88.37 0 160-71.63 160-160S344.37 0 256 0 96 71.63 96 160s71.63 160 160 160zm-.3-151.94l33.58-78.36c3.5-8.17 12.94-11.92 21.03-8.41 8.12 3.48 11.88 12.89 8.41 21l-33.67 78.55C291.73 188 296 197.45 296 208c0 22.09-17.91 40-40 40s-40-17.91-40-40c0-21.98 17.76-39.77 39.7-39.94z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+s = sign(rat$d)[sign(rat$d) != 0]
+table(s)
+```
+
+```
+## s
+## -1  1 
+##  3  6
+```
+
+```r
+binom.test(c(6, 3), p = 0.5, alternative = "greater")
+```
+
+```
+## 
+## 	Exact binomial test
+## 
+## data:  c(6, 3)
+## number of successes = 6, number of trials = 9, p-value = 0.2539
+## alternative hypothesis: true probability of success is greater than 0.5
+## 95 percent confidence interval:
+##  0.3449414 1.0000000
+## sample estimates:
+## probability of success 
+##              0.6666667
+```
+
+```r
+# equivalently could specify number of successes and the total number of trials
+# binom.test(6, n = length(s), p = 0.5, alternative = "greater")
+```
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M448 64h-25.98C438.44 92.28 448 125.01 448 160c0 105.87-86.13 192-192 192S64 265.87 64 160c0-34.99 9.56-67.72 25.98-96H64C28.71 64 0 92.71 0 128v320c0 35.29 28.71 64 64 64h384c35.29 0 64-28.71 64-64V128c0-35.29-28.71-64-64-64zM256 320c88.37 0 160-71.63 160-160S344.37 0 256 0 96 71.63 96 160s71.63 160 160 160zm-.3-151.94l33.58-78.36c3.5-8.17 12.94-11.92 21.03-8.41 8.12 3.48 11.88 12.89 8.41 21l-33.67 78.55C291.73 188 296 197.45 296 208c0 22.09-17.91 40-40 40s-40-17.91-40-40c0-21.98 17.76-39.77 39.7-39.94z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Conflicting results
+
+- The p-value using the sign test is 0.254.
+
+- The p-value using the `\(t\)`-test is 0.020.
+
+
+```r
+t.test(rat$d, mu = 0, alternative = "greater")
+```
+
+```
+## 
+## 	One Sample t-test
+## 
+## data:  rat$d
+## t = 2.3897, df = 9, p-value = 0.02029
+## alternative hypothesis: true mean is greater than 0
+## 95 percent confidence interval:
+##  0.05822761        Inf
+## sample estimates:
+## mean of x 
+##      0.25
+```
+
+- In this case the paired `\(t\)`-test and the sign test give conflicting results.
+- This is not uncommon when the sample size is small.
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M167.02 309.34c-40.12 2.58-76.53 17.86-97.19 72.3-2.35 6.21-8 9.98-14.59 9.98-11.11 0-45.46-27.67-55.25-34.35C0 439.62 37.93 512 128 512c75.86 0 128-43.77 128-120.19 0-3.11-.65-6.08-.97-9.13l-88.01-73.34zM457.89 0c-15.16 0-29.37 6.71-40.21 16.45C213.27 199.05 192 203.34 192 257.09c0 13.7 3.25 26.76 8.73 38.7l63.82 53.18c7.21 1.8 14.64 3.03 22.39 3.03 62.11 0 98.11-45.47 211.16-256.46 7.38-14.35 13.9-29.85 13.9-45.99C512 20.64 486 0 457.89 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Paint drying times
+
+A paint supplier claims that a new additive will reduce the drying time of acrylic paint. To test this claim 10 panels of wood are painted: one half with the original paint formula and one half with the paint having the new additive. The drying times in hours are:
+
+
+```r
+new_paint = c(6.4,5.8,7.4,5.5,6.3,7.8,8.6,8.2,7.0,4.9)
+old_paint = c(6.6,5.9,7.8,5.7,6.0,8.4,8.8,8.4,7.3,5.8)
+d = old_paint - new_paint
+sort(d)
+```
+
+```
+##  [1] -0.3  0.1  0.2  0.2  0.2  0.2  0.3  0.4  0.6  0.9
+```
+
+```r
+par(mar = c(4,0.5,0.5,0.5))
+boxplot(d, horizontal = TRUE, xlab = "Difference in drying time (h)")
+stripchart(d, pch = 20, at = 0.5, add = TRUE, method = "stack")
+```
+
+&lt;img src="lec13_files/figure-html/unnamed-chunk-24-1.png" width="864" /&gt;
+
+---
+&lt;svg viewBox="0 0 512 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M167.02 309.34c-40.12 2.58-76.53 17.86-97.19 72.3-2.35 6.21-8 9.98-14.59 9.98-11.11 0-45.46-27.67-55.25-34.35C0 439.62 37.93 512 128 512c75.86 0 128-43.77 128-120.19 0-3.11-.65-6.08-.97-9.13l-88.01-73.34zM457.89 0c-15.16 0-29.37 6.71-40.21 16.45C213.27 199.05 192 203.34 192 257.09c0 13.7 3.25 26.76 8.73 38.7l63.82 53.18c7.21 1.8 14.64 3.03 22.39 3.03 62.11 0 98.11-45.47 211.16-256.46 7.38-14.35 13.9-29.85 13.9-45.99C512 20.64 486 0 457.89 0z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Paint drying times
+
+Let `\(p_{+}\)` denote the probability of a positive difference.
+
+- `\(H_0\colon\  p_{+} = \frac{1}{2}\)` against `\(H_1\colon\ p_{+} &gt; \frac{1}{2}\)`.
+
+- Assume differences are independent.  Let `\(\alpha=0.05\)`.
+
+- Let `\(T\)` denote the number of positive differences. There are `\(10\)` non-zero differences. Thus under `\(H_0\)`, `\(T \sim B(10, \frac{1}{2}).\)`
+
+- We observe `\(t_0 = 9\)` positive differences out of the `\(10\)` non-zero ones.
+
+- Thus, the p-value is:
+`$$\begin{aligned}
+P( T \geq t_0) &amp; = P( T \geq 9)\\ 
+&amp; = 1 - P(T \leq 8) \\
+&amp; = \texttt{1 - pbinom(8, 10, 1/2)} \approx 0.0107.
+\end{aligned}$$`
+
+- As the p-value is less than `\(\alpha=0.05\)`, we reject `\(H_0\)` and conclude that the new additive is effective in reducing the drying time of the paint.
+
+---
+
+## Remarks
+
+
+.blockquote[
+### &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M144 208c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm112 0c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm112 0c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zM256 32C114.6 32 0 125.1 0 240c0 47.6 19.9 91.2 52.9 126.3C38 405.7 7 439.1 6.5 439.5c-6.6 7-8.4 17.2-4.6 26S14.4 480 24 480c61.5 0 110-25.7 139.1-46.3C192 442.8 223.2 448 256 448c141.4 0 256-93.1 256-208S397.4 32 256 32zm0 368c-26.7 0-53.1-4.1-78.4-12.1l-22.7-7.2-19.5 13.8c-14.3 10.1-33.9 21.4-57.5 29 7.3-12.1 14.4-25.7 19.9-40.2l10.6-28.1-20.6-21.8C69.7 314.1 48 282.2 48 240c0-88.2 93.3-160 208-160s208 71.8 208 160-93.3 160-208 160z"&gt;&lt;/path&gt;&lt;/svg&gt; Statistical Thinking
+What are some of the benefits and drawbacks of using the sign test?
+]
+
+---
+
+## Remarks
+
+- The sign test .bold[.red[ignores a lot of the information]] in the sample but it can be applied in .bold[.red[quite general]] situations.  We only use the _sign_ of the `\(d_i\)` and ignore their _magnitude_ in the sign test.
+- The sign test does not depend on the distribution of the data! For this reason sometimes these types of tests are called .bold[.red[nonparametric]].
+- If the normality assumption is satisfied, the `\(t\)`-test is more .bold[.red[powerful]], in the sense that it will reject the null hypothesis when the alternative hypothesis is true more often than the sign test. 
+- The sign test can be used to test if a .bold[.red[single sample]] is taken from a .bold[.red[continuous distribution]] that is .bold[.red[symmetric about]] its population mean `\(\mu\)`.
+- The sign test is more _robust_, i.e. less affected by outlying large or small observations, than a `\(t\)`-test.
+- If the sample is reasonably believed to come from a normal population, you should use the more powerful `\(t\)`-test instead of a sign test.
+
+---
+class: segue
+
+# Additional practice questions
+
+---
+&lt;svg viewBox="0 0 352 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M205.22 22.09c-7.94-28.78-49.44-30.12-58.44 0C100.01 179.85 0 222.72 0 333.91 0 432.35 78.72 512 176 512s176-79.65 176-178.09c0-111.75-99.79-153.34-146.78-311.82zM176 448c-61.75 0-112-50.25-112-112 0-8.84 7.16-16 16-16s16 7.16 16 16c0 44.11 35.89 80 80 80 8.84 0 16 7.16 16 16s-7.16 16-16 16z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Moisture retention
+
+The following data are 15 measurements of moisture retention (%) using a new sealing system. The system is expected to be better (greater retention) than the previous system, for which the mean retention was 96%. 
+
+
+```r
+x = c(97.5, 95.2, 97.3, 96.0, 96.8, 99.8, 97.4, 95.3, 98.2, 99.1, 96.1, 97.6, 98.2, 98.5, 99.4)
+```
+
+.small[
+.pull-left[
+.pull-left[
+
+```r
+boxplot(x)
+```
+
+&lt;img src="lec13_files/figure-html/unnamed-chunk-26-1.png" width="324" /&gt;
+]
+.pull-right[
+
+```r
+hist(x)
+```
+
+&lt;img src="lec13_files/figure-html/unnamed-chunk-27-1.png" width="324" /&gt;
+]
+]
+.pull-right[
+.pull-left[
+
+```r
+qqnorm(x)
+qqline(x)
+```
+
+&lt;img src="lec13_files/figure-html/unnamed-chunk-28-1.png" width="324" /&gt;
+]
+.pull-right[
+
+```r
+p = rank(x)/(length(x)+1)
+q = qnorm(p)
+plot(q,x)
+abline(lm(x~q))
+```
+
+&lt;img src="lec13_files/figure-html/unnamed-chunk-29-1.png" width="324" /&gt;
+]
+]
+]
+
+---
+&lt;svg viewBox="0 0 352 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M205.22 22.09c-7.94-28.78-49.44-30.12-58.44 0C100.01 179.85 0 222.72 0 333.91 0 432.35 78.72 512 176 512s176-79.65 176-178.09c0-111.75-99.79-153.34-146.78-311.82zM176 448c-61.75 0-112-50.25-112-112 0-8.84 7.16-16 16-16s16 7.16 16 16c0 44.11 35.89 80 80 80 8.84 0 16 7.16 16 16s-7.16 16-16 16z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Moisture retention
+
+The following data are 15 measurements of moisture retention (%) using a new sealing system. The system is expected to be better (greater retention) than the previous system, for which the mean retention was 96%. 
+
+
+```r
+x = c(97.5, 95.2, 97.3, 96.0, 96.8, 99.8, 97.4, 95.3, 98.2, 99.1, 96.1, 97.6, 98.2, 98.5, 99.4)
+```
+
+
+The sign of the differences `\(d_i = x_i - \mu_0 = x_i - 96\)` are: 
+
+
+```r
+sign(x - 96)
+```
+
+```
+##  [1]  1 -1  1  0  1  1  1 -1  1  1  1  1  1  1  1
+```
+
+```r
+sum(sign(x - 96) == 1)
+```
+
+```
+## [1] 12
+```
+
+```r
+sum(sign(x - 96) != 0)
+```
+
+```
+## [1] 14
+```
+
+---
+class: font130
+&lt;svg viewBox="0 0 352 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M205.22 22.09c-7.94-28.78-49.44-30.12-58.44 0C100.01 179.85 0 222.72 0 333.91 0 432.35 78.72 512 176 512s176-79.65 176-178.09c0-111.75-99.79-153.34-146.78-311.82zM176 448c-61.75 0-112-50.25-112-112 0-8.84 7.16-16 16-16s16 7.16 16 16c0 44.11 35.89 80 80 80 8.84 0 16 7.16 16 16s-7.16 16-16 16z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+Let `\(p_+\)` be the probability of a positive difference. The _sign test_ for the mean % of moisture retention using a new sealing system is:
+
+
+.blockquote[
+- **Hypothesis:** `\(H_0\colon\ p_+ = \frac{1}{2}\)` vs `\(H_1\colon\  p_+ &gt; \frac{1}{2}\)`
+
+- **Assumptions:** Differences, `\(D_i\)`, are independent.
+
+- **Test statistic:** `\(T = \#(D_i &gt; 0)\)` where `\(D_i = X_i - \mu\)`.  Under `\(H_0\)`, `\(T\sim B(14,0.5)\)`.
+
+.pull-left-2[
+
+- **Observed test statistic:** `\(t_0 = \#(d_i &gt; 0) = 12\)`.
+
+- **p-value:** 
+`\begin{align*}
+P(T \ge 12) &amp; = P(T = 12) + P(T=13) + P(T=14) \\
+&amp; = \displaystyle \sum_{i=12}^{14} \binom{14}{i} 0.5^i 0.5^{14-i} \\ 
+&amp; = 0.5^{14}\left[\binom{14}{12}+\binom{14}{13}+\binom{14}{14}\right] = 0.0065.
+\end{align*}`
+
+]
+.pull-right-1[
+&lt;img src="imgs/binomial14_12.png" width="537" /&gt;
+]
+
+- **Decision:** Since the p-value is less than 0.05 there is strong evidence against the null hypothesis. Hence, we conclude that the retention rate is greater than 96%.
+
+]
+
+
+
+---
+&lt;svg viewBox="0 0 352 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M205.22 22.09c-7.94-28.78-49.44-30.12-58.44 0C100.01 179.85 0 222.72 0 333.91 0 432.35 78.72 512 176 512s176-79.65 176-178.09c0-111.75-99.79-153.34-146.78-311.82zM176 448c-61.75 0-112-50.25-112-112 0-8.84 7.16-16 16-16s16 7.16 16 16c0 44.11 35.89 80 80 80 8.84 0 16 7.16 16 16s-7.16 16-16 16z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.large[
+"Manual" calculation
+
+
+```r
+x = c(97.5, 95.2, 97.3, 96.0, 96.8, 99.8, 97.4, 95.3, 98.2, 99.1, 96.1, 97.6, 98.2, 98.5, 99.4)
+mu0 = 96 # hypothesised parameter value
+d = x - mu0 # vector of differences 
+n = sum(d != 0) # number of non-zero differences
+t0 = sum(d &gt; 0) # count of positive differences
+ps = t0/n # proportion of positive differences
+p0 = 0.5 # proportion of positive differences under the null hypothesis
+p_value = 1 - pbinom(q = t0 - 1, size = n, prob = p0)
+p_value
+```
+
+```
+## [1] 0.006469727
+```
+]
+
+---
+class: font130
+&lt;svg viewBox="0 0 352 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M205.22 22.09c-7.94-28.78-49.44-30.12-58.44 0C100.01 179.85 0 222.72 0 333.91 0 432.35 78.72 512 176 512s176-79.65 176-178.09c0-111.75-99.79-153.34-146.78-311.82zM176 448c-61.75 0-112-50.25-112-112 0-8.84 7.16-16 16-16s16 7.16 16 16c0 44.11 35.89 80 80 80 8.84 0 16 7.16 16 16s-7.16 16-16 16z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.large[
+Using `binom.test()`
+
+
+```r
+binom.test(t0, n, p = 0.5, alternative = "greater", conf.level = 0.95)
+```
+
+```
+## 
+## 	Exact binomial test
+## 
+## data:  t0 and n
+## number of successes = 12, number of trials = 14, p-value = 0.00647
+## alternative hypothesis: true probability of success is greater than 0.5
+## 95 percent confidence interval:
+##  0.6146103 1.0000000
+## sample estimates:
+## probability of success 
+##              0.8571429
+```
+]
+
+---
+class: font130
+&lt;svg viewBox="0 0 352 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M205.22 22.09c-7.94-28.78-49.44-30.12-58.44 0C100.01 179.85 0 222.72 0 333.91 0 432.35 78.72 512 176 512s176-79.65 176-178.09c0-111.75-99.79-153.34-146.78-311.82zM176 448c-61.75 0-112-50.25-112-112 0-8.84 7.16-16 16-16s16 7.16 16 16c0 44.11 35.89 80 80 80 8.84 0 16 7.16 16 16s-7.16 16-16 16z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.large[
+Compare with `t.test()`
+
+
+```r
+t.test(x, mu = mu0, alternative = "greater")
+```
+
+```
+## 
+## 	One Sample t-test
+## 
+## data:  x
+## t = 4.0658, df = 14, p-value = 0.0005784
+## alternative hypothesis: true mean is greater than 96
+## 95 percent confidence interval:
+##  96.84642      Inf
+## sample estimates:
+## mean of x 
+##  97.49333
+```
+
+]
+
+
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M444.34 181.1c22.38 15.68 35.66 41.16 35.66 68.59V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-43.24-21.01-83.41-56.34-108.06C463.85 125.02 448 99.34 448 70.31V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v66.4c0 43.69 24.56 81.63 60.34 106.7zM194.97 358.98C126.03 370.07 59.69 394.69 0 432c83.65 52.28 180.3 80 278.94 80h88.57L254.79 380.49c-14.74-17.2-37.45-25.11-59.82-21.51zM553.28 87.09c-5.67-3.8-9.28-9.96-9.28-16.78V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v62.31c0 22.02 10.17 43.41 28.64 55.39C550.79 153.04 576 199.54 576 249.69V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-65.44-32.41-126.19-86.72-162.6zM360.89 352.05c-34.4.06-86.81.15-88.21.17l117.8 137.43A63.987 63.987 0 0 0 439.07 512h88.45L409.57 374.4a63.955 63.955 0 0 0-48.68-22.35zM616 352H432l117.99 137.65A63.987 63.987 0 0 0 598.58 512H616c13.25 0 24-10.75 24-24V376c0-13.26-10.75-24-24-24z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+## Smoking
+
+Blood samples from `\(11\)` individuals before and after they smoked a cigarette are used to measure aggregation of blood platelets.  
+
+.pull-left[
+
+```r
+before = c(25, 25, 27, 44, 30, 67, 53, 53, 52, 60, 28)
+after =  c(27, 29, 37, 36, 46, 82, 57, 80, 61, 59, 43)
+df = data.frame(before, after,
+                difference = after-before)
+df %&gt;% arrange(difference)
+```
+
+```
+##    before after difference
+## 1      44    36         -8
+## 2      60    59         -1
+## 3      25    27          2
+## 4      25    29          4
+## 5      53    57          4
+## 6      52    61          9
+## 7      27    37         10
+## 8      67    82         15
+## 9      28    43         15
+## 10     30    46         16
+## 11     53    80         27
+```
+]
+
+
+.pull-right[
+
+&lt;br&gt;
+
+.blockquote[
+Is platelet aggregation affected by smoking?
+]
+
+
+```r
+apply(df, 2, mean) %&gt;% round(2)
+```
+
+    before      after difference 
+     42.18      50.64       8.45 
+
+```r
+apply(df, 2, sd) %&gt;% round(2)
+```
+
+    before      after difference 
+     15.61      18.90       9.65 
+
+
+]
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M444.34 181.1c22.38 15.68 35.66 41.16 35.66 68.59V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-43.24-21.01-83.41-56.34-108.06C463.85 125.02 448 99.34 448 70.31V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v66.4c0 43.69 24.56 81.63 60.34 106.7zM194.97 358.98C126.03 370.07 59.69 394.69 0 432c83.65 52.28 180.3 80 278.94 80h88.57L254.79 380.49c-14.74-17.2-37.45-25.11-59.82-21.51zM553.28 87.09c-5.67-3.8-9.28-9.96-9.28-16.78V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v62.31c0 22.02 10.17 43.41 28.64 55.39C550.79 153.04 576 199.54 576 249.69V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-65.44-32.41-126.19-86.72-162.6zM360.89 352.05c-34.4.06-86.81.15-88.21.17l117.8 137.43A63.987 63.987 0 0 0 439.07 512h88.45L409.57 374.4a63.955 63.955 0 0 0-48.68-22.35zM616 352H432l117.99 137.65A63.987 63.987 0 0 0 598.58 512H616c13.25 0 24-10.75 24-24V376c0-13.26-10.75-24-24-24z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+.pull-left-2[
+
+```r
+p = ggplot(df, aes(x="", y=difference)) +
+  geom_boxplot() +
+  geom_dotplot(binaxis = "y", stackdir = "center") +
+  theme_classic(base_size = 24) +
+  geom_hline(yintercept = 0, linetype='dashed') +
+  labs(y = 'Difference in blood platelet levels')+
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+```
+]
+.pull-right-1[
+
+```r
+p
+```
+
+&lt;img src="lec13_files/figure-html/unnamed-chunk-39-1.png" width="288" /&gt;
+]
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M444.34 181.1c22.38 15.68 35.66 41.16 35.66 68.59V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-43.24-21.01-83.41-56.34-108.06C463.85 125.02 448 99.34 448 70.31V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v66.4c0 43.69 24.56 81.63 60.34 106.7zM194.97 358.98C126.03 370.07 59.69 394.69 0 432c83.65 52.28 180.3 80 278.94 80h88.57L254.79 380.49c-14.74-17.2-37.45-25.11-59.82-21.51zM553.28 87.09c-5.67-3.8-9.28-9.96-9.28-16.78V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v62.31c0 22.02 10.17 43.41 28.64 55.39C550.79 153.04 576 199.54 576 249.69V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-65.44-32.41-126.19-86.72-162.6zM360.89 352.05c-34.4.06-86.81.15-88.21.17l117.8 137.43A63.987 63.987 0 0 0 439.07 512h88.45L409.57 374.4a63.955 63.955 0 0 0-48.68-22.35zM616 352H432l117.99 137.65A63.987 63.987 0 0 0 598.58 512H616c13.25 0 24-10.75 24-24V376c0-13.26-10.75-24-24-24z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+Let `\(X_i\)` and `\(Y_i\)` be the blood platelet aggregation levels for the `\(i^{th}\)` person before and after smoking, respectively. Define the change in person `\(i\)`'s platelet aggregation levels as `\(D_i = Y_i - X_i\)` and the population mean change in platelet aggregation levels as `\(\mu_d\)`.  Also let `\(p_+\)` be the proportion of positive differences.  Testing if `\(p_+=0.5\)` is the same as testing if `\(\mu_d=0\)`.
+
+Sign test for zero mean difference of the aggregation of blood platelets before and after smoking:
+
+.blockquote[
+- **Hypothesis:** `\(H_0\colon\  p_+=\frac{1}{2}\)` vs `\(H_1\colon\  p_+ \ne \frac{1}{2}\)`
+
+- **Assumptions:** Differences, `\(D_i\)`, are independent.
+
+- **Test statistic:** `\(T = \#(D_i&gt;0)\)`. Under `\(H_0\)`, `\(T \sim B(11, \frac{1}{2})\)`.
+
+- **Observed test statistic:** `\(t_0 = \#(d_i &gt; 0) = 9\)`. Large and small values of `\(t_0\)` will argue against `\(H_0\)`.
+
+-  **p-value:** `\(2P(T \ge 9) = 2 \times \sum_{i=9}^{11} \binom{11}{i} 0.5^i 0.5^{11-i}\)`
+`\(= 2 \times 0.5^{11}\left[ \binom{11}{9} + \binom{11}{10} + \binom{11}{11} \right] = 0.065\)`
+
+- **Decision:**  The p-value is (slightly) larger than 0.05, so we do not reject `\(H_0\)`. Hence the data are consistent with the null hypothesis that platelet aggregation is not affected by smoking.
+]
+
+This result is in contrast to the t-test which had p-value of 0.016.
+
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M444.34 181.1c22.38 15.68 35.66 41.16 35.66 68.59V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-43.24-21.01-83.41-56.34-108.06C463.85 125.02 448 99.34 448 70.31V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v66.4c0 43.69 24.56 81.63 60.34 106.7zM194.97 358.98C126.03 370.07 59.69 394.69 0 432c83.65 52.28 180.3 80 278.94 80h88.57L254.79 380.49c-14.74-17.2-37.45-25.11-59.82-21.51zM553.28 87.09c-5.67-3.8-9.28-9.96-9.28-16.78V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v62.31c0 22.02 10.17 43.41 28.64 55.39C550.79 153.04 576 199.54 576 249.69V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-65.44-32.41-126.19-86.72-162.6zM360.89 352.05c-34.4.06-86.81.15-88.21.17l117.8 137.43A63.987 63.987 0 0 0 439.07 512h88.45L409.57 374.4a63.955 63.955 0 0 0-48.68-22.35zM616 352H432l117.99 137.65A63.987 63.987 0 0 0 598.58 512H616c13.25 0 24-10.75 24-24V376c0-13.26-10.75-24-24-24z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+The p-value calculation is based on getting a result .bold[.red[as or more extreme]] than the observed test statistic.  We observed 9 positive differences, but the alternative hypothesis is "not equal to" so we also need to consider .bold[.red[extreme]] at the other end of the distribution.
+
+Hence, the p-value is `\(P(T\geq 9) + P(T\leq 2) = 2P(T\geq 9)\)` because the binomial distribution is symmetric when `\(p=0.5\)`.
+
+.pull-left[
+&lt;img src="imgs/binomial11_9.png" width="644" /&gt;
+]
+.pull-right[
+&lt;img src="imgs/binomial11_2.png" width="644" /&gt;
+]
+
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M444.34 181.1c22.38 15.68 35.66 41.16 35.66 68.59V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-43.24-21.01-83.41-56.34-108.06C463.85 125.02 448 99.34 448 70.31V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v66.4c0 43.69 24.56 81.63 60.34 106.7zM194.97 358.98C126.03 370.07 59.69 394.69 0 432c83.65 52.28 180.3 80 278.94 80h88.57L254.79 380.49c-14.74-17.2-37.45-25.11-59.82-21.51zM553.28 87.09c-5.67-3.8-9.28-9.96-9.28-16.78V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v62.31c0 22.02 10.17 43.41 28.64 55.39C550.79 153.04 576 199.54 576 249.69V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-65.44-32.41-126.19-86.72-162.6zM360.89 352.05c-34.4.06-86.81.15-88.21.17l117.8 137.43A63.987 63.987 0 0 0 439.07 512h88.45L409.57 374.4a63.955 63.955 0 0 0-48.68-22.35zM616 352H432l117.99 137.65A63.987 63.987 0 0 0 598.58 512H616c13.25 0 24-10.75 24-24V376c0-13.26-10.75-24-24-24z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+
+```r
+d = after - before
+n = length(d)
+t0 = sum(d &gt; 0)
+c(n, t0)
+```
+
+```
+## [1] 11  9
+```
+
+```r
+2 * (1 - pbinom(t0 - 1, n, 0.5))
+```
+
+```
+## [1] 0.06542969
+```
+
+```r
+binom.test(t0, n, 0.5)
+```
+
+```
+## 
+## 	Exact binomial test
+## 
+## data:  t0 and n
+## number of successes = 9, number of trials = 11, p-value = 0.06543
+## alternative hypothesis: true probability of success is not equal to 0.5
+## 95 percent confidence interval:
+##  0.4822441 0.9771688
+## sample estimates:
+## probability of success 
+##              0.8181818
+```
+
+---
+&lt;svg viewBox="0 0 640 512" style="height:1em;display:inline-block;position:fixed;top:10;right:10;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M444.34 181.1c22.38 15.68 35.66 41.16 35.66 68.59V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-43.24-21.01-83.41-56.34-108.06C463.85 125.02 448 99.34 448 70.31V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v66.4c0 43.69 24.56 81.63 60.34 106.7zM194.97 358.98C126.03 370.07 59.69 394.69 0 432c83.65 52.28 180.3 80 278.94 80h88.57L254.79 380.49c-14.74-17.2-37.45-25.11-59.82-21.51zM553.28 87.09c-5.67-3.8-9.28-9.96-9.28-16.78V8c0-4.42-3.58-8-8-8h-48c-4.42 0-8 3.58-8 8v62.31c0 22.02 10.17 43.41 28.64 55.39C550.79 153.04 576 199.54 576 249.69V280c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-30.31c0-65.44-32.41-126.19-86.72-162.6zM360.89 352.05c-34.4.06-86.81.15-88.21.17l117.8 137.43A63.987 63.987 0 0 0 439.07 512h88.45L409.57 374.4a63.955 63.955 0 0 0-48.68-22.35zM616 352H432l117.99 137.65A63.987 63.987 0 0 0 598.58 512H616c13.25 0 24-10.75 24-24V376c0-13.26-10.75-24-24-24z"&gt;&lt;/path&gt;&lt;/svg&gt;
+
+Compare with the paired `\(t\)`-test from last week:
+
+.pull-left[
+.blockquote[
+- __Hypothesis:__ `\(H_0\colon\ \mu_d = 0\)` vs `\(H_1\colon\ \mu_d \ne 0\)`
+- **Assumptions:** `\(D_i\)` are iid.fn[*] `\(N(\mu, \sigma^2)\)`.
+- **Test statistic:** `\(T = \dfrac{\bar{D} - \mu_0}{S_d /\sqrt{n}}\)`.  Under `\(H_0\)`, `\(T\sim t_{n-1}\)`
+- **Observed test statistic:** `\(t_0 = \dfrac{8.45}{9.65 /\sqrt{11}}= 2.91\)`
+- **p-value:** `\(2P(t_{10} \ge |2.91|) = 0.016\)`.
+
+]
+
+.footnote[.fn[*] iid is short for "independent and identically distributed"]
+]
+.pull-right[
+.blockquote[
+- **Decision:** As the p-value is small, there is evidence against the null hypothesis. There is evidence that blood platelet aggregation levels increase after smoking.
+]
+&lt;img src="lec13_files/figure-html/unnamed-chunk-43-1.png" width="864" /&gt;
+]
+
+---
+
+## Further reading
+
+Larsen and Marx (2012; section 14.2).
+
+&lt;br&gt;
+
+Larsen, R. J. and M. L. Marx (2012). _An Introduction to Mathematical
+Statistics and its Applications_. 5th ed. Boston, MA: Prentice Hall.
+ISBN: 978-0-321-69394-5.
+
+Phipps, M. and M. Quine (2001). _A Primer Statistics_. 4th edition.
+Pearson Education Australia. ISBN: 1740096266.
+
+Wickham, H., M. Averick, J. Bryan, W. Chang, L. D. McGowan, R.
+François, G. Grolemund, A. Hayes, L. Henry, J. Hester, et al. (2019).
+"Welcome to the tidyverse". In: _Journal of Open Source Software_ 4.43,
+p. 1686. DOI:
+[10.21105/joss.01686](https://doi.org/10.21105%2Fjoss.01686).
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="assets/remark-zoom.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"navigation": {
+"scroll": false
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
