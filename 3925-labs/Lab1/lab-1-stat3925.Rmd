@@ -2,13 +2,7 @@
 title: "lab-1-stat3925"
 author: "Mason"
 date: "27/02/2022"
-output:
-  bookdown::html_document2:
-    theme: paper
-    code_folding: show 
-    toc: true
-    toc_float: true
-    number_sections: false 
+output: pdf_document 
 ---
 
 ```{r setup, include=FALSE}
