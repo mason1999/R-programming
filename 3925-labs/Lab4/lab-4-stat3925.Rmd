@@ -1,0 +1,130 @@
+---
+title: "lab-4-stat3925"
+author: "Mason"
+date: "21st March 2022"
+output: pdf_document 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      warning = FALSE,
+                      error = FALSE,
+                      message = FALSE,
+                      tidy = TRUE,
+                      fig.width = 6, 
+                      fig.height = 6, 
+                      fig.align = "center")
+```
+
+# Question 1
+We show that the roots of $1 - 0.4\omega + 0.7\omega^2 = 0$ are complex such that $\left|\omega\right| > 1$ or both are lying outside the unit circle
+
+```{r}
+roots = polyroot(c(1, -0.4, 0.7))
+roots
+abs_roots = abs(roots)
+abs_roots
+```
+Hence we have that both roots are outside the unit circle. 
+
+# Question 2
+
+```{r}
+set.seed(127)
+par(mfrow = c(3, 1))
+d = arima.sim(mode=list(ar=c(0.4, -0.7)), n=450)
+d = d[151:450]
+ts.plot(d)
+acf(d)
+pacf(d)
+```
+We see that: 
+
+- The time series plot has roughly constant variance and constant mean
+- The ACF plot decays very quickly
+- There are two significant spikes for the PACF plot. 
+
+Hence a reasonable model is the $AR(2)$ model which is stationary. 
+
+# Question 3
+```{r}
+par(mfrow = c(3, 1))
+d1 = arima.sim(mode=list(ar=c(0.6)), n=400)
+d1 = d1[151:400]
+ts.plot(d1)
+acf(d1)
+pacf(d1)
+```
+- time series plot has constant mean and constant variance
+- ACF decays quickly
+- PACF has one significant spike
+
+```{r}
+par(mfrow = c(3, 1))
+d2 = arima.sim(mode=list(ar=c(-0.8)), n=400)
+d2 = d2[151:400]
+ts.plot(d2)
+acf(d2)
+pacf(d2)
+```
+- time series plot has constant mean and constant variance
+- ACF decays quickly
+- PACF has one significant spike
+
+```{r}
+par(mfrow = c(3, 1))
+d3 = arima.sim(mode=list(ar=c(0.9999)), n=400)
+d3 = d3[151:400]
+ts.plot(d3)
+acf(d3)
+pacf(d3)
+```
+This series is still stationary. But we would say that we would say that it's nearly non-stationary. Note that the ACF doesn't decay very qickly but the PACF still has one spike. 
+
+
+# Question 4
+```{r}
+x = c(18.705, 20.232, 20.467, 22.123, 25.036, 26.839, 29.640, 30.935, 28.278, 24.235, 22.370, 21.224,
+21.061, 19.598, 21.463, 23.287, 24.065, 27.447, 30.413, 32.307, 32.974, 29.973, 23.986, 26.953,
+24.250, 23.518, 20.816, 23.743, 25.152, 28.804, 31.158, 31.540, 32.849, 33.748, 31.910, 27.609,
+25.170, 24.040, 25.368, 21.260, 24.109, 26.320, 27.701, 34.502, 33.297, 31.252, 35.173, 36.207,
+31.511, 28.560, 26.828, 26.660)
+par(mfrow = c(3, 1))
+ts.plot(x)
+acf(x)
+pacf(x)
+```
+(i) There is seasonality and a linear trend. 
+
+(ii) Since the observations are taken monthly, the period is naturally every year. That is every 12 months. 
+
+```{r}
+db = diff(x, lag = 12)
+par(mfrow = c(3, 1))
+ts.plot(db)
+acf(db)
+pacf(db)
+```
+
+(iii) Hence we see that there is not more seasonality from the main components but there is still seasonlity from the error components. 
+
+(iv) We see that from the PACF model there is 1 significant spike so we could use an AR(1). 
+
+# Question 5
+
+```{r}
+x = c(30, 31, 31, 29, 29, 28, 30, 32, 33, 31, 28, 30, 30, 31, 31, 31, 30, 29, 30, 30, 32, 29, 28, 29, 30,
+31, 30, 30, 29, 28, 28, 28, 29, 30, 31, 31, 30, 31, 31, 30, 30, 30, 29, 29, 28, 30, 29, 29, 30, 31,
+31, 30, 30, 30, 28, 30, 30, 30, 32, 31, 30, 28, 29, 29, 29, 30, 30, 28, 30, 29, 29, 29, 29, 29, 30,
+31, 31, 31, 28, 27, 28, 30, 31, 31, 30, 31, 30, 29, 29, 30, 32, 31, 29, 29, 27, 28, 30, 31, 31, 32,
+30, 30, 30, 28, 28, 31, 32, 31, 29, 28, 30, 31, 32, 30, 29, 31, 30, 30, 30, 29, 29, 28, 26, 27, 30,
+32, 30, 27, 28, 29, 29, 30, 30, 31, 31, 30, 30, 29, 27, 30, 33, 33, 29, 28, 27, 28, 29, 30, 30, 31,
+32, 29, 26, 27, 30, 29, 30, 30, 32, 30, 31, 30, 31, 30, 28, 28, 29, 30, 31, 30, 28, 29, 30, 29, 30,
+33, 31, 29, 28, 30, 31, 31, 32, 31, 30, 30, 30, 28, 29, 30, 32, 32, 30, 30, 30, 29, 29, 30, 30, 29)
+par(mfrow = c(3, 1))
+ts.plot(x)
+acf(x)
+pacf(x)
+```
+
+(ii) MA(1), MA(3) or MA(4) and AR(2) models could possibly work
