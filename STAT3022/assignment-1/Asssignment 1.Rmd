@@ -1,0 +1,200 @@
+---
+header-includes:
+  - \input{./everything/everything.tex}
+output:
+  pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      warning = FALSE,
+                      error = FALSE,
+                      message = FALSE,
+                      tidy = TRUE,
+                      fig.width = 6, 
+                      fig.height = 6, 
+                      fig.align = "center")
+```
+\pagestyle{default}
+\thispagestyle{empty}
+\input{./title_page.tex}
+\newpage
+\setcounter{page}{1}
+# Question 1
+\begin{enumerate}
+\item The fitted regression equation for the model of the average total SAT score on all other covariates in the data set is: 
+$$\hat{total} = 1045.97 -3.62(ratio) + 1.64(salary) + 4.46(expend) - 2.90(perc)$$
+\item No they are not contradictory. The reason is because they are testing completely different models!
+
+\begin{itemize}
+\item For the $t$-test for the covariate salary, we see that the test being conducted here is: 
+$$H_0: total \thicksim ratio + expend + perc \quad\text{vs}\quad H_1: total \thicksim ratio + salary + expend + perc$$
+\item Whereas for the $F$-test for the covariate salary, we see that the test being conducted here is: 
+$$H_0: total\thicksim ratio \quad\text{vs}\quad H_1: total\thicksim ratio + salary$$
+\end{itemize}
+\item If we observe the normal quantile-quantile plot see that the standardized residuals are roughly linear so the assumption of normality of the residuals seems to be satisfied. 
+
+Moreover, if we look at the plot of the residuals vs fitted, it seems to be the case that the variance is roughly equal and that there is no obvious pattern. Hence the constant variance assumption seems to be satisfied too. 
+\item Looking at both the outputs for the cooks distance and the dffit, we see that the states which seem to be influential observations are: 
+\begin{itemize}
+\item Utah because it has high leverage ($\overline{h} = \frac{p}{n} = \frac{5}{50} \implies 2\overline{h} = 0.2$ and the leverage of Utah is 0.29) and it is an outlier (as it is the second when we arrange the data in descending order by magnitude of externally studentized residuals). 
+\item West Virginia as it is an outlier (being the first when we arrange the data in descending order by magnitude of externally studentized residuals).
+\item North Dakota (as it is the third when we arrange the data in descending order by magnitude of externally studentized residuals).
+\item New Hampshire (as it is the fourth when we arrange the data in descending order by magnitude of externally studentized residuals).
+\end{itemize}
+\item Given that all the covariates are in the model, we see that the correlation between `salary` and `ratio` is very small (-0.001). Though coefficients are hard to interpret in the case of multicollinearity, we can see that the correlation between `ratio` and `salary` is close to zero, meaning that they are uncorrelated predictors. Hence they will have different effects on the response variable. 
+\item We calculate the variance inflation factors (VIF's) for the following four covariates: 
+\begin{itemize}
+  \item $VIF_{\text{ratio}} = \frac{1}{1-0.589} = 2.433$
+  \item $VIF_{\text{salary}} = \frac{1}{1-0.892} = 9.26 > 5$
+  \item $VIF_{\text{expend}} = \frac{1}{1-0.894} = 9.43 > 5$
+  \item $VIF_{\text{perc}} = \frac{1}{1-0.0.430} = 1.75$
+\end{itemize}
+\item We see that the covariates `salary` and `expend` have $VIF$ greater than 5. Based on the rule, we see that `modelA` has serious collinearity. We can also see this through the pairwise correlation plot as as the correlation between `salary` and `expend` is 0.870
+\end{enumerate}
+# Question 2
+```{r}
+library(dplyr)
+library(ggplot2)
+mtcars = mtcars %>% mutate(vs = factor(vs), am = factor(am))
+```
+(i) Additive model only
+```{r}
+additive_model = lm(mpg ~ wt + qsec, data = mtcars)
+summary(additive_model)
+anova(additive_model)
+```
+
+- Given `wt` is in the model, does `qsec` depend on `vs`?
+
+```{r}
+qsec_dep_vs = lm(mpg ~ wt + qsec*vs, data = mtcars)
+anova(qsec_dep_vs)
+```
+It seems like `qsec` doesn't depend on `vs` if we look at the p values for the interaction term. Moreover, It doesn't look like we should include the `vs` term at the 5% level of significance
+
+- Given `wt` is in the model, does `qsec` depend on `am`?
+```{r}
+qsec_dep_am = lm(mpg ~ wt + qsec*am, data = mtcars)
+anova(qsec_dep_am)
+```
+It seems like `qsec` does depend on `am` and that we should include the interaction term at the 5% level of significance. 
+
+- Given `wt` is in the model, does `qsec` depend on both `vs` and `am`?
+
+```{r}
+qsec_dep_both = lm(mpg ~ wt + qsec*am*vs, data = mtcars)
+anova(qsec_dep_both)
+```
+Note that `am` and `qsec:am` are bordering on the 5% level of significance. Given the previous result, all this leads us to conclude that `qsec` depends on `am`
+```{r}
+# check the sum of squared residuals
+SSE_1 = sum(qsec_dep_vs$residuals^2)
+SSE_2 = sum(qsec_dep_am$residuals^2)
+SSE_3 = sum(qsec_dep_both$residuals^2)
+c(SSE_1, SSE_2, SSE_3)
+```
+We see that the sum of squared residuals decreases drastically when we change from `vs` as being the binary predictor to `am` being the binary predictor. Moreover, when include both `vs` and `am` the decrease in the sum of squared residuals is negligible. Hence, even though the model with both `vs` and `am` has the lowest SSE, we have sufficient evidence to not include the coefficient of `vs` and favour the model with only `am` and it's interaction term with `qsec` assuming `wt` is in the model. 
+
+# Question 3
+Suppose that we have $M$ new observations at $x_0^\ast$. That is we have: 
+
+$$\begin{cases}
+y_{01}^\ast = \beta_0 + \beta_1x_0^\ast + \varepsilon_{01}\\
+y_{02}^\ast = \beta_0 + \beta_1x_0^\ast + \varepsilon_{02}\\
+\vdots \\
+y_{0M}^\ast = \beta_0 + \beta_1x_0^\ast + \varepsilon_{0M}
+\end{cases}$$
+
+Where $y_{0i}^\ast$ is a random variable for $i = 1, 2, ..., M$ with some random error $\varepsilon_{0i}$ for $i = 1, 2, ..., M$
+
+We also denote $\hat{\beta_0}$, $\hat{\beta_1}$ and $\hat{\sigma}$ as the least square estimates of $\beta_0, \beta_1$ and $\sigma$ as given in the lecture. Hence we would have the facts that
+$$
+\begin{bmatrix}
+\hat{\beta_0}\\
+\hat{\beta_{1}}
+\end{bmatrix} \thicksim N\brac{\begin{bmatrix}\beta_0\\ \beta_1 \end{bmatrix}, \sigma^2 \begin{bmatrix} \frac{1}{n} + \frac{\overline{x}^2}{S_{xx}} & -\frac{\overline{x}}{S_{xx}} \\ -\frac{\overline{x}}{S_{xx}} & \frac{1}{S_{xx}}\end{bmatrix}}$$
+And
+$$\hat{\sigma^2} = \frac{1}{n-2}\sum_{i=1}^ne_i^2$$
+
+Define the random variable $$y_0^\ast = \frac{1}{M}\rbrac{y_{01}^\ast + y_{02}^\ast + ... + y_{0M}^\ast}$$
+Note: that according to the question, our variable $y_0^\ast$  corresponds to $\overline{y}_0^\ast$ and we have omitted the bar for convenience.
+
+We simplify so that we see: 
+\begin{align*}
+y_0^\ast & = \frac{1}{M}\rbrac{\brac{\beta_0 + \beta_1x_0^\ast + \varepsilon_{01}} + ... + \brac{\beta_0 + \beta_1x_0^\ast + \varepsilon_{0M}}} \\
+& = \frac{1}{M}\rbrac{M\beta_0 + M\beta_1x_0^\ast + \brac{\varepsilon_{01} + ... +\varepsilon_{0M}}} \\
+& = \beta_0 + \beta_1x_0^\ast + \frac{1}{M}\brac{\varepsilon_{01} + ... + \varepsilon_{0M}}
+\end{align*}
+We partition our thinking into 4 steps: 
+
+\setlength{\leftskip}{3ex}
+
+\underline{Step 1: Find ${\E{y_0^\ast}}$ and ${\Var{y_0^\ast}}$}
+\begin{itemize}
+\item Since $\E{\varepsilon_{0i}} = 0$ for $i = 1, ..., M$ we have that: 
+\begin{align*}
+\E{y_0^\ast} & = \E{\beta_0 + \beta_1x_0^\ast + \frac{1}{M}\brac{\varepsilon_{01} + ... \varepsilon_{0M}}}\\
+& = \beta_0 + \beta_1x_0^\ast + \E{\frac{1}{M}\brac{\varepsilon_{01} + ... \varepsilon_{0M}}}\\
+& = \beta_0 + \beta_1x_0^\ast + \frac{1}{M}\rbrac{\E{\varepsilon_{01}} + ... + \E{\varepsilon_{0M}}} \\
+& = \beta_0 + \beta_1x_0^\ast + \frac{1}{M}\rbrac{\underbrace{0 + ... + 0}_{M\ times}}\\
+& = \beta_0 + \beta_1x_0^\ast
+\end{align*}
+\item  Since $\Cov{\vareps_{0i}, \vareps_{0j}} = 0$ for $i \neq j$ (by assumption) we have that $\Var{\vareps_{0i} + \vareps_{0j}} = \Var{\vareps_{0i}} + \Var{\vareps_{0j}}$ for $ i \neq j$. Furthermore we also have that $\Var{\vareps_{0i}} = \sigma^2$ for all $i = 1, ..., M$ By assumption. Hence: 
+
+\begin{align*}
+\Var{y_0^\ast} & = \Var{\beta_0 + \beta_1x_0^\ast +\frac{1}{M}\brac{\vareps_{01} + ... + \vareps_{0M}}} \\ 
+& = \Var{\frac{1}{M}\brac{\vareps_{01} + ... + \vareps_{0M}}}\\
+& = \frac{1}{M^2}\Var{\vareps_{01} + ... + \vareps_{0M}} \\
+& = \frac{1}{M^2}\rbrac{\underbrace{\sigma^2 + ... + \sigma^2}_{m\ times}}\\
+& = \frac{\sigma^2}{M}
+\end{align*}
+\end{itemize}
+
+\underline{Step 2: Find the point estimate $\hat{y_0}$}
+
+The point estimate $\hat{y_0}$ is obtained by subbing in $\hat{\beta_0}$ and $\hat{\beta_1}$ into $y_0^\ast$ and removing the error terms (as they zero mean). Hence our point estimate is: 
+
+$$\hat{y_0} = \hat{\beta_0} + \hat{\beta_1}x_0^\ast$$
+\underline{Step 3: Find $\E{\hat{y_0}}$ and $\Var{\hat{y_0}}$}
+
+\begin{itemize}
+  \item The expectation is obtained by the following
+    \begin{align*}
+  \E{\hat{y_0}} & = \E{\hat{\beta_0} + \hat{\beta_1}x_0^\ast} \\
+  & = \E{\hat{\beta_0}} + \E{\hat{\beta_1}}x_0^\ast\\
+  & = \beta_0 + \beta_1x_0^\ast
+  \end{align*}
+  \item The variance is obtained by the following: 
+  \begin{align*}
+  \Var{\hat{y_0}} & = \Var{\hat{\beta_0} + \hat{\beta_1}x_0^\ast}\\
+  & = \Var{\hat{\beta_0}} + \Var{\hat{\beta_1}x_0^\ast} + 2\Cov{\hat{\beta_0}, \hat{\beta_1}x_0^\ast} \\ 
+  & = \Var{\hat{\beta_0}} + {x_0^\ast}^2\Var{\hat{\beta_1}} + 2x_0^\ast\Cov{\hat{\beta_0}, \hat{\beta_1}} \\
+  & = \sigma^2 \brac{\frac{1}{n} + \frac{\overline{x}^2}{S_{xx}} + \frac{{x_0^\ast}^2}{S_{xx}} - \frac{2x_0^\ast\overline{x}}{S_{xx}}} \\
+  & = \sigma^2 \brac{\frac{1}{n} + \frac{\brac{x_0^\ast - \overline{x}}^2}{S_{xx}}}
+  \end{align*}
+\end{itemize}
+
+\underline{Step 4: Find the distribution of $y_0^\ast - \hat{y_0}$}
+\begin{itemize}
+\item We obtain the expectation 
+\begin{align*}
+\E{y_0^\ast - \hat{y_0}} & = \E{y_0^\ast} - \E{\hat{y_0}}\\
+& = 0
+\end{align*}
+\item To find the variance we note that $y_0^\ast$ and $\hat{y_0}$ are independent due to $x_0^\ast$ being a new observation. Hence: 
+\begin{align*}
+\Var{y_0^\ast - \hat{y_0}} & = \Var{y_0^\ast} + \Var{\hat{y_0}}\\
+& = \frac{\sigma^2}{M} + \sigma^2\brac{\frac{1}{n} + \frac{\brac{x_0^\ast - \overline{x}}^2}{S_{xx}}} \\
+& = \sigma^2\brac{\frac{1}{M} + \frac{1}{n} + \frac{\brac{x_0^\ast - \overline{x}}^2}{S_{xx}}} 
+\end{align*}
+\end{itemize}
+Replacing $\sigma$ by $\hat{\sigma} = \frac{1}{n-2}\sum_{i = 1}^ne_i^2$ we obtain that the standard error is: 
+$$SE\brac{y_0^\ast - \hat{y_0}} = \hat{\sigma}\sqrt{\frac{1}{M} + \frac{1}{n} + \frac{\brac{x_0^\ast - \overline{x}}^2}{S_{xx}}}$$
+Hence: 
+$$T = \frac{y_0^\ast - \hat{y_0} - 0}{SE\brac{y_0^\ast - \hat{y_0}}} \thicksim t_{n-2}$$Where the degrees of freedom of the student $t$ test come from the $\hat{\sigma}$. Hence we have that a $100(1 - \alpha)\%$ prediction interval for $y_0^\ast$ is: 
+
+$$\hat{y_0} \pm t_{n-2, 1 - \alpha/2} \hat{\sigma}\sqrt{\frac{1}{M} + \frac{1}{n} + \frac{\brac{x_0^\ast - \overline{x}}^2}{S_{xx}}}$$
+Where $t_{n-2, 1 - \alpha/2}$ is the quantile can be obtained by `qt(p=1-alpha/2, df=n-2, lower.tail=TRUE)` in  `R`. Note that if we let $M\rightarrow \infty$ then we obtain the confidence interval for the average response (instead of a particular observation) which makes intuitive sense as we are taking an average of the response variables!
+
+\setlength{\leftskip}{0ex}

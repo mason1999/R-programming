@@ -1,0 +1,75 @@
+---
+title: "lab week 11"
+author: "Mason Wong"
+date: "9nd May 2022"
+output: pdf_document 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      warning = FALSE,
+                      error = FALSE,
+                      message = FALSE,
+                      tidy = TRUE,
+                      fig.width = 6, 
+                      fig.height = 6, 
+                      fig.align = "center")
+
+```
+
+---
+title: "lab week 10"
+author: "Mason Wong"
+date: "23rd May 2022"
+output: pdf_document 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      warning = FALSE,
+                      error = FALSE,
+                      message = FALSE,
+                      tidy = TRUE,
+                      fig.width = 6, 
+                      fig.height = 6, 
+                      fig.align = "center")
+```
+
+# R version and setup
+The R version used is `4.1.01`. 
+
+The following function is used to recreate vectors: 
+```{r}
+recreate_vector = function(X, numeric = TRUE, quiet = FALSE){
+  X = scan(what = character(), text = X, quiet = quiet)
+  X = sub("^\\s*\\[\\d+\\]", "", X)
+  X = X[X != ""]
+  if(numeric) X <- as.numeric(X)
+  X
+}
+```
+
+1. 
+```{r}
+library(fracdiff)
+s = fracdiff.sim(n = 1300, ar = 0.7, ma = 0.4, d = 0.35)$series[301:1300]
+ts.plot(s)
+acf(s)
+pacf(s)
+spectrum(s)
+```
+2. 
+```{r}
+fit_arfima_1d1 = fracdiff(s, nar = 1, nma = 1)
+```
+
+3. 
+```{r}
+set.seed(100)
+library(TSA)
+d1 = garch.sim(alpha = c(0.7, 0.4), n = 1000)[201:1000]
+ts.plot(d1)
+acf(d1)
+pacf(d1)
+```
+

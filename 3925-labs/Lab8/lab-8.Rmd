@@ -1,0 +1,108 @@
+---
+title: "lab week 8"
+author: "Mason Wong"
+date: "11th April 2022"
+output: pdf_document 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      warning = FALSE,
+                      error = FALSE,
+                      message = FALSE,
+                      tidy = TRUE,
+                      fig.width = 6, 
+                      fig.height = 6, 
+                      fig.align = "center")
+```
+
+# R version
+The R version used is `4.1.01`. 
+
+The following function is used to recreate vectors: 
+```{r}
+recreate_vector = function(X, numeric = TRUE, quiet = FALSE){
+  X = scan(what = character(), text = X, quiet = quiet)
+  X = sub("^\\s*\\[\\d+\\]", "", X)
+  X = X[X != ""]
+  if(numeric) X <- as.numeric(X)
+  X
+}
+```
+
+Read the data into `R`
+```{r}
+data = '[1] 218.45 218.98 219.48 219.96 220.42 220.90 221.40 221.94 222.54 223.21 223.93 224.67 225.44 226.19 226.95
+ [16] 227.73 228.53 229.36 230.21 231.08 231.96 232.82 233.66 234.52 235.38 236.26 237.16 238.06 238.96 239.86
+ [31] 240.74 241.59 242.42 243.25 244.06 244.86 245.63 246.40 247.16 247.96 248.78 249.65 250.53 251.42 252.32
+ [46] 253.24 254.18 255.12 256.06 256.97 257.86 258.72 259.55 260.35 261.13 261.88 262.60 263.29 263.95 264.57
+ [61] 265.17 265.74 266.29 266.85 267.41 267.98 268.57 269.20 269.87 270.59 271.37 272.21 273.09 273.98 274.88
+ [76] 275.78 276.69 277.61 278.54 279.51 280.52 281.58 282.70 283.86 285.04 286.23 287.41 288.58 289.74 290.89
+ [91] 292.06 293.23 294.40 295.59 296.79 297.98 299.15 300.26 301.33 302.35 303.33 304.29 305.20 306.09 306.95
+[106] 307.82 308.69 309.57 310.46 311.38 312.32 313.29 314.27 315.27 316.29 317.35 318.44 319.54 320.63 321.71
+[121] 322.76 323.80 324.82 325.82 326.82 327.82 328.83 329.83 330.84 331.88 332.95 334.08 335.24 336.41 337.57
+[136] 338.73 339.85 340.94 342.03 343.11 344.19 345.27 346.34 347.39 348.46 349.53 350.59 351.67 352.75 353.83
+[151] 354.91 355.99 357.07 358.12 359.15 360.13 361.10 362.04 362.97 363.88 364.78 365.69 366.63 367.57 368.54
+[166] 369.51 370.53 371.59 372.69 373.84 375.03 376.23 377.45 378.68 379.92 381.17 382.44 383.70 384.97 386.22
+[181] 387.46 388.69 389.93 391.18 392.46 393.77 395.11 396.49 397.91 399.36 400.84 402.32 403.80 405.27 406.72
+[196] 408.15 409.58 411.02 412.47 413.94'
+x = recreate_vector(data)
+length(x)
+```
+Obtain the tsplot and the acf of the data in $x$
+```{r}
+ts.plot(x)
+acf(x)
+```
+
+The series looks non stationary with a trend
+
+We investigate the series for $d = 1, 2, ...$ where $d$ is the integer differencing we do
+
+```{r}
+par(mfrow = c(2, 1))
+d1 = diff(x)
+ts.plot(d1)
+acf(d1)
+
+par(mfrow = c(2, 1))
+d2 = diff(diff(x))
+ts.plot(d2)
+acf(d2)
+```
+It looks like $d = 2$ is the best value to form a stationary series
+
+# Question 2
+Consider the MA(1) series given by : $$X_t = Z_t + 0.7Z_{t-1}$$ where $Z_t \thicksim NID(0, 1.5^2)$
+
+We draw the theoretical spectrum of $f$ and $f^*$
+```{r}
+w = seq(-pi, pi, 0.1)
+fw = ((1 + 0.7^2) + 1.4*cos(w)) * (1.5^2/(2*pi))
+plot(w, fw, type = 'l', main = 'SDF of ARMA(0, 1)')
+```  
+
+We investigate $AR(1), AR(2), AR(3), MA(3)$ and $ARMA(1, 2)$. 
+
+1. Firstly we fit all the models: 
+```{r}
+fit_ar1 = arima(d2, order = c(1, 0, 0))
+fit_ar2 = arima(d2, order = c(2, 0, 0))
+fit_ar3 = arima(d2, order = c(3, 0, 0))
+fit_ma3 = arima(d2, order = c(0, 0, 3))
+fit_arma12 = arima(d2, order = c(1, 0, 2))
+```
+
+```{r}
+tsdiag(fit_ar1)
+tsdiag(fit_ar2)
+tsdiag(fit_ar3)
+tsdiag(fit_ma3)
+tsdiag(fit_arma12)
+```
+
+To forecast for $ARMA(1, 2)$
+```{r}
+forecast = predict(fit_arma12, n.ahead = 5, se.fit = TRUE)
+```
+

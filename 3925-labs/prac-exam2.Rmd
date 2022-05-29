@@ -1,0 +1,189 @@
+---
+title: "Practial Computer exam 2"
+author: "Mason Wong"
+date: "23rd May 2022"
+output: pdf_document 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      warning = FALSE,
+                      error = FALSE,
+                      message = FALSE,
+                      tidy = TRUE,
+                      fig.width = 6, 
+                      fig.height = 6, 
+                      fig.align = "center")
+```
+
+# R version and setup
+The R version used is `4.1.01`. 
+
+The following function is used to recreate vectors: 
+```{r}
+recreate_vector = function(X, numeric = TRUE, quiet = FALSE){
+  X = scan(what = character(), text = X, quiet = quiet)
+  X = sub("^\\s*\\[\\d+\\]", "", X)
+  X = X[X != ""]
+  if(numeric) X <- as.numeric(X)
+  X
+}
+```
+
+# Question 1
+We firstly read in the data: 
+```{r}
+# the data in text form:
+textual_data = '[1] 12.43 11.51 10.04 11.21 11.56 11.20 11.11 10.92 10.40  9.25  9.85 12.97 13.71 14.04 13.39 13.05 12.34 12.86
+ [19] 14.31 14.20 13.63 15.64 14.83 12.26 11.51 11.29 12.07 13.80 15.53 14.66 14.54 17.25 16.37 14.43 12.95 12.09
+ [37] 10.98 11.70 12.99 14.08 13.75 11.78 12.05 13.55 14.72 13.44 14.56 16.17 14.84 13.32 13.75 15.12 16.09 14.07
+ [55] 13.33 14.93 16.20 15.00 13.32 12.45 12.51 12.89 13.66 13.42 15.02 15.48 15.11 13.96 13.93 14.42 14.14 13.62
+ [73] 14.09 12.96 13.66 14.14 13.24 14.33 15.92 13.96 12.52 11.43 11.77 14.91 15.44 15.48 15.08 16.23 15.97 14.28
+ [91] 12.52 13.19 14.32 14.90 15.13 13.65 12.88 11.65 11.13 12.04 14.72 15.22 14.61 14.35 14.41 15.49 14.32 12.97
+[109] 12.83 11.50 11.02 11.24 11.26 13.54 15.57 15.21 14.34 12.21 11.17 13.65'
+
+data = recreate_vector(textual_data)
+length(data)
+```
+(i) We fir an $MA(2)$ model to this data and write down the corresponding parameter estimates with their corresponding standard errros:
+
+```{r}
+fit_ma2 = arima(data, order = c(0, 0, 2))
+fit_ma2
+```
+The parameter estimates with standard errors are: 
+
+- $intercept = 13.5066$ with $se = 0.2269$
+- $ma1 = 1.128$ with $se = 0.083$
+- $ma2 = 0.4201$ with $se = 0.0765$
+
+(ii) We find the next 5 predicted values for this series
+
+```{r}
+forecast = predict(fit_ma2, n.ahead = 5, se.fit = TRUE)
+pred = forecast$pred
+pred
+```
+Hence the next 5 predicted values for this series are: 
+
+- 14.93285, 14.12289, 13.50655, 13.50655, 13.50655
+
+# Question 2
+(i) To find 95\% prediction intervals for the 5 predicted values in Q1 (ii) we recall that prediction intervals are given by $prediction \pm 2 * standard\ error$. Hence, since the standard error are given by:
+
+```{r}
+stderrors = forecast$se
+stderrors
+```
+
+- prediction interval: 14.93285 $\pm 2 * 0.9818537$
+- prediction interval: 14.12289 $\pm 2 * 1.4801163$
+- prediction interval: 13.50655 $\pm 2 * 1.5365191$
+- prediction interval: 13.50655 $\pm 2 * 1.5365191$
+- prediction interval: 13.50655 $\pm 2 * 1.5365191$
+
+
+```{r}
+plot(121:125, pred, ylim = c(8, 17), xlab = "time", ylab = "weekly profit", main = "weekly profit vs time")
+arrows(x0=121:125, y0 = pred - 2 * stderrors, x1=121:125, y1=pred + 2 * stderrors, code=3, angle=90, length=0.05, col = "blue")
+legend(x=121,y=0.06, "prediction intervals" ,cex=.8, col = "blue", pch=c(1,1))
+```
+
+# Question 3
+(i) We draw the theoretical spectrum of $$X_t = Z_t - 0.6Z_{t-1} + 0.6Z_{t-2} + 0.4Z_{t-3}$$ where $Z_t \thicksim NID(0, 1)$
+```{r}
+library(astsa)
+arma.spec(ma = c(-0.6, 0.6, 0.4))
+```
+(ii) The spectrum is approximately minimised at 0.16. An appropriate interval to look for the minimum would be the open interval $(1.5, 2)$
+
+# Question 4
+```{r}
+set.seed(341)
+d4 = arima.sim(list(ma = c(-0.6, 0.6, 0.4)), n = 600)[401:600]
+spectrum(d4)
+```
+The shape of the sample periodogram looks very close to the theoretical periodogram. In face, the frequency for which the minimum occurs in the sample periodogram is also very close to the frequency for which the minimum occurs in the theoretical periodogram. 
+
+# Question 5
+We want to see the theoretical spectrum of the $ARMA(1, 2)$ process givbn by: 
+
+$$X_t = 10 + 0.4X_{t-1} + Z_t - 0.5Z_{t-1} + 0.7Z_{t-2}$$
+where $Z_t \thicksim NID(0, 1)$
+(i) We draw the theoretical spectrum of the process
+```{r}
+arma.spec(ar = 0.4, ma = c(-0.5, 0.7))
+```
+
+- frequency of approximate maximum value(s) = 0 and 0.5
+- frequency of approximate minimum value = 0.2
+- points of inflexion occur at frequencies of 0.06 and 0.35
+
+# Question 6
+```{r}
+w = seq(0.0001, pi, by = 0.001)
+fw = 1/(2*pi) * (1.25 + cos(w))/(1.49 - 1.4 * cos(w)) * 1/(2*sin(w/2))^(0.6)
+plot(w, fw, type = 'l')
+```
+The behaviour near the origin makes it look like it's unbounded and has a large value near the origin. Hence this time series has long memory
+
+# Question 7
+
+```{r}
+library(fracdiff)
+set.seed(1205)
+arfima_data = fracdiff.sim(n = 1200, ar =  c(0.3, -0.7), ma = c(0.4, -0.6), d = 0.4)
+ts_data = arfima_data$series
+acf_vals = acf(ts_data)
+pacf_vals = pacf(ts_data)
+```
+(i) The acf and pacf values are provided below
+
+```{r}
+acf_vals[1:5]
+pacf_vals[1:5]
+```
+(ii) The first 5 values of the sample periodogram are: 
+
+```{r}
+spec_values = spectrum(ts_data)
+spec_values$spec[1:5]
+```
+
+# Question 8
+```{r}
+set.seed(8134)
+arfima_data2 = fracdiff.sim(n = 1500, ar =  0.4, ma = -0.6, d = 0.4)
+d8 = arfima_data2$series[301:1500]
+fit = fracdiff(d8, nar = 1, nma = 1)
+fit
+fit$stderror.dpq
+```
+- d = 0.4029887 with std error 0.01044004
+- ar = 0.4092010 with std errror 0.03529640
+- ma = -0.5737011 with std error 0.03089261
+
+# Question 9
+(i) We write down the first acf and pacf values of d9
+```{r}
+set.seed(1456)
+library(TSA)
+simulate_vals = garch.sim(alpha = c(0.58, 0.3), beta = 0.4, n = 1800)
+d9 = simulate_vals[401:1800]
+acf_vals = acf(d9)
+pacf_vals = pacf(d9)
+acf_vals[1:3]
+pacf_vals[1:3]
+```
+
+(ii) 
+```{r}
+d9_squared = d9^2
+acf(d9_squared)
+pacf(d9_squared)
+```
+The data seems more correlated for the squared values compared to the normal values. 
+
+# Question 10
+Not enough time
+

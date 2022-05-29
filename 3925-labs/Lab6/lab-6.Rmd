@@ -1,0 +1,148 @@
+---
+title: "Lab Quiz"
+author: "SID: 470408326"
+date: "4th April 2022"
+output: pdf_document 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      warning = FALSE,
+                      error = FALSE,
+                      message = FALSE,
+                      tidy = TRUE,
+                      fig.width = 6, 
+                      fig.height = 6, 
+                      fig.align = "center")
+```
+
+# R version
+The R version used is `4.1.01`
+
+# Question 1
+```{r}
+data = c(12.1, 13.2, 13.8, 13.5, 14.3, 15.2, 12.4, 14.5, 12.4, 11.7, 13.4, 12.8, 11.6, 13.2, 11.1, 10.9)
+m = 4
+weights = c(1/(2*m), rep(1/m, m - 1), 1/(2*m))
+filter(data, weights)
+```
+The first two and last two moving average values are: 13.4250, 13.9500, 12.4625, 11.9375
+
+# Question 2
+We replace `data` with `diff(data)`
+```{r}
+data = c(12.1, 13.2, 13.8, 13.5, 14.3, 15.2, 12.4, 14.5, 12.4, 11.7, 13.4, 12.8, 11.6, 13.2, 11.1, 10.9)
+m = 4
+weights = c(1/(2*m), rep(1/m, m - 1), 1/(2*m))
+filter(diff(data), weights)
+
+```
+The first two and last two de-trended values are: 0.5250, 0.0750, -0.1, -0.525
+
+```{r}
+weekly_profit = c(12.43, 11.51, 10.04, 11.21, 11.56, 11.20, 11.11, 10.92, 10.40, 9.25, 9.85, 12.97, 13.71, 14.04, 13.39, 13.05, 12.34,
+12.86, 14.31, 14.20, 13.63, 15.64, 14.83, 12.26, 11.51, 11.29, 12.07, 13.80, 15.53, 14.66, 14.54, 17.25, 16.37,
+14.43, 12.95, 12.09, 10.98, 11.70, 12.99, 14.08, 13.75, 11.78, 12.05, 13.55, 14.72, 13.44, 14.56, 16.17, 14.84,
+13.32, 13.75, 15.12, 16.09, 14.07, 13.33, 14.93, 16.20, 15.00, 13.32, 12.45, 12.51, 12.89, 13.66, 13.42, 15.02,
+15.48, 15.11, 13.96, 13.93, 14.42, 14.14, 13.62, 14.09, 12.96, 13.66, 14.14, 13.24, 14.33, 15.92, 13.96, 12.52,
+11.43, 11.77, 14.91, 15.44, 15.48, 15.08, 16.23, 15.97, 14.28, 12.52, 13.19, 14.32, 14.90, 15.13, 13.65, 12.88,
+11.65, 11.13, 12.04, 14.72, 15.22, 14.61, 14.35, 14.41, 15.49, 14.32, 12.97, 12.83, 11.50, 11.02, 11.24, 11.26,
+13.54, 15.57, 15.21, 14.34, 12.21, 11.17, 13.65)
+weekly_profit_mean = mean(weekly_profit)
+weekly_profit_var = var(weekly_profit)
+par(mfrow = c(3, 1))
+ts.plot(weekly_profit)
+rhos = acf(weekly_profit)
+pis = pacf(weekly_profit)
+```
+We see that the time series seems stationary with constant mean `r weekly_profit_mean` and variance `r weekly_profit_var`. This is supported by a quickly decayiing ACF plot. 
+
+# Question 4
+We stored the ACF and PACF values of the time series from before: 
+```{r}
+rhos
+pis
+```
+- The first 5 ACF values at lags 1 to 5 are: 0.716, 0.306, 0.089, 0.011, -0.007
+- The first 5 PACF values at lags 1 to 5 are: 0.716, -0.422, 0.200, -0.100, 0.047
+
+# Question 5
+We are given the model 
+$$X_t = 0.7X_{t-1} + 0.8X_{t-3} + Z_t - 0.7Z_{t-1}+0.3Z_{t-2}+0.5Z_{t-3} \quad Z_t \thicksim NID(0, 1.7^2)$$
+Which can be written as: 
+
+$$(1 - 0.7B - 0.8B^3)X_t = (1 - 0.7B + 0.3B^2 + 0.5B^3)Z_t$$
+
+Hence:
+
+- AR(3) polynomial is $a(\omega) = 1 - 0.7\omega - 0.8\omega^3$
+- MA(3) polynomial is $b(\omega) = 1 - 0.7\omega + 0.3\omega^2 + 0.5\omega^3$
+
+We find the modulus of the roots using `R` 
+
+```{r}
+# For the AR(3) polynomial
+ar_roots = polyroot(c(1, -0.7, 0, 0.8))
+abs(ar_roots)
+
+ma_roots = polyroot(c(1, -0.7, 0.3, 0.5))
+abs(ma_roots)
+```
+- The ARMA(3,3) model **is not** stationary because not all of it's roots for the AR(3) polynomial have a modulus greater than 1
+- The ARMA(3,3) model **is** invertible because all of it's roots for the MA(3) polynomial are greater than 1
+
+# Question 6
+We simulate 600 values 
+```{r}
+set.seed(142)
+de = 15 + arima.sim(model = list(ma = c(0.5, 0.9)), n = 600)[201:600]
+fit = arima(de, order = c(0, 0, 2))
+fit
+```
+(i) Estimates are: 
+
+- $\hat{\mu} = 15.1299$
+- $\hat{\beta_1} = 0.5430$
+- $\hat{\beta_2} = 0.8761$
+- $\hat{\sigma^2} = 0.9259$
+
+(ii) The AIC is: 1115.37
+
+# Question 7
+```{r}
+fit2 = arima(de, order = c(1, 0, 2))
+fit2
+```
+(i) Estimates are: 
+
+- $\hat{\mu} = 15.1296$
+- $\hat{\beta_1} = 0.5372$
+- $\hat{\beta_2} = 0.8740$
+- $\hat{\sigma^2} = 0.9254$
+- $\hat{\alpha_1} = 0.0283$
+
+(ii) The AIC is: 1117.13
+
+(iii) Since the AIC is lower for model in Q6 we prefer that one. 
+
+# Question 8
+```{r}
+fit3 = arima(de, order = c(2, 0, 1))
+fit3
+```
+- ar1 se = 0.0801 and t ratio = -0.5106
+- ar2 se = 0.0512 and t ratio = 10.05
+- ma1 se = 0.0823 and t ratio = 5.83
+- intercept se = 0.1548 and t ratio = 100.07
+
+# Question 9
+```{r}
+Box.test(resid(fit), lag = 12, type = "Ljung")
+```
+X-squared = 4.5378 and p-value = 0.9717
+
+# Question 10
+Didn't finish on time
+
+
+

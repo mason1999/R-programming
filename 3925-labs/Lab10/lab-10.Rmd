@@ -1,0 +1,32 @@
+---
+title: "lab week 10"
+author: "Mason Wong"
+date: "23rd May 2022"
+output: pdf_document 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      warning = FALSE,
+                      error = FALSE,
+                      message = FALSE,
+                      tidy = TRUE,
+                      fig.width = 6, 
+                      fig.height = 6, 
+                      fig.align = "center")
+```
+
+# R version
+The R version used is `4.1.01`. 
+
+The following function is used to recreate vectors: 
+```{r}
+recreate_vector = function(X, numeric = TRUE, quiet = FALSE){
+  X = scan(what = character(), text = X, quiet = quiet)
+  X = sub("^\\s*\\[\\d+\\]", "", X)
+  X = X[X != ""]
+  if(numeric) X <- as.numeric(X)
+  X
+}
+```
+

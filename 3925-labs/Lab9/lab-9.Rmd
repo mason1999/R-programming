@@ -1,0 +1,75 @@
+---
+title: "lab week 8"
+author: "Mason Wong"
+date: "11th April 2022"
+output: pdf_document 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      warning = FALSE,
+                      error = FALSE,
+                      message = FALSE,
+                      tidy = TRUE,
+                      fig.width = 6, 
+                      fig.height = 6, 
+                      fig.align = "center")
+```
+
+# R version
+The R version used is `4.1.01`. 
+
+The following function is used to recreate vectors: 
+```{r}
+recreate_vector = function(X, numeric = TRUE, quiet = FALSE){
+  X = scan(what = character(), text = X, quiet = quiet)
+  X = sub("^\\s*\\[\\d+\\]", "", X)
+  X = X[X != ""]
+  if(numeric) X <- as.numeric(X)
+  X
+}
+```
+
+
+# Practice Question
+```{r}
+# (i)
+z = rnorm(n = 1000)[701:1000]
+# (ii)
+par(mfrow = c(3, 1))
+ts.plot(z)
+acf(z)
+pacf(z)
+
+# (iii)
+library(astsa)
+spectrum(z)
+
+# (iv) 
+x1 = 1 + 2*701:1000 + z
+```
+
+
+# Questions
+1. 
+```{r}
+arma.spec(ar = c(0.6))
+```
+2. 
+```{r}
+d = arima.sim(list(ar = 0.6), n = 500)[301:500]
+spectrum(d)
+```
+Comment: 
+
+- they are on different scales
+- they start off with large values and head towards small values
+
+3. 
+```{r}
+spectrum(arima.sim(list(ar = -0.6), n = 500)[301:500])
+spectrum(arima.sim(list(ar = 0.99), n = 500)[301:500])
+spectrum(arima.sim(list(ar = 0.99), n = 500)[301:500])
+```
+
+

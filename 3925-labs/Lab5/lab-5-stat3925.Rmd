@@ -1,0 +1,29 @@
+---
+title: "lab-5-stat3925"
+author: "Mason"
+date: "28th March 2022"
+output: pdf_document 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      warning = FALSE,
+                      error = FALSE,
+                      message = FALSE,
+                      tidy = TRUE,
+                      fig.width = 6, 
+                      fig.height = 6, 
+                      fig.align = "center")
+```
+
+# Question 1
+To simulate 500 values from the $ARMA(1, 1)$ model we do: 
+```{r}
+set.seed(333)
+d1 = arima.sim(model = list(order = c(1, 0, 1), ar = c(0.8), ma = c(0.6)), n = 500)
+d1 = d1[301:500]
+par(mfrow = c(3, 1))
+ts.plot(d1)
+acf(d1)
+pacf(d1)
+```
