@@ -1,0 +1,645 @@
+---
+title: "Assignment 1"
+author: "Mason Wong (SID:470408326)"
+date: "9/9/2021"
+output:
+  bookdown::html_document2:
+    theme: paper
+    code_folding: hide
+    toc: true
+    toc_float: true
+    number_sections: false 
+---
+
+```{r, , include=FALSE}
+#########################################################
+# Note that this code chunk is here to run the R script 
+# clean_data.R to clean the data at first. The script can
+# be found in the same zip file. The whole RMD file should take
+# about a minute to render. Sip some tea while you wait!
+source(here::here("clean_data.R"), local = knitr::knit_global())
+#########################################################
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      warning = FALSE,
+                      error = FALSE,
+                      message = FALSE,
+                      tidy = TRUE,
+                      fig.width = 6, 
+                      fig.height = 6, 
+                      fig.align = "center")
+
+library <- function(...) {
+  suppressPackageStartupMessages(base::library(...))
+}
+library(tidyverse)
+library(gridExtra) # for combining ggplots together
+library(formatR)
+library(gtsummary)
+library(manipulateWidget)
+library(data.table)
+```
+
+# Executive summary {.tabset}
+
+## Process summary and results
+**Our Process and results**
+
+Given the raw data set `AHS11biomedical.csv` we began by first of all cleaning the data. This mainly consisted of: cleaning the variable names, obtaining the types of our variables and understanding what each one of them meant. The script `clean_data.R` does this and from the script we obtain the `.Rdata files`: `proc_biom`, `types_biom` and `dict_biom`. We go further into what each of these mean in the **our data** section below. 
+
+Now to talk about our process...
+
+1. We began by exploring different aspects of our data set. 
+
+    - First of all we began by looking at outliers. We did this by looking at boxplots of our numerical variables. From this we were able to see that 6 of our numerical variables had outliers. These 6 will be presented later in the report
+    - Secondly we looked at logical inconsistencies in our data. The variables which were logically inconsistent were the variables to do with exercise and the variables to do with blood pressure. Examples of logical inconsistencies included the data recording that there were people who exercised for almost 7 days straight or people with blood pressures of 0. To combat this we made the logical inconsistencies `NA`. There were a total of 6 variables which were logically inconsistent which will be presented later in the report
+    - Thirdly we looked at the low variance variables. We separated our analysis into looking at numerical variables and categorical variables. For the numerical variables we analysed low variance (or more generally spread) through a box plot. We saw that it was two of the exercise variables which had low variance. For the categorical variables, we analysed low variance by looking at and comparing the proportion of different levels (for a categorical variable). 
+    - Fourthly we dropped the variables with low variance
+    
+2. Next we moved on to dealing with the `NA` values in our data set. The process we followed was: 
+
+    - We visualised the proportion of missing data in our data set through a bar chart showing the proportion of missing data for each variable. We displayed the bar charts by descending order of missingness. 
+    - We could see that the missing data fit roughly into 4 categories (in descending order of missingness). The four categories are: 
+    
+      i. Variables with missingness between 72% to 74%
+      ii. Variables with missingness between 53% to 67%
+      iii. Variables with missignness between 0% to 23%
+      iv. Variables with no missingness
+
+    - We eliminated all the variables in the first 2 categories (these variables had more than 50% of their observations missing) 
+    - After this, we dealt with rare levels occuring in categorical variables. For a given categorical variable, we removed any level which constituted less than 2.5% of the total observations for that variable. 
+    - Finally we removed all observations containing at least one `NA` from our data set. We saved this data set as `clean_biom`. Alongside `clean_biom` we also saved the original `dict_biom` and `types_biom` into a `.Rdata` file called `clean_data.Rdata`
+    
+## Summary of final data set and potential research questions
+The final data set we ended up with was called `clean_biom`. There were 3199 observations and 27 variables. The variables which we have in our data set are: 
+
+```{r}
+# Load in the data from the Rdata objects
+load(here::here("tech_data.Rdata"))
+variable_names = c("ABSPID", "BMISC", "AGEC", "SMSBC", "COBBC", "FEMLSBC", "PHDKGWBC", "PHDCMHBC", "EXLWTBC",
+                   "PHDCMWBC", "SF2SA1QN", "INCDEC", "ADTOTSE", "BDYMSQ04", "DIASTOL", "DIETQ12", "DIETQ14", "DIETQ5",
+                   "DIETQ8", "SABDYMS", "SEX", "SLPTIME", "SMKDAILY", "SMKSTAT", "SYSTOL", "BIORESPC", "GGTNTR"
+                   )
+types_biom %>% 
+  select(variable_name, description) %>% 
+  filter(variable_name %in% variable_names) %>% 
+  DT::datatable(., rownames = FALSE, options = list(columnDefs = list(list(className = 'dt-center', targets = 0:1)), pageLength = 9))
+```
+
+
+Some potential research questions we could answer with the data we have are: 
+
+1. How does BMI (`BMISC`), physical exercise (`EXLWTBC` and `ADTOTSE`), diet (`DIETQ5`, `DIETQ8`, `DIETQ12` and `DIETQ14`) and lifestyle (`SLPTIME`) affect the present of high blood pressure (`DIASTOL` and `SYSTOL`) in individuals over the age of 40 (`AGEC`)?
+
+2. What role does diet restriction (`DIETQ5`, `DIETQ8`, `DIETQ12`, `DIETQ14`, `BDYMSQ04`) and biological sex (`SEX`) play in the physical (`BMISC`) and mental (`SABDYMS`) health of an individual?
+
+3. Are social factors like socio-economic status, income and nationality (`SF2SA1QN`, `INCDEC` and `COBBC`) risk factors for high blood pressure (`DIASTOL` and `SYSTOL`)?
+
+# Our Data {.tabset}
+
+The data which we will be looking at is data from the `AHS11biomedical.csv`. Now, as we have already cleaned the data (using the `CleanData.rmd` which generated `tech_data.Rdata`) in this report we will be looking at **three** main data frames we have obtained from the `tech_data.Rdata` file. They are: `proc_biom`, `types_biom`, `dict_biom`. Click on the following tabs in this section to learn more about them. 
+
+## proc_biom
+This is essentially the raw data except all the categorical variables are explicitly converted to the `factor` data type (for R processing). We have also taken the liberty of replacing all values with `NA` if they were invalid, missing or not present. 
+```{r, fig.cap = "proc_biom shown for the first 8 variables and the first 5 observations"}
+proc_biom %>% dplyr::select(1:8) %>% head(5) %>% DT::datatable() %>% DT::formatRound(columns = c('BMISC', 'PHDKGWBC', 'PHDCMHBC'), digits = 2)
+```
+
+## types_biom
+This data frame gives us a description of each of the variables (alongside any extra information). The type information for each variable is also given.
+```{r, fig.cap = "types_biom shown for 5 observations at a time"}
+DT::datatable(types_biom, options = list(pageLength = 5))
+```
+## dict_biom
+Like `types_biom` this gives us a description of each of the variables. Unlike `types_biom`, it provides further information by explaining what each of the levels for each variable means. 
+```{r, fig.cap = "dict_biom shown for 5 observations at a time"}
+DT::datatable(dict_biom, options = list(pageLength = 5))
+```
+
+# Exploratory Data Analysis {.tabset}
+
+## Outliers 
+
+```{r}
+# total number of observations: 
+n_tot = proc_biom %>% nrow()
+
+# the following variables have outliers
+n_tot = proc_biom %>% select(BMISC) %>% nrow()
+bmisc = ggplot(data = proc_biom) + 
+  geom_boxplot(mapping = aes(x = BMISC), outlier.size = 4)
+prop_bmisc = (proc_biom %>% filter(BMISC > 40) %>% nrow())/n_tot * 100
+
+n_tot = proc_biom %>% select(PHDCMHBC) %>% nrow()
+phdcmhbc = ggplot(data = proc_biom) + 
+  geom_boxplot(mapping = aes(x = PHDCMHBC))
+prop_phdcmhbc = ((proc_biom %>% filter(PHDCMHBC > 200) %>% nrow()) + (proc_biom %>% filter(PHDCMHBC < 130) %>% nrow()))/n_tot * 100
+
+n_tot = proc_biom %>% select(PHDCMWBC) %>% nrow()
+phdcmwbc = ggplot(data = proc_biom) + 
+  geom_boxplot(mapping = aes(x = PHDCMWBC))
+prop_phdcmwbc = (proc_biom %>% filter(PHDCMWBC > 135) %>% nrow())/n_tot * 100
+
+n_tot = proc_biom %>% select(DIASTOL) %>% nrow()
+diastol = ggplot(data = proc_biom) + 
+  geom_boxplot(mapping = aes(x = DIASTOL))
+prop_diastol = ((proc_biom %>% filter(DIASTOL < 45) %>% nrow()) + (proc_biom %>% filter(DIASTOL > 102) %>% nrow()))/n_tot * 100
+
+n_tot = proc_biom %>% select(SLPTIME) %>% nrow()
+slptime = ggplot(data = proc_biom) + 
+  geom_boxplot(mapping = aes(x = SLPTIME))
+prop_slptime = ((proc_biom %>% filter(SLPTIME < 225) %>% nrow()) + (proc_biom %>% filter(SLPTIME > 769) %>% nrow()))/n_tot * 100
+
+n_tot = proc_biom %>% select(SYSTOL) %>% nrow()
+systol = ggplot(data = proc_biom) + 
+  geom_boxplot(mapping = aes(x = SYSTOL))
+prop_systol = ((proc_biom %>% filter(SYSTOL < 69) %>% nrow()) + (proc_biom %>% filter(SYSTOL > 169) %>% nrow()))/n_tot * 100
+```
+
+
+We firstly look for outliers in our numerical variables. We see that out of the 9 numerical variables, 6 of them contain outlier observations. From the boxplots below we can roughly see that for the following variables: 
+
+- **BMISC (Body mass index)**: There are approximately `r round(prop_bmisc, 1)`% observations which are outliers
+- **PHDCMHBC (height in cm)**: There are approximately `r round(prop_phdcmhbc, 1)`% observations which are outliers
+- **PHDCMWBC (waist circumference in cm)**: There are approximately `r round(prop_phdcmwbc, 1)`% observations which are outliers
+- **DIASTOL (diastolilc blood pressure)**: There are approximately `r round(prop_diastol, 1)`% observations which are outliers
+- **SLPTIME (sleep duration in minutes prior to interview)**: There are approximately `r round(prop_slptime, 1)`% observations which are outliers
+- **SYSTOL (systolic blood pressure)**: There are approximately `r round(prop_systol, 1)`% observations which are outliers
+```{r}
+# arrange them on a 3x2 grid
+grid.arrange(bmisc, phdcmhbc, phdcmwbc, diastol, slptime, systol, ncol = 3, nrow = 2)
+```
+Click the next tab to see the next subsection on **logical inconsistencies**
+
+## Logical inconsistencies
+Some logical inconsistencies which we can see with the variables in the data are: 
+
+```{r}
+n_tot = proc_biom %>% select(EXLWTBC) %>% nrow()
+exlwtbc_prop = (proc_biom %>% filter(EXLWTBC == 9996 | EXLWTBC == 9999) %>% nrow())/n_tot * 100
+exlwtbc_hist = ggplot(data = proc_biom) + 
+  geom_histogram(mapping = aes(x = EXLWTBC)) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+n_tot = proc_biom %>% select(EXLWMBC) %>% nrow()
+exlwmbc_prop = (proc_biom %>% filter(EXLWMBC == 9996 | EXLWMBC == 9999) %>% nrow())/n_tot * 100
+exlwmbc_hist = ggplot(data = proc_biom) + 
+  geom_histogram(mapping = aes(x = EXLWMBC)) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+n_tot = proc_biom %>% select(EXLWVBC) %>% nrow()
+exlwvbc_prop = (proc_biom %>% filter(EXLWVBC == 9996 | EXLWVBC == 9999) %>% nrow())/n_tot * 100
+exlwvbc_hist = ggplot(data = proc_biom) + 
+  geom_histogram(mapping = aes(x = EXLWVBC)) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+-  **The exercise variables** : For the exercise variables `EXLWTBC`, `EXLWMBC` and `EXLWVBC` (corresponding to **total exercise**, **moderate exercise** and **vigorous exercise** in the past week) there is a logical inconsistency as there are values which suggest an individual has exercised for 6.9 days straight (corresponding to values of 9996 and 9999). It seems that more likely since 9996 and 9999 are values which are present with such high frequency (and precisely those two values), it may be the case that these should have been values which had another meaning in the data dictionary. We can see these logical inconsistencies in the following histograms:
+
+    - Approximately for `EXLWTBC` there are  `r round(exlwtbc_prop, 2)`% of observations which are not logically consistent
+    - Approximately for `EXLWMBC` there are  `r round(exlwmbc_prop, 2)`% of observations which are not logically consistent
+    - Approximately for `EXLWVBC` there are  `r round(exlwvbc_prop, 2)`% of observations which are not logically consistent
+
+```{r}
+grid.arrange(exlwtbc_hist, exlwmbc_hist, exlwvbc_hist, ncol = 3)
+```
+
+  - For the exercise variables `EXLWTBC`, `EXLWMBC` and `EXLWVBC` it seems appropriate to encode the values corresponding to 9996 and 9999 as `NA` until more information about the levels of these variables is given. 
+
+```{r}
+proc_biom = proc_biom %>% mutate(EXLWTBC = case_when(
+  EXLWTBC == 9996 ~ as.numeric(NA),
+  EXLWTBC == 9999 ~ as.numeric(NA), 
+  TRUE ~ EXLWTBC))
+
+
+proc_biom = proc_biom %>% mutate(EXLWMBC = case_when(
+  EXLWMBC == 9996 ~ as.numeric(NA),
+  EXLWMBC == 9999 ~ as.numeric(NA), 
+  TRUE ~ EXLWMBC))
+
+proc_biom = proc_biom %>% mutate(EXLWVBC = case_when(
+  EXLWVBC == 9996 ~ as.numeric(NA),
+  EXLWVBC == 9999 ~ as.numeric(NA), 
+  TRUE ~ EXLWVBC))
+```
+
+
+- The following variables have values of zero which don't make sense: 
+
+    - `ADTOTSE`: which measures how long one is sedentary, the presence of zero values (which means that an individual did not rest at all in the last week) doesn't make sense. There are `r ((proc_biom %>% filter(ADTOTSE == 0) %>% nrow())/(proc_biom %>% select(ADTOTSE) %>% nrow()) * 100) %>% round(., 2)`% which are zero. 
+    - `DIASTOL`: which measures an individuals diastolic blood pressure. The presence of zero values means that an individual has no diastolic blood pressure which doesn't make sense. There are `r ((proc_biom %>% filter(DIASTOL == 0) %>% nrow())/(proc_biom %>% select(DIASTOL) %>% nrow()) * 100) %>% round(., 2)`% which are zero
+    - `SYSTOL`: which measures an individuals systolic blood pressure. The presence of zero values means that an individual has no systolic blood pressure which doesn't make sense. There are `r ((proc_biom %>% filter(SYSTOL == 0) %>% nrow())/(proc_biom %>% select(SYSTOL) %>% nrow()) * 100) %>% round(., 2)`% which are zero
+    
+```{r}
+n_tot = proc_biom %>% select(ADTOTSE) %>% nrow()
+adtotse_prop = (proc_biom %>% filter(ADTOTSE == 0) %>% nrow())/n_tot * 100
+adtotse_hist = ggplot(data = proc_biom) + 
+  geom_histogram(mapping = aes(x = ADTOTSE)) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+n_tot = proc_biom %>% select(DIASTOL) %>% nrow()
+diastol_prop = (proc_biom %>% filter(DIASTOL == 0) %>% nrow())/n_tot * 100
+diastol_hist = ggplot(data = proc_biom) + 
+  geom_histogram(mapping = aes(x = DIASTOL)) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+n_tot = proc_biom %>% select(SYSTOL) %>% nrow()
+systol_prop = (proc_biom %>% filter(SYSTOL == 0) %>% nrow())/n_tot * 100
+systol_hist = ggplot(data = proc_biom) + 
+  geom_histogram(mapping = aes(x = SYSTOL)) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+grid.arrange(adtotse_hist, diastol_hist, systol_hist, ncol = 3)
+
+proc_biom = proc_biom %>% mutate(SYSTOL = case_when(
+  SYSTOL == 0 ~ as.numeric(NA),
+  TRUE ~ SYSTOL))
+
+
+proc_biom = proc_biom %>% mutate(DIASTOL = case_when(
+  DIASTOL == 0 ~ as.numeric(NA),
+  TRUE ~ DIASTOL))
+
+
+proc_biom = proc_biom %>% mutate(SYSTOL = case_when(
+  SYSTOL == 0 ~ as.numeric(NA),
+  TRUE ~ SYSTOL))
+```
+
+- For the following variables `ADTOTSE`, `DIASTOL` and `SYSTOL` it seems appropriate to encode the values corresponding to 0 as NA until more information about the levels of these variables is given.
+
+Click the next tab to see the next subsection on **low variance variables**
+
+## low variances variables {.tabset}
+As we are either dealing with numerical variables or categorical variables, we have to use different criteria based on the type of the variable we are dealing with. 
+
+- For numeric variables, we will use a more heuristic way. That is, we first begin by standardizing the data (taking away the mean and dividing by the standard deviation) then observing a boxplot of our variables. For relatively thin boxplots the corresponding variable will be discarded. 
+- For categorical variables if one particular level accounts for more than 85% of the observations for that variable **and** the other variables are approximately at the 10% margin (or less) then we consider that variable to have low variance
+
+    
+### Low variance numeric variables
+By observing the numeric variables we see that two variables `EXLWMBC` and `EXLWVBC` were noteworthy for having low variance. As we can observe by their corresponding boxplots: 
+
+```{r}
+exlwmbc_box = ggplot(data = proc_biom) + 
+  geom_boxplot(mapping = aes(x = EXLWMBC))
+
+exlwvbc_box = ggplot(data = proc_biom) + 
+  geom_boxplot(mapping = aes(x = EXLWVBC))
+
+grid.arrange(exlwmbc_box, exlwvbc_box, ncol = 2)
+```
+
+
+
+
+```{r}
+# uncomment this to see a histogram of all the continuous variables
+
+# DELETE
+#numeric_names = types_biom %>% filter(variable_type == 'continuous') %>% select(variable_name) %>% pull()
+#for (i in 1:length(numeric_names)) {
+#  name = numeric_names[i]
+#  dat = proc_biom %>% select((!!sym(name))) %>% pull()
+#  std_dat = (dat - mean(dat, na.rm = TRUE))/sd(dat, na.rm = TRUE)
+#  hist(std_dat, main = name)
+#  boxplot(std_dat, main = name)
+#}
+#
+#
+#numeric_names = types_biom %>% filter(variable_type == 'continuous') %>% select(variable_name) %>% pull()
+#for (i in 1:length(numeric_names)) {
+#  name = numeric_names[i]
+#  print(ggplot(data = proc_biom) + 
+#    geom_boxplot(mapping = aes(x = (!!sym(name)))))
+#}
+```
+
+```{r}
+# DELETE
+# numeric_names = types_biom %>% filter(variable_type == 'continuous') %>% select(variable_name) %>% pull()
+# for (i in 1:length(numeric_names)) {
+#   name = numeric_names[i]
+#   dat = proc_biom %>% select((!!sym(name))) %>% pull()
+#   print(paste(paste("-----", name, sep = " "), "-----", sep = " "))
+#   print(paste("dat:", as.character(IQR(dat, na.rm = TRUE)), sep = " "))
+#   print(paste("median:", as.character(median(dat, na.rm = TRUE)), sep = " "))
+#   print(IQR(dat, na.rm = TRUE)/median(dat, na.rm = TRUE))
+# }
+```
+
+
+Click the next tab to see the next part on **low variance categorical variables**
+
+### Low variance categorical variables
+To analyse the low variance categorical variables, we do this by comparing the proportions of each level of a given categorical variable. We define a categorical variable to have low variance if: 
+
+1. One level contains 85 (or more) percent of the observations. 
+2. The other levels of the categorical variable are below a 10 percent threshold. 
+
+We see that the low variance categorical variables are the variables: `DIABBC`, `HCHOLBC`, `HSUGBC`, `HYPBC` and `DIETRDI`. We can see this clearly by the the following bar charts: 
+```{r}
+categorical_names = types_biom %>% filter(variable_type == 'categorical') %>% select(variable_name) %>% pull()
+categorical_names = c('DIABBC', 'HCHOLBC', 'HSUGBC', 'HYPBC', 'DIETRDI')
+
+diabbc_bar = ggplot(data = proc_biom, mapping = aes(x = DIABBC)) + 
+  geom_bar(mapping = aes(y = (..count..)/sum(..count..)*100)) + 
+  geom_hline(yintercept = 10, color = 'blue', size = 1) + 
+  geom_hline(yintercept = 85, color = 'red', size = 1) + 
+  ylab('percentage') + 
+  xlab('DIABBC')
+
+
+hcholbc_bar = ggplot(data = proc_biom, mapping = aes(x = HCHOLBC)) + 
+  geom_bar(mapping = aes(y = (..count..)/sum(..count..)*100)) + 
+  geom_hline(yintercept = 10, color = 'blue', size = 1) + 
+  geom_hline(yintercept = 85, color = 'red', size = 1) + 
+  ylab('percentage') + 
+  xlab('HCHOLBC')
+
+
+hsugbc_bar = ggplot(data = proc_biom, mapping = aes(x = HSUGBC)) + 
+  geom_bar(mapping = aes(y = (..count..)/sum(..count..)*100)) + 
+  geom_hline(yintercept = 10, color = 'blue', size = 1) + 
+  geom_hline(yintercept = 85, color = 'red', size = 1) + 
+  ylab('percentage') + 
+  xlab('HSUGBC')
+
+
+hypbc_bar = ggplot(data = proc_biom, mapping = aes(x = HYPBC)) + 
+  geom_bar(mapping = aes(y = (..count..)/sum(..count..)*100)) + 
+  geom_hline(yintercept = 10, color = 'blue', size = 1) + 
+  geom_hline(yintercept = 85, color = 'red', size = 1) + 
+  ylab('percentage') + 
+  xlab('HYPBC')
+
+
+dietrdi_bar = ggplot(data = proc_biom, mapping = aes(x = DIETRDI)) + 
+  geom_bar(mapping = aes(y = (..count..)/sum(..count..)*100)) + 
+  geom_hline(yintercept = 10, color = 'blue', size = 1) + 
+  geom_hline(yintercept = 85, color = 'red', size = 1) + 
+  ylab('percentage') + 
+  xlab('DIETRDI')
+
+
+grid.arrange(diabbc_bar, hcholbc_bar, hsugbc_bar, hypbc_bar, dietrdi_bar , ncol = 3, nrow = 2)
+  
+```
+
+Click the next to see that we dropped the low variance variables in **dropping low variance variables**
+
+### Dropping low variance variables
+We now just make an intentional note that after looking at the continuous and categorical variables with low variance, we will now drop them from the data set as they contribute minimal information to it. The variables we drop are: 
+
+- The numeric variables `EXLWMBC` and `EXLWVBC` 
+- The categorical variables `DIABBC`, `HCHOLBC`, `HSUGBC`, `HYPBC` and `DIETRDI`
+
+```{r}
+to_drop = c('EXLWMBC', 'EXLWVBC', 'DIABBC', 'HCHOLBC', 'HSUGBC', 'HYPBC', 'DIETRDI')
+new_proc_biom = proc_biom %>% select(-EXLWMBC, -EXLWVBC, -DIABBC, -HCHOLBC, -HSUGBC, -HYPBC, -DIETRDI)
+new_dict_biom = dict_biom %>% filter(!(variable_name %in% to_drop))
+new_types_biom = types_biom %>% filter(!(variable_name %in% to_drop))
+```
+
+click the next tab to see the next subsection on **mismatches between the data and the data dictionary**
+
+## Mismatches between data and data dictionary
+
+- For the exercise variables (`EXLWTBC`, `EXLWMBC` and `EXLWVBC`) we needed to coerce the type back into a numeric value as that is what the data dictionary records it as. 
+- For the variable `SF2SA1QN` there is strong evidence that there is an error in the data dictionary. While the data dictionary states that the levels of this variable are split up into deciles, only the values 1-5 show up (denoting quintiles, which is supported by the [Australian Bureau of Statistics](https://www.abs.gov.au/ausstats/abs@.nsf/Lookup/15B5F6B85000EE97CA257B8D00229EA3?opendocument)). We can see this from the two tables below: 
+```{r}
+freq_sf2sa1qn = new_proc_biom %>% select(SF2SA1QN) %>% pull() %>% table() %>% as.data.frame()
+colnames(freq_sf2sa1qn) = c('SF2SA1QN Levels', 'Frequency')
+freq_sf2sa1qn_data_table = DT::datatable(freq_sf2sa1qn, rownames = FALSE, options = list(columnDefs = list(list(className = 'dt-center', targets = 0:1))))
+desc_sf2sa1qn = new_dict_biom %>% filter(variable_name == 'SF2SA1QN') %>% select(-extra) %>% DT::datatable(., rownames = FALSE, options = list(columnDefs = list(list(className = 'dt-center', targets = 0:1)), pageLength = 5))
+```
+
+```{r, fig.cap='Frequency table for SF2SA1QN'}
+freq_sf2sa1qn_data_table
+```
+
+```{r, fig.cap='Data dictionary for SF2SA1QN'}
+desc_sf2sa1qn
+```
+
+- For the variable `GGTNTR` there are `r new_proc_biom %>% filter(GGTNTR == 0) %>% nrow()` observations which correspond to a level of 0. However, in the data dictionary there is no definition for a level corresponding to 0. We can see this from the two tables below: 
+
+```{r}
+freq_ggtntr = new_proc_biom %>% select(GGTNTR) %>% pull() %>% table() %>% as.data.frame()
+colnames(freq_ggtntr) = c('GGTNTR Levels', 'Frequency')
+freq_ggtntr_data_table = DT::datatable(freq_ggtntr, rownames = FALSE, options = list(columnDefs = list(list(className = 'dt-center', targets = 0:1))))
+desc_ggtntr = new_dict_biom %>% filter(variable_name == 'GGTNTR') %>% select(-extra) %>% DT::datatable(., rownames = FALSE, options = list(columnDefs = list(list(className = 'dt-center', targets = 0:1)), pageLength = 5))
+```
+
+```{r, fig.cap='Frequency table for GGTNTR'}
+freq_ggtntr_data_table
+```
+
+```{r, fig.cap='Data dictionary for GGTNTR'}
+desc_ggtntr
+```
+
+Scroll down to the next section to see how we addresses **missing values**
+
+# Missing Values {.tabset}
+
+## Visualising the data's missingness
+We firstly begin this section by visualizing the the patterns of missing-ness: 
+
+```{r}
+num_na = function(vec, n) {
+  sum(is.na(vec))/n *100
+}
+save_names = colnames(new_proc_biom %>% select(-ABSPID))
+missingness_df = new_proc_biom %>% select(-ABSPID) %>% summarize(across(everything(), list(na = ~num_na(., nrow(new_proc_biom)))))
+missingness_df[2, ] = 100 - missingness_df[1, ]
+colnames(missingness_df) = save_names
+rownames(missingness_df) = c('na', 'not_na')
+
+save_names = colnames(missingness_df)
+t_miss_df = transpose(missingness_df)
+t_miss_df[ ,3] = save_names
+colnames(t_miss_df) = c('na', 'not_na', 'names')
+t_miss_df = t_miss_df %>% arrange(na)
+t_miss_df$names = factor(t_miss_df$names, levels = t_miss_df$names)
+
+ggplot(data = t_miss_df, aes(x = names, y = na)) + 
+  geom_bar(stat = 'identity') + 
+  geom_text(
+    aes(label = round(na,0), y = na + 2),
+    position = position_dodge(0.9),
+    size = 2.5,
+    vjust = 0
+  ) + 
+  coord_flip() + 
+  theme(axis.text.y = element_text(size = 7)) + 
+  ylab('percentage of NA\'s (%)') +
+  xlab('variables')
+```
+
+## A summary of the data's missingness
+
+From the following table, we can see the approximate percentage of missingness occurring in each of the variables (note that in the following data table it would be easier to type in the variable you want to search for). 
+
+```{r, fig.cap='This table shows the variables in our data frame and the how much data is missing from each variable as a percentage'}
+t_miss_df$names = as.character(t_miss_df$names)
+t_miss_df = t_miss_df %>% arrange(names)
+data_missingness_table = t_miss_df %>% mutate(`variable name` = names, `NA percentage` = round(na, 2)) %>% select('variable name', 'NA percentage')
+
+
+DT::datatable(data_missingness_table, rownames = FALSE, options = list(columnDefs = list(list(className = 'dt-center', targets = 0:1))))
+```
+
+
+In summary, the missingness of our data can be seen in four main categories: 
+
+1. **Variables with missingness between 72% to 74%**: `CVDMEDST`, `LDLRESB`, `LDLNTR`, `TRIGRESB`, `TRIGNTR`, `GLUCFREB` and `GLUCFPD` (7 variables)
+2. **Variables with missingness between 53% to 67%**: `HBA1PREB`, `DIAHBRSK`, `GGTRESB`, `ALTRESB`, `ALTNTR`, `APOBRESB`, `APOBNTR`, `HDLCHREB`, `FOLATREB`, `CHOLRESB`, `CHOLNTR`, `B12RESB` and `FASTSTAD` (13 variables)
+3. **Variables with missignness between 0% to 23%**: `EXLWTBC`, `ADTOTSE`, `SABDYMS`, `SMKSTAT`, `SMKDAILY`, `SMSBC`, `SYSTOL`, `DIASTOL`, `PHDCMWBC`, `BMISC`, `PHDCMHBC`, `INCDEC`, `SLPTIME`, `BIORESPC`, `DIETQ12`, `GGTNTR`, `DIETQ14` and `BDYMSQ04`  (18 variables)
+4. **Variables with no missingness**: `SEX`, `DIETQ8`, `DIETQ5`, `SF2SA1QN`, `COBBC` and `AGEC`(6 variables)
+
+This summary is heightened by the bar chart in the previous tabbed section 
+
+## Removing missingness from data set
+
+We deal with the `NA` values in steps: 
+
+1. The first step is to drop variables which have a high percentage of `NA` values. We define "high percentage" by variables missing more than 50% of their observations. Hence we first begin by removing the variables in category 1 and 2 (where category was defined in the previous section **A summary of the data's missingness**)
+2. The second step is remove any rows from categorical variables which have low occurrence. That is we remove the "rare levels". For a categorical variable, We define a level to be rare if it occurs less than 2.5% of the time. 
+
+    - Consider the following column charts:
+
+```{r}
+
+#1. **Variables with missingness between 72% to 74%**: `CVDMEDST`, `LDLRESB`, `LDLNTR`, `TRIGRESB`, `TRIGNTR`, `GLUCFREB` and `GLUCFPD` (7 variables)
+#2. **Variables with missingness between 53% to 67%**: `HBA1PREB`, `DIAHBRSK`, `GGTRESB`, `ALTRESB`, `ALTNTR`, `APOBRESB`, `APOBNTR`, `HDLCHREB`, `FOLATREB`, `CHOLRESB`, `CHOLNTR`, `B12RESB` and `FASTSTAD` (13 variables)
+
+to_drop = c('CVDMEDST', 'LDLRESB', 'LDLNTR', 'TRIGRESB', 'TRIGNTR', 'GLUCFREB', 'GLUCFPD', 'HBA1PREB', 'DIAHBRSK', 'GGTRESB', 'ALTRESB', 'ALTNTR', 'APOBRESB', 'APOBNTR', 'HDLCHREB', 'FOLATREB', 'CHOLRESB', 'CHOLNTR', 'B12RESB', 'FASTSTAD')
+
+new_proc_biom = new_proc_biom %>% select(-CVDMEDST, -LDLRESB, -LDLNTR, -TRIGRESB, -TRIGNTR, -GLUCFREB, -GLUCFPD, -HBA1PREB, -DIAHBRSK, -GGTRESB,
+                                 -ALTRESB, -ALTNTR, -APOBRESB, -APOBNTR, -HDLCHREB, -FOLATREB, -CHOLRESB, -CHOLNTR, -B12RESB, -FASTSTAD)
+
+new_dict_biom = new_dict_biom %>% filter(!(variable_name %in% to_drop))
+new_types_biom = new_types_biom %>% filter(!(variable_name %in% to_drop))
+
+
+femlsbc_bar = ggplot(data = new_proc_biom, mapping = aes(x =FEMLSBC)) + 
+  geom_bar(mapping = aes(y = (..count..)/sum(..count..)*100))+ 
+  geom_hline(yintercept = 2.5, color = 'blue', size = 1) + 
+  ylab('percentage') + 
+  xlab('FEMLSBC')
+
+
+bdymsq04_bar = ggplot(data = new_proc_biom, mapping = aes(x =BDYMSQ04)) + 
+  geom_bar(mapping = aes(y = (..count..)/sum(..count..)*100))+ 
+  geom_hline(yintercept = 2.5, color = 'blue', size = 1) + 
+  ylab('percentage') + 
+  xlab('BDYMSQ04')
+
+dietq5_bar = ggplot(data = new_proc_biom, mapping = aes(x =DIETQ5)) + 
+  geom_bar(mapping = aes(y = (..count..)/sum(..count..)*100))+ 
+  geom_hline(yintercept = 2.5, color = 'blue', size = 1) + 
+  ylab('percentage') + 
+  xlab('DIETQ5')
+
+sabdyms_bar = ggplot(data = new_proc_biom, mapping = aes(x =SABDYMS)) + 
+  geom_bar(mapping = aes(y = (..count..)/sum(..count..)*100))+ 
+  geom_hline(yintercept = 2.5, color = 'blue', size = 1) + 
+  ylab('percentage') + 
+  xlab('SABDYMS')
+
+smkdaily_bar = ggplot(data = new_proc_biom, mapping = aes(x =SMKDAILY)) + 
+  geom_bar(mapping = aes(y = (..count..)/sum(..count..)*100))+ 
+  geom_hline(yintercept = 2.5, color = 'blue', size = 1) + 
+  ylab('percentage') + 
+  xlab('SMKDAILY')
+
+smkstat_bar = ggplot(data = new_proc_biom, mapping = aes(x =SMKSTAT)) + 
+  geom_bar(mapping = aes(y = (..count..)/sum(..count..)*100))+ 
+  geom_hline(yintercept = 2.5, color = 'blue', size = 1) + 
+  ylab('percentage') + 
+  xlab('SMKSTAT')
+
+grid.arrange(femlsbc_bar, bdymsq04_bar, dietq5_bar, sabdyms_bar, smkdaily_bar, smkstat_bar, ncol = 3, nrow = 2)
+```
+
+  - From them we are able to see that:
+    
+      - `FEMLSBC` has rare levels corresponding to the levels of 1, 2 and 3
+      - `BDYMSQ04` has a rare level corresponding to the level 3
+      - `DIETQ5` has rare levels corresponding to the levels of 6 and 8
+      - `DIETQ8` has rare levels corresponding to the levels of 5 and 6
+      - `SABDYMS` has a rare level corresponding to the level 4
+      - `SMKDAILY` has a rare level corresponding to the level 2
+      - `SMKSTAT` has a rare levels corresponding to levels 2 and 3
+        
+  - So we remove all observations corresponding to the rare levels. We can see that we have no more rare categories!
+    
+```{r}
+new_proc_biom = new_proc_biom %>% 
+  filter(!(FEMLSBC %in% c(1, 2, 3))) %>% 
+  filter(!(BDYMSQ04 %in% c(3))) %>% 
+  filter(!(DIETQ5 %in% c(6, 8))) %>% 
+  filter(!(SABDYMS %in% c(4))) %>% 
+  filter(!(SMKDAILY %in% c(2))) %>% 
+  filter(!(SMKSTAT %in% c(2, 3)))
+
+femlsbc_bar = ggplot(data = new_proc_biom, mapping = aes(x =FEMLSBC)) + 
+  geom_bar(mapping = aes(y = (..count..)/sum(..count..)*100))+ 
+  geom_hline(yintercept = 2.5, color = 'blue', size = 1) + 
+  ylab('percentage') + 
+  xlab('FEMLSBC')
+
+
+bdymsq04_bar = ggplot(data = new_proc_biom, mapping = aes(x =BDYMSQ04)) + 
+  geom_bar(mapping = aes(y = (..count..)/sum(..count..)*100))+ 
+  geom_hline(yintercept = 2.5, color = 'blue', size = 1) + 
+  ylab('percentage') + 
+  xlab('BDYMSQ04')
+
+dietq5_bar = ggplot(data = new_proc_biom, mapping = aes(x =DIETQ5)) + 
+  geom_bar(mapping = aes(y = (..count..)/sum(..count..)*100))+ 
+  geom_hline(yintercept = 2.5, color = 'blue', size = 1) + 
+  ylab('percentage') + 
+  xlab('DIETQ5')
+
+sabdyms_bar = ggplot(data = new_proc_biom, mapping = aes(x =SABDYMS)) + 
+  geom_bar(mapping = aes(y = (..count..)/sum(..count..)*100))+ 
+  geom_hline(yintercept = 2.5, color = 'blue', size = 1) + 
+  ylab('percentage') + 
+  xlab('SABDYMS')
+
+smkdaily_bar = ggplot(data = new_proc_biom, mapping = aes(x =SMKDAILY)) + 
+  geom_bar(mapping = aes(y = (..count..)/sum(..count..)*100))+ 
+  geom_hline(yintercept = 2.5, color = 'blue', size = 1) + 
+  ylab('percentage') + 
+  xlab('SMKDAILY')
+
+smkstat_bar = ggplot(data = new_proc_biom, mapping = aes(x =SMKSTAT)) + 
+  geom_bar(mapping = aes(y = (..count..)/sum(..count..)*100))+ 
+  geom_hline(yintercept = 2.5, color = 'blue', size = 1) + 
+  ylab('percentage') + 
+  xlab('SMKSTAT')
+
+grid.arrange(femlsbc_bar, bdymsq04_bar, dietq5_bar, sabdyms_bar, smkdaily_bar, smkstat_bar, ncol = 3, nrow = 2)
+```
+
+3. The final step is to remove any rows which have any missing data (for any variable) which we have done
+```{r}
+new_proc_biom = new_proc_biom[complete.cases(new_proc_biom), ]
+```
+
+# Saving our complete Data set {.tabset}
+We have now saved our data sets into a `.Rdata` file. It is called `clean_data.Rdata` and it contains the data sets: 
+
+- `clean_biom` : This is the result of cleaning our technically correct data. More was said on this in the very beginning section in the executive summary
+- `dict_biom` : This is the data dictionary with meanings as to all the levels of each variable
+- `types_biom`: This is gives overlapping information to `dict_biom` however it provides the types of each of the variables in our data set. 
+```{r}
+clean_biom = new_proc_biom
+save(clean_biom, dict_biom, types_biom, file = "clean_data.Rdata")
+```
